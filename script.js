@@ -1152,7 +1152,7 @@ function initializeHeaderNavigation() {
 
     // Desktop navigation buttons
     if (productsBtn) {
-        productsBtn.addEventListener('click', () => handleNavigation('products'));
+        productsBtn.addEventListener('click', () => handleNavigation('product-categories'));
     }
 
     if (contactBtn) {
@@ -1177,7 +1177,7 @@ function initializeHeaderNavigation() {
     const mobileWhatsappBtn = document.getElementById('mobileWhatsappBtn');
 
     if (mobileProductsBtn) {
-        mobileProductsBtn.addEventListener('click', () => handleNavigation('products'));
+        mobileProductsBtn.addEventListener('click', () => handleNavigation('product-categories'));
     }
 
     if (mobileContactBtn) {
