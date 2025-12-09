@@ -31,110 +31,35 @@
             background-color: #cce5ff;
             color: #004085;
         }
-    </style>
-</head>
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supabase Connection Test</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-        }
-
-        #status {
+        pre {
+            background: #f4f4f4;
             padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .loading {
-            background-color: #cce5ff;
-            color: #004085;
+            border: 1px solid #ddd;
+            overflow-x: auto;
         }
     </style>
 </head>
 
 <body>
-    <h1>Supabase Connection Test</h1>
-    <div id="status" class="loading">Testing connection...</div>
+    <h1>Supabase Connection Test (Self-Contained)</h1>
+    <div id="status" class="loading">Initializing...</div>
     <pre id="output"></pre>
 
-    <script type="module">
-        // Global error handlers to show errors on screen
+    <script>
+        // Global error handler for non-module errors
         window.onerror = function (msg, url, line, col, error) {
             const outputEl = document.getElementById('output');
-            const statusEl = document.getElementById('status');
             if (outputEl) outputEl.textContent += `\n[Global Error]: ${msg}\nLine: ${line}\n`;
-            if (statusEl) {
-                statusEl.textContent = 'Error Detected (Check logs below)';
-                statusEl.className = 'error';
-            }
-            return false;
+            document.getElementById('status').textContent = 'Error Detected';
+            document.getElementById('status').className = 'error';
         };
+    </script>
 
-        window.onunhandledrejection = function (event) {
-            const outputEl = document.getElementById('output');
-            if (outputEl) outputEl.textContent += `\n[Unhandled Rejection]: ${event.reason}\n`;
-        };
+    <script type="module">
+        const outputEl = document.getElementById('output');
+        const statusEl = document.getElementById('status');
 
-        import { supabase } from './lib/supabase.js';
-
-        async function testConnection() {
-            const statusEl = document.getElementById('status');
-            const outputEl = document.getElementById('output');
-
-            outputEl.textContent += "Script started...\n";
-
-            try {
-                outputEl.textContent += "Initializing Supabase Auth check...\n";
-                // Try to fetch the current user session (doesn't require table access)
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-                if (sessionError) throw sessionError;
-
-                outputEl.textContent += `Auth Session Check: OK\n`;
-
-                outputEl.textContent += "Querying 'products' table...\n";
-                // Try to fetch one product to verify database access
-                // We assume 'products' table exists based on seed_products.sql
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .limit(1);
-
-                if (error) {
-                    // If table doesn't exist, it might be a 404 or specific error
-                    throw error;
-                }
-
-                statusEl.textContent = 'Connection Successful!';
-                statusEl.className = 'success';
-                outputEl.textContent += `Database Check: OK\nData received: ${JSON.stringify(data, null, 2)}`;
-
-            } catch (err) {
-                statusEl.textContent = 'Connection Failed';
-                statusEl.className = 'error';
-                outputEl.textContent += `Error: ${err.message}\n${JSON.stringify(err, null, 2)}`;
-                console.error(err);
-            }
-        }
-
-        testConnection();
     </script>
 </body>
 
