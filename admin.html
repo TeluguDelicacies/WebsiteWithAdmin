@@ -132,21 +132,72 @@
 
     <!-- Dashboard Section -->
     <div id="dashboardSection" class="admin-container dashboard">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Product Management</h1>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="openProductModal()" class="submit-btn" style="width: auto;">
-                    <i class="fas fa-plus"></i> Add Product
+        <div class="dashboard-header"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div>
+                <h2 style="color: var(--color-primary); margin-bottom: 5px;">Admin Dashboard</h2>
+                <div class="view-toggle" style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="viewProductsBtn" class="nav-btn active" onclick="switchView('products')"
+                        style="padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">
+                        Products
+                    </button>
+                    <button id="viewTestimonialsBtn" class="nav-btn" onclick="switchView('testimonials')"
+                        style="padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">
+                        Testimonials
+                    </button>
+                </div>
+            </div>
+            <div>
+                <button onclick="openAddModal()" class="submit-btn" style="width: auto; padding: 10px 20px;">
+                    <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
                 </button>
-                <button onclick="handleLogout()" class="nav-btn" style="background: #fee;">
+                <button onclick="handleLogout()" class="nav-btn"
+                    style="background: white; border: 1px solid var(--border-light);">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
         </div>
 
-        <div id="productList" class="product-list">
-            <!-- Products will be loaded here -->
-            <p style="text-align: center; color: var(--text-secondary);">Loading products...</p>
+        <div id="productsTableContainer" class="table-container"
+            style="background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr
+                        style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
+                        <th style="padding: 15px;">Product</th>
+                        <th style="padding: 15px;">Category</th>
+                        <th style="padding: 15px;">MRP</th>
+                        <th style="padding: 15px;">Stock</th>
+                        <th style="padding: 15px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productList">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 30px;">Loading products...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="testimonialsTableContainer" class="table-container"
+            style="display: none; background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr
+                        style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
+                        <th style="padding: 15px;">Name</th>
+                        <th style="padding: 15px;">Message</th>
+                        <th style="padding: 15px;">Location</th>
+                        <th style="padding: 15px;">Rating</th>
+                        <th style="padding: 15px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="testimonialList">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 30px;">Loading testimonials...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -159,8 +210,12 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Product Name</label>
+                        <label>Product Name (English)</label>
                         <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Name (Telugu)</label>
+                        <input type="text" id="productNameTelugu" placeholder="e.g. కడప కారం">
                     </div>
                     <div class="form-group">
                         <label>Category</label>
@@ -192,20 +247,24 @@
                         <input type="text" id="netWeight">
                     </div>
                     <div class="form-group">
-                        <label>Total Stock</label>
-                        <input type="number" id="totalStock">
+                        <label>Total Stock (Auto-sum)</label>
+                        <input type="number" id="totalStock" readonly
+                            style="background-color: var(--bg-secondary); cursor: not-allowed;">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Showcase Image URL</label>
-                        <input type="text" id="showcaseImage">
-                        <!-- <input type="file" id="showcaseImageFile" accept="image/*"> -->
-                    </div>
-                    <div class="form-group">
-                        <label>Info Image URL</label>
-                        <input type="text" id="infoImage">
+                        <label>Product Image</label>
+                        <div class="upload-group">
+                            <input type="text" id="showcaseImage" placeholder="Image URL or Upload File ->"
+                                style="flex: 1;">
+                            <label for="showcaseUpload" class="upload-btn">
+                                <i class="fas fa-cloud-upload-alt"></i> Upload
+                            </label>
+                            <input type="file" id="showcaseUpload" accept="image/*" style="display: none;">
+                        </div>
+                        <small id="showcaseStatus" style="color: var(--text-secondary);"></small>
                     </div>
                 </div>
 
@@ -223,6 +282,58 @@
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="submit-btn">Save Product</button>
                     <button type="button" onclick="closeProductModal()" class="nav-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Testimonial Modal -->
+    <div id="testimonialModal" class="modal">
+        <div class="modal-content">
+            <h2 id="testimonialModalTitle">Add Testimonial</h2>
+            <form id="testimonialForm" class="contact-form">
+                <input type="hidden" id="testimonialId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <input type="text" id="tName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="tLocation">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="tMessage" rows="4" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Rating (1-5)</label>
+                        <select id="tRating">
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Product (Optional)</label>
+                        <input type="text" id="tProduct">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="submit-btn">Save Testimonial</button>
+                        <button type="button" onclick="closeTestimonialModal()" class="nav-btn">Cancel</button>
+                    </div>
                 </div>
             </form>
         </div>

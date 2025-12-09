@@ -125,327 +125,251 @@
         </div>
     </section>
 
-    <!-- Ready to Eat Section -->
-    <section id="ready-to-eat" class="category-section section">
-        <div class="container">
-            <h2 class="section-title">Ready to Eat</h2>
-            <div class="category-grid">
-                <!-- Products will be loaded here -->
-            </div>
-        </div>
-    </section>
+    <!-- Product Categories Master Section -->
+    <section id="product-categories" class="section">
+        <section class="section" id="product-categories">
+            <div class="container">
+                <h2 class="section-title">Our Collections</h2>
+                <div class="master-cards-grid">
 
-    <!-- Ready to Cook Section -->
-    <section id="ready-to-cook" class="category-section section">
-        <div class="container">
-            <h2 class="section-title">Ready to Cook</h2>
-            <div class="category-grid">
-                <!-- Products will be loaded here -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Ready to Use Section -->
-    <section id="ready-to-use" class="category-section section">
-        <div class="container">
-            <h2 class="section-title">Ready to Use</h2>
-            <div class="category-grid">
-                <!-- Products will be loaded here -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Customer Testimonials Section -->
-    <section class="testimonials-showcase section">
-        <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
-            <div class="scroll-container">
-                <div class="testimonials-scroll" id="testimonialsScroll">
-
-                    <!-- Original Testimonials -->
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"The best Telugu Podis I've tasted outside of my grandmother's kitchen! The authentic
-                                flavors bring back memories of home."</p>
-                            <div class="testimonial-author">
-                                <strong>Priya Sharma</strong>
-                                <span>Hyderabad</span>
+                    <!-- Card 1: Ready To Eat -->
+                    <div class="master-card" data-category="ready-to-eat">
+                        <div class="card-face card-front">
+                            <div class="card-hero-image">
+                                <img src="./images/categories/ready-to-eat-podis-n.jpg" alt="Ready To Eat Collection">
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Ready To Eat</h3>
+                                <p class="telugu-subtitle">పచ్చళ్ళు - పొడులు</p>
+                                <p class="card-desc">
+                                    Authentic Traditional Telugu Spice Powders – Perfectly prepared to complement rice,
+                                    idli, or
+                                    dosa. Simply blend with oil or ghee to experience the rich and genuine flavors of
+                                    Telugu
+                                    cuisine instantaneously.
+                                </p>
+                                <div class="dropdown-wrapper">
+                                    <select class="product-select" id="select-ready-to-eat">
+                                        <option value="" disabled selected>Select Podi</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                                </div>
                             </div>
                         </div>
+                        <!-- Back Face (Overlay) -->
+                        <div class="card-face card-back" id="view-ready-to-eat"></div>
                     </div>
 
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Finally found Parotas that taste just like the ones from Kerala! Perfectly flaky and
-                                delicious every time."</p>
-                            <div class="testimonial-author">
-                                <strong>Rajesh Kumar</strong>
-                                <span>Bangalore</span>
+                    <!-- Card 2: Ready To Cook -->
+                    <div class="master-card" data-category="ready-to-cook">
+                        <div class="card-face card-front">
+                            <div class="card-hero-image">
+                                <img src="./images/categories/ready-to-cook-n.jpg" alt="Ready To Cook Collection">
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Ready To Cook</h3>
+                                <p class="telugu-subtitle">మీ సౌకర్యం, త్వరితగతి కోసం</p>
+                                <p class="card-desc">
+                                    Fresh, Ready-to-Cook Malabar Parota and Wheat Chapathi – Expertly prepared for your
+                                    convenience. Simply heat on a pan to enjoy soft, flavorful flatbreads that
+                                    complement any
+                                    meal with authentic taste and texture.
+                                </p>
+                                <div class="dropdown-wrapper">
+                                    <select class="product-select" id="select-ready-to-cook">
+                                        <option value="" disabled selected>Select Product</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                                </div>
                             </div>
                         </div>
+                        <!-- Back Face (Overlay) -->
+                        <div class="card-face card-back" id="view-ready-to-cook"></div>
                     </div>
 
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"The convenience of ready-to-cook Chapathis without compromising on taste. My family
-                                loves them!"</p>
-                            <div class="testimonial-author">
-                                <strong>Meera Reddy</strong>
-                                <span>Chennai</span>
+                    <!-- Card 3: Ready To Use -->
+                    <div class="master-card" data-category="ready-to-use">
+                        <div class="card-face card-front">
+                            <div class="card-hero-image">
+                                <img src="./images/categories/ready-to-use.jpg" alt="Ready To Use Collection">
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">Ready To Use</h3>
+                                <p class="telugu-subtitle">నేరుగా వాడుకోవడానికి అనువైనవి</p>
+                                <p class="card-desc">
+                                    Premium Culinary Essentials – Carefully selected to enhance your everyday cooking.
+                                    Includes
+                                    rich ghee, wholesome multigrain atta, aromatic coffee, and pure turmeric. Ready to
+                                    use
+                                    directly in your favorite recipes.
+                                </p>
+                                <div class="dropdown-wrapper">
+                                    <select class="product-select" id="select-ready-to-use">
+                                        <option value="" disabled selected>Select Product</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Telugu Delicacies has made my busy mornings so much easier. Quality food with authentic
-                                taste!"</p>
-                            <div class="testimonial-author">
-                                <strong>Anil Krishna</strong>
-                                <span>Mumbai</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Outstanding quality and taste! The Kadapa Kaaram is exactly how my mother used to make
-                                it."</p>
-                            <div class="testimonial-author">
-                                <strong>Lakshmi Devi</strong>
-                                <span>Vijayawada</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Excellent packaging and fast delivery! The products arrived fresh and tasty. Highly
-                                recommended!"</p>
-                            <div class="testimonial-author">
-                                <strong>Sunita Rao</strong>
-                                <span>Pune</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Duplicate testimonials for seamless infinite scroll -->
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"The best Telugu Podis I've tasted outside of my grandmother's kitchen! The authentic
-                                flavors bring back memories of home."</p>
-                            <div class="testimonial-author">
-                                <strong>Priya Sharma</strong>
-                                <span>Hyderabad</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Finally found Parotas that taste just like the ones from Kerala! Perfectly flaky and
-                                delicious every time."</p>
-                            <div class="testimonial-author">
-                                <strong>Rajesh Kumar</strong>
-                                <span>Bangalore</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"The convenience of ready-to-cook Chapathis without compromising on taste. My family
-                                loves them!"</p>
-                            <div class="testimonial-author">
-                                <strong>Meera Reddy</strong>
-                                <span>Chennai</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Telugu Delicacies has made my busy mornings so much easier. Quality food with authentic
-                                taste!"</p>
-                            <div class="testimonial-author">
-                                <strong>Anil Krishna</strong>
-                                <span>Mumbai</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Outstanding quality and taste! The Kadapa Kaaram is exactly how my mother used to make
-                                it."</p>
-                            <div class="testimonial-author">
-                                <strong>Lakshmi Devi</strong>
-                                <span>Vijayawada</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-item">
-                        <div class="testimonial-content">
-                            <div class="stars">★★★★★</div>
-                            <p>"Excellent packaging and fast delivery! The products arrived fresh and tasty. Highly
-                                recommended!"</p>
-                            <div class="testimonial-author">
-                                <strong>Sunita Rao</strong>
-                                <span>Pune</span>
-                            </div>
-                        </div>
+                        <!-- Back Face (Overlay) -->
+                        <div class="card-face card-back" id="view-ready-to-use"></div>
                     </div>
 
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Customer Testimonials Section (Loaded from external file) -->
-    <section id="testimonials-placeholder">
-        <!-- Testimonials will be loaded here -->
-    </section>
+        <!-- Customer Testimonials Section -->
+        <section class="testimonials-showcase section">
+            <div class="container">
+                <h2 class="section-title">What Our Customers Say</h2>
+                <div class="scroll-container">
+                    <div class="testimonials-scroll" id="testimonialsScroll">
+                        <!-- Testimonials will be loaded dynamically -->
+                        <div class="testimonial-item">
+                            <div class="testimonial-content">
+                                <p style="text-align: center;">Loading reviews...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <!-- 
+        <!-- Customer Testimonials Section (Loaded from external file) -->
+        <section id="testimonials-placeholder">
+            <!-- Testimonials will be loaded here -->
+        </section>
+
+        <!-- 
     ========================================
     CONTACT FORM SECTION
     Modern form design with enhanced UX
     ========================================
     -->
-    <section id="contact" class="contact-form-section">
-        <div class="container">
-            <div class="contact-form-content">
-                <h2 class="section-title text-center">Get In Touch</h2>
-                <p class="form-subtitle">Have questions about our products or want to place a custom order? We'd love to
-                    hear from you!</p>
+        <section id="contact" class="contact-form-section">
+            <div class="container">
+                <div class="contact-form-content">
+                    <h2 class="section-title text-center">Get In Touch</h2>
+                    <p class="form-subtitle">Have questions about our products or want to place a custom order? We'd
+                        love to
+                        hear from you!</p>
 
-                <form class="contact-form" onsubmit="handleFormSubmit(event)" method="POST" netlify>
-                    <input type="hidden" name="form-name" value="contact">
+                    <form class="contact-form" onsubmit="handleFormSubmit(event)" method="POST" netlify>
+                        <input type="hidden" name="form-name" value="contact">
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="name">Full Name *</label>
-                            <input type="text" id="name" name="name" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">Full Name *</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <select id="subject" name="subject">
+                                    <option value="">Select Subject</option>
+                                    <option value="product-inquiry">Product Inquiry</option>
+                                    <option value="bulk-order">Bulk Order</option>
+                                    <option value="distributor">Become a Distributor</option>
+                                    <option value="feedback">Feedback</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="email">Email Address *</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone">
+                            <label for="message">Message *</label>
+                            <textarea id="message" name="message" rows="5" placeholder="Tell us about your inquiry..."
+                                required></textarea>
                         </div>
 
-                        <div class="form-group">
-                            <label for="subject">Subject</label>
-                            <select id="subject" name="subject">
-                                <option value="">Select Subject</option>
-                                <option value="product-inquiry">Product Inquiry</option>
-                                <option value="bulk-order">Bulk Order</option>
-                                <option value="distributor">Become a Distributor</option>
-                                <option value="feedback">Feedback</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="message">Message *</label>
-                        <textarea id="message" name="message" rows="5" placeholder="Tell us about your inquiry..."
-                            required></textarea>
-                    </div>
-
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-paper-plane"></i>
-                        Send Message
-                    </button>
-                </form>
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Message
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- 
+        <!-- 
     ========================================
     FOOTER SECTION
     Compact footer with embedded Google Maps and essential information
     ========================================
     -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <!-- Company Information -->
-                <div class="footer-info">
-                    <!-- Brand section -->
-                    <div class="footer-brand">
-                        <h2>Telugu Delicacies</h2>
-                        <p class="footer-tagline">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
-                        <p class="fssai-license">FSSAI License: 13623999000239</p>
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <!-- Company Information -->
+                    <div class="footer-info">
+                        <!-- Brand section -->
+                        <div class="footer-brand">
+                            <h2>Telugu Delicacies</h2>
+                            <p class="footer-tagline">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
+                            <p class="fssai-license">FSSAI License: 13623999000239</p>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="footer-section footer-contact" id="footer-contact">
+                            <h4><i class="fas fa-phone"></i> Contact Us</h4>
+                            <p><a href="tel:+919676712031">+91 96767 12031</a></p>
+                            <p><a href="tel:+919618513131">+91 96185 13131</a></p>
+                            <p><a href="mailto:info@telugudelicacies.com">info@telugudelicacies.com</a></p>
+                        </div>
+
+                        <!-- Address Information -->
+                        <div class="footer-section footer-address">
+                            <h4><i class="fas fa-map-marker-alt"></i> Our Location</h4>
+                            <p>II, Western Part, Plot No: 121/3</p>
+                            <p>B N Reddy Nagar, Cherlapalli</p>
+                            <p>Hyderabad, Telangana 500051</p>
+                            <p>India</p>
+                        </div>
                     </div>
 
-                    <!-- Contact Information -->
-                    <div class="footer-section footer-contact" id="footer-contact">
-                        <h4><i class="fas fa-phone"></i> Contact Us</h4>
-                        <p><a href="tel:+919676712031">+91 96767 12031</a></p>
-                        <p><a href="tel:+919618513131">+91 96185 13131</a></p>
-                        <p><a href="mailto:info@telugudelicacies.com">info@telugudelicacies.com</a></p>
-                    </div>
-
-                    <!-- Address Information -->
-                    <div class="footer-section footer-address">
-                        <h4><i class="fas fa-map-marker-alt"></i> Our Location</h4>
-                        <p>II, Western Part, Plot No: 121/3</p>
-                        <p>B N Reddy Nagar, Cherlapalli</p>
-                        <p>Hyderabad, Telangana 500051</p>
-                        <p>India</p>
+                    <!-- Google Maps Section -->
+                    <div class="footer-map">
+                        <h4><i class="fas fa-location-dot"></i> Find Us Here</h4>
+                        <div class="map-container">
+                            <!-- Google Maps Embed -->
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.8428871601745!2d78.60164107521217!3d17.46723238343367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9d007f562aaf%3A0x2f13d0ef2a0f7614!2sTelugu%20Delicacies!5e0!3m2!1sen!2sin!4v1756361897165!5m2!1sen!2sin"
+                                width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Google Maps Section -->
-                <div class="footer-map">
-                    <h4><i class="fas fa-location-dot"></i> Find Us Here</h4>
-                    <div class="map-container">
-                        <!-- Google Maps Embed -->
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.8428871601745!2d78.60164107521217!3d17.46723238343367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9d007f562aaf%3A0x2f13d0ef2a0f7614!2sTelugu%20Delicacies!5e0!3m2!1sen!2sin!4v1756361897165!5m2!1sen!2sin"
-                            width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade">
-                        </iframe>
-                    </div>
+                <!-- Copyright -->
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Telugu Delicacies. All rights reserved. | Crafted with ❤️ for authentic South Indian
+                        Taste</p>
+
+
                 </div>
             </div>
+        </footer>
 
-            <!-- Copyright -->
-            <div class="footer-bottom">
-                <p>&copy; 2025 Telugu Delicacies. All rights reserved. | Crafted with ❤️ for authentic South Indian
-                    Taste</p>
-
-
-            </div>
-        </div>
-    </footer>
-
-    <!-- WhatsApp Buy Now Button 
+        <!-- WhatsApp Buy Now Button 
 <button class="nav-btn nav-btn-cta" onclick="redirectToWhatsApp()">
     <i class="fab fa-whatsapp"></i> Buy Now
 </button>-->
 
-    <!-- WhatsApp Buy Now Functionality 
+        <!-- WhatsApp Buy Now Functionality 
 <script>
     /**
      * Redirects the user to the WhatsApp catalog in a new tab.
@@ -457,80 +381,80 @@
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     }
 </script>-->
-    <!-- QR Modal -->
-    <div id="qrModal" style="display:none; position:fixed; inset:0; 
+        <!-- QR Modal -->
+        <div id="qrModal" style="display:none; position:fixed; inset:0; 
             background:rgba(0,0,0,0.6); 
             align-items:center; justify-content:center; 
             z-index:2000;">
-        <div style="background:#fff; padding:30px; border-radius:16px; 
+            <div style="background:#fff; padding:30px; border-radius:16px; 
               text-align:center; width:320px; max-width:90%;
               box-shadow:0 8px 24px rgba(0,0,0,0.25); position:relative;">
-            <button onclick="closeQrModal()" style="position:absolute; top:8px; right:8px; 
+                <button onclick="closeQrModal()" style="position:absolute; top:8px; right:8px; 
                    border:none; background:none; font-size:20px; cursor:pointer;">×</button>
-            <h2 style="margin-bottom:15px; font-family:sans-serif;">Scan to Chat on WhatsApp</h2>
-            <canvas id="qrCodeCanvas"></canvas>
-            <p style="margin-top:10px; font-size:14px; color:#555;">
-                Point your phone camera at the QR
-            </p>
+                <h2 style="margin-bottom:15px; font-family:sans-serif;">Scan to Chat on WhatsApp</h2>
+                <canvas id="qrCodeCanvas"></canvas>
+                <p style="margin-top:10px; font-size:14px; color:#555;">
+                    Point your phone camera at the QR
+                </p>
+            </div>
         </div>
-    </div>
 
-    <!-- QRCode library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+        <!-- QRCode library -->
+        <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
-    <script>
-        const whatsappUrl = 'https://wa.me/c/919618519191';
+        <script>
+            const whatsappUrl = 'https://wa.me/c/919618519191';
 
-        document.addEventListener("DOMContentLoaded", function () {
-            document.addEventListener("click", function (e) {
-                const btn = e.target.closest(".whatsapp-btn");
-                if (!btn) return;
+            document.addEventListener("DOMContentLoaded", function () {
+                document.addEventListener("click", function (e) {
+                    const btn = e.target.closest(".whatsapp-btn");
+                    if (!btn) return;
 
-                // If it's inside an <a>, stop navigation
-                const anchor = btn.closest("a");
-                if (anchor) e.preventDefault();
+                    // If it's inside an <a>, stop navigation
+                    const anchor = btn.closest("a");
+                    if (anchor) e.preventDefault();
 
-                redirectToWhatsApp();
+                    redirectToWhatsApp();
+                });
             });
-        });
 
-        function redirectToWhatsApp() {
-            if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-                // Mobile → open WhatsApp
-                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-            } else {
-                // Desktop → show QR
-                openQrModal();
+            function redirectToWhatsApp() {
+                if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+                    // Mobile → open WhatsApp
+                    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                } else {
+                    // Desktop → show QR
+                    openQrModal();
+                }
             }
-        }
 
-        function openQrModal() {
-            const modal = document.getElementById("qrModal");
-            modal.style.display = "flex";
+            function openQrModal() {
+                const modal = document.getElementById("qrModal");
+                modal.style.display = "flex";
 
-            // Generate QR only when opening
-            const canvas = document.getElementById("qrCodeCanvas");
-            QRCode.toCanvas(canvas, whatsappUrl, { width: 220 }, function (error) {
-                if (error) console.error(error);
+                // Generate QR only when opening
+                const canvas = document.getElementById("qrCodeCanvas");
+                QRCode.toCanvas(canvas, whatsappUrl, { width: 220 }, function (error) {
+                    if (error) console.error(error);
+                });
+
+                document.body.style.overflow = "hidden";
+            }
+
+            function closeQrModal() {
+                const modal = document.getElementById("qrModal");
+                modal.style.display = "none";
+                document.body.style.overflow = "";
+            }
+
+            // Close if clicking outside modal content
+            document.getElementById("qrModal").addEventListener("click", function (e) {
+                if (e.target.id === "qrModal") closeQrModal();
             });
+        </script>
 
-            document.body.style.overflow = "hidden";
-        }
-
-        function closeQrModal() {
-            const modal = document.getElementById("qrModal");
-            modal.style.display = "none";
-            document.body.style.overflow = "";
-        }
-
-        // Close if clicking outside modal content
-        document.getElementById("qrModal").addEventListener("click", function (e) {
-            if (e.target.id === "qrModal") closeQrModal();
-        });
-    </script>
-
-    <!-- Main JavaScript -->
-    <script type="module" src="script.js"></script>
+        <!-- Main JavaScript -->
+        <script type="module" src="script.js"></script>
 </body>
 
 </html>

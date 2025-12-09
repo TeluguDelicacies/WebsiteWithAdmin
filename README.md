@@ -45,9 +45,21 @@ A modern, responsive website for Telugu Delicacies - an authentic South Indian f
    - Add all product and category images to the respective folders
    - Ensure all image filenames match exactly as specified in the requirements
 
-3. **Open in browser**
-   - Simply open `index.html` in your web browser
-   - Or use a local server like `Live Server` extension in VS Code
+3. **Run Locally**
+   
+   To avoid CORS errors with `file://` protocol, you must use a local server. Choose one:
+
+   **Option A: VS Code Live Server (Recommended)**
+   - Install "Live Server" extension in VS Code
+   - Right-click `index.html` > "Open with Live Server"
+
+   **Option B: Node.js**
+   - Install Node.js
+   - Run `npx serve .` in the project folder
+
+   **Option C: Python**
+   - Run `python -m http.server 8000` in the project folder
+   - Open `http://localhost:8000`
 
 ## 📁 File Structure
 

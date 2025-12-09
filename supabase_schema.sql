@@ -11,7 +11,11 @@ CREATE TABLE public.products (
     mrp NUMERIC,
     net_weight TEXT,
     total_stock INTEGER DEFAULT 0,
-    quantity_variants JSONB DEFAULT '[]'::jsonb
+    quantity_variants JSONB DEFAULT '[]'::jsonb,
+    ingredients TEXT,
+    nutrition_info JSONB DEFAULT '{}'::jsonb,
+    serving_suggestion TEXT,
+    product_name_telugu TEXT
 );
 
 -- Enable Row Level Security (RLS)
@@ -44,7 +48,8 @@ USING (true);
 
 -- Create Storage Bucket for Product Images
 INSERT INTO storage.buckets (id, name, public) 
-VALUES ('product-images', 'product-images', true);
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- Storage Policy: Allow public to view images
 CREATE POLICY "Public Access" 

@@ -1244,6 +1244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch and render products
     fetchAndRenderProducts();
+    fetchAndRenderTestimonials();
 
     // Setup form validation if contact form exists
     const contactForm = document.querySelector('.contact-form');
@@ -1297,15 +1298,19 @@ async function fetchAndRenderProducts() {
             .order('created_at', { ascending: true });
 
         if (error) {
+            console.error('Supabase Error:', error);
+            showToast('Error loading products: ' + error.message, 'error');
             throw error;
         }
 
         if (!products || products.length === 0) {
             console.log('No products found in database');
+            showToast('Database connected but no products found. Please run restore_db.sql', 'error');
             return;
         }
 
         console.log(`Fetched ${products.length} products`);
+        // showToast(`Loaded ${products.length} products successfully`, 'success'); // Optional success message
         renderProducts(products);
 
         // Re-initialize animations and controls after rendering
@@ -1316,96 +1321,261 @@ async function fetchAndRenderProducts() {
 
     } catch (err) {
         console.error('Error fetching products:', err);
-        // Fallback or error display could go here
+        showToast('System Error: ' + err.message, 'error');
     }
 }
 
 /**
- * Renders products into the showcase and category sections
+ * Renders products into the master card dropdowns and handling interactive reveal
  * @param {Array} products - Array of product objects
  */
 function renderProducts(products) {
     const productScroll = document.getElementById('productScroll');
-    const categoryContainers = {
-        'ready-to-eat': document.querySelector('#ready-to-eat .category-grid'),
-        'ready-to-cook': document.querySelector('#ready-to-cook .category-grid'),
-        'ready-to-use': document.querySelector('#ready-to-use .category-grid')
+
+    // Group products by category
+    const grouped = {
+        'ready-to-eat': [],
+        'ready-to-cook': [],
+        'ready-to-use': []
     };
 
-    // Clear existing content if any (though HTML should be empty placeholders)
-    if (productScroll) productScroll.innerHTML = '';
-    Object.values(categoryContainers).forEach(container => {
-        if (container) container.innerHTML = '';
+    console.log('Rendering Products. Total count:', products.length);
+
+    products.forEach(p => {
+        // Normalize category matching: lowercase, trim, and replace spaces with dashes
+        const cat = (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
+        if (grouped[cat]) {
+            grouped[cat].push(p);
+        } else {
+            console.warn('Unknown Category found:', cat, 'for product:', p.product_name);
+        }
     });
 
-    products.forEach(product => {
-        // 1. Render to Showcase Ticker
-        if (productScroll) {
+    console.log('Grouped Products:', grouped);
+
+    // 1. Render to Showcase Ticker (Keep existing ticker logic)
+    if (productScroll) {
+        productScroll.innerHTML = '';
+        products.forEach(product => {
             const showcaseItem = document.createElement('div');
             showcaseItem.className = 'product-item';
+            let localImage = product.showcase_image;
+
+            if (!localImage) {
+                localImage = './images/placeholder-product-portrait.jpg';
+            }
+
             showcaseItem.innerHTML = `
-                <img src="${product.showcase_image}" alt="${product.product_name}">
+                <img src="${localImage}" alt="${product.product_name}">
                 <h3>${product.product_name}</h3>
-                <p>${product.product_tagline}</p>
+                <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
             `;
             productScroll.appendChild(showcaseItem);
+        });
 
-            // Duplicate for seamless scrolling (if needed, but CSS usually handles infinite scroll with duplicates)
-            // For true infinite scroll, we often duplicate the list. 
-            // Let's duplicate it once after the loop if needed, or just append.
+        // Duplicate for seamless scrolling
+        if (products.length > 0) {
+            const items = Array.from(productScroll.children);
+            items.forEach(item => productScroll.appendChild(item.cloneNode(true)));
         }
+    }
 
-        // 2. Render to Category Grid
-        const container = categoryContainers[product.product_category];
-        if (container) {
-            const categoryCard = document.createElement('div');
-            categoryCard.className = 'category-card';
+    // 2. Populate Dropdowns & Add Listeners
+    Object.keys(grouped).forEach(category => {
+        const selectId = `select-${category}`;
+        const selectEl = document.getElementById(selectId);
+        // New ID convention: view-[category]
+        const viewId = `view-${category}`;
+        const viewContainer = document.getElementById(viewId);
+        const cardElement = document.querySelector(`.master-card[data-category="${category}"]`);
 
-            // Format price range or single price
-            const priceDisplay = `₹${product.mrp}`;
+        // Debug log to ensure elements are found
+        console.log(`Setup for ${category}: Select=${!!selectEl}, View=${!!viewContainer}, Card=${!!cardElement}`);
 
-            // Generate unique ID for description
-            const descId = `${product.product_category}-${product.product_name.replace(/\s+/g, '-').toLowerCase()}`;
+        if (selectEl && viewContainer && cardElement) {
+            // Clear and add default
+            selectEl.innerHTML = '<option value="" disabled selected>Select Product</option>';
 
-            categoryCard.innerHTML = `
-                <div class="card-image">
-                    <img src="${product.showcase_image}" alt="${product.product_name}">
-                </div>
-                <div class="card-content">
-                    <h3>${product.product_name}</h3>
-                    <p class="telugu-text">${product.product_tagline}</p>
-                    <div class="price-tag">${priceDisplay}</div>
-                    
-                    <div class="product-actions">
-                        <select class="variant-select" onchange="showProductDescription(this, '${product.product_category}')" aria-label="Select quantity">
-                            <option value="" disabled selected>Select Quantity</option>
-                            ${product.quantity_variants ? JSON.parse(product.quantity_variants).map(v =>
-                `<option value="${product.product_name.replace(/\s+/g, '-').toLowerCase()}">${v.quantity} - ₹${v.price}</option>`
-            ).join('') : `<option value="${product.product_name.replace(/\s+/g, '-').toLowerCase()}">${product.net_weight} - ₹${product.mrp}</option>`}
-                        </select>
-                        <button class="add-btn" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
-                            <i class="fas fa-shopping-cart"></i> Add
-                        </button>
-                    </div>
-                    
-                    <div id="${descId}" class="product-description" style="display: none;">
-                        <p>${product.product_description}</p>
-                        <div class="nutrition-info">
-                            <small>Net Weight: ${product.net_weight}</small>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(categoryCard);
+            grouped[category].forEach(product => {
+                const opt = document.createElement('option');
+                opt.value = product.id;
+                const telugu = product.product_name_telugu ? ` (${product.product_name_telugu})` : '';
+                opt.textContent = `${product.product_name}${telugu}`;
+                selectEl.appendChild(opt);
+            });
+
+            // Change Listener: Trigger Overlay
+            selectEl.addEventListener('change', (e) => {
+                const selectedId = e.target.value;
+                const product = grouped[category].find(p => p.id === selectedId);
+                if (product) {
+                    renderOverlayProduct(product, viewContainer, selectEl, cardElement);
+                }
+            });
+        } else {
+            console.warn(`Missing elements for category: ${category}`);
         }
     });
+}
 
-    // Duplicate showcase items for seamless scrolling if we have enough items
-    if (productScroll && products.length > 0) {
-        // Clone all children to ensure seamless loop
-        const items = Array.from(productScroll.children);
-        items.forEach(item => {
-            productScroll.appendChild(item.cloneNode(true));
+function renderOverlayProduct(product, container, selectEl, cardElement) {
+    const contentIngId = `content-ing-${product.id}`;
+    const contentNutId = `content-nut-${product.id}`;
+
+    let localImage = product.showcase_image;
+    const pName = product.product_name.toLowerCase();
+    if (!localImage) {
+        // Fallback to generic placeholders if no specific image is set
+        localImage = './images/placeholder-product-portrait.jpg';
+    }
+
+    let nutInfo = {};
+    try { nutInfo = typeof product.nutrition_info === 'string' ? JSON.parse(product.nutrition_info) : product.nutrition_info; } catch (e) { nutInfo = {}; }
+
+    let variants = [];
+    try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+
+    // HTML Structure for BACK face
+    container.innerHTML = `
+        <div class="back-btn-wrapper">
+             <button class="back-btn" onclick="closeOverlay('${cardElement.dataset.category}', '${selectEl.id}')">
+                <i class="fas fa-arrow-left"></i> Back to ${cardElement.querySelector('.card-title').innerText}
+            </button>
+        </div>
+        <div class="revealed-product">
+            <img src="${localImage}" class="revealed-img" alt="${product.product_name}">
+            <div class="revealed-info">
+                <h4>${product.product_name}</h4>
+                <p class="revealed-tagline">${product.product_tagline || ''}</p>
+                <p class="card-desc" style="margin-bottom: 15px;">${product.product_description || ''}</p>
+                
+                <div class="info-toggles">
+                    <button class="toggle-btn" onclick="toggleInfo('${contentIngId}', this)">View Ingredients</button>
+                    ${Object.keys(nutInfo).length > 0 ? `<button class="toggle-btn" onclick="toggleInfo('${contentNutId}', this)">Nutrition Info</button>` : ''}
+                </div>
+
+                <div id="${contentIngId}" class="info-content-box" style="display: none;">
+                    <strong>Ingredients:</strong><br>
+                    ${product.ingredients || 'Not listed'}
+                </div>
+
+                <div id="${contentNutId}" class="info-content-box" style="display: none;">
+                    <strong>Nutrition (per serving):</strong><br>
+                    ${Object.entries(nutInfo).map(([k, v]) => `${k}: ${v}`).join('<br>') || 'Not listed'}
+                </div>
+
+                <div class="variant-selector" style="margin-bottom: 15px;">
+                    <select class="product-select" id="size-${product.id}" style="padding: 8px;">
+                         ${variants && variants.length > 0
+            ? variants.map(v => `<option value="${v.price}">${v.quantity} - ₹${v.price}</option>`).join('')
+            : `<option value="${product.mrp}">${product.net_weight || 'Std'} - ₹${product.mrp}</option>`}
+                    </select>
+                </div>
+
+                <button class="add-btn" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
+                    <i class="fab fa-whatsapp"></i> Buy on WhatsApp
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Trigger Overlay
+    // Force a reflow to ensure transitions work if needed, though simple class add is usually fine
+    requestAnimationFrame(() => {
+        cardElement.classList.add('show-product');
+    });
+}
+
+// Function to close overlay
+window.closeOverlay = function (category, selectId) {
+    const card = document.querySelector(`.master-card[data-category="${category}"]`);
+    if (card) {
+        card.classList.remove('show-product');
+        // Reset dropdown
+        const select = document.getElementById(selectId);
+        if (select) select.value = "";
+    }
+};
+
+// Global toggle function
+window.toggleInfo = function (contentId, btn) {
+    const box = document.getElementById(contentId);
+    if (box.style.display === 'none') {
+        box.style.display = 'block';
+        btn.classList.add('active');
+        btn.innerText = 'Hide ' + btn.innerText.replace('View ', '');
+    } else {
+        box.style.display = 'none';
+        btn.classList.remove('active');
+        btn.innerText = btn.innerText.replace('Hide ', 'View ');
+    }
+};
+
+/*
+========================================
+TESTIMONIALS FUNCTIONALITY
+========================================
+*/
+
+async function fetchAndRenderTestimonials() {
+    const testimonialContainer = document.getElementById('testimonialsScroll');
+    if (!testimonialContainer) return;
+
+    try {
+        console.log('Fetching testimonials...');
+        const { data: testimonials, error } = await supabase
+            .from('testimonials')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!testimonials || testimonials.length === 0) {
+            testimonialContainer.innerHTML = `
+                <div class="testimonial-item">
+                     <div class="testimonial-content">
+                        <p style="text-align: center;">No reviews yet.</p>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        testimonialContainer.innerHTML = '';
+
+        // Render function
+        const createItem = (t) => {
+            const div = document.createElement('div');
+            div.className = 'testimonial-item';
+            div.innerHTML = `
+                <div class="testimonial-content">
+                    <div class="stars">${'★'.repeat(t.rating)}</div>
+                    <p>"${t.message}"</p>
+                    <div class="testimonial-author">
+                        <strong>${t.name}</strong>
+                        <span>${t.location || ''}</span>
+                    </div>
+                </div>
+             `;
+            return div;
+        };
+
+        testimonials.forEach(t => {
+            testimonialContainer.appendChild(createItem(t));
         });
+
+        // Duplicate for infinite scroll if needed (e.g. if count is small but > 0)
+        if (testimonials.length > 0) {
+            const items = Array.from(testimonialContainer.children);
+            items.forEach(item => testimonialContainer.appendChild(item.cloneNode(true)));
+        }
+
+    } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        testimonialContainer.innerHTML = `
+            <div class="testimonial-item">
+                 <div class="testimonial-content">
+                    <p style="color: red; text-align: center;">Unable to load reviews.</p>
+                </div>
+            </div>`;
     }
 }
