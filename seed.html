@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seed Database</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <h1>Seeding Database...</h1>
+    <div id="status">Starting...</div>
+    <script type="module">
+        import { supabase } from './lib/supabase.js';
+
+        const products = [
+            {
+                product_name: 'Kadapa Kaaram',
+                product_category: 'ready-to-eat',
+                product_tagline: 'కడప కారం',
+                product_description: 'A fiery and flavorful spice blend from the Kadapa region, known for its perfect balance of heat and taste. Made with carefully selected red chilies and traditional spices.',
+                showcase_image: './images/products/kadapa-kaaram.jpg',
+                info_image: '/images/products/kadapa-kaaram-detail.jpg',
+                mrp: 150,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 150, "mrp": 150, "stock": 100 }]
+            },
+            {
+                product_name: 'Nalla Kaaram',
+                product_category: 'ready-to-eat',
+                product_tagline: 'నల్ల కారం',
+                product_description: 'Premium black pepper powder blend that adds warmth and depth to any dish. Rich in antioxidants and known for its digestive properties.',
+                showcase_image: './images/products/nalla-kaaram.jpg',
+                info_image: '/images/products/nalla-kaaram-detail.jpg',
+                mrp: 160,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 160, "mrp": 160, "stock": 100 }]
+            },
+            {
+                product_name: 'Kandi Podi',
+                product_category: 'ready-to-eat',
+                product_tagline: 'కంది పొడి',
+                product_description: 'Traditional lentil-based spice powder that\'s protein-rich and flavorful. Perfect for mixing with rice and ghee for a nutritious meal.',
+                showcase_image: './images/products/kandi-podi.jpg',
+                info_image: '/images/products/kandi-podi-detail.jpg',
+                mrp: 140,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 140, "mrp": 140, "stock": 100 }]
+            },
+            {
+                product_name: 'Godhuma Kaaram',
+                product_category: 'ready-to-eat',
+                product_tagline: 'గోధుమ కారం',
+                product_description: 'Roasted wheat-based spice powder with aromatic spices. A healthy and wholesome option that adds texture and flavor to your meals.',
+                showcase_image: './images/products/godhuma-kaaram.jpg',
+                info_image: '/images/products/godhuma-kaaram-detail.jpg',
+                mrp: 130,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 130, "mrp": 130, "stock": 100 }]
+            },
+            {
+                product_name: 'Karivepaku Podi',
+                product_category: 'ready-to-eat',
+                product_tagline: 'కరివేపాకు పొడి',
+                product_description: 'Fresh curry leaves dried and ground with traditional spices. Adds authentic South Indian aroma and is known for its health benefits.',
+                showcase_image: './images/products/karivepaku-podi.jpg',
+                info_image: '/images/products/karivepaku-podi-detail.jpg',
+                mrp: 150,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 150, "mrp": 150, "stock": 100 }]
+            },
+            {
+                product_name: 'Palli Dhaniya Podi',
+                product_category: 'ready-to-eat',
+                product_tagline: 'పల్లి ధనియా పొడి',
+                product_description: 'A unique blend of roasted groundnuts and coriander seeds. Rich in protein and adds a nutty, aromatic flavor to rice and rotis.',
+                showcase_image: './images/products/palli-dhaniya-podi.jpg',
+                info_image: '/images/products/palli-dhaniya-podi-detail.jpg',
+                mrp: 145,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 145, "mrp": 145, "stock": 100 }]
+            },
+            {
+                product_name: 'Tamalapaaku Kaaram',
+                product_category: 'ready-to-eat',
+                product_tagline: 'తమలపాకు కారం',
+                product_description: 'Bay leaf spice powder that adds a distinctive aroma and flavor. Used traditionally in Telugu cuisine for its medicinal properties.',
+                showcase_image: './images/products/tamalapaaku-kaaram.jpg',
+                info_image: '/images/products/tamalapaaku-kaaram-detail.jpg',
+                mrp: 155,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 155, "mrp": 155, "stock": 100 }]
+            },
+            {
+                product_name: 'Sambar Premix',
+                product_category: 'ready-to-eat',
+                product_tagline: 'సాంబార్ ప్రీమిక్స్',
+                product_description: 'Ready-to-use sambar masala powder with the perfect balance of tangy and spicy flavors. Makes authentic sambar in minutes.',
+                showcase_image: './images/products/sambar-premix.jpg',
+                info_image: '/images/products/sambar-premix-detail.jpg',
+                mrp: 120,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 120, "mrp": 120, "stock": 100 }]
+            },
+            {
+                product_name: 'Velluli Kaaram',
+                product_category: 'ready-to-eat',
+                product_tagline: 'వెల్లుల్లి కారం',
+                product_description: 'Fresh garlic dried and ground with aromatic spices. Known for its health benefits and bold flavor that enhances any dish.',
+                showcase_image: './images/products/velluli-kaaram.jpg',
+                info_image: '/images/products/velluli-kaaram-detail.jpg',
+                mrp: 160,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 160, "mrp": 160, "stock": 100 }]
+            },
+            {
+                product_name: 'Idli Podi',
+                product_category: 'ready-to-eat',
+                product_tagline: 'ఇడ్లీ పొడి',
+                product_description: 'The classic accompaniment for idli and dosa. A perfect blend of lentils, chilies, and spices ground to perfection.',
+                showcase_image: './images/products/idli-podi.jpg',
+                info_image: '/images/products/idli-podi-detail.jpg',
+                mrp: 135,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 135, "mrp": 135, "stock": 100 }]
+            },
+            {
+                product_name: 'Konaseema Kaaram',
+                product_category: 'ready-to-eat',
+                product_tagline: 'కోనసీమ కారం',
+                product_description: 'A special spice blend from the Konaseema region, known for its unique flavor profile and traditional preparation methods.',
+                showcase_image: './images/products/konaseema-kaaram.jpg',
+                info_image: '/images/products/konaseema-kaaram-detail.jpg',
+                mrp: 165,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 165, "mrp": 165, "stock": 100 }]
+            },
+            {
+                product_name: 'Chutney Premix',
+                product_category: 'ready-to-eat',
+                product_tagline: 'చట్నీ ప్రీమిక్స్',
+                product_description: 'Ready-to-use chutney powder that makes instant chutneys. Just add water or oil for a quick and delicious accompaniment.',
+                showcase_image: './images/products/chutney-premix.jpg',
+                info_image: '/images/products/chutney-premix-detail.jpg',
+                mrp: 125,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 125, "mrp": 125, "stock": 100 }]
+            },
+            {
+                product_name: 'Palli Kaaram',
+                product_category: 'ready-to-eat',
+                product_tagline: 'పల్లి కారం',
+                product_description: 'Roasted groundnut spice powder that\'s protein-rich and flavorful. Perfect with idli, dosa, or mixed with rice and ghee.',
+                showcase_image: './images/products/palli-kaaram.jpg',
+                info_image: '/images/products/palli-kaaram-detail.jpg',
+                mrp: 140,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 140, "mrp": 140, "stock": 100 }]
+            },
+            {
+                product_name: 'Malabar Parota',
+                product_category: 'ready-to-cook',
+                product_tagline: 'మలబార్ పరోటా',
+                product_description: 'Authentic Kerala-style layered parota made with premium flour and traditional techniques. Soft, flaky layers that separate beautifully when cooked. Perfect with curry or dal.',
+                showcase_image: './images/products/malabar-parota.jpg',
+                info_image: '/images/products/malabar-parota-detail.jpg',
+                mrp: 80,
+                net_weight: '5 pcs',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "5 pcs", "price": 80, "mrp": 80, "stock": 100 }]
+            },
+            {
+                product_name: 'Wheat Chapathi',
+                product_category: 'ready-to-cook',
+                product_tagline: 'గోధుమ చపాతీ',
+                product_description: 'Soft, wholesome wheat chapathi made from carefully selected wheat flour. Perfect balance of nutrition and taste, ideal for wrapping curries or enjoying with dal and vegetables.',
+                showcase_image: './images/products/wheat-chapathi.jpg',
+                info_image: '/images/products/wheat-chapathi-detail.jpg',
+                mrp: 60,
+                net_weight: '5 pcs',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "5 pcs", "price": 60, "mrp": 60, "stock": 100 }]
+            },
+            {
+                product_name: 'Pure Ghee',
+                product_category: 'ready-to-use',
+                product_tagline: 'స్వచ్ఛమైన నెయ్యి',
+                product_description: 'Traditional clarified butter made from pure cow\'s milk. Rich in vitamins A, D, E, and K, our ghee is perfect for cooking, tempering, and adding authentic flavor to your meals.',
+                showcase_image: './images/products/ghee.jpg',
+                info_image: '/images/products/ghee-detail.jpg',
+                mrp: 500,
+                net_weight: '500ml',
+                total_stock: 50,
+                quantity_variants: [{ "quantity": "500ml", "price": 500, "mrp": 500, "stock": 50 }]
+            },
+            {
+                product_name: 'Multigrain Atta',
+                product_category: 'ready-to-use',
+                product_tagline: 'మల్టిగ్రెయిన్ ఆటా',
+                product_description: 'A nutritious blend of wheat, millet, barley, and other wholesome grains. Perfect for making healthy rotis, parathas, and bread with enhanced nutritional value.',
+                showcase_image: './images/products/multigrain-atta.jpg',
+                info_image: '/images/products/multigrain-atta-detail.jpg',
+                mrp: 60,
+                net_weight: '1kg',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "1kg", "price": 60, "mrp": 60, "stock": 100 }]
+            },
+            {
+                product_name: 'Premium Coffee',
+                product_category: 'ready-to-use',
+                product_tagline: 'ప్రీమియం కాఫీ',
+                product_description: 'Aromatic South Indian filter coffee blend made from carefully selected coffee beans. Rich, smooth, and perfect for your morning ritual or evening relaxation.',
+                showcase_image: './images/products/coffee.jpg',
+                info_image: '/images/products/coffee-detail.jpg',
+                mrp: 200,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 200, "mrp": 200, "stock": 100 }]
+            },
+            {
+                product_name: 'Pure Pasupu',
+                product_category: 'ready-to-use',
+                product_tagline: 'స్వచ్ఛమైన పసుపు',
+                product_description: 'Premium quality turmeric powder with high curcumin content. Known for its anti-inflammatory and antioxidant properties, perfect for cooking and health benefits.',
+                showcase_image: './images/products/pasupu.jpg',
+                info_image: '/images/products/pasupu-detail.jpg',
+                mrp: 100,
+                net_weight: '250g',
+                total_stock: 100,
+                quantity_variants: [{ "quantity": "250g", "price": 100, "mrp": 100, "stock": 100 }]
+            }
+        ];
+
+        async function seedDatabase() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = 'Seeding database...';
+
+            try {
+                // Clear existing products (optional, but good for seeding)
+                // Note: This requires RLS allowing delete or service role key. 
+                // Since we use anon key, we might only be able to insert if RLS allows.
+                // Assuming RLS allows insert for now or user has disabled RLS for development.
+
+                // Insert products
+                const { data, error } = await supabase
+                    .from('products')
+                    .insert(products);
+
+                if (error) {
+                    throw error;
+                }
+
+                statusDiv.textContent = 'Database seeded successfully! You can close this page.';
+                statusDiv.style.color = 'green';
+                console.log('Seeding complete:', data);
+            } catch (err) {
+                statusDiv.textContent = 'Error seeding database: ' + err.message;
+                statusDiv.style.color = 'red';
+                console.error('Seeding error:', err);
+            }
+        }
+
+        seedDatabase();
+    </script>
+</body>
+
+</html>

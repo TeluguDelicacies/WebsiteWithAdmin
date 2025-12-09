@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - Telugu Delicacies</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Admin specific styles */
+        body {
+            background-color: var(--bg-secondary);
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+
+        .login-box h2 {
+            color: var(--color-primary-blue);
+            margin-bottom: var(--space-6);
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .product-list {
+            display: grid;
+            gap: var(--space-4);
+            margin-top: var(--space-6);
+        }
+
+        .product-card-admin {
+            background: var(--bg-primary);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-light);
+            transition: all var(--transition-normal);
+        }
+
+        .product-card-admin:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            border-color: var(--color-secondary-blue);
+        }
+
+        .product-card-admin img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: var(--z-modal);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--border-light);
+        }
+
+        .variant-row {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+            align-items: center;
+        }
+
+        .variant-row input {
+            flex: 1;
+        }
+
+        .btn-sm {
+            padding: var(--space-2) var(--space-3);
+            font-size: var(--font-sm);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="login-box">
+        <h2>Admin Login</h2>
+        <form id="loginForm" class="contact-form" style="margin-top: 20px;">
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Email" required class="form-input">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required class="form-input">
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="admin-container dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Product Management</h1>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="openProductModal()" class="submit-btn" style="width: auto;">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+                <button onclick="handleLogout()" class="nav-btn" style="background: #fee;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div id="productList" class="product-list">
+            <!-- Products will be loaded here -->
+            <p style="text-align: center; color: var(--text-secondary);">Loading products...</p>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Add Product</h2>
+            <form id="productForm" class="contact-form">
+                <input type="hidden" id="productId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="productCategory" required>
+                            <option value="ready-to-eat">Ready To Eat</option>
+                            <option value="ready-to-cook">Ready To Cook</option>
+                            <option value="ready-to-use">Ready To Use</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tagline (Telugu/English)</label>
+                    <input type="text" id="productTagline">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>MRP</label>
+                        <input type="number" id="mrp" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Net Weight</label>
+                        <input type="text" id="netWeight">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Stock</label>
+                        <input type="number" id="totalStock">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Showcase Image URL</label>
+                        <input type="text" id="showcaseImage">
+                        <!-- <input type="file" id="showcaseImageFile" accept="image/*"> -->
+                    </div>
+                    <div class="form-group">
+                        <label>Info Image URL</label>
+                        <input type="text" id="infoImage">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity Variants</label>
+                    <div id="variantsContainer">
+                        <!-- Variants injected here -->
+                    </div>
+                    <button type="button" onclick="addVariantRow()" class="nav-btn"
+                        style="margin-top: 10px; font-size: 0.8rem;">
+                        + Add Variant
+                    </button>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="submit-btn">Save Product</button>
+                    <button type="button" onclick="closeProductModal()" class="nav-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+</body>
+
+</html>

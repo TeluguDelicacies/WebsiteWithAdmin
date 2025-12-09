@@ -1,6 +1,9 @@
 /*
 ========================================
 TELUGU DELICACIES WEBSITE JAVASCRIPT
+/*
+========================================
+TELUGU DELICACIES WEBSITE JAVASCRIPT
 ========================================
 Author: Telugu Delicacies
 Description: Interactive functionality for responsive Telugu Delicacies website
@@ -9,6 +12,8 @@ Fonts: Montserrat (headers), Roboto (body text), Noto Sans Telugu (Telugu conten
 Scaling: Responsive rem-based system with fluid typography using clamp()
 Last Updated: 2024 - Updated for comprehensive font and scaling strategy
 */
+
+import { supabase } from './lib/supabase.js';
 
 /*
 ========================================
@@ -64,17 +69,17 @@ Interactive dropdown functionality for product categories
 function showProductDescription(selectElement, category) {
     // FIXED: Enhanced dropdown functionality for Telugu text support
     console.log('Dropdown selection changed:', selectElement.value);
-    
+
     // Hide all descriptions for this category first
     const categoryCard = selectElement.closest('.category-card');
     const allDescriptions = categoryCard.querySelectorAll('.product-description');
-    
+
     allDescriptions.forEach(desc => {
         desc.style.display = 'none';
         // Remove any existing animation classes
         desc.classList.remove('fade-in');
     });
-    
+
     // Show selected description with animation
     const selectedValue = selectElement.value;
     if (selectedValue) {
@@ -85,7 +90,7 @@ function showProductDescription(selectElement, category) {
             setTimeout(() => {
                 descriptionElement.classList.add('fade-in');
             }, 10);
-            
+
             // FIXED: Log for debugging Telugu functionality
             console.log('Showing description for:', selectedValue);
             console.log('Description element found:', descriptionElement);
@@ -106,47 +111,47 @@ Form submission, validation, and user feedback
  */
 function handleFormSubmit(event) {
     event.preventDefault();
-    
+
     // Validate form before submission
     if (!validateForm(event.target)) {
         return;
     }
-    
+
     // Show loading state
     const submitBtn = event.target.querySelector('.submit-btn');
     const originalText = submitBtn.innerHTML;
-    
+
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     submitBtn.disabled = true;
-    
+
     // Get form data for Netlify
     const formData = new FormData(event.target);
-    
+
     // Submit to Netlify
     fetch('/', {
         method: 'POST',
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams(formData).toString()
     })
-    .then(() => {
-        // Show success message
-        showSuccessMessage('Thank you for your message! We will get back to you soon.');
-        
-        // Reset form
-        event.target.reset();
-        
-        // Clear any validation errors
-        clearFormErrors(event.target);
-    })
-    .catch((error) => {
-        console.error('Form submission error:', error);
-        showErrorMessage('Sorry, there was an error sending your message. Please try again or contact us directly.');
-    })
-    .finally(() => {
-        // Restore button
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
+        .then(() => {
+            // Show success message
+            showSuccessMessage('Thank you for your message! We will get back to you soon.');
+
+            // Reset form
+            event.target.reset();
+
+            // Clear any validation errors
+            clearFormErrors(event.target);
+        })
+        .catch((error) => {
+            console.error('Form submission error:', error);
+            showErrorMessage('Sorry, there was an error sending your message. Please try again or contact us directly.');
+        })
+        .finally(() => {
+            // Restore button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
 }
 
 /**
@@ -157,13 +162,13 @@ function handleFormSubmit(event) {
 function validateForm(form) {
     let isValid = true;
     const inputs = form.querySelectorAll('input, select, textarea');
-    
+
     inputs.forEach(input => {
         if (!validateField({ target: input })) {
             isValid = false;
         }
     });
-    
+
     return isValid;
 }
 
@@ -196,7 +201,7 @@ function showToast(message, type = 'success') {
     if (existingToast) {
         existingToast.remove();
     }
-    
+
     // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast-notification toast-${type}`;
@@ -209,7 +214,7 @@ function showToast(message, type = 'success') {
             <i class="fas fa-times"></i>
         </button>
     `;
-    
+
     // Add toast styles if not already added
     if (!document.querySelector('#toast-styles')) {
         const styles = document.createElement('style');
@@ -284,10 +289,10 @@ function showToast(message, type = 'success') {
         `;
         document.head.appendChild(styles);
     }
-    
+
     // Add toast to page
     document.body.appendChild(toast);
-    
+
     // Auto-remove toast after 5 seconds
     setTimeout(() => {
         if (toast.parentElement) {
@@ -310,9 +315,9 @@ Dynamic header styling based on scroll position
 function updateHeaderOnScroll() {
     const header = document.querySelector('.header');
     if (!header) return;
-    
+
     const scrollY = window.scrollY;
-    
+
     if (scrollY > 20) {
         header.style.background = 'rgba(255, 255, 255, 0.95)';
         header.style.borderBottom = '1px solid rgba(0, 0, 0, 0.15)';
@@ -339,7 +344,7 @@ function initializeScrollAnimations() {
         threshold: 0.1, // Trigger when 10% of element is visible
         rootMargin: '0px 0px -50px 0px' // Trigger 50px before element enters viewport
     };
-    
+
     // Create intersection observer
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -350,7 +355,7 @@ function initializeScrollAnimations() {
             }
         });
     }, observerOptions);
-    
+
     // Observe elements that should animate
     const animateElements = document.querySelectorAll('.category-card, .info-card, .product-item');
     animateElements.forEach(el => {
@@ -358,7 +363,7 @@ function initializeScrollAnimations() {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        
+
         // Start observing the element
         observer.observe(el);
     });
@@ -380,39 +385,39 @@ function initializeProductShowcaseControls() {
     const productScroll = document.getElementById('productScroll');
     const scrollContainer = productScroll?.parentElement;
     if (!productScroll) return;
-    
+
     // Initialize showcase mode management
     initializeShowcaseMode();
-    
+
     // Ensure ticker animation is running by default
     productScroll.style.animationPlayState = 'running';
-    
+
     // Pause animation on mouse hover for better desktop UX
     productScroll.addEventListener('mouseenter', () => {
         productScroll.style.animationPlayState = 'paused';
     });
-    
+
     // Resume animation when mouse leaves
     productScroll.addEventListener('mouseleave', () => {
         productScroll.style.animationPlayState = 'running';
     });
-    
+
     // Touch interaction handling - only pause when user actively interacts
     let isUserInteracting = false;
     let interactionTimeout;
-    
+
     const handleInteractionStart = () => {
         if (!isUserInteracting) {
             productScroll.style.animationPlayState = 'paused';
             isUserInteracting = true;
         }
-        
+
         // Clear any existing timeout
         if (interactionTimeout) {
             clearTimeout(interactionTimeout);
         }
     };
-    
+
     const handleInteractionEnd = () => {
         // Resume ticker animation after brief delay
         interactionTimeout = setTimeout(() => {
@@ -420,43 +425,43 @@ function initializeProductShowcaseControls() {
             isUserInteracting = false;
         }, 2000); // Resume ticker after 2 seconds of inactivity
     };
-    
+
     // Touch events - pause ticker during active touch interaction
     scrollContainer.addEventListener('touchstart', handleInteractionStart, { passive: true });
     scrollContainer.addEventListener('touchend', handleInteractionEnd, { passive: true });
     scrollContainer.addEventListener('touchcancel', handleInteractionEnd, { passive: true });
-    
+
     // Only pause ticker if user is actively scrolling (not just from ticker animation)
     let lastScrollLeft = scrollContainer.scrollLeft;
     let scrollCheckTimeout;
-    
+
     scrollContainer.addEventListener('scroll', () => {
         const currentScrollLeft = scrollContainer.scrollLeft;
-        
+
         // Only consider it user interaction if scroll position actually changed significantly
         if (Math.abs(currentScrollLeft - lastScrollLeft) > 5) {
             handleInteractionStart();
-            
+
             // Clear previous timeout and set new one
             if (scrollCheckTimeout) {
                 clearTimeout(scrollCheckTimeout);
             }
-            
+
             scrollCheckTimeout = setTimeout(() => {
                 handleInteractionEnd();
             }, 1000); // Resume ticker 1 second after scrolling stops
         }
-        
+
         lastScrollLeft = currentScrollLeft;
     }, { passive: true });
-    
+
     // Wheel events for desktop
     scrollContainer.addEventListener('wheel', (e) => {
         handleInteractionStart();
-        
+
         // Allow smooth horizontal scrolling with wheel
         scrollContainer.scrollLeft += e.deltaY * 0.5;
-        
+
         // Resume ticker after wheel interaction
         if (interactionTimeout) {
             clearTimeout(interactionTimeout);
@@ -465,7 +470,7 @@ function initializeProductShowcaseControls() {
             productScroll.style.animationPlayState = 'running';
             isUserInteracting = false;
         }, 1500);
-        
+
         e.preventDefault();
     });
 }
@@ -485,49 +490,49 @@ function initializeShowcaseMode() {
     const productScroll = document.getElementById('productScroll');
     const scrollContainer = productScroll?.parentElement;
     if (!productScroll || !scrollContainer) return;
-    
+
     let isManualMode = false;
     let autoReturnTimeout;
     let hoverTimeout;
-    
+
     // Configuration
     const config = {
         autoReturnDelay: 3000,
         hoverActivationDelay: 500,
         transitionDuration: 300
     };
-    
+
     /**
      * Switches to manual mode
      */
     function activateManualMode() {
         if (isManualMode) return;
-        
+
         isManualMode = true;
         productScroll.style.animationPlayState = 'paused';
         scrollContainer.style.cursor = 'grab';
-        
+
         // Clear any existing timeout
         if (autoReturnTimeout) {
             clearTimeout(autoReturnTimeout);
         }
-        
+
         console.log('Manual mode activated');
     }
-    
+
     /**
      * Returns to automatic mode
      */
     function activateAutoMode() {
         if (!isManualMode) return;
-        
+
         isManualMode = false;
         productScroll.style.animationPlayState = 'running';
         scrollContainer.style.cursor = '';
-        
+
         console.log('Auto mode activated');
     }
-    
+
     /**
      * Sets up auto-return timer
      */
@@ -535,35 +540,35 @@ function initializeShowcaseMode() {
         if (autoReturnTimeout) {
             clearTimeout(autoReturnTimeout);
         }
-        
+
         autoReturnTimeout = setTimeout(() => {
             activateAutoMode();
         }, config.autoReturnDelay);
     }
-    
+
     // Hover intent detection (desktop)
     scrollContainer.addEventListener('mouseenter', () => {
         hoverTimeout = setTimeout(() => {
             activateManualMode();
         }, config.hoverActivationDelay);
     });
-    
+
     scrollContainer.addEventListener('mouseleave', () => {
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
         }
         setupAutoReturn();
     });
-    
+
     // Touch intent detection (mobile)
     scrollContainer.addEventListener('touchstart', () => {
         activateManualMode();
     }, { passive: true });
-    
+
     scrollContainer.addEventListener('touchend', () => {
         setupAutoReturn();
     }, { passive: true });
-    
+
     // Scroll wheel intent detection
     scrollContainer.addEventListener('wheel', (e) => {
         activateManualMode();
@@ -571,26 +576,26 @@ function initializeShowcaseMode() {
         setupAutoReturn();
         e.preventDefault();
     });
-    
+
     // Focus intent detection (accessibility)
     scrollContainer.addEventListener('focus', () => {
         activateManualMode();
     });
-    
+
     scrollContainer.addEventListener('blur', () => {
         setupAutoReturn();
     });
-    
+
     // Manual scrolling detection
     let lastScrollLeft = scrollContainer.scrollLeft;
     scrollContainer.addEventListener('scroll', () => {
         const currentScrollLeft = scrollContainer.scrollLeft;
-        
+
         if (Math.abs(currentScrollLeft - lastScrollLeft) > 5) {
             activateManualMode();
             setupAutoReturn();
         }
-        
+
         lastScrollLeft = currentScrollLeft;
     }, { passive: true });
 }
@@ -610,27 +615,27 @@ Real-time form validation with user feedback
 function validateField(event) {
     const field = event.target;
     const value = field.value.trim();
-    
+
     // Remove existing error styling
     field.classList.remove('error');
     clearFieldError(field);
-    
+
     // Validation rules
     if (field.hasAttribute('required') && !value) {
         showFieldError(field, 'This field is required');
         return false;
     }
-    
+
     if (field.type === 'email' && value && !isValidEmail(value)) {
         showFieldError(field, 'Please enter a valid email address');
         return false;
     }
-    
+
     if (field.type === 'tel' && value && !isValidPhone(value)) {
         showFieldError(field, 'Please enter a valid phone number');
         return false;
     }
-    
+
     return true;
 }
 
@@ -653,16 +658,16 @@ function clearFieldError(field) {
  */
 function showFieldError(field, message) {
     field.classList.add('error');
-    
+
     // Remove existing error message
     clearFieldError(field);
-    
+
     // Add new error message
     const errorElement = document.createElement('span');
     errorElement.className = 'error-message';
     errorElement.textContent = message;
     errorElement.setAttribute('role', 'alert'); // Accessibility
-    
+
     field.parentNode.appendChild(errorElement);
 }
 
@@ -673,7 +678,7 @@ function showFieldError(field, message) {
 function clearFormErrors(form) {
     const errorElements = form.querySelectorAll('.error-message');
     const errorFields = form.querySelectorAll('.error');
-    
+
     errorElements.forEach(el => el.remove());
     errorFields.forEach(field => field.classList.remove('error'));
 }
@@ -737,18 +742,18 @@ Lazy loading and error handling for images
  */
 function initializeImageOptimizations() {
     const images = document.querySelectorAll('img');
-    
+
     images.forEach(img => {
         // Set initial opacity for loading animation
         if (!img.complete) {
             img.style.opacity = '0';
         }
-        
+
         // Handle successful image load
         img.addEventListener('load', () => {
             img.style.opacity = '1';
         });
-        
+
         // Handle image load errors
         img.addEventListener('error', () => {
             console.warn('Image failed to load:', img.src);
@@ -772,14 +777,14 @@ Keyboard navigation and screen reader support
 function enhanceAccessibility() {
     const form = document.querySelector('.contact-form');
     if (!form) return;
-    
+
     const inputs = form.querySelectorAll('input, select, textarea');
-    
+
     inputs.forEach(input => {
         // Add field validation event listeners
         input.addEventListener('blur', validateField);
         input.addEventListener('input', clearFieldError);
-        
+
         // Enhance keyboard navigation
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && input.type !== 'textarea') {
@@ -822,17 +827,17 @@ Enhanced mobile navigation (for future use)
  */
 function initializeMobileInteractions() {
     const navButtons = document.querySelectorAll('.nav-btn');
-    
+
     navButtons.forEach(btn => {
         // Add touch feedback
         btn.addEventListener('touchstart', () => {
             btn.style.transform = 'scale(0.95)';
         });
-        
+
         btn.addEventListener('touchend', () => {
             btn.style.transform = '';
         });
-        
+
         // Handle click events
         btn.addEventListener('click', () => {
             // Add ripple effect or other feedback if desired
@@ -861,17 +866,17 @@ function enableSmoothScrolling(container) {
     let scrollVelocity = 0;
     let lastScrollLeft = container.scrollLeft;
     let lastTime = Date.now();
-    
+
     function updateMomentum() {
         if (isScrolling) {
             const now = Date.now();
             const deltaTime = now - lastTime;
             const deltaScroll = container.scrollLeft - lastScrollLeft;
-            
+
             scrollVelocity = deltaScroll / deltaTime;
             lastScrollLeft = container.scrollLeft;
             lastTime = now;
-            
+
             requestAnimationFrame(updateMomentum);
         } else if (Math.abs(scrollVelocity) > 0.1) {
             // Apply momentum scrolling
@@ -880,7 +885,7 @@ function enableSmoothScrolling(container) {
             requestAnimationFrame(updateMomentum);
         }
     }
-    
+
     container.addEventListener('touchstart', () => {
         isScrolling = true;
         scrollVelocity = 0;
@@ -888,7 +893,7 @@ function enableSmoothScrolling(container) {
         lastTime = Date.now();
         updateMomentum();
     }, { passive: true });
-    
+
     container.addEventListener('touchend', () => {
         isScrolling = false;
     }, { passive: true });
@@ -963,7 +968,7 @@ function showWhatsAppQR() {
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         // Add modal styles
         if (!document.getElementById('whatsapp-qr-styles')) {
             const styles = document.createElement('style');
@@ -1054,11 +1059,11 @@ function showWhatsAppQR() {
             document.head.appendChild(styles);
         }
     }
-    
+
     // Show modal
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    
+
     // Generate QR code if library is available
     if (typeof QRCode !== 'undefined') {
         const canvas = document.getElementById('qrCanvas');
@@ -1095,11 +1100,11 @@ function closeWhatsAppQR() {
 function toggleMobileMenu() {
     const mobileNav = document.getElementById('mobileNav');
     const hamburgerBtn = document.getElementById('hamburgerBtn');
-    
+
     if (!mobileNav || !hamburgerBtn) return;
-    
+
     const isOpen = mobileNav.classList.contains('show');
-    
+
     if (isOpen) {
         mobileNav.classList.remove('show');
         hamburgerBtn.classList.remove('active');
@@ -1117,9 +1122,9 @@ function toggleMobileMenu() {
 function closeMobileMenu() {
     const mobileNav = document.getElementById('mobileNav');
     const hamburgerBtn = document.getElementById('hamburgerBtn');
-    
+
     if (!mobileNav || !hamburgerBtn) return;
-    
+
     mobileNav.classList.remove('show');
     hamburgerBtn.classList.remove('active');
     document.body.style.overflow = '';
@@ -1229,27 +1234,30 @@ MAIN INITIALIZATION FUNCTION
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize header navigation
     initializeHeaderNavigation();
-    
+
     // Initialize other functionality
     initializeScrollAnimations();
     initializeProductShowcaseControls();
     initializeMobileInteractions();
     enhanceAccessibility();
     initializeImageOptimizations();
-    
+
+    // Fetch and render products
+    fetchAndRenderProducts();
+
     // Setup form validation if contact form exists
     const contactForm = document.querySelector('.contact-form');
     if (contactForm) {
         contactForm.addEventListener('submit', handleFormSubmit);
     }
-    
+
     console.log('All functionality initialized successfully');
 });
 
 // Handle page visibility changes (for performance optimization)
 document.addEventListener('visibilitychange', () => {
     const productScroll = document.getElementById('productScroll');
-    
+
     if (productScroll) {
         if (document.hidden) {
             // Page is hidden - pause animations to save resources
@@ -1276,3 +1284,128 @@ if ('connection' in navigator) {
 // Make functions globally available
 window.closeWhatsAppQR = closeWhatsAppQR;
 window.closeMobileMenu = closeMobileMenu;
+
+/**
+ * Fetches products from Supabase and renders them to the DOM
+ */
+async function fetchAndRenderProducts() {
+    try {
+        console.log('Fetching products from Supabase...');
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+
+        if (!products || products.length === 0) {
+            console.log('No products found in database');
+            return;
+        }
+
+        console.log(`Fetched ${products.length} products`);
+        renderProducts(products);
+
+        // Re-initialize animations and controls after rendering
+        setTimeout(() => {
+            initializeScrollAnimations();
+            initializeProductShowcaseControls();
+        }, 100);
+
+    } catch (err) {
+        console.error('Error fetching products:', err);
+        // Fallback or error display could go here
+    }
+}
+
+/**
+ * Renders products into the showcase and category sections
+ * @param {Array} products - Array of product objects
+ */
+function renderProducts(products) {
+    const productScroll = document.getElementById('productScroll');
+    const categoryContainers = {
+        'ready-to-eat': document.querySelector('#ready-to-eat .category-grid'),
+        'ready-to-cook': document.querySelector('#ready-to-cook .category-grid'),
+        'ready-to-use': document.querySelector('#ready-to-use .category-grid')
+    };
+
+    // Clear existing content if any (though HTML should be empty placeholders)
+    if (productScroll) productScroll.innerHTML = '';
+    Object.values(categoryContainers).forEach(container => {
+        if (container) container.innerHTML = '';
+    });
+
+    products.forEach(product => {
+        // 1. Render to Showcase Ticker
+        if (productScroll) {
+            const showcaseItem = document.createElement('div');
+            showcaseItem.className = 'product-item';
+            showcaseItem.innerHTML = `
+                <img src="${product.showcase_image}" alt="${product.product_name}">
+                <h3>${product.product_name}</h3>
+                <p>${product.product_tagline}</p>
+            `;
+            productScroll.appendChild(showcaseItem);
+
+            // Duplicate for seamless scrolling (if needed, but CSS usually handles infinite scroll with duplicates)
+            // For true infinite scroll, we often duplicate the list. 
+            // Let's duplicate it once after the loop if needed, or just append.
+        }
+
+        // 2. Render to Category Grid
+        const container = categoryContainers[product.product_category];
+        if (container) {
+            const categoryCard = document.createElement('div');
+            categoryCard.className = 'category-card';
+
+            // Format price range or single price
+            const priceDisplay = `₹${product.mrp}`;
+
+            // Generate unique ID for description
+            const descId = `${product.product_category}-${product.product_name.replace(/\s+/g, '-').toLowerCase()}`;
+
+            categoryCard.innerHTML = `
+                <div class="card-image">
+                    <img src="${product.showcase_image}" alt="${product.product_name}">
+                </div>
+                <div class="card-content">
+                    <h3>${product.product_name}</h3>
+                    <p class="telugu-text">${product.product_tagline}</p>
+                    <div class="price-tag">${priceDisplay}</div>
+                    
+                    <div class="product-actions">
+                        <select class="variant-select" onchange="showProductDescription(this, '${product.product_category}')" aria-label="Select quantity">
+                            <option value="" disabled selected>Select Quantity</option>
+                            ${product.quantity_variants ? JSON.parse(product.quantity_variants).map(v =>
+                `<option value="${product.product_name.replace(/\s+/g, '-').toLowerCase()}">${v.quantity} - ₹${v.price}</option>`
+            ).join('') : `<option value="${product.product_name.replace(/\s+/g, '-').toLowerCase()}">${product.net_weight} - ₹${product.mrp}</option>`}
+                        </select>
+                        <button class="add-btn" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
+                            <i class="fas fa-shopping-cart"></i> Add
+                        </button>
+                    </div>
+                    
+                    <div id="${descId}" class="product-description" style="display: none;">
+                        <p>${product.product_description}</p>
+                        <div class="nutrition-info">
+                            <small>Net Weight: ${product.net_weight}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(categoryCard);
+        }
+    });
+
+    // Duplicate showcase items for seamless scrolling if we have enough items
+    if (productScroll && products.length > 0) {
+        // Clone all children to ensure seamless loop
+        const items = Array.from(productScroll.children);
+        items.forEach(item => {
+            productScroll.appendChild(item.cloneNode(true));
+        });
+    }
+}
