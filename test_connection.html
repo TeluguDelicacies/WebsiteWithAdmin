@@ -33,6 +33,41 @@
         }
     </style>
 </head>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        #status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+    </style>
+</head>
 
 <body>
     <h1>Supabase Connection Test</h1>
@@ -40,13 +75,33 @@
     <pre id="output"></pre>
 
     <script type="module">
+        // Global error handlers to show errors on screen
+        window.onerror = function (msg, url, line, col, error) {
+            const outputEl = document.getElementById('output');
+            const statusEl = document.getElementById('status');
+            if (outputEl) outputEl.textContent += `\n[Global Error]: ${msg}\nLine: ${line}\n`;
+            if (statusEl) {
+                statusEl.textContent = 'Error Detected (Check logs below)';
+                statusEl.className = 'error';
+            }
+            return false;
+        };
+
+        window.onunhandledrejection = function (event) {
+            const outputEl = document.getElementById('output');
+            if (outputEl) outputEl.textContent += `\n[Unhandled Rejection]: ${event.reason}\n`;
+        };
+
         import { supabase } from './lib/supabase.js';
 
         async function testConnection() {
             const statusEl = document.getElementById('status');
             const outputEl = document.getElementById('output');
 
+            outputEl.textContent += "Script started...\n";
+
             try {
+                outputEl.textContent += "Initializing Supabase Auth check...\n";
                 // Try to fetch the current user session (doesn't require table access)
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
@@ -54,6 +109,7 @@
 
                 outputEl.textContent += `Auth Session Check: OK\n`;
 
+                outputEl.textContent += "Querying 'products' table...\n";
                 // Try to fetch one product to verify database access
                 // We assume 'products' table exists based on seed_products.sql
                 const { data, error } = await supabase
