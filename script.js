@@ -1220,6 +1220,17 @@ function initializeHeaderNavigation() {
         if (e.key === 'Escape') {
             closeMobileMenu();
             closeWhatsAppQR();
+
+            // Close any open product overlays
+            const openCard = document.querySelector('.master-card.show-product');
+            if (openCard) {
+                const category = openCard.dataset.category;
+                const selectId = `select-${category}`;
+                // Usage of existing closeOverlay function if available
+                if (typeof window.closeOverlay === 'function') {
+                    window.closeOverlay(category, selectId);
+                }
+            }
         }
     });
 }
@@ -1637,7 +1648,15 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
 
                 <div id="${contentNutId}" class="info-content-box" style="display: none;">
                     <strong>Nutrition (per serving):</strong><br>
-                    ${Object.entries(nutInfo).map(([k, v]) => `${k}: ${v}`).join('<br>') || 'Not listed'}
+                    ${nutInfo.details ? `<em>${nutInfo.details}</em><br>` : ''}
+                    ${nutInfo.calories ? `Calories: ${nutInfo.calories}<br>` : ''}
+                    ${nutInfo.protein ? `Protein: ${nutInfo.protein}<br>` : ''}
+                    ${nutInfo.satFat ? `Saturated Fat: ${nutInfo.satFat}<br>` : ''}
+                    ${nutInfo.fat ? `Total Fat: ${nutInfo.fat}<br>` : ''}
+                    ${nutInfo.carbs ? `Carbs: ${nutInfo.carbs}<br>` : ''}
+                    ${nutInfo.fiber ? `Fiber: ${nutInfo.fiber}<br>` : ''}
+                    ${nutInfo.sugars ? `Sugars: ${nutInfo.sugars}<br>` : ''}
+                    ${nutInfo.sodium ? `Sodium: ${nutInfo.sodium}<br>` : ''}
                 </div>
 
                 <div class="variant-info" style="margin-bottom: 20px;">

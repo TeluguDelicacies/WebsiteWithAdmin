@@ -10,6 +10,9 @@ const testimonialList = document.getElementById('testimonialList');
 const productModal = document.getElementById('productModal');
 const testimonialModal = document.getElementById('testimonialModal');
 const productForm = document.getElementById('productForm');
+
+// Constants
+const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='12' fill='%23999' dominant-baseline='middle' text-anchor='middle'%3EImg%3C/text%3E%3C/svg%3E";
 const testimonialForm = document.getElementById('testimonialForm');
 const variantsContainer = document.getElementById('variantsContainer');
 const modalTitle = document.getElementById('modalTitle');
@@ -219,9 +222,9 @@ function renderCategoryList(categories) {
     categoryList.innerHTML = categories.map(cat => `
         <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;">
             <td style="padding: 15px;">
-                 <img src="${cat.image_url || 'https://via.placeholder.com/60'}" 
+                 <img src="${cat.image_url || PLACEHOLDER_IMAGE}" 
                      alt="${cat.title}" 
-                     onerror="this.src='https://via.placeholder.com/60'"
+                     onerror="this.src=PLACEHOLDER_IMAGE"
                      style="width: 48px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-light);">
             </td>
             <td style="padding: 15px; font-weight: 600;">${cat.title}</td>
@@ -472,9 +475,9 @@ function renderProductList(products) {
         <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;">
             <td style="padding: 15px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="${product.showcase_image || 'https://via.placeholder.com/60'}" 
+                    <img src="${product.showcase_image || PLACEHOLDER_IMAGE}" 
                          alt="${product.product_name}" 
-                         onerror="this.src='https://via.placeholder.com/60'"
+                         onerror="this.src=PLACEHOLDER_IMAGE"
                          style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-light);">
                     <div>
                         <div style="font-weight: 600; color: var(--text-primary);">${product.product_name}</div>
@@ -637,6 +640,23 @@ async function loadProductData(productId) {
         document.getElementById('productCategory').value = product.product_category;
         document.getElementById('productTagline').value = product.product_tagline || '';
         document.getElementById('productDescription').value = product.product_description || '';
+
+        // New Fields
+        document.getElementById('productIngredients').value = product.ingredients || '';
+        document.getElementById('productUsage').value = product.serving_suggestion || '';
+
+        // Nutrition Parsing
+        const nutri = product.nutrition_info || {};
+        document.getElementById('nutriDetails').value = nutri.details || '';
+        document.getElementById('nutriCalories').value = nutri.calories || '';
+        document.getElementById('nutriProtein').value = nutri.protein || '';
+        document.getElementById('nutriSatFat').value = nutri.satFat || '';
+        document.getElementById('nutriFat').value = nutri.fat || '';
+        document.getElementById('nutriCarbs').value = nutri.carbs || '';
+        document.getElementById('nutriFiber').value = nutri.fiber || '';
+        document.getElementById('nutriSugars').value = nutri.sugars || '';
+        document.getElementById('nutriSodium').value = nutri.sodium || '';
+
         document.getElementById('showcaseImage').value = product.showcase_image || '';
 
         // Handle Variants
@@ -709,6 +729,20 @@ productForm.addEventListener('submit', async (e) => {
         product_category: document.getElementById('productCategory').value,
         product_tagline: document.getElementById('productTagline').value,
         product_description: document.getElementById('productDescription').value,
+        // New Fields
+        ingredients: document.getElementById('productIngredients').value,
+        serving_suggestion: document.getElementById('productUsage').value,
+        nutrition_info: {
+            details: document.getElementById('nutriDetails').value,
+            calories: document.getElementById('nutriCalories').value,
+            protein: document.getElementById('nutriProtein').value,
+            satFat: document.getElementById('nutriSatFat').value,
+            fat: document.getElementById('nutriFat').value,
+            carbs: document.getElementById('nutriCarbs').value,
+            fiber: document.getElementById('nutriFiber').value,
+            sugars: document.getElementById('nutriSugars').value,
+            sodium: document.getElementById('nutriSodium').value
+        },
         mrp: topMrp,
         net_weight: topNetWeight,
         total_stock: calculatedTotalStock,
@@ -899,3 +933,25 @@ const setupUploadListeners = () => {
 
 // Initialize listeners when script loads (or call this in your init function)
 setupUploadListeners();
+
+// Global Escape Key Listener to Close Modals
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const pModal = document.getElementById('productModal');
+        const cModal = document.getElementById('categoryModal');
+        const tModal = document.getElementById('testimonialModal');
+
+        if (pModal && pModal.style.display === 'flex') {
+            if (typeof window.closeProductModal === 'function') window.closeProductModal();
+            else { pModal.style.display = 'none'; document.body.style.overflow = ''; }
+        }
+        if (cModal && cModal.style.display === 'flex') {
+            if (typeof window.closeCategoryModal === 'function') window.closeCategoryModal();
+            else cModal.style.display = 'none';
+        }
+        if (tModal && tModal.style.display === 'flex') {
+            if (typeof window.closeTestimonialModal === 'function') window.closeTestimonialModal();
+            else tModal.style.display = 'none';
+        }
+    }
+});
