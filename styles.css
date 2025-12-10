@@ -1968,7 +1968,9 @@ MASTER CARD LAYOUT (Redesign with Overlay)
   pointer-events: none;
   padding: var(--space-6);
   overflow-y: auto;
-  /* Allow scrolling if content is long */
+  /* Use Flexbox to manage layout */
+  display: flex;
+  flex-direction: column;
 }
 
 .master-card.show-product .card-back {
@@ -2280,6 +2282,18 @@ MASTER CARD LAYOUT (Redesign with Overlay)
 }
 
 /* Expanded Product Reveal */
+/* ... (product-reveal-container is likely old/unused code based on script.js using .revealed-product directly inside .card-back) ... */
+
+/* Actual used class in script.js */
+.revealed-product {
+  flex-grow: 1;
+  /* Push controls to bottom */
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+  /* Prevent drastic resize (bobbing) */
+}
+
 .product-reveal-container {
   overflow: hidden;
   transition: max-height 0.4s ease-in-out, opacity 0.4s ease;
@@ -2372,5 +2386,70 @@ MASTER CARD LAYOUT (Redesign with Overlay)
 
   .card-hero-image {
     height: 180px;
+  }
+}
+
+/* Overlay Navigation Arrows */
+.overlay-nav-controls {
+  position: relative;
+  /* Changed from absolute to relative/static flow */
+  margin-top: 20px;
+  /* Add spacing from content */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  /* Reduce side padding as it's no longer full width absolute */
+  z-index: 20;
+}
+
+.nav-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.nav-arrow-btn {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-primary-light);
+  color: var(--color-primary-blue);
+  padding: 8px 16px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-arrow-btn:hover {
+  background: var(--color-primary-blue);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Adjust for mobile */
+@media (max-width: 768px) {
+  .overlay-nav-controls {
+    padding: 5px 0;
+  }
+
+  .nav-label {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+  }
+
+  .nav-arrow-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 }

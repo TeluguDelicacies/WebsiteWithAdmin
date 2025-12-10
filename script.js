@@ -1407,9 +1407,12 @@ function renderProducts(products) {
             // Change Listener: Trigger Overlay
             selectEl.addEventListener('change', (e) => {
                 const selectedId = e.target.value;
-                const product = grouped[category].find(p => p.id === selectedId);
+                const categoryProducts = grouped[category];
+                const currentIndex = categoryProducts.findIndex(p => p.id === selectedId);
+                const product = categoryProducts[currentIndex];
+
                 if (product) {
-                    renderOverlayProduct(product, viewContainer, selectEl, cardElement);
+                    renderOverlayProduct(product, viewContainer, selectEl, cardElement, categoryProducts, currentIndex);
                 }
             });
         } else {
@@ -1418,9 +1421,10 @@ function renderProducts(products) {
     });
 }
 
-function renderOverlayProduct(product, container, selectEl, cardElement) {
+function renderOverlayProduct(product, container, selectEl, cardElement, allProducts = [], currentIndex = -1) {
     const contentIngId = `content-ing-${product.id}`;
     const contentNutId = `content-nut-${product.id}`;
+    const categoryName = cardElement.dataset.category;
 
     let localImage = product.showcase_image;
     const pName = product.product_name.toLowerCase();
@@ -1434,6 +1438,27 @@ function renderOverlayProduct(product, container, selectEl, cardElement) {
 
     let variants = [];
     try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+
+    // Navigation Logic
+    let navButtons = '';
+    if (allProducts.length > 1 && currentIndex !== -1) {
+        const prevIndex = (currentIndex - 1 + allProducts.length) % allProducts.length;
+        const nextIndex = (currentIndex + 1) % allProducts.length;
+        const prevProduct = allProducts[prevIndex];
+        const nextProduct = allProducts[nextIndex];
+
+        navButtons = `
+            <div class="overlay-nav-controls">
+                <button class="nav-arrow-btn prev-btn" onclick="switchProduct('${categoryName}', '${prevProduct.id}')" aria-label="Previous Product">
+                    <i class="fas fa-chevron-left"></i> Prev
+                </button>
+                <span class="nav-label">Other Products</span>
+                <button class="nav-arrow-btn next-btn" onclick="switchProduct('${categoryName}', '${nextProduct.id}')" aria-label="Next Product">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+    }
 
     // HTML Structure for BACK face
     container.innerHTML = `
@@ -1476,6 +1501,7 @@ function renderOverlayProduct(product, container, selectEl, cardElement) {
                     <i class="fab fa-whatsapp"></i> Buy on WhatsApp
                 </button>
             </div>
+            ${navButtons}
         </div>
     `;
 
@@ -1508,6 +1534,17 @@ window.toggleInfo = function (contentId, btn) {
         box.style.display = 'none';
         btn.classList.remove('active');
         btn.innerText = btn.innerText.replace('Hide ', 'View ');
+    }
+};
+
+// Global switch product function
+window.switchProduct = function (category, productId) {
+    const selectId = `select-${category}`;
+    const selectEl = document.getElementById(selectId);
+    if (selectEl) {
+        selectEl.value = productId;
+        // Dispatch event to trigger listeners
+        selectEl.dispatchEvent(new Event('change'));
     }
 };
 
