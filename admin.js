@@ -63,8 +63,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Auth Functions
 async function handleLogin(e) {
     e.preventDefault();
+    console.log('Login form submitted'); // Debug log
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+
+    console.log('Attempting login with:', email); // Debug log
 
     try {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -72,9 +76,15 @@ async function handleLogin(e) {
             password
         });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase login error:', error); // Debug log
+            throw error;
+        }
+
+        console.log('Login successful:', data); // Debug log
         // Auth listener will handle UI switch
     } catch (error) {
+        console.error('Login catch block:', error); // Debug log
         alert('Login failed: ' + error.message);
     }
 }
@@ -102,6 +112,13 @@ const viewSettingsBtn = document.getElementById('viewSettingsBtn');
 const categoryModal = document.getElementById('categoryModal');
 const catModalTitle = document.getElementById('catModalTitle');
 const productCategorySelect = document.getElementById('productCategory');
+
+// Show Login
+function showLogin() {
+    loginSection.style.display = 'block';
+    dashboardSection.style.display = 'none';
+    if (loginForm) loginForm.reset();
+}
 
 // UI Switching
 function showDashboard() {
