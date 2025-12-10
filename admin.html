@@ -136,19 +136,28 @@
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <div>
                 <h2 style="color: var(--color-primary); margin-bottom: 5px;">Admin Dashboard</h2>
-                <div class="view-toggle" style="display: flex; gap: 10px; margin-top: 10px;">
+                <div class="view-toggle" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
                     <button id="viewProductsBtn" class="nav-btn active" onclick="switchView('products')"
                         style="padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">
                         Products
+                    </button>
+                    <button id="viewCategoriesBtn" class="nav-btn" onclick="switchView('categories')"
+                        style="padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">
+                        Categories
                     </button>
                     <button id="viewTestimonialsBtn" class="nav-btn" onclick="switchView('testimonials')"
                         style="padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">
                         Testimonials
                     </button>
+                    <button id="viewSettingsBtn" class="nav-btn" onclick="switchView('settings')"
+                        style="padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">
+                        Settings
+                    </button>
                 </div>
             </div>
             <div>
-                <button onclick="openAddModal()" class="submit-btn" style="width: auto; padding: 10px 20px;">
+                <button id="addBtn" onclick="handleAddClick()" class="submit-btn"
+                    style="width: auto; padding: 10px 20px;">
                     <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
                 </button>
                 <button onclick="handleLogout()" class="nav-btn"
@@ -158,6 +167,7 @@
             </div>
         </div>
 
+        <!-- Products Table -->
         <div id="productsTableContainer" class="table-container"
             style="background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse;">
@@ -166,8 +176,10 @@
                         style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
                         <th style="padding: 15px;">Product</th>
                         <th style="padding: 15px;">Category</th>
-                        <th style="padding: 15px;">MRP</th>
-                        <th style="padding: 15px;">Stock</th>
+                        <th style="padding: 15px;">Variant 1</th>
+                        <th style="padding: 15px;">Variant 2</th>
+                        <th style="padding: 15px;">Variant 3</th>
+
                         <th style="padding: 15px; text-align: right;">Actions</th>
                     </tr>
                 </thead>
@@ -179,6 +191,29 @@
             </table>
         </div>
 
+        <!-- Categories Table -->
+        <div id="categoriesTableContainer" class="table-container"
+            style="display: none; background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr
+                        style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
+                        <th style="padding: 15px;">Image</th>
+                        <th style="padding: 15px;">Title</th>
+                        <th style="padding: 15px;">Slug</th>
+                        <th style="padding: 15px;">Order</th>
+                        <th style="padding: 15px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryList">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 30px;">Loading categories...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Testimonials Table -->
         <div id="testimonialsTableContainer" class="table-container"
             style="display: none; background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse;">
@@ -198,6 +233,114 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settingsContainer" class="table-container"
+            style="display: none; background: white; padding: 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);">
+            <form id="settingsForm" class="contact-form">
+                <h3
+                    style="margin-bottom: 20px; color: var(--color-primary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+                    Global Site Settings</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Site Title</label>
+                        <input type="text" id="setSiteTitle">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Hero Title</label>
+                        <input type="text" id="setHeroTitle">
+                    </div>
+                    <div class="form-group">
+                        <label>Hero Subtitle</label>
+                        <input type="text" id="setHeroSubtitle">
+                    </div>
+                </div>
+                <!-- New Hero Description -->
+                <div class="form-group">
+                    <label>Hero Description</label>
+                    <textarea id="setHeroDesc" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Hero Telugu Subtitle</label>
+                    <input type="text" id="setHeroTelugu">
+                </div>
+
+                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Contact & Legal</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Primary Phone</label>
+                        <input type="text" id="setPhonePri">
+                    </div>
+                    <div class="form-group">
+                        <label>Secondary Phone</label>
+                        <input type="text" id="setPhoneSec">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="setEmail">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Embedded Google Map URL (iframe src)</label>
+                    <input type="text" id="setMapUrl" placeholder="https://www.google.com/maps/embed?pb=...">
+                </div>
+                <!-- FSSAI -->
+                <div class="form-group">
+                    <label>FSSAI Number</label>
+                    <input type="text" id="setFssai" placeholder="e.g. 1001234567890">
+                </div>
+
+                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Images & Assets</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Logo</label>
+                        <div class="upload-group">
+                            <input type="text" id="setLogoUrl" placeholder="Logo URL">
+                            <label for="uploadLogo" class="upload-btn"><i class="fas fa-upload"></i></label>
+                            <input type="file" id="uploadLogo" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'setLogoUrl')">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Favicon</label>
+                        <div class="upload-group">
+                            <input type="text" id="setFaviconUrl" placeholder="Favicon URL">
+                            <label for="uploadFavicon" class="upload-btn"><i class="fas fa-upload"></i></label>
+                            <input type="file" id="uploadFavicon" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'setFaviconUrl')">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Hero Background Image</label>
+                    <div class="upload-group">
+                        <input type="text" id="setHeroBgUrl" placeholder="Hero Background URL">
+                        <label for="uploadHeroBg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                        <input type="file" id="uploadHeroBg" accept="image/*" style="display: none;"
+                            onchange="handleAssetUpload(this, 'setHeroBgUrl')">
+                    </div>
+                </div>
+                <!-- Product Placeholder -->
+                <div class="form-group">
+                    <label>Default Product Placeholder Image</label>
+                    <div class="upload-group">
+                        <input type="text" id="setProductPlaceholder" placeholder="Product Placeholder URL">
+                        <label for="uploadPaceholder" class="upload-btn"><i class="fas fa-upload"></i></label>
+                        <input type="file" id="uploadPaceholder" accept="image/*" style="display: none;"
+                            onchange="handleAssetUpload(this, 'setProductPlaceholder')">
+                    </div>
+                    <small style="color: var(--text-secondary);">Used when a product has no image.</small>
+                </div>
+
+                <div class="form-group" style="margin-top: 30px;">
+                    <button type="submit" class="submit-btn">Save All Settings</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -220,9 +363,7 @@
                     <div class="form-group">
                         <label>Category</label>
                         <select id="productCategory" required>
-                            <option value="ready-to-eat">Ready To Eat</option>
-                            <option value="ready-to-cook">Ready To Cook</option>
-                            <option value="ready-to-use">Ready To Use</option>
+                            <!-- Dynamically populated -->
                         </select>
                     </div>
                 </div>
@@ -237,21 +378,7 @@
                     <textarea id="productDescription" rows="3"></textarea>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>MRP</label>
-                        <input type="number" id="mrp" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label>Net Weight</label>
-                        <input type="text" id="netWeight">
-                    </div>
-                    <div class="form-group">
-                        <label>Total Stock (Auto-sum)</label>
-                        <input type="number" id="totalStock" readonly
-                            style="background-color: var(--bg-secondary); cursor: not-allowed;">
-                    </div>
-                </div>
+
 
                 <div class="form-row">
                     <div class="form-group">
@@ -282,6 +409,53 @@
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="submit-btn">Save Product</button>
                     <button type="button" onclick="closeProductModal()" class="nav-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <h2 id="catModalTitle">Add Category</h2>
+            <form id="categoryForm" class="contact-form">
+                <input type="hidden" id="catId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="catTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Slug (Unique ID)</label>
+                        <input type="text" id="catSlug" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Telugu Title</label>
+                    <input type="text" id="catTelugu">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="catDescription" rows="2"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Display Order</label>
+                        <input type="number" id="catOrder" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Category Image</label>
+                    <div class="upload-group">
+                        <input type="text" id="catImageUrl" placeholder="Image URL">
+                        <label for="uploadCatImg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                        <input type="file" id="uploadCatImg" accept="image/*" style="display: none;"
+                            onchange="handleAssetUpload(this, 'catImageUrl')">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="submit-btn">Save Category</button>
+                    <button type="button" onclick="closeCategoryModal()" class="nav-btn">Cancel</button>
                 </div>
             </form>
         </div>
@@ -339,7 +513,7 @@
         </div>
     </div>
 
-    <script type="module" src="admin.js"></script>
+    <script type="module" src="admin.js?v=3"></script>
 </body>
 
 </html>

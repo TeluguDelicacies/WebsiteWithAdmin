@@ -1231,7 +1231,7 @@ MAIN INITIALIZATION FUNCTION
 */
 
 // Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Initialize header navigation
     initializeHeaderNavigation();
 
@@ -1242,7 +1242,10 @@ document.addEventListener('DOMContentLoaded', () => {
     enhanceAccessibility();
     initializeImageOptimizations();
 
-    // Fetch and render products
+    // Fetch site settings first, then render
+    await fetchSiteSettings();
+
+    // Fetch and render products (includes categories)
     fetchAndRenderProducts();
     fetchAndRenderTestimonials();
 
@@ -1286,32 +1289,158 @@ if ('connection' in navigator) {
 window.closeWhatsAppQR = closeWhatsAppQR;
 window.closeMobileMenu = closeMobileMenu;
 
+// Global settings cache
+window.currentSiteSettings = {};
+
+/**
+ * Fetches site settings and applies them
+ */
+async function fetchSiteSettings() {
+    try {
+        const { data, error } = await supabase
+            .from('site_settings')
+            .select('*')
+            .single();
+
+        if (error) {
+            console.warn('Could not fetch site settings:', error);
+            return null;
+        }
+
+        if (data) {
+            window.currentSiteSettings = data; // Cache globally
+
+            // Title
+            if (data.site_title) document.title = data.site_title;
+
+            // Logo
+            if (data.logo_url) {
+                const logoImgs = document.querySelectorAll('.logo');
+                logoImgs.forEach(img => img.src = data.logo_url);
+            }
+
+            // Favicon
+            if (data.fav_icon_url) {
+                const link = document.querySelector("link[rel~='icon']");
+                if (link) link.href = data.fav_icon_url;
+            }
+
+            // Hero
+            if (data.hero_title) document.getElementById('hero-title').innerText = data.hero_title;
+            if (data.hero_subtitle) document.getElementById('hero-subtitle').innerText = data.hero_subtitle;
+            if (data.hero_telugu_subtitle) document.getElementById('hero-telugu-subtitle').innerText = data.hero_telugu_subtitle;
+
+            // Hero Description (Replace paragraph content or container)
+            if (data.hero_description) {
+                const descContainer = document.getElementById('hero-description-container');
+                if (descContainer) {
+                    // Update the paragraph inside
+                    descContainer.innerHTML = `<p class="hero-subtitle">${data.hero_description}</p>`;
+                }
+            }
+
+            // Hero Background
+            if (data.hero_background_url) {
+                const heroSection = document.querySelector('.hero');
+                if (heroSection) heroSection.style.backgroundImage = `url('${data.hero_background_url}')`;
+            }
+
+            // Contact Info
+            if (data.contact_phone_primary) {
+                const el = document.getElementById('contact-phone-primary');
+                if (el) { el.innerText = data.contact_phone_primary; el.href = `tel:${data.contact_phone_primary.replace(/\s/g, '')}`; }
+            }
+            if (data.contact_phone_secondary) {
+                const el = document.getElementById('contact-phone-secondary');
+                if (el) { el.innerText = data.contact_phone_secondary; el.href = `tel:${data.contact_phone_secondary.replace(/\s/g, '')}`; }
+            }
+            if (data.contact_email) {
+                const el = document.getElementById('contact-email');
+                if (el) { el.innerText = data.contact_email; el.href = `mailto:${data.contact_email}`; }
+            }
+            if (data.fssai_number) {
+                const el = document.getElementById('contact-fssai');
+                if (el) el.innerText = `FSSAI License No: ${data.fssai_number}`;
+            }
+            if (data.address_line1 || data.address_line2) {
+                const el = document.getElementById('contact-address');
+                if (el) {
+                    el.innerHTML = `
+                        <p>${data.address_line1 || ''}</p>
+                        <p>${data.address_line2 || ''}</p>
+                    `;
+                }
+            }
+
+            // Map
+            if (data.map_embed_url) {
+                const mapContainer = document.getElementById('footer-map-container');
+                if (mapContainer) {
+                    let mapSrc = data.map_embed_url;
+                    // Extract src if user pasted full iframe tag
+                    if (mapSrc.includes('<iframe')) {
+                        const match = mapSrc.match(/src=["']([^"']+)["']/);
+                        if (match && match[1]) {
+                            mapSrc = match[1];
+                        }
+                    }
+                    mapContainer.innerHTML = `<iframe src="${mapSrc}" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                }
+            }
+        }
+        return data;
+
+    } catch (err) {
+        console.error('Error in fetchSiteSettings:', err);
+        return null;
+    }
+}
+
+/**
+ * Fetches categories from Supabase
+ */
+async function fetchCategories() {
+    try {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+    } catch (err) {
+        console.error('Error fetching categories:', err);
+        return [];
+    }
+}
+
 /**
  * Fetches products from Supabase and renders them to the DOM
  */
 async function fetchAndRenderProducts() {
     try {
-        console.log('Fetching products from Supabase...');
-        const { data: products, error } = await supabase
-            .from('products')
-            .select('*')
-            .order('created_at', { ascending: true });
+        // Parallel fetch for speed
+        const [productsResp, categories] = await Promise.all([
+            supabase.from('products').select('*').order('created_at', { ascending: true }),
+            fetchCategories()
+        ]);
 
-        if (error) {
-            console.error('Supabase Error:', error);
-            showToast('Error loading products: ' + error.message, 'error');
-            throw error;
+        const products = productsResp.data;
+        const productsError = productsResp.error;
+
+
+        if (productsError) {
+            console.error('Supabase Error:', productsError);
+            showToast('Error loading products: ' + productsError.message, 'error');
+            throw productsError;
         }
 
         if (!products || products.length === 0) {
             console.log('No products found in database');
-            showToast('Database connected but no products found. Please run restore_db.sql', 'error');
-            return;
+            showToast('Database connected but no products found.', 'info');
         }
 
-        console.log(`Fetched ${products.length} products`);
-        // showToast(`Loaded ${products.length} products successfully`, 'success'); // Optional success message
-        renderProducts(products);
+        renderProducts(products || [], categories);
 
         // Re-initialize animations and controls after rendering
         setTimeout(() => {
@@ -1320,53 +1449,35 @@ async function fetchAndRenderProducts() {
         }, 100);
 
     } catch (err) {
-        console.error('Error fetching products:', err);
+        console.error('Error fetching data:', err);
         showToast('System Error: ' + err.message, 'error');
     }
 }
 
 /**
- * Renders products into the master card dropdowns and handling interactive reveal
+ * Renders products into the dynamic category layouts
  * @param {Array} products - Array of product objects
+ * @param {Array} categories - Array of category objects
  */
-function renderProducts(products) {
+function renderProducts(products, categories) {
     const productScroll = document.getElementById('productScroll');
+    const categoriesContainer = document.getElementById('categories-container');
 
-    // Group products by category
-    const grouped = {
-        'ready-to-eat': [],
-        'ready-to-cook': [],
-        'ready-to-use': []
-    };
-
-    console.log('Rendering Products. Total count:', products.length);
-
-    products.forEach(p => {
-        // Normalize category matching: lowercase, trim, and replace spaces with dashes
-        const cat = (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
-        if (grouped[cat]) {
-            grouped[cat].push(p);
-        } else {
-            console.warn('Unknown Category found:', cat, 'for product:', p.product_name);
-        }
-    });
-
-    console.log('Grouped Products:', grouped);
-
-    // 1. Render to Showcase Ticker (Keep existing ticker logic)
+    // 1. Render to Showcase Ticker
     if (productScroll) {
         productScroll.innerHTML = '';
         products.forEach(product => {
             const showcaseItem = document.createElement('div');
             showcaseItem.className = 'product-item';
-            let localImage = product.showcase_image;
 
+            // Allow dynamic placeholder from site settings if needed, but for now specific or default
+            let localImage = product.showcase_image;
             if (!localImage) {
-                localImage = './images/placeholder-product-portrait.jpg';
+                localImage = window.currentSiteSettings?.product_placeholder_url;
             }
 
             showcaseItem.innerHTML = `
-                <img src="${localImage}" alt="${product.product_name}">
+                <img src="${localImage}" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
                 <h3>${product.product_name}</h3>
                 <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
             `;
@@ -1380,45 +1491,77 @@ function renderProducts(products) {
         }
     }
 
-    // 2. Populate Dropdowns & Add Listeners
-    Object.keys(grouped).forEach(category => {
-        const selectId = `select-${category}`;
-        const selectEl = document.getElementById(selectId);
-        // New ID convention: view-[category]
-        const viewId = `view-${category}`;
-        const viewContainer = document.getElementById(viewId);
-        const cardElement = document.querySelector(`.master-card[data-category="${category}"]`);
+    // 2. Render Categories
+    if (categoriesContainer && categories.length > 0) {
+        categoriesContainer.innerHTML = '';
 
-        // Debug log to ensure elements are found
-        console.log(`Setup for ${category}: Select=${!!selectEl}, View=${!!viewContainer}, Card=${!!cardElement}`);
-
-        if (selectEl && viewContainer && cardElement) {
-            // Clear and add default
-            selectEl.innerHTML = '<option value="" disabled selected>Select Product</option>';
-
-            grouped[category].forEach(product => {
-                const opt = document.createElement('option');
-                opt.value = product.id;
-                const telugu = product.product_name_telugu ? ` (${product.product_name_telugu})` : '';
-                opt.textContent = `${product.product_name}${telugu}`;
-                selectEl.appendChild(opt);
+        categories.forEach(category => {
+            // Filter products for this category
+            // Normalize slug and product category string comparison
+            const catProducts = products.filter(p => {
+                const pCat = (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
+                return pCat === category.slug;
             });
 
-            // Change Listener: Trigger Overlay
-            selectEl.addEventListener('change', (e) => {
-                const selectedId = e.target.value;
-                const categoryProducts = grouped[category];
-                const currentIndex = categoryProducts.findIndex(p => p.id === selectedId);
-                const product = categoryProducts[currentIndex];
+            // Create Category Card HTML
+            const card = document.createElement('div');
+            card.className = 'master-card';
+            card.dataset.category = category.slug;
 
-                if (product) {
-                    renderOverlayProduct(product, viewContainer, selectEl, cardElement, categoryProducts, currentIndex);
-                }
-            });
-        } else {
-            console.warn(`Missing elements for category: ${category}`);
-        }
-    });
+            const cardImage = category.image_url || `./images/categories/${category.slug}.jpg`; // Fallback to local convention if new URL empty
+
+            card.innerHTML = `
+                <div class="card-face card-front">
+                    <div class="card-hero-image">
+                        <img src="${cardImage}" alt="${category.title}" onerror="this.src='./images/placeholder-product-portrait.jpg'">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">${category.title}</h3>
+                        <p class="telugu-subtitle">${category.telugu_title || ''}</p>
+                        <p class="card-desc">${category.description || ''}</p>
+                        <div class="dropdown-wrapper">
+                            <select class="product-select" id="select-${category.slug}">
+                                <option value="" disabled selected>Select Product</option>
+                            </select>
+                            <i class="fas fa-chevron-down dropdown-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- Back Face (Overlay) -->
+                <div class="card-face card-back" id="view-${category.slug}"></div>
+            `;
+
+            categoriesContainer.appendChild(card);
+
+            // Populate Dropdown
+            const selectEl = card.querySelector(`#select-${category.slug}`);
+            const viewContainer = card.querySelector(`#view-${category.slug}`);
+
+            if (selectEl) {
+                catProducts.forEach(product => {
+                    const opt = document.createElement('option');
+                    opt.value = product.id;
+                    const telugu = product.product_name_telugu ? ` (${product.product_name_telugu})` : '';
+                    opt.textContent = `${product.product_name}${telugu}`;
+                    selectEl.appendChild(opt);
+                });
+
+                // Add Change Listener
+                selectEl.addEventListener('change', (e) => {
+                    const selectedId = e.target.value;
+                    const currentIndex = catProducts.findIndex(p => p.id === selectedId);
+                    const product = catProducts[currentIndex];
+
+                    if (product) {
+                        renderOverlayProduct(product, viewContainer, selectEl, card, catProducts, currentIndex);
+                    }
+                });
+            }
+        });
+    } else if (categoriesContainer) {
+        categoriesContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">No categories found.</p>';
+    }
+
 }
 
 function renderOverlayProduct(product, container, selectEl, cardElement, allProducts = [], currentIndex = -1) {
@@ -1430,7 +1573,7 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
     const pName = product.product_name.toLowerCase();
     if (!localImage) {
         // Fallback to generic placeholders if no specific image is set
-        localImage = './images/placeholder-product-portrait.jpg';
+        localImage = window.currentSiteSettings?.product_placeholder_url;
     }
 
     let nutInfo = {};
@@ -1438,6 +1581,14 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
 
     let variants = [];
     try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+
+    // Generate quantities text
+    let quantitiesText = '';
+    if (variants && variants.length > 0) {
+        quantitiesText = variants.map(v => v.quantity).join(', ');
+    } else {
+        quantitiesText = product.net_weight || 'Standard';
+    }
 
     // Navigation Logic
     let navButtons = '';
@@ -1468,7 +1619,7 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
             </button>
         </div>
         <div class="revealed-product">
-            <img src="${localImage}" class="revealed-img" alt="${product.product_name}">
+            <img src="${localImage}" class="revealed-img" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
             <div class="revealed-info">
                 <h4>${product.product_name}</h4>
                 <p class="revealed-tagline">${product.product_tagline || ''}</p>
@@ -1489,12 +1640,9 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
                     ${Object.entries(nutInfo).map(([k, v]) => `${k}: ${v}`).join('<br>') || 'Not listed'}
                 </div>
 
-                <div class="variant-selector" style="margin-bottom: 15px;">
-                    <select class="product-select" id="size-${product.id}" style="padding: 8px;">
-                         ${variants && variants.length > 0
-            ? variants.map(v => `<option value="${v.price}">${v.quantity} - ₹${v.price}</option>`).join('')
-            : `<option value="${product.mrp}">${product.net_weight || 'Std'} - ₹${product.mrp}</option>`}
-                    </select>
+                <div class="variant-info" style="margin-bottom: 20px;">
+                    <span style="font-weight: 600; color: var(--text-primary);">Available From: </span>
+                    <span style="color: var(--text-secondary);">${quantitiesText}</span>
                 </div>
 
                 <button class="add-btn" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">

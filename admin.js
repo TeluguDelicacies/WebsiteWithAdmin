@@ -92,64 +92,332 @@ async function handleLogout() {
     }
 }
 
-// UI Switching
-function showLogin() {
-    loginSection.style.display = 'block';
-    dashboardSection.style.display = 'none';
-}
+const siteSettingsForm = document.getElementById('settingsForm');
+const categoryForm = document.getElementById('categoryForm');
+const categoryList = document.getElementById('categoryList');
+const categoriesTableContainer = document.getElementById('categoriesTableContainer');
+const settingsContainer = document.getElementById('settingsContainer');
+const viewCategoriesBtn = document.getElementById('viewCategoriesBtn');
+const viewSettingsBtn = document.getElementById('viewSettingsBtn');
+const categoryModal = document.getElementById('categoryModal');
+const catModalTitle = document.getElementById('catModalTitle');
+const productCategorySelect = document.getElementById('productCategory');
 
+// UI Switching
 function showDashboard() {
     loginSection.style.display = 'none';
     dashboardSection.style.display = 'block';
+
+    // Default view
     if (currentView === 'products') {
         fetchProducts();
-    } else {
+    } else if (currentView === 'testimonials') {
         fetchTestimonials();
+    } else if (currentView === 'categories') {
+        fetchCategories();
+    } else if (currentView === 'settings') {
+        fetchSettings();
     }
 }
 
 window.switchView = (view) => {
     currentView = view;
+    // Hide all first
+    productsTableContainer.style.display = 'none';
+    testimonialsTableContainer.style.display = 'none';
+    categoriesTableContainer.style.display = 'none';
+    settingsContainer.style.display = 'none';
+
+    // Reset buttons
+    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewSettingsBtn].forEach(btn => {
+        if (btn) {
+            btn.classList.remove('active');
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--text-secondary)';
+            btn.style.border = '1px solid var(--border-medium)';
+        }
+    });
+
+    const activeStyle = (btn) => {
+        btn.classList.add('active');
+        btn.style.color = '';
+        btn.style.background = '';
+        btn.style.border = '';
+    }
+
     if (view === 'products') {
         productsTableContainer.style.display = 'block';
-        testimonialsTableContainer.style.display = 'none';
-        viewProductsBtn.classList.add('active');
-        viewProductsBtn.style.color = '';
-        viewProductsBtn.style.background = '';
-        viewProductsBtn.style.border = '';
-
-        viewTestimonialsBtn.classList.remove('active');
-        viewTestimonialsBtn.style.background = 'transparent';
-        viewTestimonialsBtn.style.color = 'var(--text-secondary)';
-        viewTestimonialsBtn.style.border = '1px solid var(--border-medium)';
-
+        activeStyle(viewProductsBtn);
         addBtnText.textContent = 'Add Product';
+        document.getElementById('addBtn').style.display = 'inline-block';
         fetchProducts();
-    } else {
-        productsTableContainer.style.display = 'none';
+    } else if (view === 'testimonials') {
         testimonialsTableContainer.style.display = 'block';
-        viewTestimonialsBtn.classList.add('active');
-        viewTestimonialsBtn.style.color = ''; // Reset to css default
-        viewTestimonialsBtn.style.background = ''; // Reset
-        viewTestimonialsBtn.style.border = '';
-
-        viewProductsBtn.classList.remove('active');
-        viewProductsBtn.style.background = 'transparent';
-        viewProductsBtn.style.color = 'var(--text-secondary)';
-        viewProductsBtn.style.border = '1px solid var(--border-medium)';
-
+        activeStyle(viewTestimonialsBtn);
         addBtnText.textContent = 'Add Testimonial';
+        document.getElementById('addBtn').style.display = 'inline-block';
         fetchTestimonials();
+    } else if (view === 'categories') {
+        categoriesTableContainer.style.display = 'block';
+        activeStyle(viewCategoriesBtn);
+        addBtnText.textContent = 'Add Category';
+        document.getElementById('addBtn').style.display = 'inline-block';
+        fetchCategories();
+    } else if (view === 'settings') {
+        settingsContainer.style.display = 'block';
+        activeStyle(viewSettingsBtn);
+        document.getElementById('addBtn').style.display = 'none'; // No add btn for settings
+        fetchSettings();
     }
 };
 
-window.openAddModal = () => {
-    if (currentView === 'products') {
-        openProductModal();
-    } else {
-        openTestimonialModal();
+window.handleAddClick = () => {
+    if (currentView === 'products') openProductModal();
+    else if (currentView === 'testimonials') openTestimonialModal();
+    else if (currentView === 'categories') openCategoryModal();
+}
+
+// ----------------------------------------------------
+// CATEGORIES MANAGEMENT
+// ----------------------------------------------------
+
+async function fetchCategories() {
+    categoryList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">Loading...</td></tr>';
+    try {
+        const { data, error } = await supabase.from('categories').select('*').order('display_order', { ascending: true });
+        if (error) throw error;
+        renderCategoryList(data);
+    } catch (e) {
+        console.error(e);
+        categoryList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${e.message}</td></tr>`;
     }
-};
+}
+
+function renderCategoryList(categories) {
+    if (!categories || categories.length === 0) {
+        categoryList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">No categories found.</td></tr>';
+        return;
+    }
+
+    categoryList.innerHTML = categories.map(cat => `
+        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;">
+            <td style="padding: 15px;">
+                 <img src="${cat.image_url || 'https://via.placeholder.com/60'}" 
+                     alt="${cat.title}" 
+                     onerror="this.src='https://via.placeholder.com/60'"
+                     style="width: 48px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-light);">
+            </td>
+            <td style="padding: 15px; font-weight: 600;">${cat.title}</td>
+            <td style="padding: 15px;">${cat.slug}</td>
+            <td style="padding: 15px;">${cat.display_order}</td>
+            <td style="padding: 15px; text-align: right;">
+                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                    <button onclick="editCategory('${cat.id}')" class="nav-btn" style="padding: 8px;" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteCategory('${cat.id}')" class="nav-btn" style="padding: 8px; color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+window.openCategoryModal = (id = null) => {
+    categoryModal.style.display = 'flex';
+    categoryForm.reset();
+    document.getElementById('catId').value = '';
+    if (id) {
+        catModalTitle.textContent = 'Edit Category';
+        loadCategoryData(id);
+    } else {
+        catModalTitle.textContent = 'Add Category';
+    }
+}
+window.closeCategoryModal = () => { categoryModal.style.display = 'none'; }
+
+async function loadCategoryData(id) {
+    const { data: cat } = await supabase.from('categories').select('*').eq('id', id).single();
+    if (cat) {
+        document.getElementById('catId').value = cat.id;
+        document.getElementById('catTitle').value = cat.title;
+        document.getElementById('catSlug').value = cat.slug;
+        document.getElementById('catTelugu').value = cat.telugu_title || '';
+        document.getElementById('catDescription').value = cat.description || '';
+        document.getElementById('catOrder').value = cat.display_order || 0;
+        document.getElementById('catImageUrl').value = cat.image_url || '';
+    }
+}
+
+// Ensure Categories logic is hooked up
+if (categoryForm) {
+    categoryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('catId').value;
+        const btn = categoryForm.querySelector('button[type="submit"]');
+        const oldText = btn.textContent;
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+
+        const formData = {
+            title: document.getElementById('catTitle').value,
+            slug: document.getElementById('catSlug').value,
+            telugu_title: document.getElementById('catTelugu').value,
+            description: document.getElementById('catDescription').value,
+            display_order: parseInt(document.getElementById('catOrder').value || 0),
+            image_url: document.getElementById('catImageUrl').value
+        };
+
+        try {
+            const { error } = id
+                ? await supabase.from('categories').update(formData).eq('id', id)
+                : await supabase.from('categories').insert([formData]);
+
+            if (error) throw error;
+            closeCategoryModal();
+            fetchCategories();
+            alert('Category saved.');
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
+    });
+}
+
+window.editCategory = (id) => openCategoryModal(id);
+window.deleteCategory = async (id) => {
+    if (!confirm('Delete this category?')) return;
+    try {
+        const { error } = await supabase.from('categories').delete().eq('id', id);
+        if (error) throw error;
+        fetchCategories();
+    } catch (e) { alert('Error: ' + e.message); }
+}
+
+// ----------------------------------------------------
+// SITE SETTINGS MANAGEMENT
+// ----------------------------------------------------
+
+async function fetchSettings() {
+    try {
+        const { data, error } = await supabase.from('site_settings').select('*').single();
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 is no rows found
+
+        if (data) {
+            document.getElementById('setSiteTitle').value = data.site_title || '';
+            document.getElementById('setHeroTitle').value = data.hero_title || '';
+            document.getElementById('setHeroSubtitle').value = data.hero_subtitle || '';
+            document.getElementById('setHeroDesc').value = data.hero_description || '';
+            document.getElementById('setHeroTelugu').value = data.hero_telugu_subtitle || '';
+            document.getElementById('setPhonePri').value = data.contact_phone_primary || '';
+            document.getElementById('setPhoneSec').value = data.contact_phone_secondary || '';
+            document.getElementById('setEmail').value = data.contact_email || '';
+            document.getElementById('setMapUrl').value = data.map_embed_url || '';
+            document.getElementById('setFssai').value = data.fssai_number || '';
+            document.getElementById('setLogoUrl').value = data.logo_url || '';
+            document.getElementById('setFaviconUrl').value = data.fav_icon_url || '';
+            document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
+            document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
+        }
+    } catch (e) {
+        console.error('Settings fetch error:', e);
+    }
+}
+
+if (siteSettingsForm) {
+    siteSettingsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = siteSettingsForm.querySelector('button[type="submit"]');
+        const oldText = btn.textContent;
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+
+        const settingsData = {
+            site_title: document.getElementById('setSiteTitle').value,
+            hero_title: document.getElementById('setHeroTitle').value,
+            hero_subtitle: document.getElementById('setHeroSubtitle').value,
+            hero_description: document.getElementById('setHeroDesc').value,
+            hero_telugu_subtitle: document.getElementById('setHeroTelugu').value,
+            contact_phone_primary: document.getElementById('setPhonePri').value,
+            contact_phone_secondary: document.getElementById('setPhoneSec').value,
+            contact_email: document.getElementById('setEmail').value,
+            map_embed_url: document.getElementById('setMapUrl').value,
+            fssai_number: document.getElementById('setFssai').value,
+            logo_url: document.getElementById('setLogoUrl').value,
+            fav_icon_url: document.getElementById('setFaviconUrl').value,
+            hero_background_url: document.getElementById('setHeroBgUrl').value,
+            product_placeholder_url: document.getElementById('setProductPlaceholder').value
+        };
+
+        try {
+            // Check if settings exist, if so update, else insert (though migration seeds it)
+            const { data } = await supabase.from('site_settings').select('id').single();
+
+            if (data) {
+                const { error } = await supabase.from('site_settings').update(settingsData).eq('id', data.id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('site_settings').insert([settingsData]);
+                if (error) throw error;
+            }
+            alert('Settings saved!');
+        } catch (e) {
+            alert('Error: ' + e.message);
+        } finally {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
+    });
+}
+
+// ----------------------------------------------------
+// ASSET UPLOAD HANDLING (Combined for all inputs)
+// ----------------------------------------------------
+
+window.handleAssetUpload = async (inputElement, targetUrlInputId) => {
+    const file = inputElement.files[0];
+    if (!file) return;
+
+    const urlInput = document.getElementById(targetUrlInputId);
+    // Simple visual feedback on label if possible, or just use input
+    const label = inputElement.previousElementSibling;
+    const oldIcon = label.innerHTML;
+    label.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        // Decide bucket based on usage? Actually 'site-assets' is good for all admin general assets
+        // Product images use 'product-images', others use 'site-assets'
+        const bucket = 'site-assets';
+
+        const { data, error } = await supabase.storage.from(bucket).upload(fileName, file);
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
+
+        urlInput.value = publicUrl;
+        // alert('Uploaded!'); 
+    } catch (e) {
+        console.error(e);
+        alert('Upload failed: ' + e.message);
+    } finally {
+        label.innerHTML = oldIcon;
+    }
+}
+
+// Helper: Populate Product Categories dynamically in Product Modal
+async function populateCategoryOptions() {
+    try {
+        const { data } = await supabase.from('categories').select('title, slug').order('display_order');
+        if (data && productCategorySelect) {
+            productCategorySelect.innerHTML = data.map(c => `<option value="${c.slug}">${c.title}</option>`).join('');
+        }
+    } catch (e) { console.error('Error loading cats for dropdown', e); }
+}
+
+// Override openProductModal to fetch cats every time (or cache it)
+
 
 // ... [Existing Product Management Functions: fetchProducts, renderProductList] ...
 
@@ -158,6 +426,7 @@ async function fetchProducts() {
     productList.innerHTML = '<p style="text-align: center;">Loading...</p>';
 
     try {
+        // Fetch products AND categories to map slug -> name if needed
         const { data: products, error } = await supabase
             .from('products')
             .select('*')
@@ -168,11 +437,7 @@ async function fetchProducts() {
         renderProductList(products);
     } catch (error) {
         console.error('Fetch error:', error);
-        let msg = error.message;
-        if (error.message === 'Failed to fetch') {
-            msg = 'Connection failed. Please check your internet connection or ensuring you are not blocking Supabase domains. (If using AdBlock, try disabling it)';
-        }
-        productList.innerHTML = `<p style="color: red; text-align: center;">Error: ${msg}</p>`;
+        productList.innerHTML = `<p style="color: red; text-align: center;">Error: ${error.message}</p>`;
     }
 }
 
@@ -205,14 +470,22 @@ function renderProductList(products) {
                     ${product.product_category.replace(/-/g, ' ')}
                 </span>
             </td>
-            <td style="padding: 15px; font-weight: 500;">
-                ₹${product.mrp}
+            <td style="padding: 15px;">
+                ${product.quantity_variants && product.quantity_variants[0] ?
+                `<div style="font-weight: 500;">₹${product.quantity_variants[0].price} <span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through;">(${product.quantity_variants[0].mrp})</span></div><div style="font-size: 0.8rem; color: var(--text-secondary);">${product.quantity_variants[0].quantity}</div>` :
+                '-'}
             </td>
             <td style="padding: 15px;">
-                <span style="font-size: 0.85rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; ${stockStatus}">
-                    ${product.total_stock} units
-                </span>
+                ${product.quantity_variants && product.quantity_variants[1] ?
+                `<div style="font-weight: 500;">₹${product.quantity_variants[1].price} <span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through;">(${product.quantity_variants[1].mrp})</span></div><div style="font-size: 0.8rem; color: var(--text-secondary);">${product.quantity_variants[1].quantity}</div>` :
+                '-'}
             </td>
+            <td style="padding: 15px;">
+                ${product.quantity_variants && product.quantity_variants[2] ?
+                `<div style="font-weight: 500;">₹${product.quantity_variants[2].price} <span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through;">(${product.quantity_variants[2].mrp})</span></div><div style="font-size: 0.8rem; color: var(--text-secondary);">${product.quantity_variants[2].quantity}</div>` :
+                '-'}
+            </td>
+
             <td style="padding: 15px; text-align: right;">
                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
                     <button onclick="editProduct('${product.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem;" title="Edit">
@@ -273,7 +546,8 @@ function renderTestimonialList(testimonials) {
 }
 
 // Modal Functions (Product)
-window.openProductModal = (productId = null) => {
+window.openProductModal = async (productId = null) => {
+    await populateCategoryOptions(); // Ensure categories are loaded
     productModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
@@ -287,7 +561,7 @@ window.openProductModal = (productId = null) => {
         loadProductData(productId);
     } else {
         modalTitle.textContent = 'Add Product';
-        addVariantRow(); // Add one empty variant row by default
+        addVariantRow(); // Always add one empty variant row
     }
 };
 
@@ -296,73 +570,37 @@ window.closeProductModal = () => {
     document.body.style.overflow = '';
 };
 
-// Modal Functions (Testimonial)
-window.openTestimonialModal = (testimonialId = null) => {
-    testimonialModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+// ... (Testimonial functions unchanged) ...
 
-    // Reset form
-    testimonialForm.reset();
-    document.getElementById('testimonialId').value = '';
-
-    if (testimonialId) {
-        testimonialModalTitle.textContent = 'Edit Testimonial';
-        loadTestimonialData(testimonialId);
-    } else {
-        testimonialModalTitle.textContent = 'Add Testimonial';
-    }
-};
-
-window.closeTestimonialModal = () => {
-    testimonialModal.style.display = 'none';
-    document.body.style.overflow = '';
-};
-
-async function loadTestimonialData(id) {
-    try {
-        const { data: t, error } = await supabase
-            .from('testimonials')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-
-        document.getElementById('testimonialId').value = t.id;
-        document.getElementById('tName').value = t.name;
-        document.getElementById('tLocation').value = t.location || '';
-        document.getElementById('tMessage').value = t.message;
-        document.getElementById('tRating').value = t.rating || 5;
-        document.getElementById('tProduct').value = t.product_name || '';
-
-    } catch (error) {
-        alert('Error loading testimonial: ' + error.message);
-        closeTestimonialModal();
-    }
-}
-
-// Add Variant Row
-window.addVariantRow = (variant = {}) => {
+// Helper to add variant row
+window.addVariantRow = (data = null) => {
     const div = document.createElement('div');
     div.className = 'variant-row';
+    div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center; background: var(--bg-secondary); padding: 10px; border-radius: 8px;';
+
     div.innerHTML = `
-        <input type="text" placeholder="Size (e.g. 250g)" value="${variant.quantity || ''}" class="variant-qty" oninput="updateTotalStockDisplay()">
-        <input type="number" placeholder="Price" value="${variant.price || ''}" class="variant-price">
-        <input type="number" placeholder="MRP" value="${variant.mrp || ''}" class="variant-mrp">
-        <input type="number" placeholder="Stock Count" value="${variant.stock || 0}" class="variant-stock" oninput="updateTotalStockDisplay()">
-        <button type="button" onclick="this.parentElement.remove(); updateTotalStockDisplay();" style="color: red; border: none; background: none; cursor: pointer;">
-            <i class="fas fa-times"></i>
+        <div style="flex: 1;">
+            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">Quantity/Size</label>
+            <input type="text" class="variant-qty form-input" placeholder="e.g. 250g" value="${data ? data.quantity : ''}" required>
+        </div>
+        <div style="flex: 1;">
+            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">MRP (₹)</label>
+            <input type="number" class="variant-mrp form-input" placeholder="MRP" value="${data ? data.mrp || '' : ''}" required>
+        </div>
+        <div style="flex: 1;">
+            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">Selling Price (₹)</label>
+            <input type="number" class="variant-price form-input" placeholder="Price" value="${data ? data.price : ''}" required>
+        </div>
+        <div style="flex: 1;">
+            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">Stock</label>
+            <input type="number" class="variant-stock form-input" placeholder="Qty" value="${data ? data.stock || 0 : 0}" required>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: var(--color-error); margin-top: 15px;">
+            <i class="fas fa-trash"></i>
         </button>
     `;
-    variantsContainer.appendChild(div);
-};
 
-window.updateTotalStockDisplay = () => {
-    let total = 0;
-    document.querySelectorAll('.variant-stock').forEach(input => {
-        total += parseInt(input.value || 0);
-    });
-    document.getElementById('totalStock').value = total;
+    variantsContainer.appendChild(div);
 };
 
 async function loadProductData(productId) {
@@ -382,23 +620,21 @@ async function loadProductData(productId) {
         document.getElementById('productCategory').value = product.product_category;
         document.getElementById('productTagline').value = product.product_tagline || '';
         document.getElementById('productDescription').value = product.product_description || '';
-        document.getElementById('mrp').value = product.mrp || '';
-        document.getElementById('netWeight').value = product.net_weight || '';
-        document.getElementById('totalStock').value = product.total_stock || 0;
         document.getElementById('showcaseImage').value = product.showcase_image || '';
-        // document.getElementById('infoImage').value = product.info_image || ''; // Removed
 
-        // Populate variants
-        if (product.quantity_variants && Array.isArray(product.quantity_variants)) {
-            product.quantity_variants.forEach(v => addVariantRow(v));
+        // Handle Variants
+        const variants = product.quantity_variants || [];
+        variantsContainer.innerHTML = ''; // Clear existing
+
+        if (variants.length > 0) {
+            variants.forEach(v => addVariantRow(v));
         } else {
+            // Fallback for old data or empty variants: create one empty row
             addVariantRow();
         }
 
-        // Recalculate total stock to ensure UI consistency
-        updateTotalStockDisplay();
-
     } catch (error) {
+        console.error('Error loading product:', error); // Log full error
         alert('Error loading product: ' + error.message);
         closeProductModal();
     }
@@ -415,9 +651,10 @@ productForm.addEventListener('submit', async (e) => {
     submitBtn.disabled = true;
 
     // Collect Variants
-    const variants = [];
+    let variants = [];
     let calculatedTotalStock = 0;
 
+    // First check variant rows
     document.querySelectorAll('.variant-row').forEach(row => {
         const qty = row.querySelector('.variant-qty').value;
         const price = row.querySelector('.variant-price').value;
@@ -434,18 +671,32 @@ productForm.addEventListener('submit', async (e) => {
         }
     });
 
+    // IF NO VARIANT ROWS, Add one empty (User should fill it)
+    if (variants.length === 0) {
+        alert('Please add at least one variant.');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+
+    // Determine Logic for Top-Level Fields (Display Purposes)
+    // We'll use the FIRST variant for the main table display values
+    const firstVariant = variants[0];
+    const topMrp = firstVariant.mrp;
+    const topNetWeight = firstVariant.quantity;
+
+
     const productData = {
         product_name: document.getElementById('productName').value,
         product_name_telugu: document.getElementById('productNameTelugu').value,
         product_category: document.getElementById('productCategory').value,
         product_tagline: document.getElementById('productTagline').value,
         product_description: document.getElementById('productDescription').value,
-        mrp: parseFloat(document.getElementById('mrp').value || 0),
-        net_weight: document.getElementById('netWeight').value,
-        total_stock: calculatedTotalStock, // Use calculated stock
-        total_stock: calculatedTotalStock, // Use calculated stock
+        mrp: topMrp,
+        net_weight: topNetWeight,
+        total_stock: calculatedTotalStock,
         showcase_image: document.getElementById('showcaseImage').value,
-        info_image: document.getElementById('showcaseImage').value, // Use same image for both
+        // info_image: document.getElementById('showcaseImage').value, // Use same image for both
         quantity_variants: variants
     };
 
@@ -568,9 +819,11 @@ window.deleteTestimonial = async (id) => {
 };
 
 // Expose functions to window for onclick handlers
+// Expose functions to window for onclick handlers
 window.handleLogin = handleLogin;
 window.handleLogout = handleLogout;
 window.editProduct = (id) => openProductModal(id);
+window.editTestimonial = (id) => openTestimonialModal(id);
 
 /*
 ========================================

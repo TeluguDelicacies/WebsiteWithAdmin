@@ -20,7 +20,7 @@
     <!-- External Stylesheets and Fonts -->
     <link rel="stylesheet" href="styles.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500;700&family=Noto+Sans+Telugu:wght@300;400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Noto+Sans+Telugu:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -38,7 +38,8 @@
             <div class="header-content">
                 <!-- Logo Section -->
                 <div class="logo-section">
-                    <img src="./images/logo.png" alt="Telugu Delicacies Logo" class="logo"
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        alt="Telugu Delicacies Logo" class="logo"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <div class="logo-fallback" style="display: none;">TD</div>
                     <h1 class="brand-name">Telugu Delicacies</h1>
@@ -96,15 +97,19 @@
         <div class="hero-container">
             <div class="hero-content">
                 <h2 class="hero-title">
-                    Modern Yet Traditional
-                    <span class="telugu-subtitle">సాంప్రదాయ రుచులు, ఆధునిక శైలి</span>
+                    <span id="hero-title">Modern Yet Traditional</span>
+                    <span class="telugu-subtitle" id="hero-telugu-subtitle">సాంప్రదాయ రుచులు, ఆధునిక శైలి</span>
                 </h2>
-                <p class="hero-subtitle">Timeless tradition, created for today.</p>
-                <p class="hero-subtitle">Every recipe begins by hand—carefully crafted, tested, and refined until it
-                    carries both a unique signature and the warmth of familiar flavors that bring you back to childhood
-                    kitchens. Made with thoughtfully chosen ingredients and deep care, our products are more than just
-                    food—they are moments of comfort, memory, and authenticity, prepared to the highest standards of
-                    quality.</p>
+                <p class="hero-subtitle" id="hero-subtitle">Timeless tradition, created for today.</p>
+                <div id="hero-description-container">
+                    <p class="hero-subtitle">Every recipe begins by hand—carefully crafted, tested, and refined until it
+                        carries both a unique signature and the warmth of familiar flavors that bring you back to
+                        childhood
+                        kitchens. Made with thoughtfully chosen ingredients and deep care, our products are more than
+                        just
+                        food—they are moments of comfort, memory, and authenticity, prepared to the highest standards of
+                        quality.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -130,91 +135,12 @@
         <section class="section" id="product-categories">
             <div class="container">
                 <h2 class="section-title">Our Collections</h2>
-                <div class="master-cards-grid">
-
-                    <!-- Card 1: Ready To Eat -->
-                    <div class="master-card" data-category="ready-to-eat">
-                        <div class="card-face card-front">
-                            <div class="card-hero-image">
-                                <img src="./images/categories/ready-to-eat-podis-n.jpg" alt="Ready To Eat Collection">
-                            </div>
-                            <div class="card-body">
-                                <h3 class="card-title">Ready To Eat</h3>
-                                <p class="telugu-subtitle">పచ్చళ్ళు - పొడులు</p>
-                                <p class="card-desc">
-                                    Authentic Traditional Telugu Spice Powders – Perfectly prepared to complement rice,
-                                    idli, or
-                                    dosa. Simply blend with oil or ghee to experience the rich and genuine flavors of
-                                    Telugu
-                                    cuisine instantaneously.
-                                </p>
-                                <div class="dropdown-wrapper">
-                                    <select class="product-select" id="select-ready-to-eat">
-                                        <option value="" disabled selected>Select Podi</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down dropdown-icon"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back Face (Overlay) -->
-                        <div class="card-face card-back" id="view-ready-to-eat"></div>
+                <!-- Dynamic Categories Container -->
+                <div class="master-cards-grid" id="categories-container">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p>Loading collections...</p>
                     </div>
-
-                    <!-- Card 2: Ready To Cook -->
-                    <div class="master-card" data-category="ready-to-cook">
-                        <div class="card-face card-front">
-                            <div class="card-hero-image">
-                                <img src="./images/categories/ready-to-cook-n.jpg" alt="Ready To Cook Collection">
-                            </div>
-                            <div class="card-body">
-                                <h3 class="card-title">Ready To Cook</h3>
-                                <p class="telugu-subtitle">మీ సౌకర్యం, త్వరితగతి కోసం</p>
-                                <p class="card-desc">
-                                    Fresh, Ready-to-Cook Malabar Parota and Wheat Chapathi – Expertly prepared for your
-                                    convenience. Simply heat on a pan to enjoy soft, flavorful flatbreads that
-                                    complement any
-                                    meal with authentic taste and texture.
-                                </p>
-                                <div class="dropdown-wrapper">
-                                    <select class="product-select" id="select-ready-to-cook">
-                                        <option value="" disabled selected>Select Product</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down dropdown-icon"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back Face (Overlay) -->
-                        <div class="card-face card-back" id="view-ready-to-cook"></div>
-                    </div>
-
-                    <!-- Card 3: Ready To Use -->
-                    <div class="master-card" data-category="ready-to-use">
-                        <div class="card-face card-front">
-                            <div class="card-hero-image">
-                                <img src="./images/categories/ready-to-use.jpg" alt="Ready To Use Collection">
-                            </div>
-                            <div class="card-body">
-                                <h3 class="card-title">Ready To Use</h3>
-                                <p class="telugu-subtitle">నేరుగా వాడుకోవడానికి అనువైనవి</p>
-                                <p class="card-desc">
-                                    Premium Culinary Essentials – Carefully selected to enhance your everyday cooking.
-                                    Includes
-                                    rich ghee, wholesome multigrain atta, aromatic coffee, and pure turmeric. Ready to
-                                    use
-                                    directly in your favorite recipes.
-                                </p>
-                                <div class="dropdown-wrapper">
-                                    <select class="product-select" id="select-ready-to-use">
-                                        <option value="" disabled selected>Select Product</option>
-                                    </select>
-                                    <i class="fas fa-chevron-down dropdown-icon"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back Face (Overlay) -->
-                        <div class="card-face card-back" id="view-ready-to-use"></div>
-                    </div>
-
                 </div>
             </div>
         </section>
@@ -319,32 +245,31 @@
                         <div class="footer-brand">
                             <h2>Telugu Delicacies</h2>
                             <p class="footer-tagline">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
-                            <p class="fssai-license">FSSAI License: 13623999000239</p>
+                            <p class="fssai-license" id="contact-fssai">FSSAI License: 13623999000239</p>
                         </div>
 
                         <!-- Contact Information -->
                         <div class="footer-section footer-contact" id="footer-contact">
                             <h4><i class="fas fa-phone"></i> Contact Us</h4>
-                            <p><a href="tel:+919676712031">+91 96767 12031</a></p>
-                            <p><a href="tel:+919618513131">+91 96185 13131</a></p>
-                            <p><a href="mailto:info@telugudelicacies.com">info@telugudelicacies.com</a></p>
+                            <p><a href="#" id="contact-phone-primary">Loading...</a></p>
+                            <p><a href="#" id="contact-phone-secondary"></a></p>
+                            <p><a href="#" id="contact-email">Loading...</a></p>
                         </div>
 
                         <!-- Address Information -->
                         <div class="footer-section footer-address">
                             <h4><i class="fas fa-map-marker-alt"></i> Our Location</h4>
-                            <p>II, Western Part, Plot No: 121/3</p>
-                            <p>B N Reddy Nagar, Cherlapalli</p>
-                            <p>Hyderabad, Telangana 500051</p>
-                            <p>India</p>
+                            <div id="contact-address">
+                                <p>Loading address...</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Google Maps Section -->
                     <div class="footer-map">
                         <h4><i class="fas fa-location-dot"></i> Find Us Here</h4>
-                        <div class="map-container">
-                            <!-- Google Maps Embed -->
+                        <div class="map-container" id="footer-map-container">
+                            <!-- Dynamic Map Embed -->
                             <iframe
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.8428871601745!2d78.60164107521217!3d17.46723238343367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9d007f562aaf%3A0x2f13d0ef2a0f7614!2sTelugu%20Delicacies!5e0!3m2!1sen!2sin!4v1756361897165!5m2!1sen!2sin"
                                 width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy"
