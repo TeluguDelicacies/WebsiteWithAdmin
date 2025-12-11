@@ -1976,52 +1976,60 @@ MASTER CARD LAYOUT (Redesign with Overlay)
   margin-bottom: var(--space-4);
 }
 
-.product-select {
+/* Modern Select Styling (Products & Contact Form) */
+.product-select,
+.contact-form select {
   width: 100%;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px 24px;
-  font-family: var(--font-body);
+  background-color: #f8fafc;
+  /* Match input background */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  /* Match input border */
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  padding-right: 40px;
+  /* Space for arrow */
+  font-family: var(--font-primary);
   font-weight: 500;
   font-size: 1rem;
-  color: #1e293b;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  box-shadow: none;
+
+  /* Custom Arrow (Dark Grey by default) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 20px;
 }
 
-.product-select:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  background: #f8fafc;
+.product-select:hover,
+.contact-form select:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-md);
+  background-color: var(--bg-secondary);
 }
 
-.product-select:focus {
+.product-select:focus,
+.contact-form select:focus {
   outline: none;
-  border-color: #3b82f6;
-  /* Elegant Brand Blue */
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  border-color: var(--color-primary-blue);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.15);
+  /* Active Arrow (Primary Blue, flipped handled by logic or just color change) */
+  /* Note: Rotating background image on focus isn't easily animateable, so we just change color usually or keep it simple. 
+     To rotate, we'd need the icon element. But `appearance: none` removes system arrow. 
+     We'll stick to a color change for the arrow to indicate focus. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230077B6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
-.dropdown-icon {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #64748b;
-  font-size: 0.8rem;
-  transition: transform 0.3s ease;
-}
-
-.product-select:focus+.dropdown-icon {
-  transform: translateY(-50%) rotate(180deg);
-  color: #3b82f6;
+/* Legacy icon hidden as we use background-image now */
+.dropdown-icon,
+.dropdown-wrapper .fas {
+  display: none !important;
 }
 
 /* Revealed Content (Now inside Card Back) */

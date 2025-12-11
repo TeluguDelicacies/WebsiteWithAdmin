@@ -170,22 +170,34 @@ window.switchView = (view) => {
         activeStyle(viewProductsBtn);
         addBtnText.textContent = 'Add Product';
         document.getElementById('addBtn').style.display = 'inline-block';
+        // Show Filter
+        const filterRow = document.getElementById('productFilterRow');
+        if (filterRow) filterRow.style.display = 'flex';
         fetchProducts();
     } else if (view === 'testimonials') {
         testimonialsTableContainer.style.display = 'block';
         activeStyle(viewTestimonialsBtn);
+        // Hide Filter
+        const filterRow = document.getElementById('productFilterRow');
+        if (filterRow) filterRow.style.display = 'none';
         addBtnText.textContent = 'Add Testimonial';
         document.getElementById('addBtn').style.display = 'inline-block';
         fetchTestimonials();
     } else if (view === 'categories') {
         categoriesTableContainer.style.display = 'block';
         activeStyle(viewCategoriesBtn);
+        // Hide Filter
+        const filterRow = document.getElementById('productFilterRow');
+        if (filterRow) filterRow.style.display = 'none';
         addBtnText.textContent = 'Add Category';
         document.getElementById('addBtn').style.display = 'inline-block';
         fetchCategories();
     } else if (view === 'settings') {
         settingsContainer.style.display = 'block';
         activeStyle(viewSettingsBtn);
+        // Hide Filter
+        const filterRow = document.getElementById('productFilterRow');
+        if (filterRow) filterRow.style.display = 'none';
         document.getElementById('addBtn').style.display = 'none'; // No add btn for settings
         fetchSettings();
     }
@@ -220,12 +232,24 @@ function renderCategoryList(categories) {
     }
 
     categoryList.innerHTML = categories.map(cat => `
-        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;">
+        <tr draggable="true" 
+            data-id="${cat.id}" 
+            data-type="category"
+            class="draggable-row"
+            style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: move;"
+            ondragstart="handleDragStart(event)"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)"
+            ondragenter="handleDragEnter(event)"
+            ondragleave="handleDragLeave(event)">
             <td style="padding: 15px;">
-                 <img src="${cat.image_url || PLACEHOLDER_IMAGE}" 
-                     alt="${cat.title}" 
-                     onerror="this.src=PLACEHOLDER_IMAGE"
-                     style="width: 48px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-light);">
+                 <div style="display: flex; align-items: center; gap: 10px;">
+                     <i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>
+                     <img src="${cat.image_url || PLACEHOLDER_IMAGE}" 
+                         alt="${cat.title}" 
+                         onerror="this.src=PLACEHOLDER_IMAGE"
+                         style="width: 48px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-light);">
+                 </div>
             </td>
             <td style="padding: 15px; font-weight: 600;">${cat.title}</td>
             <td style="padding: 15px;">${cat.slug}</td>
@@ -266,6 +290,35 @@ async function loadCategoryData(id) {
     }
 }
 
+// Category Filter Logic
+const categoryFilter = document.getElementById('categoryFilter');
+if (categoryFilter) {
+    categoryFilter.addEventListener('change', () => renderProductList());
+}
+
+async function populateCategoryFilter() {
+    if (categoryFilter.options.length > 1) return; // Already populated
+
+    try {
+        const { data: categories, error } = await supabase
+            .from('categories')
+            .select('*')
+            .order('display_order', { ascending: true });
+
+        if (error) throw error;
+
+        if (categories) {
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.slug;
+                option.textContent = cat.title;
+                categoryFilter.appendChild(option);
+            });
+        }
+    } catch (e) {
+        console.error('Error populating filter:', e);
+    }
+}
 // Ensure Categories logic is hooked up
 if (categoryForm) {
     categoryForm.addEventListener('submit', async (e) => {
@@ -441,40 +494,71 @@ async function populateCategoryOptions() {
 
 // ... [Existing Product Management Functions: fetchProducts, renderProductList] ...
 
-// Product Management
+// Global Products State
+let allProducts = [];
+
 async function fetchProducts() {
     productList.innerHTML = '<p style="text-align: center;">Loading...</p>';
 
     try {
-        // Fetch products AND categories to map slug -> name if needed
         const { data: products, error } = await supabase
             .from('products')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('product_category', { ascending: true })
+            .order('display_order', { ascending: true });
 
         if (error) throw error;
 
-        renderProductList(products);
+        allProducts = products; // Store globally
+        populateCategoryFilter(); // Ensure filter is ready
+        renderProductList(); // Render based on current filter state
     } catch (error) {
         console.error('Fetch error:', error);
         productList.innerHTML = `<p style="color: red; text-align: center;">Error: ${error.message}</p>`;
     }
 }
 
-function renderProductList(products) {
-    if (!products || products.length === 0) {
-        productList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">No products found.</td></tr>';
+function renderProductList() { // No arg needed, uses global allProducts + filter
+    let displayProducts = allProducts;
+
+    // Apply Filter
+    const categoryFilter = document.getElementById('categoryFilter');
+    const isFiltered = categoryFilter && categoryFilter.value !== 'all';
+
+    if (isFiltered) {
+        displayProducts = allProducts.filter(p => p.product_category === categoryFilter.value);
+    }
+
+    if (!displayProducts || displayProducts.length === 0) {
+        productList.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;">No products found.</td></tr>';
         return;
     }
 
-    productList.innerHTML = products.map(product => {
-        // Stock status styles
-        const stockStatus = product.total_stock < 10 ? 'color: #dc2626; background: #fee2e2;' : 'color: #166534; background: #dcfce7;';
+    // Sort logic for Display (Filtered or Not)
+    // If not filtered, we rely on the initial Category -> Order sort from fetch
+    // If filtered, we can resort by display_order locally to be sure
+    if (isFiltered) {
+        displayProducts.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    }
 
-        return `
-        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;">
+    // Show Hint if not filtered
+    const dndHint = !isFiltered ?
+        '<tr><td colspan="7" style="text-align: center; background: #fff3cd; color: #856404; padding: 8px; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Please select a specific category from the dropdown above to enable reordering.</td></tr>' : '';
+
+    productList.innerHTML = dndHint + displayProducts.map((product, index) => `
+        <tr ${isFiltered ? 'draggable="true" class="draggable-row" style="border-bottom: 1px solid var(--border-light); transition: all 0.2s; cursor: move;"' : 'style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;"'} 
+            data-id="${product.id}" 
+            data-type="product"
+            ${isFiltered ? `
+            ondragstart="handleDragStart(event)"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)"
+            ondragenter="handleDragEnter(event)"
+            ondragleave="handleDragLeave(event)"` : ''}>
+            
             <td style="padding: 15px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
+                    ${isFiltered ? '<i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>' : ''}
                     <img src="${product.showcase_image || PLACEHOLDER_IMAGE}" 
                          alt="${product.product_name}" 
                          onerror="this.src=PLACEHOLDER_IMAGE"
@@ -492,18 +576,18 @@ function renderProductList(products) {
             </td>
             <td style="padding: 15px;">
                 ${product.quantity_variants && product.quantity_variants[0] ?
-                `<div style="font-weight: 500;">₹${product.quantity_variants[0].price} <span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through;">(${product.quantity_variants[0].mrp})</span></div><div style="font-size: 0.8rem; color: var(--text-secondary);">${product.quantity_variants[0].quantity}</div>` :
-                '-'}
+            `<div style="font-weight: 500;">₹${product.quantity_variants[0].price}</div>` : '-'}
             </td>
             <td style="padding: 15px;">
                 ${product.quantity_variants && product.quantity_variants[1] ?
-                `<div style="font-weight: 500;">₹${product.quantity_variants[1].price} <span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through;">(${product.quantity_variants[1].mrp})</span></div><div style="font-size: 0.8rem; color: var(--text-secondary);">${product.quantity_variants[1].quantity}</div>` :
-                '-'}
+            `<div style="font-weight: 500;">₹${product.quantity_variants[1].price}</div>` : '-'}
             </td>
             <td style="padding: 15px;">
                 ${product.quantity_variants && product.quantity_variants[2] ?
-                `<div style="font-weight: 500;">₹${product.quantity_variants[2].price} <span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through;">(${product.quantity_variants[2].mrp})</span></div><div style="font-size: 0.8rem; color: var(--text-secondary);">${product.quantity_variants[2].quantity}</div>` :
-                '-'}
+            `<div style="font-weight: 500;">₹${product.quantity_variants[2].price}</div>` : '-'}
+            </td>
+            <td style="padding: 15px; text-align: center; font-weight: bold;" class="order-cell">
+                ${product.display_order || 0}
             </td>
 
             <td style="padding: 15px; text-align: right;">
@@ -517,7 +601,131 @@ function renderProductList(products) {
                 </div>
             </td>
         </tr>
-    `}).join('');
+    `).join('');
+}
+
+// Drag and Drop State
+let dragSrcEl = null;
+
+// Drag and Drop Handlers
+// Drag and Drop Handlers
+window.handleDragStart = (e) => {
+    dragSrcEl = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', dragSrcEl.innerHTML);
+    // Generic approach: rely on data-type
+    dragSrcEl.style.opacity = '0.4';
+};
+
+window.handleDragOver = (e) => {
+    if (e.preventDefault) e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+};
+
+window.handleDragEnter = (e) => {
+    e.currentTarget.style.background = '#f0f9ff';
+};
+
+window.handleDragLeave = (e) => {
+    e.currentTarget.style.background = '';
+};
+
+window.handleDrop = async (e) => {
+    if (e.stopPropagation) e.stopPropagation();
+
+    const dropTarget = e.currentTarget;
+
+    // Safety check for same list using data-type
+    const srcType = dragSrcEl.getAttribute('data-type');
+    const targetType = dropTarget.getAttribute('data-type');
+
+    if (dragSrcEl !== dropTarget && srcType === targetType) {
+        // Find indices in currently displayed list
+        // Use parentNode to be generic (categoryList, productList, etc.)
+        const container = dropTarget.parentNode;
+        const rows = Array.from(container.querySelectorAll('tr'));
+
+        const srcIndex = rows.indexOf(dragSrcEl);
+        const targetIndex = rows.indexOf(dropTarget);
+
+        // Move row in DOM
+        if (srcIndex < targetIndex) {
+            dropTarget.after(dragSrcEl);
+        } else {
+            dropTarget.before(dragSrcEl);
+        }
+
+        // Cleanup styles
+        dropTarget.style.background = '';
+        dragSrcEl.style.opacity = '1';
+
+        // Recalculate Order based on new DOM position
+        await updateOrderFromDom(srcType, container);
+    }
+    return false;
+};
+
+async function updateOrderFromDom(type, container) {
+    if (!container) return;
+
+    const rows = Array.from(container.querySelectorAll('tr'));
+    const updates = [];
+
+    // Show visual feedback
+    const addBtnText = document.getElementById('addBtnText');
+    const originalBtnText = addBtnText.textContent;
+    addBtnText.textContent = "Saving Order...";
+
+    // Determine Table Name and Local Update Logic
+    let tableName = 'products'; // Default
+    if (type === 'category') tableName = 'categories';
+    else if (type === 'testimonial') tableName = 'testimonials';
+
+    rows.forEach((row, index) => {
+        const id = row.getAttribute('data-id');
+        const newOrder = index + 1; // 1-based index
+
+        // update visual order cell if exists
+        // Product has .order-cell. Category has it as 4th cell.
+        if (type === 'product') {
+            const cell = row.querySelector('.order-cell');
+            if (cell) cell.textContent = newOrder;
+        } else if (type === 'category') {
+            // 4th cell is display_order
+            const cells = row.querySelectorAll('td');
+            if (cells[3]) cells[3].textContent = newOrder;
+        }
+        // Testimonials currently don't show order, so nothing to update visually in table
+
+        updates.push({
+            id: id,
+            display_order: newOrder
+        });
+    });
+
+    // Batch update to Supabase
+    try {
+        const promises = updates.map(u =>
+            supabase.from(tableName).update({ display_order: u.display_order }).eq('id', u.id)
+        );
+
+        await Promise.all(promises);
+
+        // Update local state if needed (mainly for Products which has a global store)
+        if (type === 'product' && typeof allProducts !== 'undefined') {
+            updates.forEach(u => {
+                const p = allProducts.find(prod => prod.id === u.id);
+                if (p) p.display_order = u.display_order;
+            });
+        }
+
+    } catch (error) {
+        console.error('Error saving order:', error);
+        alert('Failed to save new order.');
+    } finally {
+        addBtnText.textContent = originalBtnText;
+    }
 }
 
 // Testimonial Management
@@ -528,7 +736,7 @@ async function fetchTestimonials() {
         const { data: testimonials, error } = await supabase
             .from('testimonials')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('display_order', { ascending: true });
 
         if (error) throw error;
 
@@ -546,8 +754,22 @@ function renderTestimonialList(testimonials) {
     }
 
     testimonialList.innerHTML = testimonials.map(t => `
-        <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;">
-            <td style="padding: 15px; font-weight: 600;">${t.name}</td>
+        <tr draggable="true"
+            data-id="${t.id}"
+            data-type="testimonial"
+            class="draggable-row"
+            style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: move;"
+            ondragstart="handleDragStart(event)"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)"
+            ondragenter="handleDragEnter(event)"
+            ondragleave="handleDragLeave(event)">
+            <td style="padding: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>
+                    <span style="font-weight: 600;">${t.name}</span>
+                </div>
+            </td>
             <td style="padding: 15px; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${t.message}</td>
             <td style="padding: 15px;">${t.location || '-'}</td>
             <td style="padding: 15px;">${'★'.repeat(t.rating)}</td>
@@ -575,6 +797,7 @@ window.openProductModal = async (productId = null) => {
     productForm.reset();
     variantsContainer.innerHTML = '';
     document.getElementById('productId').value = '';
+    document.getElementById('productOrder').value = '0'; // Default order
 
     if (productId) {
         modalTitle.textContent = 'Edit Product';
@@ -660,19 +883,22 @@ async function loadProductData(productId) {
         document.getElementById('showcaseImage').value = product.showcase_image || '';
 
         // Handle Variants
-        const variants = product.quantity_variants || [];
         variantsContainer.innerHTML = ''; // Clear existing
-
-        if (variants.length > 0) {
-            variants.forEach(v => addVariantRow(v));
+        // Populate variants
+        if (product.quantity_variants && product.quantity_variants.length > 0) {
+            product.quantity_variants.forEach(variant => {
+                addVariantRow(variant);
+            });
         } else {
-            // Fallback for old data or empty variants: create one empty row
             addVariantRow();
         }
 
+        // Populate display order
+        document.getElementById('productOrder').value = product.display_order || 0;
+
     } catch (error) {
-        console.error('Error loading product:', error); // Log full error
-        alert('Error loading product: ' + error.message);
+        console.error('Error loading product:', error);
+        alert('Error loading product data');
         closeProductModal();
     }
 }
@@ -729,9 +955,8 @@ productForm.addEventListener('submit', async (e) => {
         product_category: document.getElementById('productCategory').value,
         product_tagline: document.getElementById('productTagline').value,
         product_description: document.getElementById('productDescription').value,
-        // New Fields
         ingredients: document.getElementById('productIngredients').value,
-        serving_suggestion: document.getElementById('productUsage').value,
+        serving_suggestion: document.getElementById('productUsage').value, // Kept original ID for consistency with HTML
         nutrition_info: {
             details: document.getElementById('nutriDetails').value,
             calories: document.getElementById('nutriCalories').value,

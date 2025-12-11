@@ -1432,7 +1432,11 @@ async function fetchAndRenderProducts() {
     try {
         // Parallel fetch for speed
         const [productsResp, categories] = await Promise.all([
-            supabase.from('products').select('*').order('created_at', { ascending: true }),
+            // Fetch products sorted by category and then display_order
+            supabase.from('products')
+                .select('*')
+                .order('product_category', { ascending: true })
+                .order('display_order', { ascending: true }),
             fetchCategories()
         ]);
 

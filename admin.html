@@ -176,6 +176,14 @@
                     <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
                 </button>
             </div>
+
+            <!-- Category Filter Row (Only visible for Products view) -->
+            <div id="productFilterRow" style="margin-top: 15px; display: none; justify-content: flex-end;">
+                <select id="categoryFilter"
+                    style="padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-medium); min-width: 200px; background: white;">
+                    <option value="all">All Categories</option>
+                </select>
+            </div>
         </div>
 
         <!-- Products Table -->
@@ -373,122 +381,137 @@
                     </div>
                     <div class="form-group">
                         <label>Category</label>
-                        <select id="productCategory" required>
-                            <!-- Dynamically populated -->
+                        <select id="productCategory" required class="form-input">
+                            <option value="">Select Category</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Tagline (Telugu/English)</label>
-                    <input type="text" id="productTagline">
-                </div>
-
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="productDescription" rows="3"></textarea>
-                </div>
-
-                <!-- New Detailed Info Section -->
-                <h4
-                    style="margin: 20px 0 10px; color: var(--color-secondary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 5px;">
-                    Detailed Info</h4>
-
-                <div class="form-row">
                     <div class="form-group">
-                        <label>Ingredients</label>
-                        <textarea id="productIngredients" rows="3"
-                            placeholder="Comma separated list of ingredients..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Usage Instructions (Serving Suggestion)</label>
-                        <textarea id="productUsage" rows="3" placeholder="How to serve..."></textarea>
-                    </div>
-                </div>
-
-                <label style="display: block; margin-bottom: 10px; font-weight: 500;">Nutrition Facts (Per
-                    Serving)</label>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Serving Size Details</label>
-                        <input type="text" id="nutriDetails" placeholder="e.g. Per 100g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Calories (kcal)</label>
-                        <input type="text" id="nutriCalories" placeholder="e.g. 350 kcal">
+                        <label>Display Order</label>
+                        <input type="number" id="productOrder" placeholder="e.g., 1, 2, 3" class="form-input" value="0">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label style="font-size: 0.85rem;">Protein (g)</label>
-                        <input type="text" id="nutriProtein" placeholder="e.g. 12g">
+                        <label>Serving Suggestion</label>
+                        <input type="text" id="productTagline">
                     </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Saturated Fat (g)</label>
-                        <input type="text" id="nutriSatFat" placeholder="e.g. 2g">
-                    </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group">
-                        <label style="font-size: 0.85rem;">Total Fat (g)</label>
-                        <input type="text" id="nutriFat" placeholder="e.g. 10g">
+                        <label>Description</label>
+                        <textarea id="productDescription" rows="3"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Carbs (g)</label>
-                        <input type="text" id="nutriCarbs" placeholder="e.g. 45g">
-                    </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Fiber (g)</label>
-                        <input type="text" id="nutriFiber" placeholder="e.g. 5g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Sugars (g)</label>
-                        <input type="text" id="nutriSugars" placeholder="e.g. 2g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Sodium (g)</label>
-                        <input type="text" id="nutriSodium" placeholder="e.g. 0.5g">
-                    </div>
-                </div>
+                    <!-- New Detailed Info Section -->
+                    <h4
+                        style="margin: 20px 0 10px; color: var(--color-secondary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 5px;">
+                        Detailed Info</h4>
 
-
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Product Image</label>
-                        <div class="upload-group">
-                            <input type="text" id="showcaseImage" placeholder="Image URL or Upload File ->"
-                                style="flex: 1;">
-                            <label for="showcaseUpload" class="upload-btn">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload
-                            </label>
-                            <input type="file" id="showcaseUpload" accept="image/*" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ingredients</label>
+                            <textarea id="productIngredients" rows="3"
+                                placeholder="Comma separated list of ingredients..."></textarea>
                         </div>
-                        <small id="showcaseStatus" style="color: var(--text-secondary);"></small>
+                        <div class="form-group">
+                            <label>Usage Instructions (Serving Suggestion)</label>
+                            <textarea id="productUsage" rows="3" placeholder="How to serve..."></textarea>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Quantity Variants</label>
-                    <div id="variantsContainer">
-                        <!-- Variants injected here -->
+                    <label style="display: block; margin-bottom: 10px; font-weight: 500;">Nutrition Facts (Per
+                        Serving)</label>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Serving Size Details</label>
+                            <input type="text" id="nutriDetails" placeholder="e.g. Per 100g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Calories (kcal)</label>
+                            <input type="text" id="nutriCalories" placeholder="e.g. 350 kcal">
+                        </div>
                     </div>
-                    <button type="button" onclick="addVariantRow()" class="nav-btn"
-                        style="margin-top: 10px; font-size: 0.8rem;">
-                        + Add Variant
-                    </button>
-                </div>
 
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <button type="button" onclick="closeProductModal()" class="submit-btn"
-                        style="margin-top: 0; background: transparent; border: 2px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
-                    <button type="submit" class="submit-btn" style="margin-top: 0;">Save Product</button>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Protein (g)</label>
+                            <input type="text" id="nutriProtein" placeholder="e.g. 12g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Saturated Fat (g)</label>
+                            <input type="text" id="nutriSatFat" placeholder="e.g. 2g">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Total Fat (g)</label>
+                            <input type="text" id="nutriFat" placeholder="e.g. 10g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Carbs (g)</label>
+                            <input type="text" id="nutriCarbs" placeholder="e.g. 45g">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Fiber (g)</label>
+                            <input type="text" id="nutriFiber" placeholder="e.g. 5g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Sugars (g)</label>
+                            <input type="text" id="nutriSugars" placeholder="e.g. 2g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Sodium (g)</label>
+                            <input type="text" id="nutriSodium" placeholder="e.g. 0.5g">
+                        </div>
+                    </div>
+
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>P.250g</th>
+                            <th>P.500g</th>
+                            <th>P.1Kg</th>
+                            <th>Order</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Product Image</label>
+                            <div class="upload-group">
+                                <input type="text" id="showcaseImage" placeholder="Image URL or Upload File ->"
+                                    style="flex: 1;">
+                                <label for="showcaseUpload" class="upload-btn">
+                                    <i class="fas fa-cloud-upload-alt"></i> Upload
+                                </label>
+                                <input type="file" id="showcaseUpload" accept="image/*" style="display: none;">
+                            </div>
+                            <small id="showcaseStatus" style="color: var(--text-secondary);"></small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quantity Variants</label>
+                        <div id="variantsContainer">
+                            <!-- Variants injected here -->
+                        </div>
+                        <button type="button" onclick="addVariantRow()" class="nav-btn"
+                            style="margin-top: 10px; font-size: 0.8rem;">
+                            + Add Variant
+                        </button>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button type="button" onclick="closeProductModal()" class="submit-btn"
+                            style="margin-top: 0; background: transparent; border: 2px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Product</button>
+                    </div>
             </form>
         </div>
     </div>
