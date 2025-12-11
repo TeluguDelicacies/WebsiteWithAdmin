@@ -5,7 +5,7 @@ import { supabase } from './lib/supabase.js';
 const loginSection = document.getElementById('loginSection');
 const dashboardSection = document.getElementById('dashboardSection');
 const loginForm = document.getElementById('loginForm');
-const productList = document.getElementById('productList');
+const productList = document.getElementById('productListContainer');
 const testimonialList = document.getElementById('testimonialList');
 const productModal = document.getElementById('productModal');
 const testimonialModal = document.getElementById('testimonialModal');
@@ -143,7 +143,7 @@ function showDashboard() {
 window.switchView = (view) => {
     currentView = view;
     // Hide all first
-    productsTableContainer.style.display = 'none';
+    if (productList) productList.style.display = 'none';
     testimonialsTableContainer.style.display = 'none';
     categoriesTableContainer.style.display = 'none';
     settingsContainer.style.display = 'none';
@@ -166,7 +166,8 @@ window.switchView = (view) => {
     }
 
     if (view === 'products') {
-        productsTableContainer.style.display = 'block';
+        // Show product list
+        if (productList) productList.style.display = 'grid';
         activeStyle(viewProductsBtn);
         addBtnText.textContent = 'Add Product';
         document.getElementById('addBtn').style.display = 'inline-block';
@@ -297,7 +298,14 @@ if (categoryFilter) {
 }
 
 async function populateCategoryFilter() {
-    if (categoryFilter.options.length > 1) return; // Already populated
+    // Debug log
+    console.log('Populating Category Filter...');
+
+    // Allow re-population if empty, but prevent duplicates if already has options
+    if (categoryFilter.options.length > 1) {
+        console.log('Filter already populated.');
+        return;
+    }
 
     try {
         const { data: categories, error } = await supabase
@@ -308,9 +316,10 @@ async function populateCategoryFilter() {
         if (error) throw error;
 
         if (categories) {
+            console.log('Categories found for filter:', categories.length);
             categories.forEach(cat => {
                 const option = document.createElement('option');
-                option.value = cat.slug;
+                option.value = cat.slug; // Value is slug
                 option.textContent = cat.title;
                 categoryFilter.appendChild(option);
             });
@@ -530,96 +539,147 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
     }
 
     if (!displayProducts || displayProducts.length === 0) {
-        productList.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;">No products found.</td></tr>';
+        productList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px;">No products found.</div>';
         return;
     }
 
     // Sort logic for Display (Filtered or Not)
-    // If not filtered, we rely on the initial Category -> Order sort from fetch
-    // If filtered, we can resort by display_order locally to be sure
     if (isFiltered) {
         displayProducts.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
     }
 
-    // Show Hint if not filtered
+    // Drag hint
     const dndHint = !isFiltered ?
-        '<tr><td colspan="7" style="text-align: center; background: #fff3cd; color: #856404; padding: 8px; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Please select a specific category from the dropdown above to enable reordering.</td></tr>' : '';
+        '<div style="grid-column: 1/-1; text-align: center; background: #fff3cd; color: #856404; padding: 8px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Please select a specific category from the dropdown to enable reordering.</div>' : '';
 
-    productList.innerHTML = dndHint + displayProducts.map((product, index) => `
-        <tr ${isFiltered ? 'draggable="true" class="draggable-row" style="border-bottom: 1px solid var(--border-light); transition: all 0.2s; cursor: move;"' : 'style="border-bottom: 1px solid var(--border-light); transition: background 0.2s;"'} 
-            data-id="${product.id}" 
-            data-type="product"
-            ${isFiltered ? `
-            ondragstart="handleDragStart(event)"
-            ondragover="handleDragOver(event)"
-            ondrop="handleDrop(event)"
-            ondragenter="handleDragEnter(event)"
-            ondragleave="handleDragLeave(event)"` : ''}>
-            
-            <td style="padding: 15px;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    ${isFiltered ? '<i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>' : ''}
-                    <img src="${product.showcase_image || PLACEHOLDER_IMAGE}" 
-                         alt="${product.product_name}" 
-                         onerror="this.src=PLACEHOLDER_IMAGE"
-                         style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-light);">
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-primary);">${product.product_name}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${product.product_tagline || ''}</div>
-                    </div>
+    productList.innerHTML = dndHint + displayProducts.map((product, index) => {
+        // Variants Grid
+        const variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+
+        // Ensure at least 3 slots for grid consistency if we want fixed columns, 
+        // OR just render what we have. Design plan said "rows for variants" or "up to 3". 
+        // Let's render up to 3 columns if available, or just empty slots?
+        // The CSS grid is repeat(3, 1fr). So we should fill 3 slots to maintain layout structure or just let them auto-flow?
+        // Let's stick to filling 3 slots for alignment if possible, or just rendering valid ones.
+        // Actually best to just render available ones.
+
+        let variantsHtml = '';
+        if (variants.length > 0) {
+            variantsHtml = variants.slice(0, 3).map(v => `
+                <div class="mini-variant">
+                    <div class="v-qty">${v.quantity}</div>
+                    ${v.mrp ? `<div class="v-mrp">₹${v.mrp}</div>` : ''}
+                    <div class="v-price">₹${v.price}</div>
                 </div>
-            </td>
-            <td style="padding: 15px;">
-                <span style="font-size: 0.9rem; padding: 4px 10px; border-radius: 20px; background: var(--bg-secondary); border: 1px solid var(--border-medium);">
-                    ${product.product_category.replace(/-/g, ' ')}
-                </span>
-            </td>
-            <td style="padding: 15px;">
-                ${product.quantity_variants && product.quantity_variants[0] ?
-            `<div style="font-weight: 500;">₹${product.quantity_variants[0].price}</div>` : '-'}
-            </td>
-            <td style="padding: 15px;">
-                ${product.quantity_variants && product.quantity_variants[1] ?
-            `<div style="font-weight: 500;">₹${product.quantity_variants[1].price}</div>` : '-'}
-            </td>
-            <td style="padding: 15px;">
-                ${product.quantity_variants && product.quantity_variants[2] ?
-            `<div style="font-weight: 500;">₹${product.quantity_variants[2].price}</div>` : '-'}
-            </td>
-            <td style="padding: 15px; text-align: center; font-weight: bold;" class="order-cell">
-                ${product.display_order || 0}
-            </td>
+            `).join('');
 
-            <td style="padding: 15px; text-align: right;">
-                <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                    <button onclick="editProduct('${product.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem;" title="Edit">
+            // Fill empty slots if less than 3 so grid stays aligned
+            for (let i = variants.length; i < 3; i++) {
+                variantsHtml += `<div class="mini-variant" style="opacity: 0.3;">-</div>`;
+            }
+        } else {
+            variantsHtml = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); font-size: 0.8rem;">No variants</div>`;
+        }
+
+        return `
+        <div class="admin-product-card draggable-item" 
+             draggable="${isFiltered}" 
+             data-id="${product.id}"
+             data-order="${product.display_order || 0}"
+             ${isFiltered ? `
+             ondragstart="handleDragStart(event)"
+             ondragover="handleDragOver(event)"
+             ondrop="handleDrop(event)"
+             ondragenter="handleDragEnter(event)"
+             ondragleave="handleDragLeave(event)"` : ''}>
+            
+            <div class="card-row" onclick="toggleCardDetails('${product.id}')">
+                <!-- Grip for Drag -->
+                ${isFiltered ? '<div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>' : ''}
+                
+                <img src="${product.showcase_image || PLACEHOLDER_IMAGE}" 
+                     onerror="this.src=PLACEHOLDER_IMAGE"
+                     style="${isFiltered ? 'margin-left: 15px;' : ''}">
+                
+                <div class="row-info">
+                    <h3>${product.product_name}</h3>
+                    <div class="tagline">${product.product_tagline || ''}</div>
+                    <span class="category-badge">${product.product_category.replace(/-/g, ' ')}</span>
+                </div>
+
+                <div class="row-variants">
+                    ${variantsHtml}
+                </div>
+
+                <div style="text-align: center; font-weight: bold; color: var(--text-secondary);">
+                    ${product.display_order || 0}
+                </div>
+
+                <div class="row-actions" onclick="event.stopPropagation()">
+                    <button onclick="editProduct('${product.id}')" class="nav-btn btn-sm" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button onclick="deleteProduct('${product.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem; color: var(--color-error); border-color: var(--color-error);" title="Delete">
+                    <button onclick="deleteProduct('${product.id}')" class="nav-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
-            </td>
-        </tr>
-    `).join('');
+
+                <i class="fas fa-chevron-down" id="chevron-${product.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+            </div>
+
+            <div class="card-expanded-details" id="details-${product.id}">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Description</h4>
+                        <p style="margin: 0 0 10px; color: var(--text-secondary);">${product.product_description || 'None'}</p>
+                        
+                        <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Ingredients</h4>
+                        <p style="margin: 0; color: var(--text-secondary);">${product.ingredients || 'None'}</p>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Usage Instructions</h4>
+                        <p style="margin: 0 0 10px; color: var(--text-secondary);">${product.serving_suggestion || 'None'}</p>
+
+                        <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Nutrition Info</h4>
+                        <p style="margin: 0; color: var(--text-secondary);">${product.nutrition_info ? 'Available (Check Edit Mode)' : 'None'}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `}).join('');
 }
 
-// Drag and Drop State
+window.toggleCardDetails = function (id) {
+    const details = document.getElementById(`details-${id}`);
+    const chevron = document.getElementById(`chevron-${id}`);
+
+    if (details.classList.contains('open')) {
+        details.classList.remove('open');
+        chevron.style.transform = 'rotate(0deg)';
+    } else {
+        details.classList.add('open');
+        chevron.style.transform = 'rotate(180deg)';
+    }
+};
 let dragSrcEl = null;
 
 // Drag and Drop Handlers
 // Drag and Drop Handlers
 window.handleDragStart = (e) => {
-    dragSrcEl = e.currentTarget;
+    dragSrcEl = e.target.closest('.draggable-item');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', dragSrcEl.innerHTML);
-    // Generic approach: rely on data-type
+    dragSrcEl.classList.add('dragging');
     dragSrcEl.style.opacity = '0.4';
 };
 
 window.handleDragOver = (e) => {
     if (e.preventDefault) e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    const target = e.target.closest('.draggable-item');
+    if (target && target !== dragSrcEl) {
+        target.classList.add('over');
+    }
     return false;
 };
 
@@ -628,72 +688,78 @@ window.handleDragEnter = (e) => {
 };
 
 window.handleDragLeave = (e) => {
-    e.currentTarget.style.background = '';
+    const target = e.target.closest('.draggable-item');
+    if (target) {
+        target.classList.remove('over');
+    }
 };
 
-window.handleDrop = async (e) => {
-    if (e.stopPropagation) e.stopPropagation();
 
-    const dropTarget = e.currentTarget;
+window.handleDrop = (e) => {
+    e.stopPropagation(); // Standard stop propagation
 
-    // Safety check for same list using data-type
-    const srcType = dragSrcEl.getAttribute('data-type');
-    const targetType = dropTarget.getAttribute('data-type');
+    const dragSrcEl = document.querySelector('.draggable-item.dragging');
+    const dropTarget = e.target.closest('.draggable-item');
 
-    if (dragSrcEl !== dropTarget && srcType === targetType) {
-        // Find indices in currently displayed list
-        // Use parentNode to be generic (categoryList, productList, etc.)
-        const container = dropTarget.parentNode;
-        const rows = Array.from(container.querySelectorAll('tr'));
+    if (dragSrcEl && dropTarget && dragSrcEl !== dropTarget) {
+        // Swap DOM elements
+        const container = dragSrcEl.parentNode;
+        const allItems = Array.from(container.children);
+        const srcIndex = allItems.indexOf(dragSrcEl);
+        const targetIndex = allItems.indexOf(dropTarget);
 
-        const srcIndex = rows.indexOf(dragSrcEl);
-        const targetIndex = rows.indexOf(dropTarget);
-
-        // Move row in DOM
         if (srcIndex < targetIndex) {
             dropTarget.after(dragSrcEl);
         } else {
             dropTarget.before(dragSrcEl);
         }
 
-        // Cleanup styles
-        dropTarget.style.background = '';
-        dragSrcEl.style.opacity = '1';
-
-        // Recalculate Order based on new DOM position
-        await updateOrderFromDom(srcType, container);
+        const type = dragSrcEl.getAttribute('data-type');
+        updateOrderFromDom(type, container);
     }
+
+    // Cleanup
+    const cols = document.querySelectorAll('.draggable-item, .draggable-row');
+    cols.forEach(col => {
+        col.classList.remove('over');
+        col.classList.remove('dragging');
+        col.style.opacity = '1';
+    });
+
     return false;
 };
 
 async function updateOrderFromDom(type, container) {
     if (!container) return;
 
-    const rows = Array.from(container.querySelectorAll('tr'));
+    const items = Array.from(container.children).filter(el => el.classList.contains('draggable-item') || el.classList.contains('draggable-row'));
     const updates = [];
 
     // Show visual feedback
     const addBtnText = document.getElementById('addBtnText');
-    const originalBtnText = addBtnText.textContent;
-    addBtnText.textContent = "Saving Order...";
+    let originalBtnText = '';
+    if (addBtnText) {
+        originalBtnText = addBtnText.textContent;
+        addBtnText.textContent = "Saving Order...";
+    }
+
 
     // Determine Table Name and Local Update Logic
     let tableName = 'products'; // Default
     if (type === 'category') tableName = 'categories';
     else if (type === 'testimonial') tableName = 'testimonials';
 
-    rows.forEach((row, index) => {
-        const id = row.getAttribute('data-id');
+    items.forEach((item, index) => {
+        const id = item.getAttribute('data-id');
         const newOrder = index + 1; // 1-based index
 
         // update visual order cell if exists
         // Product has .order-cell. Category has it as 4th cell.
         if (type === 'product') {
-            const cell = row.querySelector('.order-cell');
-            if (cell) cell.textContent = newOrder;
+            item.setAttribute('data-order', newOrder); // Update data-order attribute
         } else if (type === 'category') {
             // 4th cell is display_order
-            const cells = row.querySelectorAll('td');
+            const cells = item.querySelectorAll('td');
             if (cells[3]) cells[3].textContent = newOrder;
         }
         // Testimonials currently don't show order, so nothing to update visually in table
@@ -1057,6 +1123,8 @@ if (testimonialForm) {
         }
     });
 }
+
+
 
 // Delete Product
 window.deleteProduct = async (productId) => {
