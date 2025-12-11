@@ -1641,13 +1641,14 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
                 <p class="card-desc" style="margin-bottom: 15px;">${product.product_description || ''}</p>
                 
                 <div class="info-toggles">
-                    <button class="toggle-btn" onclick="toggleInfo('${contentIngId}', this)">View Ingredients</button>
-                    ${Object.keys(nutInfo).length > 0 ? `<button class="toggle-btn" onclick="toggleInfo('${contentNutId}', this)">Nutrition Info</button>` : ''}
+                    ${product.ingredients ? `<button class="toggle-btn" onclick="switchInfoTab('${contentIngId}', this)">Ingredients</button>` : ''}
+                    ${Object.keys(nutInfo).length > 0 && (nutInfo.calories || nutInfo.protein || nutInfo.fat) ? `<button class="toggle-btn" onclick="switchInfoTab('${contentNutId}', this)">Nutrition Info</button>` : ''}
+                    ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('content-usage-${product.id}', this)">Usage Instructions</button>` : ''}
                 </div>
 
                 <div id="${contentIngId}" class="info-content-box" style="display: none;">
                     <strong>Ingredients:</strong><br>
-                    ${product.ingredients || 'Not listed'}
+                    ${product.ingredients || ''}
                 </div>
 
                 <div id="${contentNutId}" class="info-content-box" style="display: none;">
@@ -1661,6 +1662,11 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
                     ${nutInfo.fiber ? `Fiber: ${nutInfo.fiber}<br>` : ''}
                     ${nutInfo.sugars ? `Sugars: ${nutInfo.sugars}<br>` : ''}
                     ${nutInfo.sodium ? `Sodium: ${nutInfo.sodium}<br>` : ''}
+                </div>
+
+                <div id="content-usage-${product.id}" class="info-content-box" style="display: none;">
+                    <strong>Usage Instructions:</strong><br>
+                    ${product.serving_suggestion || ''}
                 </div>
 
                 <div class="variant-info" style="margin-bottom: 20px;">
@@ -1695,17 +1701,32 @@ window.closeOverlay = function (category, selectId) {
 };
 
 // Global toggle function
-window.toggleInfo = function (contentId, btn) {
-    const box = document.getElementById(contentId);
-    if (box.style.display === 'none') {
-        box.style.display = 'block';
+// Global switch tab function
+window.switchInfoTab = function (contentId, btn) {
+    // 1. Find container of this button
+    const container = btn.closest('.revealed-info');
+
+    // 2. Find all content boxes and buttons within this container
+    const allBoxes = container.querySelectorAll('.info-content-box');
+    const allBtns = container.querySelectorAll('.toggle-btn');
+    const targetBox = document.getElementById(contentId);
+
+    // 3. Logic:
+    // If clicking an already active tab -> Close it (COLLAPSE)
+    // If clicking a new tab -> Close others, Open new one
+
+    const isActive = btn.classList.contains('active');
+
+    // Reset ALL first
+    allBoxes.forEach(box => box.style.display = 'none');
+    allBtns.forEach(b => b.classList.remove('active'));
+
+    if (!isActive) {
+        // Open the target
+        targetBox.style.display = 'block';
         btn.classList.add('active');
-        btn.innerText = 'Hide ' + btn.innerText.replace('View ', '');
-    } else {
-        box.style.display = 'none';
-        btn.classList.remove('active');
-        btn.innerText = btn.innerText.replace('Hide ', 'View ');
     }
+    // If it WAS active, we did the reset, so now it's closed (Toggle behavior preserved)
 };
 
 // Global switch product function
