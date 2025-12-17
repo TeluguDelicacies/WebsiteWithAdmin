@@ -399,6 +399,10 @@ async function fetchSettings() {
             document.getElementById('setFaviconUrl').value = data.fav_icon_url || '';
             document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
             document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
+            document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
+            document.getElementById('setShowTicker').checked = data.show_product_ticker !== false; // Default true
+            document.getElementById('setShowQuickLayout').checked = data.show_quick_layout || false; // Default false
+            document.getElementById('setShowMrp').checked = data.show_mrp !== false; // Default true
         }
     } catch (e) {
         console.error('Settings fetch error:', e);
@@ -426,8 +430,15 @@ if (siteSettingsForm) {
             fssai_number: document.getElementById('setFssai').value,
             logo_url: document.getElementById('setLogoUrl').value,
             fav_icon_url: document.getElementById('setFaviconUrl').value,
+            fav_icon_url: document.getElementById('setFaviconUrl').value,
             hero_background_url: document.getElementById('setHeroBgUrl').value,
-            product_placeholder_url: document.getElementById('setProductPlaceholder').value
+            product_placeholder_url: document.getElementById('setProductPlaceholder').value,
+            hero_background_url: document.getElementById('setHeroBgUrl').value,
+            product_placeholder_url: document.getElementById('setProductPlaceholder').value,
+            product_placeholder_url: document.getElementById('setProductPlaceholder').value,
+            show_product_ticker: document.getElementById('setShowTicker').checked,
+            show_quick_layout: document.getElementById('setShowQuickLayout').checked,
+            show_mrp: document.getElementById('setShowMrp').checked
         };
 
         try {

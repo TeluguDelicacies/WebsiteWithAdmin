@@ -1480,34 +1480,50 @@ function renderProducts(products, categories) {
 
     // 1. Render to Showcase Ticker
     if (productScroll) {
-        productScroll.innerHTML = '';
-        products.forEach(product => {
-            const showcaseItem = document.createElement('div');
-            showcaseItem.className = 'product-item';
+        // Toggle visibility based on settings
+        const showTicker = window.currentSiteSettings?.show_product_ticker !== false; // Default true if undefined
+        const showcaseSection = productScroll.closest('.product-showcase');
 
-            // Allow dynamic placeholder from site settings if needed, but for now specific or default
-            let localImage = product.showcase_image;
-            if (!localImage) {
-                localImage = window.currentSiteSettings?.product_placeholder_url;
+        if (showcaseSection) {
+            showcaseSection.style.display = showTicker ? 'block' : 'none';
+        }
+
+        if (showTicker) {
+            productScroll.innerHTML = '';
+            products.forEach(product => {
+                const showcaseItem = document.createElement('div');
+                showcaseItem.className = 'product-item';
+
+                // Allow dynamic placeholder from site settings if needed, but for now specific or default
+                let localImage = product.showcase_image;
+                if (!localImage) {
+                    localImage = window.currentSiteSettings?.product_placeholder_url;
+                }
+
+                showcaseItem.innerHTML = `
+                    <img src="${localImage}" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
+                    <h3>${product.product_name}</h3>
+                    <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
+                `;
+                productScroll.appendChild(showcaseItem);
+            });
+
+            // Duplicate for seamless scrolling
+            if (products.length > 0) {
+                const items = Array.from(productScroll.children);
+                items.forEach(item => productScroll.appendChild(item.cloneNode(true)));
             }
-
-            showcaseItem.innerHTML = `
-                <img src="${localImage}" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
-                <h3>${product.product_name}</h3>
-                <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
-            `;
-            productScroll.appendChild(showcaseItem);
-        });
-
-        // Duplicate for seamless scrolling
-        if (products.length > 0) {
-            const items = Array.from(productScroll.children);
-            items.forEach(item => productScroll.appendChild(item.cloneNode(true)));
         }
     }
 
     // 2. Render Categories
     if (categoriesContainer && categories.length > 0) {
+        // QUICK COMMERCE LAYOUT CHECK
+        if (window.currentSiteSettings?.show_quick_layout) {
+            renderQuickLayout(products, categories, categoriesContainer);
+            return;
+        }
+
         categoriesContainer.innerHTML = '';
 
         categories.forEach(category => {
@@ -1807,4 +1823,85 @@ async function fetchAndRenderTestimonials() {
                 </div>
             </div>`;
     }
+}
+
+/**
+ * Renders the Quick Commerce Grid Layout
+ */
+function renderQuickLayout(products, categories, container) {
+    container.innerHTML = '<div class="quick-layout-grid"></div>';
+    const grid = container.querySelector('.quick-layout-grid');
+
+    const showMrp = window.currentSiteSettings?.show_mrp !== false; // Default true if undefined
+
+    categories.forEach(category => {
+        // Filter products
+        // Normalize both sides to be safe
+        const targetSlug = category.slug.toLowerCase().trim();
+
+        const catProducts = products.filter(p => {
+            const rawCat = (p.product_category || '').toLowerCase().trim();
+            // Try matching either direct value or slugified value
+            const slugified = rawCat.replace(/\s+/g, '-');
+            return rawCat === targetSlug || slugified === targetSlug || rawCat === category.id;
+        });
+
+        // Debugging to help identify why products might be missing
+        // console.log(`Category: ${category.title} (${targetSlug}) - Found: ${catProducts.length}`);
+
+        if (catProducts.length === 0) return;
+
+        // "Ready To Eat" spans full width
+        const isFullWidth = category.slug === 'ready-to-eat';
+        const card = document.createElement('div');
+        card.className = `quick-card ${isFullWidth ? 'span-full' : ''}`;
+
+        let productsHtml = '';
+        catProducts.forEach(product => {
+            // Handle image fallback
+            let localImage = product.showcase_image;
+            // Check if image path is valid (basic check)
+            if (!localImage || localImage.trim() === '') {
+                localImage = window.currentSiteSettings?.product_placeholder_url;
+            }
+            // Fallback for onerror handled in HTML attributes below
+            const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
+
+            let variants = [];
+            try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+
+            let priceDisplay = product.mrp || 0;
+            let qtyDisplay = product.net_weight || '';
+
+            if (variants && variants.length > 0) {
+                priceDisplay = variants[0].price;
+                qtyDisplay = variants[0].quantity;
+            }
+
+            productsHtml += `
+            <div class="quick-product-item" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
+                <img src="${localImage}" 
+                     alt="${product.product_name}" 
+                     id="img-${product.id}"
+                     onerror="this.onerror=null; this.src='${fallbackImg}';">
+                
+                <div class="quick-product-item-info">
+                    <h4>${product.product_name}</h4>
+                    <div class="weight">${qtyDisplay}</div>
+                    ${showMrp ? `<div class="price">₹${priceDisplay}</div>` : ''}
+                    <button class="add-btn">ADD</button>
+                </div>
+            </div>
+            `;
+        });
+
+        card.innerHTML = `
+            <h3>${category.title}</h3>
+            <p class="quick-subtitle">${category.telugu_title || ''}</p>
+            <div class="quick-product-scroll">
+                ${productsHtml}
+            </div>
+        `;
+        grid.appendChild(card);
+    });
 }
