@@ -1398,6 +1398,45 @@ async function fetchSiteSettings() {
                     mapContainer.innerHTML = `<iframe src="${mapSrc}" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
                 }
             }
+
+            // QUICK COMMERCE HERO LOGIC
+            // Overrides standard hero settings if Quick Layout is enabled
+            if (data.show_quick_layout) {
+                const heroSection = document.querySelector('.hero');
+                const descContainer = document.getElementById('hero-description-container');
+
+                if (heroSection) {
+                    heroSection.classList.add('hero-quick-commerce');
+                    // Use dynamic image from settings or fallback to default
+                    const bgUrl = data.quick_hero_image_url || './images/quick_commerce_hero.png';
+                    heroSection.style.backgroundImage = `url('${bgUrl}')`;
+                }
+
+                // Add global class for scoping other styles
+                document.body.classList.add('quick-commerce-mode');
+
+                // Update Text with Quick Commerce Copy (Dynamic or Default)
+                const titleEl = document.getElementById('hero-title');
+                const teluguSubtitleEl = document.getElementById('hero-telugu-subtitle');
+                const subtitleEl = document.getElementById('hero-subtitle');
+                // descContainer already declared above
+
+                if (titleEl) titleEl.innerText = data.quick_hero_title || "Groceries in Minutes";
+                if (teluguSubtitleEl) teluguSubtitleEl.innerText = data.quick_hero_telugu_subtitle || "అవసరమైన సరుకులు, నిమిషాల్లో మీ ఇంటికి";
+                if (subtitleEl) subtitleEl.innerText = data.quick_hero_subtitle || "Freshness delivered at the speed of life.";
+
+                // Hide the long paragraph description for a cleaner look
+                if (descContainer) descContainer.style.display = 'none';
+            } else {
+                // Ensure class is removed if toggled off (though page reload usually happens on meaningful state change)
+                const heroSection = document.querySelector('.hero');
+                const descContainer = document.getElementById('hero-description-container');
+
+                if (heroSection) heroSection.classList.remove('hero-quick-commerce');
+                document.body.classList.remove('quick-commerce-mode');
+                if (descContainer) descContainer.style.display = 'block';
+            }
+
         }
         return data;
 
@@ -1455,6 +1494,7 @@ async function fetchAndRenderProducts() {
             showToast('Database connected but no products found.', 'info');
         }
 
+        window.allProductsCache = products || [];
         renderProducts(products || [], categories);
 
         // Re-initialize animations and controls after rendering
@@ -1548,6 +1588,9 @@ function renderProducts(products, categories) {
                     </div>
                     <div class="card-body">
                         <h3 class="card-title">${category.title}</h3>
+                        ${category.sub_brand_logo_url
+                    ? `<img src="${category.sub_brand_logo_url}" class="sub-brand-logo-img" alt="${category.sub_brand || 'Sub Brand'}">`
+                    : (category.sub_brand ? `<p class="category-sub-brand">${category.sub_brand}</p>` : '')}
                         <p class="telugu-subtitle">${category.telugu_title || ''}</p>
                         <p class="card-desc">${category.description || ''}</p>
                         <div class="dropdown-wrapper">
@@ -1828,80 +1871,349 @@ async function fetchAndRenderTestimonials() {
 /**
  * Renders the Quick Commerce Grid Layout
  */
+/**
+ * Renders the Quick Commerce Layout (Desktop Grid + Mobile Tabs)
+ */
 function renderQuickLayout(products, categories, container) {
-    container.innerHTML = '<div class="quick-layout-grid"></div>';
-    const grid = container.querySelector('.quick-layout-grid');
+    container.innerHTML = '';
+    const showMrp = window.currentSiteSettings?.show_mrp !== false;
 
-    const showMrp = window.currentSiteSettings?.show_mrp !== false; // Default true if undefined
+    // Create wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'quick-layout-wrapper';
 
-    categories.forEach(category => {
-        // Filter products
-        // Normalize both sides to be safe
-        const targetSlug = category.slug.toLowerCase().trim();
+    // --- MOBILE TABS NAVIGATION ---
+    const mobileNav = document.createElement('div');
+    mobileNav.className = 'quick-mobile-nav';
+    mobileNav.innerHTML = `<div class="category-tabs" id="quickCategoryTabs"></div>`;
 
-        const catProducts = products.filter(p => {
+    // --- MOBILE CONTENT AREA ---
+    const mobileContent = document.createElement('div');
+    mobileContent.className = 'quick-mobile-content';
+    mobileContent.id = 'quickMobileContent';
+
+    // --- DESKTOP GRID ---
+    const desktopGrid = document.createElement('div');
+    desktopGrid.className = 'quick-layout-grid';
+
+    // Filter categories that have products
+    const activeCategories = categories.filter(cat => {
+        const targetSlug = cat.slug.toLowerCase().trim();
+        return products.some(p => {
             const rawCat = (p.product_category || '').toLowerCase().trim();
-            // Try matching either direct value or slugified value
             const slugified = rawCat.replace(/\s+/g, '-');
-            return rawCat === targetSlug || slugified === targetSlug || rawCat === category.id;
+            return rawCat === targetSlug || slugified === targetSlug || rawCat === cat.id;
         });
+    });
 
-        // Debugging to help identify why products might be missing
-        // console.log(`Category: ${category.title} (${targetSlug}) - Found: ${catProducts.length}`);
+    if (activeCategories.length === 0) {
+        container.innerHTML = '<p class="text-center">No products found for Quick Commerce.</p>';
+        return;
+    }
 
-        if (catProducts.length === 0) return;
+    // 1. Build Mobile Tabs & Content
+    activeCategories.forEach((cat, index) => {
+        // Tab
+        const tab = document.createElement('button');
+        tab.className = `cat-tab-btn ${index === 0 ? 'active' : ''}`;
+        tab.innerText = cat.title;
+        tab.onclick = () => switchQuickTab(cat.slug);
+        mobileNav.querySelector('.category-tabs').appendChild(tab);
 
-        // "Ready To Eat" spans full width
-        const isFullWidth = category.slug === 'ready-to-eat';
+        // Content Container (Initially hidden except first)
+        const contentDiv = document.createElement('div');
+        contentDiv.className = `quick-tab-pane ${index === 0 ? 'active' : ''}`;
+        contentDiv.id = `tab-pane-${cat.slug}`;
+
+        // Render Products for this category
+        const catProducts = getProductsForCategory(products, cat);
+        contentDiv.innerHTML = renderQuickProductsHTML(catProducts, showMrp);
+
+        mobileContent.appendChild(contentDiv);
+
+        // 2. Build Desktop Grid Card
         const card = document.createElement('div');
+        // Ready to eat spans full
+        const isFullWidth = cat.slug === 'ready-to-eat';
         card.className = `quick-card ${isFullWidth ? 'span-full' : ''}`;
 
-        let productsHtml = '';
-        catProducts.forEach(product => {
-            // Handle image fallback
-            let localImage = product.showcase_image;
-            // Check if image path is valid (basic check)
-            if (!localImage || localImage.trim() === '') {
-                localImage = window.currentSiteSettings?.product_placeholder_url;
-            }
-            // Fallback for onerror handled in HTML attributes below
-            const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
-
-            let variants = [];
-            try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
-
-            let priceDisplay = product.mrp || 0;
-            let qtyDisplay = product.net_weight || '';
-
-            if (variants && variants.length > 0) {
-                priceDisplay = variants[0].price;
-                qtyDisplay = variants[0].quantity;
-            }
-
-            productsHtml += `
-            <div class="quick-product-item" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
-                <img src="${localImage}" 
-                     alt="${product.product_name}" 
-                     id="img-${product.id}"
-                     onerror="this.onerror=null; this.src='${fallbackImg}';">
-                
-                <div class="quick-product-item-info">
-                    <h4>${product.product_name}</h4>
-                    <div class="weight">${qtyDisplay}</div>
-                    ${showMrp ? `<div class="price">₹${priceDisplay}</div>` : ''}
-                    <button class="add-btn">ADD</button>
+        card.innerHTML = `
+            <div class="quick-header-row">
+                <div class="quick-header-text">
+                    <h3>${cat.title}</h3>
+                    ${cat.sub_brand ? `<p class="quick-category-tagline">${cat.sub_brand}</p>` : ''}
+                    <p class="quick-subtitle">${cat.telugu_title || ''}</p>
+                </div>
+                <div class="quick-header-action">
+                    <a href="#" class="view-all-link" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank'); return false;">View All <i class="fas fa-chevron-right"></i></a>
                 </div>
             </div>
-            `;
-        });
-
-        card.innerHTML = `
-            <h3>${category.title}</h3>
-            <p class="quick-subtitle">${category.telugu_title || ''}</p>
-            <div class="quick-product-scroll">
-                ${productsHtml}
+            <div class="quick-product-scroll" id="scroll-${cat.slug}">
+                ${renderQuickProductsHTML(catProducts, showMrp)}
             </div>
         `;
-        grid.appendChild(card);
+        desktopGrid.appendChild(card);
     });
+
+    // Assemble DOM
+    // Mobile Wrapper
+    const mobileWrapper = document.createElement('div');
+    mobileWrapper.className = 'mobile-only-layout';
+    mobileWrapper.appendChild(mobileNav);
+    mobileWrapper.appendChild(mobileContent);
+
+    // Desktop Wrapper
+    const desktopWrapper = document.createElement('div');
+    desktopWrapper.className = 'desktop-only-layout';
+    desktopWrapper.appendChild(desktopGrid);
+
+    container.appendChild(mobileWrapper);
+    container.appendChild(desktopWrapper);
+
+    // Initialize Drag Scroll for Desktop Lists
+    setTimeout(() => {
+        document.querySelectorAll('.quick-product-scroll').forEach(el => {
+            enableDragScroll(el);
+        });
+    }, 500);
+}
+
+/**
+ * Filter Helper
+ */
+function getProductsForCategory(products, category) {
+    const targetSlug = category.slug.toLowerCase().trim();
+    return products.filter(p => {
+        const rawCat = (p.product_category || '').toLowerCase().trim();
+        const slugified = rawCat.replace(/\s+/g, '-');
+        return rawCat === targetSlug || slugified === targetSlug || rawCat === category.id;
+    });
+}
+
+/**
+ * HTML Generator Helper
+ */
+function renderQuickProductsHTML(products, showMrp) {
+    if (!products.length) return '<p class="text-muted">No products.</p>';
+
+    return products.map(product => {
+        let localImage = product.showcase_image;
+        if (!localImage || localImage.trim() === '') localImage = window.currentSiteSettings?.product_placeholder_url;
+        const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
+
+        let variants = [];
+        try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+
+        let priceDisplay = product.mrp || 0;
+        let qtyDisplay = product.net_weight || '';
+
+        if (variants && variants.length > 0) {
+            priceDisplay = variants[0].price; // Sales Price
+            qtyDisplay = variants[0].quantity;
+        }
+
+        // Escape single quotes in product name for the argument
+        const pId = product.id;
+
+        const extraClass = showMrp ? '' : 'no-price';
+
+        return `
+        <div class="quick-product-item ${extraClass}" onclick="window.openQuickProductModal('${pId}')">
+            <img src="${localImage}" 
+                    alt="${product.product_name}" 
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='${fallbackImg}';">
+            
+            <div class="quick-product-item-info">
+                <h4>${product.product_name}</h4>
+                <div class="weight">${qtyDisplay}</div>
+                ${showMrp ? `<div class="price-row">
+                    <span class="price">₹${priceDisplay}</span>
+                    ${product.mrp && product.mrp > priceDisplay ? `<span class="mrp-strike">₹${product.mrp}</span>` : ''}
+                </div>` : ''}
+            </div>
+        </div>
+        `;
+    }).join('');
+}
+
+// ----------------------------------------------------
+// QUICK PRODUCT MODAL LOGIC
+// ----------------------------------------------------
+
+window.openQuickProductModal = function (productId) {
+    // Ensure we have a cache
+    const cache = window.allProductsCache || [];
+
+    // loose comparison or string conversion to be safe
+    const currentIndex = cache.findIndex(p => String(p.id) === String(productId));
+
+    if (currentIndex === -1) return;
+
+    const product = cache[currentIndex];
+
+    // Navigation Indices (Looping)
+    const prevIndex = (currentIndex - 1 + cache.length) % cache.length;
+    const nextIndex = (currentIndex + 1) % cache.length;
+    const prevId = cache[prevIndex].id;
+    const nextId = cache[nextIndex].id;
+
+    // 2. Remove ANY existing modals to prevent duplicates (Nuclear Fix)
+    const existingModals = document.querySelectorAll('#quickProductModal');
+    existingModals.forEach(m => m.remove());
+
+    // 3. Create Fresh Modal
+    let modal = document.createElement('div');
+    modal.id = 'quickProductModal';
+    modal.className = 'quick-product-detail-modal';
+    document.body.appendChild(modal);
+
+    // Add Listeners
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // Global ESC Listener (Note: Adding this repeatedly is bad if we don't clean it up, 
+    // but anonymous functions can't be removed easily. 
+    // Better to add a named function or check if listener exists? 
+    // Or just attach ONCE to document. 
+    // Actually, if we attach to document every time we open, we get stack of listeners.
+    // Let's attach to the MODAL itself (tabindex) or handle document logic globally ONCE.
+    // For now, let's just use a simple check or attach to document OUTSIDE function.
+    // OR, attach 'keydown' to window only once.
+    // Let's rely on the previous singleton logic for the LISTENER, but we removed the modal.
+    // We should put the listener logic OUTSIDE this function to be safe.
+
+    // Prepare Content
+    let localImage = product.showcase_image;
+    if (!localImage || localImage.trim() === '') localImage = window.currentSiteSettings?.product_placeholder_url;
+    const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
+
+    let variants = [];
+    try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+    let quantitiesText = variants.length > 0 ? variants.map(v => v.quantity).join(', ') : (product.net_weight || 'Standard');
+
+    let nutInfo = {};
+    try { nutInfo = typeof product.nutrition_info === 'string' ? JSON.parse(product.nutrition_info) : product.nutrition_info; } catch (e) { nutInfo = {}; }
+
+    // IDs for toggles
+    const contentIngId = `q-content-ing-${product.id}`;
+    const contentNutId = `q-content-nut-${product.id}`;
+    const contentUsageId = `q-content-usage-${product.id}`;
+
+    modal.innerHTML = `
+        <div class="quick-modal-content">
+            <button class="quick-modal-close" onclick="document.getElementById('quickProductModal').style.display='none'">&times;</button>
+            
+            <div class="quick-modal-body revealed-info"> <!-- Added revealed-info class for switchInfoTab comaptibility -->
+                <img src="${localImage}" alt="${product.product_name}" onerror="this.src='${fallbackImg}'">
+                <h3>${product.product_name}</h3>
+                <p class="quick-modal-tagline">${product.product_tagline || ''}</p>
+                <p class="quick-modal-desc">${product.product_description || ''}</p>
+                
+                <!-- Toggles Container -->
+                <div class="info-toggles quick-toggles">
+                    ${product.ingredients ? `<button class="toggle-btn" onclick="switchInfoTab('${contentIngId}', this)">Ingredients</button>` : ''}
+                    ${Object.keys(nutInfo).length > 0 ? `<button class="toggle-btn" onclick="switchInfoTab('${contentNutId}', this)">Nutrition</button>` : ''}
+                    ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('${contentUsageId}', this)">Usage</button>` : ''}
+                </div>
+
+                <!-- Content Sections -->
+                <div id="${contentIngId}" class="info-content-box" style="display: none;">
+                    <strong>Ingredients:</strong><br>${product.ingredients || ''}
+                </div>
+
+                <div id="${contentNutId}" class="info-content-box" style="display: none;">
+                    <strong>Nutrition:</strong><br>
+                    ${nutInfo.calories ? `Calories: ${nutInfo.calories}<br>` : ''}
+                    ${nutInfo.protein ? `Protein: ${nutInfo.protein}<br>` : ''}
+                    ${nutInfo.fat ? `Fat: ${nutInfo.fat}<br>` : ''}
+                </div>
+
+                <div id="${contentUsageId}" class="info-content-box" style="display: none;">
+                    <strong>Usage:</strong><br>${product.serving_suggestion || ''}
+                </div>
+
+                <div class="quick-modal-footer">
+                     <div class="variant-info">
+                        <strong>Available:</strong> ${quantitiesText}
+                    </div>
+                    <button class="whatsapp-buy-btn" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
+                        <i class="fab fa-whatsapp"></i> Buy on WhatsApp
+                    </button>
+                </div>
+
+                <!-- Navigation -->
+                <div class="quick-modal-nav">
+                    <button class="nav-arrow-btn prev-btn" onclick="window.openQuickProductModal('${prevId}')">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="nav-label">${currentIndex + 1} / ${cache.length}</span>
+                    <button class="nav-arrow-btn next-btn" onclick="window.openQuickProductModal('${nextId}')">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 4. Show Modal
+    modal.style.display = 'flex';
+};
+
+/**
+ * Switch Tab Function
+ */
+window.switchQuickTab = function (slug) {
+    // Update Buttons
+    document.querySelectorAll('.cat-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active'); // Assumes triggered by click event
+
+    // Update Panes
+    document.querySelectorAll('.quick-tab-pane').forEach(pane => pane.classList.remove('active'));
+    document.getElementById(`tab-pane-${slug}`)?.classList.add('active');
+}
+
+/**
+ * Enbles Drag-to-Scroll on any container
+ */
+function enableDragScroll(element) {
+    if (!element) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    element.style.cursor = 'grab';
+
+    element.addEventListener('mousedown', (e) => {
+        isDown = true;
+        element.style.cursor = 'grabbing';
+        startX = e.pageX - element.offsetLeft;
+        scrollLeft = element.scrollLeft;
+
+        // Prevent default drag behavior of images inside
+        e.preventDefault();
+    });
+
+    element.addEventListener('mouseleave', () => {
+        isDown = false;
+        element.style.cursor = 'grab';
+    });
+
+    element.addEventListener('mouseup', () => {
+        isDown = false;
+        element.style.cursor = 'grab';
+    });
+
+    element.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - element.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll-fast
+        element.scrollLeft = scrollLeft - walk;
+    });
+
+    // Touch is handled natively by overflow-x: auto, checking that...
+    // But we can add Momentum if needed (usually native is fine)
 }

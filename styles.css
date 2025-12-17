@@ -621,7 +621,20 @@ Enhanced visual appeal with modern design
   background-repeat: no-repeat;
   background-blend-mode: normal;
   overflow: hidden;
+  transition: min-height var(--transition-normal);
 }
+
+.hero.hero-quick-commerce {
+  min-height: 450px;
+  /* Sleek, shorter height */
+}
+
+@media (max-width: 768px) {
+  .hero.hero-quick-commerce {
+    min-height: 350px;
+  }
+}
+
 
 .hero::before {
   content: '';
@@ -2611,4 +2624,436 @@ body {
   color: white;
   padding-bottom: env(safe-area-inset-bottom);
   /* Handle mobile safe areas */
+}
+
+/* 
+========================================
+QUICK COMMERCE & LAYOUT REFINEMENTS
+========================================
+*/
+
+/* 1. Reduced Padding between Hero and Content in Quick Mode */
+.hero.hero-quick-commerce+section,
+.hero.hero-quick-commerce+.product-showcase+section {
+  padding-top: var(--space-8) !important;
+}
+
+/* 2. Mobile Tabs Styles */
+.mobile-only-layout {
+  display: none;
+}
+
+.desktop-only-layout {
+  display: block;
+}
+
+.quick-mobile-nav {
+  position: sticky;
+  top: 70px;
+  /* Below header */
+  z-index: 100;
+  background: white;
+  padding: 10px 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin: 0 -1rem 1rem -1rem;
+  /* Negative margin to span full width */
+}
+
+.category-tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 0 1rem;
+  scrollbar-width: none;
+}
+
+.category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-tab-btn {
+  border: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cat-tab-btn.active {
+  background: var(--color-primary-blue);
+  color: white;
+  border-color: var(--color-primary-blue);
+  box-shadow: 0 2px 8px rgba(0, 119, 182, 0.3);
+}
+
+.quick-tab-pane {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.quick-tab-pane.active {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* 2 columns on mobile for products */
+  gap: 10px;
+}
+
+/* Mobile Product Item Adjustments */
+.quick-tab-pane .quick-product-item {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin-bottom: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  /* Force column on mobile tabs view? User said "tabs for each", likely grid inside tab is better than list */
+}
+
+/* Responsive Switching */
+@media (max-width: 768px) {
+  .mobile-only-layout {
+    display: block;
+  }
+
+  .desktop-only-layout {
+    display: none;
+  }
+
+  /* Ensure Quick Product Cards look good in Grid */
+  .quick-tab-pane .quick-product-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .quick-tab-pane .quick-product-item img {
+    width: 100%;
+    height: 120px;
+    margin: 0 0 10px 0;
+  }
+
+  /* Padding adjustments */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+
+/* 3. Drag Scroll & MRP Styles */
+.quick-product-scroll {
+  scrollbar-width: none;
+  /* Keep hidden, use drag */
+}
+
+.price-row {
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.mrp-strike {
+  font-size: 0.8rem;
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Header link in Desktop Quick Card */
+.quick-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  padding: 0 4px;
+  /* Align with scroll items */
+}
+
+.view-all-link {
+  font-size: 0.85rem;
+  color: var(--color-primary-blue);
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.view-all-link:hover {
+  color: var(--color-primary-dark);
+}
+
+/* Sub Brand Styles */
+.category-sub-brand {
+  font-size: 0.9rem;
+  color: var(--color-primary-blue);
+  font-weight: 600;
+  margin: -10px 0 10px 0;
+  /* Adjust spacing nicely under title */
+  font-style: italic;
+}
+
+/* 
+   QUICK COMMERCE SPECIFIC LAYOUT OVERRIDES 
+   Triggered by .quick-commerce-mode on body
+*/
+
+/* 1. Hero Reduction (50% less space) */
+.hero.hero-quick-commerce {
+  min-height: 250px !important;
+  /* Was 450px */
+  padding-top: 80px !important;
+  /* Fix for Header Overlap (70px header + 10px) */
+}
+
+@media (max-width: 768px) {
+  .hero.hero-quick-commerce {
+    min-height: 200px !important;
+    /* Was 350px/Mobile */
+  }
+}
+
+/* 2. Our Collections Compact (Size down 30%, Move Left, Less Padding) */
+.quick-commerce-mode #product-categories {
+  padding-top: 0.5rem !important;
+  /* Further Reduced padding */
+  padding-bottom: 0.5rem !important;
+}
+
+.quick-commerce-mode #product-categories .section-title {
+  text-align: left !important;
+  font-size: 2rem !important;
+  /* Reduced from standard size */
+  margin-bottom: 0.5rem !important;
+  padding-left: 1rem;
+  /* Align with container padding */
+}
+
+/* Mobile adjust for title alignment if needed */
+@media (max-width: 768px) {
+  .quick-commerce-mode #product-categories .section-title {
+    font-size: 1.5rem !important;
+    padding-left: 1rem;
+  }
+}
+
+.quick-category-tagline {
+  font-size: 0.85rem;
+  color: var(--color-secondary-blue);
+  margin: -2px 0 2px 0;
+  font-weight: 500;
+}
+
+/* Sub Brand Logo Styles */
+.sub-brand-logo-img {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  margin: -5px 0 8px 0;
+  display: block;
+}
+
+.quick-sub-brand-logo {
+  height: 60px;
+  /* Large visible logo */
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  margin: 0;
+  display: block;
+}
+
+/* Resizing when No Price - Ultra Compact */
+.quick-product-item.no-price {
+  min-height: auto;
+  padding: 5px;
+  width: 100px;
+  /* Force small width if needed, or let grid handle it but reduce contents */
+}
+
+/* Override Mobile Image Height globally for no-price */
+.quick-product-item.no-price img {
+  height: 60px !important;
+  /* Force small height */
+  width: auto !important;
+  margin: 0 auto 5px auto;
+}
+
+/* Adjust grid for mobile tabs when no-price to allow more items? 
+   Currently it is grid-template-columns: repeat(2, 1fr);
+   Maybe for no-price we want more columns? 
+   Let's keep 2 cols but they will be short flats. 
+   Actually, if they are 25% size, maybe 3-4 cols?
+   Let's just shrink the height for now as requested.
+*/
+
+.quick-product-item.no-price .quick-product-item-info {
+  justify-content: center;
+  gap: 2px;
+  padding: 0;
+}
+
+.quick-product-item.no-price .quick-product-item-info h4 {
+  font-size: 0.75rem;
+  /* Smaller text */
+  line-height: 1.1;
+  margin-bottom: 0;
+}
+
+.quick-product-item.no-price .weight {
+  font-size: 0.7rem;
+  display: none;
+  /* Hide weight to save space? Or keep tiny? Let's hide to make it 25% size visual impact */
+}
+
+/* Detail Modal Styles */
+.quick-product-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+
+.quick-modal-content {
+  background: white;
+  width: 90%;
+  /* Responsive width */
+  max-width: 320px;
+  /* Small card style */
+  border-radius: 12px;
+  overflow-y: auto;
+  max-height: 80vh;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.quick-modal-close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  color: #333;
+}
+
+.quick-modal-body {
+  padding: 15px;
+  text-align: center;
+}
+
+.quick-modal-body img {
+  width: 100%;
+  max-height: 180px;
+  /* Much smaller image */
+  object-fit: contain;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+.quick-modal-tagline {
+  font-style: italic;
+  color: var(--color-primary-blue);
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+/* Navigation Styles for Quick Modal */
+.quick-modal-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+}
+
+.quick-modal-nav .nav-arrow-btn {
+  background: var(--bg-secondary);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+.quick-modal-nav .nav-arrow-btn:hover {
+  background: var(--border-light);
+}
+
+.quick-modal-nav .nav-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Toggle Adjustments */
+.quick-toggles {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.quick-toggles .toggle-btn {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+}
+
+.whatsapp-buy-btn {
+  background: #25D366;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 15px;
+  transition: transform 0.2s;
+}
+
+.whatsapp-buy-btn:hover {
+  transform: scale(1.02);
+  background: #20BA5C;
 }

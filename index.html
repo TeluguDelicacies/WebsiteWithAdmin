@@ -306,77 +306,8 @@
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     }
 </script>-->
-        <!-- QR Modal -->
-        <div id="qrModal" style="display:none; position:fixed; inset:0; 
-            background:rgba(0,0,0,0.6); 
-            align-items:center; justify-content:center; 
-            z-index:2000;">
-            <div style="background:#fff; padding:30px; border-radius:16px; 
-              text-align:center; width:320px; max-width:90%;
-              box-shadow:0 8px 24px rgba(0,0,0,0.25); position:relative;">
-                <button onclick="closeQrModal()" style="position:absolute; top:8px; right:8px; 
-                   border:none; background:none; font-size:20px; cursor:pointer;">×</button>
-                <h2 style="margin-bottom:15px; font-family:sans-serif;">Scan to Chat on WhatsApp</h2>
-                <canvas id="qrCodeCanvas"></canvas>
-                <p style="margin-top:10px; font-size:14px; color:#555;">
-                    Point your phone camera at the QR
-                </p>
-            </div>
-        </div>
-
         <!-- QRCode library -->
         <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
-        <script>
-            const whatsappUrl = 'https://wa.me/c/919618519191';
-
-            document.addEventListener("DOMContentLoaded", function () {
-                document.addEventListener("click", function (e) {
-                    const btn = e.target.closest(".whatsapp-btn");
-                    if (!btn) return;
-
-                    // If it's inside an <a>, stop navigation
-                    const anchor = btn.closest("a");
-                    if (anchor) e.preventDefault();
-
-                    redirectToWhatsApp();
-                });
-            });
-
-            function redirectToWhatsApp() {
-                if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-                    // Mobile → open WhatsApp
-                    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-                } else {
-                    // Desktop → show QR
-                    openQrModal();
-                }
-            }
-
-            function openQrModal() {
-                const modal = document.getElementById("qrModal");
-                modal.style.display = "flex";
-
-                // Generate QR only when opening
-                const canvas = document.getElementById("qrCodeCanvas");
-                QRCode.toCanvas(canvas, whatsappUrl, { width: 220 }, function (error) {
-                    if (error) console.error(error);
-                });
-
-                document.body.style.overflow = "hidden";
-            }
-
-            function closeQrModal() {
-                const modal = document.getElementById("qrModal");
-                modal.style.display = "none";
-                document.body.style.overflow = "";
-            }
-
-            // Close if clicking outside modal content
-            document.getElementById("qrModal").addEventListener("click", function (e) {
-                if (e.target.id === "qrModal") closeQrModal();
-            });
-        </script>
 
         <!-- Main JavaScript -->
         <script type="module" src="script.js"></script>

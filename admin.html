@@ -386,6 +386,23 @@
                     </div>
                 </div>
 
+                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Quick Commerce Settings</h4>
+                <div class="form-row">
+                    <div class="form-group"><label>Quick Hero Title</label><input type="text" id="setQuickHeroTitle"
+                            placeholder="Groceries in Minutes"></div>
+                    <div class="form-group"><label>Quick Hero Subtitle</label><input type="text"
+                            id="setQuickHeroSubtitle" placeholder="Freshness delivered..."></div>
+                </div>
+                <div class="form-group"><label>Quick Hero Telugu Subtitle</label><input type="text"
+                        id="setQuickHeroTelugu" placeholder="Telugu text..."></div>
+                <div class="form-group"><label>Quick Hero Image</label>
+                    <div class="upload-group"><input type="text" id="setQuickHeroBg" placeholder="Image URL">
+                        <label for="uploadQuickHeroBg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                        <input type="file" id="uploadQuickHeroBg" accept="image/*" style="display: none;"
+                            onchange="handleAssetUpload(this, 'setQuickHeroBg')">
+                    </div>
+                </div>
+
                 <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Images
                     & Assets</h4>
                 <div class="form-row">
@@ -577,6 +594,19 @@
                         <input type="text" id="catTitle" required>
                     </div>
                     <div class="form-group">
+                        <label>Sub Brand / Tagline</label>
+                        <input type="text" id="catSubBrand" placeholder="e.g. Authentic Taste">
+                    </div>
+                    <div class="form-group">
+                        <label>Sub Brand Logo</label>
+                        <div class="upload-group">
+                            <input type="text" id="catSubBrandLogo" placeholder="Logo URL">
+                            <label for="uploadCatSubBrandLogo" class="upload-btn"><i class="fas fa-upload"></i></label>
+                            <input type="file" id="uploadCatSubBrandLogo" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'catSubBrandLogo')">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label>Slug (Unique ID)</label>
                         <input type="text" id="catSlug" required>
                     </div>
@@ -616,6 +646,43 @@
     <div id="testimonialModal" class="modal">
         <div class="modal-content">
             <h2 id="testimonialModalTitle">Add Testimonial</h2>
+            <form id="testimonialForm" class="contact-form">
+                <input type="hidden" id="testimonialId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <input type="text" id="tName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="tLocation" placeholder="e.g. Hyderabad">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="tMessage" rows="3" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Rating (1-5)</label>
+                        <select id="tRating" class="form-input">
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Related Product (Optional)</label>
+                        <input type="text" id="tProduct" placeholder="e.g. Kura Karam">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="submit-btn" style="margin-top: 0;">Save Testimonial</button>
+                    <button type="button" onclick="closeTestimonialModal()" class="nav-btn"
+                        style="border: 1px solid var(--border-medium);">Cancel</button>
+                </div>
             </form>
         </div>
     </div>

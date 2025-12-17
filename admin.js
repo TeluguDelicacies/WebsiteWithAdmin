@@ -283,6 +283,8 @@ async function loadCategoryData(id) {
     if (cat) {
         document.getElementById('catId').value = cat.id;
         document.getElementById('catTitle').value = cat.title;
+        document.getElementById('catSubBrand').value = cat.sub_brand || '';
+        document.getElementById('catSubBrandLogo').value = cat.sub_brand_logo_url || '';
         document.getElementById('catSlug').value = cat.slug;
         document.getElementById('catTelugu').value = cat.telugu_title || '';
         document.getElementById('catDescription').value = cat.description || '';
@@ -340,6 +342,8 @@ if (categoryForm) {
 
         const formData = {
             title: document.getElementById('catTitle').value,
+            sub_brand: document.getElementById('catSubBrand').value,
+            sub_brand_logo_url: document.getElementById('catSubBrandLogo').value,
             slug: document.getElementById('catSlug').value,
             telugu_title: document.getElementById('catTelugu').value,
             description: document.getElementById('catDescription').value,
@@ -400,6 +404,12 @@ async function fetchSettings() {
             document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
             document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
             document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
+
+            // QC Settings
+            document.getElementById('setQuickHeroTitle').value = data.quick_hero_title || '';
+            document.getElementById('setQuickHeroSubtitle').value = data.quick_hero_subtitle || '';
+            document.getElementById('setQuickHeroTelugu').value = data.quick_hero_telugu_subtitle || '';
+            document.getElementById('setQuickHeroBg').value = data.quick_hero_image_url || '';
             document.getElementById('setShowTicker').checked = data.show_product_ticker !== false; // Default true
             document.getElementById('setShowQuickLayout').checked = data.show_quick_layout || false; // Default false
             document.getElementById('setShowMrp').checked = data.show_mrp !== false; // Default true
@@ -430,12 +440,14 @@ if (siteSettingsForm) {
             fssai_number: document.getElementById('setFssai').value,
             logo_url: document.getElementById('setLogoUrl').value,
             fav_icon_url: document.getElementById('setFaviconUrl').value,
-            fav_icon_url: document.getElementById('setFaviconUrl').value,
             hero_background_url: document.getElementById('setHeroBgUrl').value,
             product_placeholder_url: document.getElementById('setProductPlaceholder').value,
-            hero_background_url: document.getElementById('setHeroBgUrl').value,
-            product_placeholder_url: document.getElementById('setProductPlaceholder').value,
-            product_placeholder_url: document.getElementById('setProductPlaceholder').value,
+            // QC Fields
+            quick_hero_title: document.getElementById('setQuickHeroTitle').value,
+            quick_hero_subtitle: document.getElementById('setQuickHeroSubtitle').value,
+            quick_hero_telugu_subtitle: document.getElementById('setQuickHeroTelugu').value,
+            quick_hero_image_url: document.getElementById('setQuickHeroBg').value,
+
             show_product_ticker: document.getElementById('setShowTicker').checked,
             show_quick_layout: document.getElementById('setShowQuickLayout').checked,
             show_mrp: document.getElementById('setShowMrp').checked
@@ -890,7 +902,43 @@ window.closeProductModal = () => {
     document.body.style.overflow = '';
 };
 
-// ... (Testimonial functions unchanged) ...
+// Testimonial Modal Functions
+window.openTestimonialModal = (id = null) => {
+    testimonialModal.style.display = 'flex';
+    testimonialForm.reset();
+    document.getElementById('testimonialId').value = '';
+
+    if (id) {
+        testimonialModalTitle.textContent = 'Edit Testimonial';
+        loadTestimonialData(id);
+    } else {
+        testimonialModalTitle.textContent = 'Add Testimonial';
+    }
+};
+
+window.closeTestimonialModal = () => {
+    testimonialModal.style.display = 'none';
+};
+
+async function loadTestimonialData(id) {
+    try {
+        const { data, error } = await supabase.from('testimonials').select('*').eq('id', id).single();
+        if (error) throw error;
+
+        if (data) {
+            document.getElementById('testimonialId').value = data.id;
+            document.getElementById('tName').value = data.name;
+            document.getElementById('tLocation').value = data.location || '';
+            document.getElementById('tMessage').value = data.message;
+            document.getElementById('tRating').value = data.rating || 5;
+            document.getElementById('tProduct').value = data.product_name || '';
+        }
+    } catch (e) {
+        console.error('Error loading testimonial:', e);
+        alert('Could not load testimonial data.');
+        closeTestimonialModal();
+    }
+}
 
 // Helper to add variant row
 window.addVariantRow = (data = null) => {
