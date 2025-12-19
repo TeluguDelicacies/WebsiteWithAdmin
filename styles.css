@@ -2611,7 +2611,6 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   /* Force column on mobile tabs view? User said "tabs for each", likely grid inside tab is better than list */
 }
 
-/* Responsive Switching */
 @media (max-width: 768px) {
   .mobile-only-layout {
     display: block;
@@ -2621,30 +2620,114 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
     display: none;
   }
 
-  /* Ensure Quick Product Cards look good in Grid */
-  .quick-tab-pane .quick-product-item {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    width: 100%;
-    max-width: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    /* Enhance visibility */
+  /* --- OPTION 2: POLISHED GRID (FIXED) --- */
+
+  /* Container Padding */
+  .container {
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
+  .quick-tab-pane.active {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Strict 2 columns */
+    gap: 12px;
+    /* Increased gap slightly for breathing room */
+    padding-bottom: 80px;
+    /* More space for bottom safe area */
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Card Style */
+  .quick-tab-pane .quick-product-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+    /* Flexbox text overflow fix */
+    background: white;
+    /* Ensure background is white */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    /* Soft shadow */
+    overflow: hidden;
+    /* Clip content */
+    padding-bottom: 8px;
+    position: relative;
+    border: none;
+  }
+
+  /* Image Container */
   .quick-tab-pane .quick-product-item img {
     width: 100%;
-    height: 140px;
-    object-fit: contain;
-    margin: 0 auto 10px auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    margin: 0;
     display: block;
+    border-bottom: 1px solid #f1f5f9;
   }
 
-  /* Padding adjustments to ensure full width usage */
-  .container {
-    padding-left: 10px;
-    padding-right: 10px;
+  /* Info Block */
+  .quick-tab-pane .quick-product-item-info {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Product Name */
+  .quick-tab-pane .quick-product-item h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Subtitle / Unit */
+  .quick-tab-pane .quick-product-item .weight {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+
+  /* Price Tag (Overlay) */
+  .quick-tab-pane .price-row {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    /* Move to right for better visibility */
+    left: auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 4px 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #0f172a;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  /* Add Button (Full Width Bottom) */
+  .quick-tab-pane .quick-product-item .add-btn {
+    margin-top: auto;
+    /* Push to bottom */
+    width: 100%;
+    border-radius: 6px;
+    background: var(--color-primary-blue);
+    color: white;
+    font-size: 0.8rem;
+    padding: 8px 0;
+    font-weight: 600;
+    border: none;
   }
 }
 
@@ -2709,7 +2792,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
    Triggered by .quick-commerce-mode on body
 */
 
-/* 1. Hero Reduction (50% less space) */
+/* 1. Hero Reduction */
 .hero.hero-quick-commerce {
   min-height: 250px !important;
   /* Was 450px */
@@ -2724,7 +2807,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   }
 }
 
-/* 2. Our Collections Compact (Size down 30%, Move Left, Less Padding) */
+/* 2. Our Collections Compact */
 .quick-commerce-mode #product-categories {
   padding-top: 0.5rem !important;
   /* Further Reduced padding */
@@ -2774,7 +2857,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   display: block;
 }
 
-/* Resizing when No Price - Ultra Compact */
+/* Resizing when No Price */
 .quick-product-item.no-price {
   min-height: auto;
   padding: 5px;
@@ -2817,40 +2900,60 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   /* Hide weight to save space? Or keep tiny? Let's hide to make it 25% size visual impact */
 }
 
-/* Detail Modal Styles */
+/* 
+   PRODUCT DETAIL MODAL (Fixed for Mobile Scaling) 
+*/
 .quick-product-detail-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   display: none;
   justify-content: center;
   align-items: center;
+  /* Center vertically */
   z-index: 2000;
   padding: 20px;
   backdrop-filter: blur(5px);
 }
 
-
 .quick-modal-content {
   background: white;
   width: 90%;
-  /* Responsive width */
-  max-width: 320px;
-  /* Small card style */
-  border-radius: 12px;
+  max-width: 400px;
+  /* Slightly wider */
+  border-radius: 16px;
   overflow-y: auto;
-  max-height: 80vh;
+  max-height: 90vh;
+  /* Allow more height */
   position: relative;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s ease;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .quick-product-detail-modal {
+    padding: 10px;
+    align-items: flex-end;
+    /* Sheet style on mobile */
+  }
+
+  .quick-modal-content {
+    width: 100%;
+    max-width: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    max-height: 85vh;
+  }
 }
 
 @keyframes slideUp {
   from {
-    transform: translateY(20px);
+    transform: translateY(50px);
     opacity: 0;
   }
 
@@ -2862,36 +2965,44 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 .quick-modal-close {
   position: absolute;
-  top: 5px;
-  right: 10px;
-  background: none;
+  top: 10px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   border: none;
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   z-index: 10;
   color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .quick-modal-body {
-  padding: 15px;
+  padding: 20px;
   text-align: center;
+  overflow-y: auto;
 }
 
 .quick-modal-body img {
   width: 100%;
-  max-height: 180px;
-  /* Much smaller image */
+  height: auto;
+  max-height: 250px;
   object-fit: contain;
-  margin-bottom: 10px;
-  border-radius: 8px;
+  margin-bottom: 15px;
+  border-radius: 12px;
 }
 
 .quick-modal-tagline {
   font-style: italic;
   color: var(--color-primary-blue);
-  margin-bottom: 5px;
-  font-size: 0.9rem;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 /* Navigation Styles for Quick Modal */
@@ -2899,20 +3010,25 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
-  padding-top: 10px;
+  margin-top: 20px;
+  padding-top: 15px;
   border-top: 1px solid var(--border-light);
 }
 
 .quick-modal-nav .nav-arrow-btn {
   background: var(--bg-secondary);
   border: none;
-  padding: 8px 12px;
+  padding: 10px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--text-primary);
-  transition: background 0.2s;
+  transition: all 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .quick-modal-nav .nav-arrow-btn:hover {
