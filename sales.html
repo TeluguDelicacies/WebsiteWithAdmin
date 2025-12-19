@@ -55,6 +55,12 @@
 
         // Initialize App
         async function init() {
+            // Expose toggleFlip globally
+            window.toggleFlip = function () {
+                const el = document.querySelector('.gallery-inner');
+                if (el) el.classList.toggle('flipped');
+            };
+
             try {
                 const [settingsRes, productsRes, categoriesRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
@@ -178,66 +184,95 @@
 
                     <!-- Main Content -->
                     <article class="main-product-area">
-                        <div class="product-gallery">
-                            ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
-                            <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
+                        <div class="gallery-wrapper">
+                            <div class="product-gallery" id="productFlipper">
+                                <div class="gallery-inner">
+                                    <!-- Front: Image -->
+                                    <div class="gallery-front">
+                                        ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
+                                        <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
+                                    </div>
+                                    <!-- Back: Description -->
+                                    <div class="gallery-back">
+                                        <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
+                                        <p>${product.product_description || 'No description available.'}</p>
+                                        <button onclick="toggleFlip()" style="padding:8px 20px; border:1px solid var(--border-medium); background:white; border-radius:20px; cursor:pointer;">
+                                            <i class="fas fa-undo"></i> Back to Image
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Toggle Button Below Image -->
+                            <div style="text-align:center; margin-top:15px;">
+                                <button onclick="toggleFlip()" style="color:var(--color-primary-blue); background:transparent; border:none; border-bottom:1px dashed var(--color-primary-blue); cursor:pointer; font-weight:600; font-size:0.9rem;">
+                                    <i class="fas fa-info-circle"></i> View Description
+                                </button>
+                            </div>
                         </div>
                         
-                        <div class="product-details">
-                            ${!category?.sub_brand_logo_url && category?.sub_brand ? `<div style="text-transform:uppercase; font-size:0.8rem; font-weight:700; color:var(--text-muted);">${category.sub_brand}</div>` : ''}
-                            <h1 class="product-title">${product.product_name}</h1>
-                            <div class="telugu-title">${product.product_name_telugu || ''}</div>
 
-                            <div class="price-row">
-                                <span class="current-price" id="view-price">₹${product.price}</span>
-                                <span class="mrp-strike" id="view-mrp" style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
-                                <span class="discount-badge" id="view-discount" style="${product.mrp > product.price ? '' : 'display:none'}"></span>
-                            </div>
 
-                            <div class="selection-area">
-                                ${renderVariants(product)}
-                            </div>
+    <div class="product-details">
+        ${!category?.sub_brand_logo_url && category?.sub_brand ? `<div
+            style="text-transform:uppercase; font-size:0.8rem; font-weight:700; color:var(--text-muted);">
+            ${category.sub_brand}</div>` : ''}
+        <h1 class="product-title">${product.product_name}</h1>
+        <div class="telugu-title">${product.product_name_telugu || ''}</div>
 
-                            
-                            <div class="info-tabs">
-                                <div class="info-btns-row" id="tabs-buttons">
-                                    <!-- Buttons injected here -->
-                                </div>
-                                <div id="ingredients-content" class="info-content-block"></div>
-                                <div id="nutrition-content" class="info-content-block"></div>
-                                <div id="usage-content" class="info-content-block"></div>
-                            </div>
+        <div class="price-row">
+            <span class="current-price" id="view-price">₹${product.price}</span>
+            <span class="mrp-strike" id="view-mrp"
+                style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
+            <span class="discount-badge" id="view-discount"
+                style="${product.mrp > product.price ? '' : 'display:none'}"></span>
+        </div>
 
-                            <div class="actions" style="margin-top:30px;">
-                                <a href="https://wa.me/c/919618519191" target="_blank" class="buy-btn" style="background:var(--color-success); color:white; display:flex; align-items:center; justify-content:center; gap:10px; padding:15px; border-radius:30px; font-weight:700; text-decoration:none;">
-                                    <i class="fab fa-whatsapp"></i> Order on WhatsApp
-                                </a>
-                            </div>
-                        </div>
-                    </article>
+        <div class="selection-area">
+            ${renderVariants(product)}
+        </div>
 
-                    <!-- Sidebar -->
-                    <aside class="sidebar">
-                        <section class="sidebar-card">
-                            <div class="sidebar-tabs">
-                                <div class="sidebar-tab active" data-tab="similar">Similar</div>
-                                <div class="sidebar-tab" data-tab="trending">Trending</div>
-                            </div>
-                            <div id="side-content">
-                                ${renderVerticalItems(getSimilarProducts(product))}
-                            </div>
-                        </section>
-                    </aside>
 
-                    <!-- Recent Section -->
-                    <section class="recent-section">
-                        <h3 style="margin-bottom:20px;">Recently Viewed</h3>
-                        <div class="recent-grid">
-                            ${renderHistoryItems()}
-                        </div>
-                    </section>
-                </div>
-            `;
+        <div class="info-tabs">
+            <div class="info-btns-row" id="tabs-buttons">
+                <!-- Buttons injected here -->
+            </div>
+            <div id="ingredients-content" class="info-content-block"></div>
+            <div id="nutrition-content" class="info-content-block"></div>
+            <div id="usage-content" class="info-content-block"></div>
+        </div>
+
+        <div class="actions" style="margin-top:30px;">
+            <a href="https://wa.me/c/919618519191" target="_blank" class="buy-btn"
+                style="background:var(--color-success); color:white; display:flex; align-items:center; justify-content:center; gap:10px; padding:15px; border-radius:30px; font-weight:700; text-decoration:none;">
+                <i class="fab fa-whatsapp"></i> Order on WhatsApp
+            </a>
+        </div>
+    </div>
+    </article>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <section class="sidebar-card">
+            <div class="sidebar-tabs">
+                <div class="sidebar-tab active" data-tab="similar">Similar</div>
+                <div class="sidebar-tab" data-tab="trending">Trending</div>
+            </div>
+            <div id="side-content">
+                ${renderVerticalItems(getSimilarProducts(product))}
+            </div>
+        </section>
+    </aside>
+
+    <!-- Recent Section -->
+    <section class="recent-section">
+        <h3 style="margin-bottom:20px;">Recently Viewed</h3>
+        <div class="recent-grid">
+            ${renderHistoryItems()}
+        </div>
+    </section>
+    </div>
+    `;
 
             initProductInteractions(product);
         }
@@ -245,24 +280,33 @@
         // --- Helpers: Components ---
         function renderVariants(p) {
             let variants = [];
-            try { variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []); } catch (e) { }
+            try {
+                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants ||
+                    []);
+            } catch (e) { }
 
-            if (variants.length <= 1) return `<p style="color:var(--text-secondary)"><strong>Pack Size:</strong> ${variants[0]?.quantity || 'Standard'}</p>`;
+            if (variants.length <= 1) return `<p style="color:var(--text-secondary)"><strong>Pack Size:</strong>
+        ${variants[0]?.quantity || 'Standard'}</p>`;
 
             return `
-                <div style="margin-bottom:20px;">
-                    <label style="display:block; font-size:0.8rem; margin-bottom:5px; color:var(--text-muted);">SELECT SIZE</label>
-                    <select id="variantSelect" style="width:100%; max-width:300px; padding:12px; border-radius:8px; border:1px solid var(--border-medium); background:var(--bg-secondary);">
-                        ${variants.map((v, i) => `<option value="${i}">${v.quantity} - ₹${v.price}</option>`).join('')}
-                    </select>
-                </div>
-            `;
+        <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.8rem; margin-bottom:5px; color:var(--text-muted);">SELECT
+                SIZE</label>
+            <select id="variantSelect"
+                style="width:100%; max-width:300px; padding:12px; border-radius:8px; border:1px solid var(--border-medium); background:var(--bg-secondary);">
+                ${variants.map((v, i) => `<option value="${i}">${v.quantity} - ₹${v.price}</option>`).join('')}
+            </select>
+        </div>
+        `;
         }
 
         function initProductInteractions(p) {
             const vSelect = document.getElementById('variantSelect');
             let variants = [];
-            try { variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []); } catch (e) { }
+            try {
+                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) :
+                    (p.quantity_variants || []);
+            } catch (e) { }
 
             const updatePrice = (v) => {
                 document.getElementById('view-price').innerText = '₹' + v.price;
@@ -303,14 +347,18 @@
 
             // Ingredients
             if (p.ingredients) {
-                sections.push({ id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `<p>${p.ingredients}</p>` });
+                sections.push({
+                    id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `
+        <p>${p.ingredients}</p>`
+                });
             }
 
             // Nutrition
             // We need to keep a reference to update it later
             let nutritionData = null;
             if (p.nutrition_info) {
-                try { nutritionData = typeof p.nutrition_info === 'string' ? JSON.parse(p.nutrition_info) : p.nutrition_info; } catch (e) { }
+                try { nutritionData = typeof p.nutrition_info === 'string' ? JSON.parse(p.nutrition_info) : p.nutrition_info; }
+                catch (e) { }
             }
 
             const renderNutrition = (nData, currentVariant) => {
@@ -342,11 +390,13 @@
 
                 // 1. Serving Size
                 if (servingSize) {
-                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Serving Size</strong> <br> ${servingSize}</div>`;
+                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Serving
+                    Size</strong> <br> ${servingSize}</div>`;
                 }
                 // 2. Total Servings
                 if (displayedServings) {
-                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Total Servings</strong> <br> ~${displayedServings}</div>`;
+                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Total
+                    Servings</strong> <br> ~${displayedServings}</div>`;
                 }
 
                 // Field Mapping (Order 3-10)
@@ -364,9 +414,10 @@
                 fields.forEach(f => {
                     const val = getVal(f.k);
                     if (val !== null) {
-                        grid += `<div style="padding:8px 10px; background:white; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
-                            <strong>${f.label}</strong> <span>${val}</span>
-                        </div>`;
+                        grid += `<div
+                style="padding:8px 10px; background:white; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                <strong>${f.label}</strong> <span>${val}</span>
+            </div>`;
                     }
                 });
 
@@ -387,13 +438,17 @@
 
             // Usage
             if (p.serving_suggestion) {
-                sections.push({ id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p>${p.serving_suggestion}</p>` });
+                sections.push({
+                    id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p>
+            ${p.serving_suggestion}</p>`
+                });
             }
 
             // Render Buttons & Inject Content
             if (btnContainer) {
                 btnContainer.innerHTML = sections.map(s =>
-                    `<button class="info-btn" id="btn-${s.id}" data-target="${s.target}"><i class="${s.icon}"></i> ${s.label}</button>`
+                    `<button class="info-btn" id="btn-${s.id}" data-target="${s.target}"><i class="${s.icon}"></i>
+            ${s.label}</button>`
                 ).join('');
 
                 sections.forEach(s => {
@@ -446,7 +501,8 @@
                     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     const mode = tab.dataset.tab;
-                    document.getElementById('side-content').innerHTML = renderVerticalItems(mode === 'similar' ? getSimilarProducts(p) : state.allProducts.filter(x => x.is_trending));
+                    document.getElementById('side-content').innerHTML = renderVerticalItems(mode === 'similar' ?
+                        getSimilarProducts(p) : state.allProducts.filter(x => x.is_trending));
                 };
             });
         }
@@ -464,16 +520,18 @@
         }
 
         function renderVerticalItems(items) {
-            if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.</p>`;
+            if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.
+        </p>`;
             return items.map(item => `
-                <div class="sim-item" onclick="window.location.href='sales.html?id=${item.id}'">
-                    <img src="${item.showcase_image || state.placeholder}" class="sim-img" onerror="this.src='${state.placeholder}'">
-                    <div class="sim-info">
-                        <h4 style="font-size:0.9rem; margin:0;">${item.product_name}</h4>
-                        <span style="font-size:0.8rem; color:var(--color-primary-blue)">View Product</span>
-                    </div>
-                </div>
-            `).join('');
+        <div class="sim-item" onclick="window.location.href='sales.html?id=${item.id}'">
+            <img src="${item.showcase_image || state.placeholder}" class="sim-img"
+                onerror="this.src='${state.placeholder}'">
+            <div class="sim-info">
+                <h4 style="font-size:0.9rem; margin:0;">${item.product_name}</h4>
+                <span style="font-size:0.8rem; color:var(--color-primary-blue)">View Product</span>
+            </div>
+        </div>
+        `).join('');
         }
 
         function updateHistory(p) {
@@ -485,16 +543,18 @@
 
         function renderHistoryItems() {
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }
-            if (!hist.length) return `<p style="grid-column:1/-1; color:var(--text-muted)">Your viewing history will appear here.</p>`;
+            if (!hist.length) return `<p style="grid-column:1/-1; color:var(--text-muted)">Your viewing history will appear
+            here.</p>`;
             return hist.map(h => `
-                <div class="sim-item" onclick="window.location.href='sales.html?id=${h.id}'" style="background:var(--bg-primary); border:1px solid var(--border-light);">
-                    <img src="${h.img || state.placeholder}" class="sim-img" onerror="this.src='${state.placeholder}'">
-                    <div class="sim-info">
-                        <h4 style="font-size:0.9rem; margin:0;">${h.name}</h4>
-                        <span style="font-size:0.8rem; color:var(--text-secondary)">View Product</span>
-                    </div>
-                </div>
-            `).join('');
+        <div class="sim-item" onclick="window.location.href='sales.html?id=${h.id}'"
+            style="background:var(--bg-primary); border:1px solid var(--border-light);">
+            <img src="${h.img || state.placeholder}" class="sim-img" onerror="this.src='${state.placeholder}'">
+            <div class="sim-info">
+                <h4 style="font-size:0.9rem; margin:0;">${h.name}</h4>
+                <span style="font-size:0.8rem; color:var(--text-secondary)">View Product</span>
+            </div>
+        </div>
+        `).join('');
         }
 
         init();

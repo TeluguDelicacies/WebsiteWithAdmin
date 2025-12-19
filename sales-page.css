@@ -137,22 +137,74 @@ body {
     /* Critical for container health */
 }
 
-/* Component: Gallery */
+/* Component: Gallery (3D Flip) */
 .product-gallery {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    background: white;
+    perspective: 1000px;
+    /* Enable 3D space */
+}
+
+.gallery-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+/* Flipped State */
+.gallery-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.gallery-front,
+.gallery-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: var(--radius-lg);
     overflow: hidden;
+    background: white;
+    /* Ensure background is solid */
+}
+
+/* Front Face */
+.gallery-front {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.product-gallery .main-img {
+.gallery-front .main-img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+/* Back Face */
+.gallery-back {
+    transform: rotateY(180deg);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    overflow-y: auto;
+    /* Allow scrolling if text is long */
+}
+
+.gallery-back p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
 }
 
 .overlay-logo {
@@ -165,6 +217,7 @@ body {
     padding: 8px;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
+    /* Ensure it stays on front face logic if needed, or outside `inner` */
 }
 
 /* Component: Details */
@@ -344,7 +397,19 @@ body {
 @media (min-width: 768px) {
     .main-product-area {
         display: grid;
-        grid-template-columns: 45% 1fr;
+        grid-template-columns: 1fr 1fr;
+        /* Balance Image and Details */
+    }
+
+    /* Force buttons to single line on desktop */
+    .info-btns-row {
+        flex-wrap: nowrap;
+    }
+
+    .info-btn {
+        padding: 10px 15px;
+        /* Slightly tighter padding to fit */
+        font-size: 0.9rem;
     }
 
     .product-gallery {
