@@ -189,17 +189,17 @@
                     <article class="main-product-area">
                         <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
+                                ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
-                                        ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                     </div>
                                     <!-- Back: Description -->
                                     <div class="gallery-back">
                                         <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
                                         <p>${product.product_description || 'No description available.'}</p>
-                                        <button onclick="toggleFlip()" style="padding:8px 20px; border:1px solid var(--border-medium); background:white; border-radius:20px; cursor:pointer;">
+                                        <button onclick="toggleFlip()" class="action-btn-pill">
                                             <i class="fas fa-undo"></i> Back to Image
                                         </button>
                                     </div>
@@ -208,7 +208,7 @@
                             
                             <!-- Toggle Button Below Image -->
                             <div style="text-align:center; margin-top:15px;">
-                                <button onclick="toggleFlip()" style="color:var(--color-primary-blue); background:transparent; border:none; border-bottom:1px dashed var(--color-primary-blue); cursor:pointer; font-weight:600; font-size:0.9rem;">
+                                <button onclick="toggleFlip()" class="action-btn-pill outline">
                                     <i class="fas fa-info-circle"></i> View Description
                                 </button>
                             </div>

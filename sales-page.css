@@ -9,8 +9,8 @@ Mobile-First, Robust, Modern CSS
 :root {
     --header-height: 64px;
     --sidebar-width: 320px;
-    --content-max-width: 98%;
-    /* Maximize width as requested */
+    --content-max-width: 100%;
+    /* Full width */
 }
 
 body {
@@ -23,7 +23,8 @@ body {
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-light);
     height: var(--header-height);
-    padding: 0 20px;
+    padding: 0 10px;
+    /* Reduced side padding */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -35,8 +36,8 @@ body {
 .sales-page-container {
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: 0 1px;
-    /* Extremely minimal padding */
+    padding: 0 5px 50px 5px;
+    /* Minimal side padding, added bottom padding */
 }
 
 /* ... existing code ... */
@@ -366,9 +367,12 @@ body {
 .price-row {
     display: flex;
     align-items: baseline;
-    /* Align text baselines */
+    justify-content: flex-start;
+    /* Force left alignment */
     gap: 12px;
     margin-bottom: 25px;
+    margin-left: 0;
+    /* Ensure no indentation */
     flex-wrap: wrap;
 }
 
@@ -447,6 +451,40 @@ body {
 .info-content-block.active {
     display: block;
     /* Show when active */
+}
+
+/* Action Pill Button (View Desc, Back to Image) */
+.action-btn-pill {
+    padding: 8px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid transparent;
+}
+
+.action-btn-pill:hover {
+    background: var(--color-primary-blue);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.action-btn-pill.outline {
+    background: transparent;
+    border: 1px solid var(--color-primary-blue);
+    color: var(--color-primary-blue);
+}
+
+.action-btn-pill.outline:hover {
+    background: var(--color-primary-blue);
+    color: white;
 }
 
 @keyframes fadeIn {
