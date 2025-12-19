@@ -2379,8 +2379,9 @@ MASTER CARD LAYOUT (Redesign with Overlay)
 
 /* Quick Product Item */
 .quick-product-item {
-  min-width: 150px;
-  max-width: 150px;
+  min-width: 165px;
+  /* Increased 10% from 150px */
+  max-width: 165px;
   border: 1px solid #f1f5f9;
   border-radius: 12px;
   padding: 10px;
@@ -2551,8 +2552,10 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   background: white;
   padding: 10px 0;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  margin: 0 -1rem 1rem -1rem;
-  /* Negative margin to span full width */
+  margin: 0 -1rem 10px -1rem;
+  /* Full bleed tabs */
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .category-tabs {
@@ -2620,49 +2623,54 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
     display: none;
   }
 
-  /* --- OPTION 2: POLISHED GRID (FIXED) --- */
+  /* --- OPTION 4: STANDARD FLUID GRID (FRESH START) --- */
 
-  /* Container Padding */
-  .container {
-    padding-left: 8px;
-    padding-right: 8px;
+  /* Reset container styles to default */
+  .quick-commerce-mode .container {
+    padding-left: 64px;
+    /* Increased by 300% (16px -> 64px) */
+    padding-right: 2%;
+    width: 100%;
+    overflow-x: visible;
   }
 
   .quick-tab-pane.active {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    /* Strict 2 columns */
-    gap: 12px;
-    /* Increased gap slightly for breathing room */
-    padding-bottom: 80px;
-    /* More space for bottom safe area */
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 EQUAL FLUID COLUMNS */
+    gap: 8px;
     width: 100%;
     box-sizing: border-box;
+    padding-bottom: 80px;
+    justify-content: stretch;
   }
 
-  /* Card Style */
+  /* Card Style - FLUID WIDTH */
   .quick-tab-pane .quick-product-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
+    /* Fluid width */
     min-width: 0;
-    /* Flexbox text overflow fix */
+    /* meaningful for grid items */
+    max-width: none;
+    /* Remove any caps */
+    margin: 0;
+    height: auto;
     background: white;
-    /* Ensure background is white */
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    /* Soft shadow */
     overflow: hidden;
-    /* Clip content */
     padding-bottom: 8px;
     position: relative;
     border: none;
   }
 
-  /* Image Container */
+  /* Image Container - Aspect Ratio 1:1 */
   .quick-tab-pane .quick-product-item img {
     width: 100%;
+    height: auto;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     margin: 0;
@@ -2675,15 +2683,20 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
     padding: 8px;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    /* occupy remaining space */
   }
 
-  /* Product Name */
+  /* Product Name - Smaller for 3-col */
   .quick-tab-pane .quick-product-item h4 {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    /* Reduced from 0.85rem */
     font-weight: 600;
     color: #1e293b;
     margin: 0 0 4px 0;
-    line-height: 1.3;
+    line-height: 1.2;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -2695,15 +2708,17 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   .quick-tab-pane .quick-product-item .weight {
     font-size: 0.75rem;
     color: #64748b;
-    margin-bottom: 6px;
+    margin-bottom: auto;
+    /* Push bottom elements down */
   }
 
   /* Price Tag (Overlay) */
   .quick-tab-pane .price-row {
     position: absolute;
     top: 8px;
+    left: 8px;
+    /* Left aligned price tag usually looks better or top-right? Kept top-left or right as per pref. Let's stick to Right for visibility over image */
     right: 8px;
-    /* Move to right for better visibility */
     left: auto;
     background: rgba(255, 255, 255, 0.95);
     padding: 4px 8px;
@@ -2718,14 +2733,14 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
   /* Add Button (Full Width Bottom) */
   .quick-tab-pane .quick-product-item .add-btn {
-    margin-top: auto;
-    /* Push to bottom */
+    margin-top: 4px;
     width: 100%;
     border-radius: 6px;
     background: var(--color-primary-blue);
     color: white;
-    font-size: 0.8rem;
-    padding: 8px 0;
+    font-size: 0.7rem;
+    /* Reduced size */
+    padding: 6px 0;
     font-weight: 600;
     border: none;
   }
