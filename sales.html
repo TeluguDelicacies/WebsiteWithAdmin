@@ -198,9 +198,14 @@
                                 ${renderVariants(product)}
                             </div>
 
+                            
                             <div class="info-tabs">
-                                <div class="info-btns-row" id="tabs-container"></div>
-                                <div class="info-display-area" id="tabs-content"></div>
+                                <div class="info-btns-row" id="tabs-buttons">
+                                    <!-- Buttons injected here -->
+                                </div>
+                                <div id="ingredients-content" class="info-content-block"></div>
+                                <div id="nutrition-content" class="info-content-block"></div>
+                                <div id="usage-content" class="info-content-block"></div>
                             </div>
 
                             <div class="actions" style="margin-top:30px;">
@@ -280,40 +285,160 @@
             }
             if (variants[0]) updatePrice(variants[0]);
 
-            // Tabs
-            const tabs = [];
-            if (p.ingredients) tabs.push({ id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', html: `<p>${p.ingredients}</p>` });
+
+            // 2. Toggles & Content
+            const btnContainer = document.getElementById('tabs-buttons');
+            const sections = [];
+
+            // Helper to parsing weight: "250g" -> 250, "1kg" -> 1000
+            const parseWeight = (str) => {
+                if (!str) return 0;
+                const match = str.toLowerCase().match(/([\d\.]+)\s*([a-z]+)/);
+                if (!match) return 0;
+                let val = parseFloat(match[1]);
+                let unit = match[2];
+                if (unit === 'kg') val *= 1000;
+                return val;
+            };
+
+            // Ingredients
+            if (p.ingredients) {
+                sections.push({ id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `<p>${p.ingredients}</p>` });
+            }
+
+            // Nutrition
+            // We need to keep a reference to update it later
+            let nutritionData = null;
             if (p.nutrition_info) {
-                let n = {}; try { n = typeof p.nutrition_info === 'string' ? JSON.parse(p.nutrition_info) : p.nutrition_info; } catch (e) { }
-                let grid = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">`;
-                Object.entries(n).forEach(([k, v]) => {
-                    if (k !== 'serving_size' && k !== 'total_servings' && v) {
-                        grid += `<div style="padding:10px; background:white; border-radius:6px; display:flex; justify-content:space-between; font-size:0.8rem;">
-                            <strong>${k.replace('_', ' ')}</strong> <span>${v}</span>
+                try { nutritionData = typeof p.nutrition_info === 'string' ? JSON.parse(p.nutrition_info) : p.nutrition_info; } catch (e) { }
+            }
+
+            const renderNutrition = (nData, currentVariant) => {
+                if (!nData) return '';
+
+                // Normalize Keys (Handle legacy/different formats)
+                const getVal = (keys) => {
+                    if (!Array.isArray(keys)) keys = [keys];
+                    for (const k of keys) {
+                        if (nData[k] !== undefined && nData[k] !== null && nData[k] !== '') return nData[k];
+                    }
+                    return null;
+                };
+
+                const servingSize = getVal(['serving_size', 'servingSize']);
+                const totalServings = getVal(['total_servings', 'totalServings']);
+
+                // Calculate Servings
+                let displayedServings = totalServings; // fallback
+                if (currentVariant && servingSize) {
+                    const packWeight = parseWeight(currentVariant.quantity);
+                    const sSize = parseWeight(servingSize);
+                    if (packWeight > 0 && sSize > 0) {
+                        displayedServings = Math.round(packWeight / sSize); // Integer servings
+                    }
+                }
+
+                let grid = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
+
+                // 1. Serving Size
+                if (servingSize) {
+                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Serving Size</strong> <br> ${servingSize}</div>`;
+                }
+                // 2. Total Servings
+                if (displayedServings) {
+                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Total Servings</strong> <br> ~${displayedServings}</div>`;
+                }
+
+                // Field Mapping (Order 3-10)
+                const fields = [
+                    { k: ['calories', 'Calories'], label: 'Calories' },
+                    { k: ['protein', 'Protein'], label: 'Protein' },
+                    { k: ['total_fat', 'fat', 'Total Fat', 'Fat'], label: 'Total Fat' },
+                    { k: ['saturated_fat', 'saturatedFat', 'Saturated Fat'], label: 'Saturated Fat' },
+                    { k: ['carbs', 'Carbs'], label: 'Carbs' },
+                    { k: ['fiber', 'Fiber'], label: 'Fiber' },
+                    { k: ['sugars', 'sugar', 'Sugars'], label: 'Sugar' },
+                    { k: ['sodium', 'Sodium'], label: 'Sodium' }
+                ];
+
+                fields.forEach(f => {
+                    const val = getVal(f.k);
+                    if (val !== null) {
+                        grid += `<div style="padding:8px 10px; background:white; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                            <strong>${f.label}</strong> <span>${val}</span>
                         </div>`;
                     }
                 });
+
                 grid += `</div>`;
-                tabs.push({ id: 'nut', label: 'Nutrition', icon: 'fas fa-heartbeat', html: grid });
+                return grid;
+            };
+
+            if (nutritionData) {
+                sections.push({
+                    id: 'nut',
+                    label: 'Nutrition',
+                    icon: 'fas fa-heartbeat',
+                    target: 'nutrition-content',
+                    // Initial render with first variant (or default)
+                    html: renderNutrition(nutritionData, variants[0])
+                });
             }
-            if (p.serving_suggestion) tabs.push({ id: 'use', label: 'Usage', icon: 'fas fa-utensils', html: `<p>${p.serving_suggestion}</p>` });
 
-            const tabContainer = document.getElementById('tabs-container');
-            const tabContent = document.getElementById('tabs-content');
+            // Usage
+            if (p.serving_suggestion) {
+                sections.push({ id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p>${p.serving_suggestion}</p>` });
+            }
 
-            const switchTab = (id) => {
-                const active = tabs.find(t => t.id === id);
-                tabContent.innerHTML = active?.html || '';
-                document.querySelectorAll('.info-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.id === id));
-            };
+            // Render Buttons & Inject Content
+            if (btnContainer) {
+                btnContainer.innerHTML = sections.map(s =>
+                    `<button class="info-btn" id="btn-${s.id}" data-target="${s.target}"><i class="${s.icon}"></i> ${s.label}</button>`
+                ).join('');
 
-            tabContainer.innerHTML = tabs.map(t => `<button class="info-btn" data-id="${t.id}"><i class="${t.icon}"></i> ${t.label}</button>`).join('');
-            tabContainer.onclick = (e) => {
-                const btn = e.target.closest('.info-btn');
-                if (btn) switchTab(btn.dataset.id);
-            };
+                sections.forEach(s => {
+                    document.getElementById(s.target).innerHTML = s.html;
+                });
 
-            if (tabs[0]) switchTab(tabs[0].id);
+                // Add Toggle Logic
+                // Add Toggle Logic
+                btnContainer.onclick = (e) => {
+                    const btn = e.target.closest('.info-btn');
+                    if (!btn) return;
+
+                    const targetId = btn.dataset.target;
+                    const contentDiv = document.getElementById(targetId);
+
+                    // Check state before clearing
+                    const wasActive = btn.classList.contains('active');
+
+                    // Close ALL
+                    document.querySelectorAll('.info-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.info-content-block').forEach(d => d.classList.remove('active'));
+
+                    // If it wasn't active, open it (If it was active, we just closed it above)
+                    if (!wasActive) {
+                        btn.classList.add('active');
+                        contentDiv.classList.add('active');
+                    }
+                };
+            }
+
+            // Hook Nutrition Update into Variant Selection
+            if (vSelect && nutritionData) {
+                const originalChange = vSelect.onchange;
+                vSelect.onchange = (e) => {
+                    // Call original price updater
+                    if (originalChange) originalChange(e);
+
+                    // Update Nutrition HTML
+                    const selectedVar = variants[e.target.value];
+                    const nutContent = document.getElementById('nutrition-content');
+                    if (nutContent) {
+                        nutContent.innerHTML = renderNutrition(nutritionData, selectedVar);
+                    }
+                };
+            }
 
             // Sidebar Tabs
             document.querySelectorAll('.sidebar-tab').forEach(tab => {
