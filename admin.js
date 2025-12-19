@@ -1000,11 +1000,12 @@ async function loadProductData(productId) {
 
         // Nutrition Parsing
         const nutri = product.nutrition_info || {};
-        document.getElementById('nutriDetails').value = nutri.details || '';
+        // Map JSON snake_case to Form IDs
+        document.getElementById('nutriDetails').value = nutri.serving_size || nutri.details || ''; // Backwards compat
         document.getElementById('nutriCalories').value = nutri.calories || '';
         document.getElementById('nutriProtein').value = nutri.protein || '';
-        document.getElementById('nutriSatFat').value = nutri.satFat || '';
-        document.getElementById('nutriFat').value = nutri.fat || '';
+        document.getElementById('nutriSatFat').value = nutri.saturated_fat || nutri.satFat || '';
+        document.getElementById('nutriFat').value = nutri.total_fat || nutri.fat || '';
         document.getElementById('nutriCarbs').value = nutri.carbs || '';
         document.getElementById('nutriFiber').value = nutri.fiber || '';
         document.getElementById('nutriSugars').value = nutri.sugars || '';
@@ -1075,9 +1076,6 @@ productForm.addEventListener('submit', async (e) => {
     // Determine Logic for Top-Level Fields (Display Purposes)
     // We'll use the FIRST variant for the main table display values
     const firstVariant = variants[0];
-    const topMrp = firstVariant.mrp;
-    const topNetWeight = firstVariant.quantity;
-
 
     const productData = {
         product_name: document.getElementById('productName').value,
@@ -1086,13 +1084,15 @@ productForm.addEventListener('submit', async (e) => {
         product_tagline: document.getElementById('productTagline').value,
         product_description: document.getElementById('productDescription').value,
         ingredients: document.getElementById('productIngredients').value,
-        serving_suggestion: document.getElementById('productUsage').value, // Kept original ID for consistency with HTML
+        serving_suggestion: document.getElementById('productUsage').value,
         nutrition_info: {
-            details: document.getElementById('nutriDetails').value,
+            // Save as snake_case standard
+            serving_size: document.getElementById('nutriDetails').value,
+            total_servings: '20', // Defaulting to 20 or we could add a field for it? User didn't ask for field but existing data has it. Let's keep it simple or default.
             calories: document.getElementById('nutriCalories').value,
             protein: document.getElementById('nutriProtein').value,
-            satFat: document.getElementById('nutriSatFat').value,
-            fat: document.getElementById('nutriFat').value,
+            saturated_fat: document.getElementById('nutriSatFat').value,
+            total_fat: document.getElementById('nutriFat').value,
             carbs: document.getElementById('nutriCarbs').value,
             fiber: document.getElementById('nutriFiber').value,
             sugars: document.getElementById('nutriSugars').value,
