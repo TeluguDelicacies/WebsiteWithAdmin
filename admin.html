@@ -288,7 +288,15 @@
                     id="categoryFilter"
                     style="padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-medium); min-width: 200px; background: white;">
                     <option value="all">All Categories</option>
-                </select></div>
+                </select>
+                <div
+                    style="display: flex; align-items: center; gap: 5px; margin-left: 10px; background: white; padding: 0 15px; border-radius: 20px; border: 1px solid var(--border-medium);">
+                    <input type="checkbox" id="trendingFilter" style="width: auto; margin: 0; cursor: pointer;">
+                    <label for="trendingFilter"
+                        style="margin: 0; font-size: 0.9rem; cursor: pointer; color: var(--text-secondary);">Trending
+                        Only</label>
+                </div>
+            </div>
         </div>
         <!-- Products List (Cards) -->
         <div id="productListContainer" class="product-list-container"
@@ -479,6 +487,15 @@
                 </div>
 
                 <div class="form-row">
+                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="productTrending" style="width: auto; margin: 0;">
+                        <label for="productTrending"
+                            style="margin: 0; font-weight: 600; color: var(--color-primary-blue);">Mark as Trending
+                            Item</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
                         <label>Product Tagline</label>
                         <input type="text" id="productTagline">
@@ -654,6 +671,21 @@
             <h2 id="testimonialModalTitle">Add Testimonial</h2>
             <form id="testimonialForm" class="contact-form">
                 <input type="hidden" id="testimonialId">
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search products..." id="productSearch">
+                    </div>
+                    <!-- Save Order Button (Hidden by default) -->
+                    <button id="saveOrderBtn" class="primary-btn"
+                        style="background-color: var(--color-success); margin-right: 10px;"
+                        onclick="saveCurrentOrder()">
+                        <i class="fas fa-save"></i> Save Order
+                    </button>
+                    <button id="addBtn" class="primary-btn" onclick="handleAddClick()">
+                        <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
+                    </button>
+                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Customer Name</label>

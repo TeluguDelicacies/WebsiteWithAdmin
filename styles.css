@@ -2397,111 +2397,7 @@ MASTER CARD LAYOUT (Redesign with Overlay)
   justify-content: space-between;
 }
 
-/* Mobile: Horizontal Item / List View */
-@media (max-width: 767px) {
-  .quick-product-item {
-    min-width: 100%;
-    max-width: 100%;
-    display: flex;
-    flex-direction: row;
-    /* Switch back to row */
-    align-items: center;
-    text-align: left;
-    gap: 15px;
-    min-height: auto;
-    /* Reset height */
-    height: auto;
-  }
-}
 
-.quick-product-item:hover {
-  border-color: #3b82f6;
-  transform: translateY(-2px);
-}
-
-.quick-product-item img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  align-self: center;
-  /* Center image */
-}
-
-@media (max-width: 767px) {
-  .quick-product-item img {
-    width: 70px;
-    height: 70px;
-    margin-bottom: 0;
-    align-self: flex-start;
-  }
-}
-
-.quick-product-item-info {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.quick-product-item h4 {
-  font-size: 0.9rem;
-  margin: 5px 0 2px;
-  color: #334155;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  line-clamp: 2;
-  /* Standard */
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  min-height: 2.4em;
-  /* Reserve space for 2 lines */
-}
-
-@media (max-width: 767px) {
-  .quick-product-item h4 {
-    min-height: auto;
-  }
-}
-
-.quick-product-item .weight {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin-top: auto;
-  /* Push to bottom of info block */
-}
-
-.quick-product-item .price {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-top: 4px;
-}
-
-.quick-product-item .add-btn {
-  margin-top: 8px;
-  background: #eff6ff;
-  color: #3b82f6;
-  border: 1px solid #bfdbfe;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  width: 100%;
-  cursor: pointer;
-}
-
-@media (max-width: 767px) {
-  .quick-product-item .add-btn {
-    width: auto;
-    margin-left: auto;
-    /* Push to right */
-    margin-top: 0;
-  }
-}
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
@@ -2729,19 +2625,26 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   .quick-tab-pane .quick-product-item {
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
+    width: 100%;
+    max-width: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    /* Enhance visibility */
   }
 
   .quick-tab-pane .quick-product-item img {
     width: 100%;
-    height: 120px;
-    margin: 0 0 10px 0;
+    height: 140px;
+    object-fit: contain;
+    margin: 0 auto 10px auto;
+    display: block;
   }
 
-  /* Padding adjustments */
+  /* Padding adjustments to ensure full width usage */
   .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }
 

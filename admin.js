@@ -130,6 +130,7 @@ function showDashboard() {
 
     // Default view
     if (currentView === 'products') {
+        populateCategoryFilter(); // Ensure this runs!
         fetchProducts();
     } else if (currentView === 'testimonials') {
         fetchTestimonials();
@@ -295,17 +296,20 @@ async function loadCategoryData(id) {
 
 // Category Filter Logic
 const categoryFilter = document.getElementById('categoryFilter');
+const trendingFilter = document.getElementById('trendingFilter'); // New
+
 if (categoryFilter) {
     categoryFilter.addEventListener('change', () => renderProductList());
 }
+if (trendingFilter) {
+    trendingFilter.addEventListener('change', () => renderProductList());
+}
 
 async function populateCategoryFilter() {
-    // Debug log
     console.log('Populating Category Filter...');
-
-    // Allow re-population if empty, but prevent duplicates if already has options
-    if (categoryFilter.options.length > 1) {
-        console.log('Filter already populated.');
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (!categoryFilter) {
+        console.error('CRITICAL: categoryFilter element NOT found in DOM');
         return;
     }
 
@@ -316,6 +320,9 @@ async function populateCategoryFilter() {
             .order('display_order', { ascending: true });
 
         if (error) throw error;
+
+        // Force clear and repopulate
+        categoryFilter.innerHTML = '<option value="all">All Categories</option>';
 
         if (categories) {
             console.log('Categories found for filter:', categories.length);
@@ -547,7 +554,7 @@ async function fetchProducts() {
         if (error) throw error;
 
         allProducts = products; // Store globally
-        populateCategoryFilter(); // Ensure filter is ready
+        await populateCategoryFilter(); // WAIT for categories to ensure dropdown is ready
         renderProductList(); // Render based on current filter state
     } catch (error) {
         console.error('Fetch error:', error);
@@ -560,10 +567,18 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
 
     // Apply Filter
     const categoryFilter = document.getElementById('categoryFilter');
-    const isFiltered = categoryFilter && categoryFilter.value !== 'all';
+    const trendingFilter = document.getElementById('trendingFilter');
 
-    if (isFiltered) {
-        displayProducts = allProducts.filter(p => p.product_category === categoryFilter.value);
+    const isCatFiltered = categoryFilter && categoryFilter.value !== 'all';
+    const isTrendingFiltered = trendingFilter && trendingFilter.checked;
+    const isFiltered = isCatFiltered || isTrendingFiltered; // General filter state
+
+    if (isCatFiltered) {
+        displayProducts = displayProducts.filter(p => p.product_category === categoryFilter.value);
+    }
+
+    if (isTrendingFiltered) {
+        displayProducts = displayProducts.filter(p => p.is_trending);
     }
 
     if (!displayProducts || displayProducts.length === 0) {
@@ -574,6 +589,23 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
     // Sort logic for Display (Filtered or Not)
     if (isFiltered) {
         displayProducts.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    }
+
+    const saveOrderBtn = document.getElementById('saveOrderBtn');
+    if (saveOrderBtn) {
+        // Always show button but disable if not filtered, OR just hide if not filtered.
+        // User said "Did not get a save button", implies they might expect it always. 
+        // But reordering only makes sense when filtered usually. 
+        // Let's make it visible but disabled if not filtered, with a tooltip? 
+        // Or stick to hiding but ensure it works. 
+        // Let's try: Display always, but disabled if not filtered (with alert if clicked? no, simple disable).
+        // actually existing logic was display: none. 
+        // Let's change to: Show if isFiltered OR if sort is by display_order? 
+        // For simplicity: Show if isFiltered. 
+        saveOrderBtn.style.display = isFiltered ? 'inline-block' : 'none';
+
+        // Debugging: force show to see if it exists
+        // saveOrderBtn.style.display = 'inline-block'; 
     }
 
     // Drag hint
@@ -630,7 +662,10 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                      style="${isFiltered ? 'margin-left: 15px;' : ''}">
                 
                 <div class="row-info">
-                    <h3>${product.product_name}</h3>
+                    <h3>
+                        ${product.product_name}
+                        ${product.is_trending ? '<i class="fas fa-fire" title="Trending Item" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
+                    </h3>
                     <div class="tagline">${product.product_tagline || ''}</div>
                     <span class="category-badge">${product.product_category.replace(/-/g, ' ')}</span>
                 </div>
@@ -639,7 +674,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                     ${variantsHtml}
                 </div>
 
-                <div style="text-align: center; font-weight: bold; color: var(--text-secondary);">
+                <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
                     ${product.display_order || 0}
                 </div>
 
@@ -694,7 +729,7 @@ let dragSrcEl = null;
 // Drag and Drop Handlers
 // Drag and Drop Handlers
 window.handleDragStart = (e) => {
-    dragSrcEl = e.target.closest('.draggable-item');
+    dragSrcEl = e.target.closest('.draggable-item, .draggable-row');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', dragSrcEl.innerHTML);
     dragSrcEl.classList.add('dragging');
@@ -704,7 +739,7 @@ window.handleDragStart = (e) => {
 window.handleDragOver = (e) => {
     if (e.preventDefault) e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    const target = e.target.closest('.draggable-item');
+    const target = e.target.closest('.draggable-item, .draggable-row');
     if (target && target !== dragSrcEl) {
         target.classList.add('over');
     }
@@ -712,11 +747,12 @@ window.handleDragOver = (e) => {
 };
 
 window.handleDragEnter = (e) => {
-    e.currentTarget.style.background = '#f0f9ff';
+    // e.currentTarget.style.background = '#f0f9ff'; 
+    // Optional visual feed back usually handled by CSS 'over' class
 };
 
 window.handleDragLeave = (e) => {
-    const target = e.target.closest('.draggable-item');
+    const target = e.target.closest('.draggable-item, .draggable-row');
     if (target) {
         target.classList.remove('over');
     }
@@ -726,8 +762,8 @@ window.handleDragLeave = (e) => {
 window.handleDrop = (e) => {
     e.stopPropagation(); // Standard stop propagation
 
-    const dragSrcEl = document.querySelector('.draggable-item.dragging');
-    const dropTarget = e.target.closest('.draggable-item');
+    const dragSrcEl = document.querySelector('.draggable-item.dragging, .draggable-row.dragging');
+    const dropTarget = e.target.closest('.draggable-item, .draggable-row');
 
     if (dragSrcEl && dropTarget && dragSrcEl !== dropTarget) {
         // Swap DOM elements
@@ -743,7 +779,10 @@ window.handleDrop = (e) => {
         }
 
         const type = dragSrcEl.getAttribute('data-type');
-        updateOrderFromDom(type, container);
+        // updateOrderFromDom(type, container); // AUTO-SAVE DISABLED
+
+        // Update Visual Numbers Only
+        updateVisualOrder(type, container);
     }
 
     // Cleanup
@@ -755,6 +794,59 @@ window.handleDrop = (e) => {
     });
 
     return false;
+};
+
+function updateVisualOrder(type, container) {
+    if (!container) return;
+    const items = Array.from(container.children).filter(el => el.classList.contains('draggable-item') || el.classList.contains('draggable-row'));
+
+    items.forEach((item, index) => {
+        const newOrder = index + 1;
+
+        if (type === 'product') {
+            item.setAttribute('data-order', newOrder);
+            const displayCell = item.querySelector('.display-order-cell');
+            if (displayCell) displayCell.textContent = newOrder;
+        } else if (type === 'category') {
+            const cells = item.querySelectorAll('td');
+            if (cells[3]) cells[3].textContent = newOrder;
+        }
+    });
+}
+
+// Global Save Function
+window.saveCurrentOrder = async () => {
+    // Determine context based on currentView (since button is shared in header?) 
+    // Actually the button is new but logic depends on view.
+    // For now assuming we are in PRODUCTS view as that's where the request focused.
+    // But Categories uses drag drop too. 
+    // Let's check 'currentView'.
+
+    let container, type, tableName;
+    if (currentView === 'products') {
+        container = document.getElementById('productListContainer');
+        type = 'product';
+        tableName = 'products';
+    } else if (currentView === 'categories') {
+        container = document.getElementById('categoryList');
+        type = 'category';
+        tableName = 'categories';
+    } else if (currentView === 'testimonials') {
+        container = document.getElementById('testimonialList');
+        type = 'testimonial';
+        tableName = 'testimonials';
+    } else { return; }
+
+    const btn = document.getElementById('saveOrderBtn');
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    btn.disabled = true;
+
+    await updateOrderFromDom(type, container); // Re-use my batch logic but now manual
+
+    btn.innerHTML = oldHtml;
+    btn.disabled = false;
+    alert('Order saved successfully!');
 };
 
 async function updateOrderFromDom(type, container) {
@@ -785,6 +877,8 @@ async function updateOrderFromDom(type, container) {
         // Product has .order-cell. Category has it as 4th cell.
         if (type === 'product') {
             item.setAttribute('data-order', newOrder); // Update data-order attribute
+            const displayCell = item.querySelector('.display-order-cell');
+            if (displayCell) displayCell.textContent = newOrder;
         } else if (type === 'category') {
             // 4th cell is display_order
             const cells = item.querySelectorAll('td');
@@ -1026,6 +1120,7 @@ async function loadProductData(productId) {
 
         // Populate display order
         document.getElementById('productOrder').value = product.display_order || 0;
+        document.getElementById('productTrending').checked = product.is_trending || false;
 
     } catch (error) {
         console.error('Error loading product:', error);
@@ -1104,6 +1199,7 @@ productForm.addEventListener('submit', async (e) => {
         net_weight: topNetWeight,
         total_stock: calculatedTotalStock,
         showcase_image: document.getElementById('showcaseImage').value,
+        is_trending: document.getElementById('productTrending').checked,
         // info_image: document.getElementById('showcaseImage').value, // Use same image for both
         quantity_variants: variants
     };
