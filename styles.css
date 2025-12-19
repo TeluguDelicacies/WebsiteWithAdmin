@@ -2554,7 +2554,8 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   margin: 0 -1rem 10px -1rem;
   /* Full bleed tabs */
-  padding-left: 1rem;
+  padding-left: 4px;
+  /* Shifted left */
   padding-right: 1rem;
 }
 
@@ -2562,7 +2563,8 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   display: flex;
   overflow-x: auto;
   gap: 10px;
-  padding: 0 1rem;
+  padding: 0 4px;
+  /* Shifted left */
   scrollbar-width: none;
 }
 
