@@ -362,9 +362,12 @@
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }
             if (!hist.length) return `<p style="grid-column:1/-1; color:var(--text-muted)">Your viewing history will appear here.</p>`;
             return hist.map(h => `
-                <div class="master-card" onclick="window.location.href='sales.html?id=${h.id}'" style="padding:10px; cursor:pointer;">
-                    <img src="${h.img || state.placeholder}" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:8px;" onerror="this.src='${state.placeholder}'">
-                    <h4 style="font-size:0.8rem; margin-top:10px; height:2.4em; overflow:hidden;">${h.name}</h4>
+                <div class="sim-item" onclick="window.location.href='sales.html?id=${h.id}'" style="background:var(--bg-primary); border:1px solid var(--border-light);">
+                    <img src="${h.img || state.placeholder}" class="sim-img" onerror="this.src='${state.placeholder}'">
+                    <div class="sim-info">
+                        <h4 style="font-size:0.9rem; margin:0;">${h.name}</h4>
+                        <span style="font-size:0.8rem; color:var(--text-secondary)">View Product</span>
+                    </div>
                 </div>
             `).join('');
         }
