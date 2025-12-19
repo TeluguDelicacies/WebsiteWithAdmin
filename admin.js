@@ -1076,6 +1076,8 @@ productForm.addEventListener('submit', async (e) => {
     // Determine Logic for Top-Level Fields (Display Purposes)
     // We'll use the FIRST variant for the main table display values
     const firstVariant = variants[0];
+    const topMrp = firstVariant.mrp;
+    const topNetWeight = firstVariant.quantity;
 
     const productData = {
         product_name: document.getElementById('productName').value,
