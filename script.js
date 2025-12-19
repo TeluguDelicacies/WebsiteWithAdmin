@@ -1627,6 +1627,12 @@ function renderProducts(products, categories) {
                     const product = catProducts[currentIndex];
 
                     if (product) {
+                        // SALES MODE CHECK
+                        if (window.currentSiteSettings?.sales_mode_enabled) {
+                            window.location.href = `sales.html?id=${product.id}`;
+                            return;
+                        }
+
                         renderOverlayProduct(product, viewContainer, selectEl, card, catProducts, currentIndex);
                     }
                 });
@@ -2042,6 +2048,12 @@ function renderQuickProductsHTML(products, showMrp) {
 // ----------------------------------------------------
 
 window.openQuickProductModal = function (productId) {
+    // SALES MODE CHECK
+    if (window.currentSiteSettings?.sales_mode_enabled) {
+        window.location.href = `sales.html?id=${productId}`;
+        return;
+    }
+
     // Ensure we have a cache
     const cache = window.allProductsCache || [];
 

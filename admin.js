@@ -412,7 +412,9 @@ async function fetchSettings() {
             document.getElementById('setQuickHeroBg').value = data.quick_hero_image_url || '';
             document.getElementById('setShowTicker').checked = data.show_product_ticker !== false; // Default true
             document.getElementById('setShowQuickLayout').checked = data.show_quick_layout || false; // Default false
+            document.getElementById('setShowQuickLayout').checked = data.show_quick_layout || false; // Default false
             document.getElementById('setShowMrp').checked = data.show_mrp !== false; // Default true
+            document.getElementById('setSalesMode').checked = data.sales_mode_enabled || false; // Default false
         }
     } catch (e) {
         console.error('Settings fetch error:', e);
@@ -450,7 +452,10 @@ if (siteSettingsForm) {
 
             show_product_ticker: document.getElementById('setShowTicker').checked,
             show_quick_layout: document.getElementById('setShowQuickLayout').checked,
-            show_mrp: document.getElementById('setShowMrp').checked
+            show_product_ticker: document.getElementById('setShowTicker').checked,
+            show_quick_layout: document.getElementById('setShowQuickLayout').checked,
+            show_mrp: document.getElementById('setShowMrp').checked,
+            sales_mode_enabled: document.getElementById('setSalesMode').checked
         };
 
         try {
