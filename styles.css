@@ -2626,9 +2626,10 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   /* --- OPTION 4: STANDARD FLUID GRID (FRESH START) --- */
 
   /* Reset container styles to default */
+  /* Reset container styles to default */
   .quick-commerce-mode .container {
-    padding-left: 64px;
-    /* Increased by 300% (16px -> 64px) */
+    padding-left: 24px;
+    /* Reduced by 250% from 64px */
     padding-right: 2%;
     width: 100%;
     overflow-x: visible;
