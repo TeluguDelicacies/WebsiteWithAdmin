@@ -170,15 +170,18 @@
             app.innerHTML = `
                 <div class="grid-layout">
                     <!-- Breadcrumbs -->
-                    <div class="breadcrumb-section" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <a href="/" style="color:var(--text-secondary)">Home</a> / 
-                            <a href="sales.html?category=${catSlug}" style="color:var(--text-secondary)">${category?.title || 'Back'}</a> / 
-                            <span style="color:var(--color-primary-blue); font-weight:600;">${product.product_name}</span>
+                    <div class="breadcrumb-section">
+                        <!-- Breadcrumbs (Left) -->
+                        <div class="crumbs">
+                            <a href="/">Home</a> <span>/</span> 
+                            <a href="sales.html?category=${catSlug}">${category?.title || 'Back'}</a> <span>/</span> 
+                            <span class="current">${product.product_name}</span>
                         </div>
-                        <div class="nav-arrows">
-                            ${prev ? `<a href="sales.html?id=${prev.id}" class="nav-arrow-btn" style="padding:5px 15px; border:1px solid var(--border-light); border-radius:20px; font-size:0.8rem;"><i class="fas fa-chevron-left"></i> Prev</a>` : ''}
-                            ${next ? `<a href="sales.html?id=${next.id}" class="nav-arrow-btn" style="padding:5px 15px; border:1px solid var(--border-light); border-radius:20px; font-size:0.8rem; margin-left:10px;">Next <i class="fas fa-chevron-right"></i></a>` : ''}
+                        
+                        <!-- Navigation (Right on Desktop, Hidden on Mobile) -->
+                        <div class="nav-group desktop-only-nav">
+                            ${prev ? `<a href="sales.html?id=${prev.id}" class="nav-btn-pill prev" title="${prev.product_name}"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
+                            ${next ? `<a href="sales.html?id=${next.id}" class="nav-btn-pill next" title="${next.product_name}"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
                         </div>
                     </div>
 
@@ -247,6 +250,12 @@
                 style="background:var(--color-success); color:white; display:flex; align-items:center; justify-content:center; gap:10px; padding:15px; border-radius:30px; font-weight:700; text-decoration:none;">
                 <i class="fab fa-whatsapp"></i> Order on WhatsApp
             </a>
+        </div>
+
+        <!-- Navigation (Mobile Only - Bottom) -->
+        <div class="nav-group mobile-only-nav" style="margin-top: 20px; width: 100%; justify-content: space-between;">
+            ${prev ? `<a href="sales.html?id=${prev.id}" class="nav-btn-pill prev" title="${prev.product_name}" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
+            ${next ? `<a href="sales.html?id=${next.id}" class="nav-btn-pill next" title="${next.product_name}" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
         </div>
     </div>
     </article>
@@ -545,13 +554,13 @@
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }
             if (!hist.length) return `<p style="grid-column:1/-1; color:var(--text-muted)">Your viewing history will appear
             here.</p>`;
-            return hist.map(h => `
+            return hist.slice(0, 5).map(h => `
         <div class="sim-item" onclick="window.location.href='sales.html?id=${h.id}'"
-            style="background:var(--bg-primary); border:1px solid var(--border-light);">
-            <img src="${h.img || state.placeholder}" class="sim-img" onerror="this.src='${state.placeholder}'">
-            <div class="sim-info">
-                <h4 style="font-size:0.9rem; margin:0;">${h.name}</h4>
-                <span style="font-size:0.8rem; color:var(--text-secondary)">View Product</span>
+            style="background:var(--bg-primary); border:1px solid var(--border-light); display:flex; align-items:center; gap:10px; padding:5px;">
+            <img src="${h.img || state.placeholder}" class="sim-img" style="width:50px; height:50px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.src='${state.placeholder}'">
+            <div class="sim-info" style="min-width:0;">
+                <h4 style="font-size:0.85rem; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${h.name}</h4>
+                <span style="font-size:0.75rem; color:var(--text-secondary)">View Product</span>
             </div>
         </div>
         `).join('');

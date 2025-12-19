@@ -9,7 +9,8 @@ Mobile-First, Robust, Modern CSS
 :root {
     --header-height: 64px;
     --sidebar-width: 320px;
-    --content-max-width: 1400px;
+    --content-max-width: 98%;
+    /* Maximize width as requested */
 }
 
 body {
@@ -34,7 +35,34 @@ body {
 .sales-page-container {
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: 15px;
+    padding: 0 1px;
+    /* Extremely minimal padding */
+}
+
+/* ... existing code ... */
+
+/* Recent History */
+.recent-section {
+    grid-area: recent;
+    padding-top: 40px;
+}
+
+.recent-grid {
+    display: grid;
+    gap: 15px;
+    /* Mobile: Horizontal Scroll */
+    grid-template-columns: repeat(5, minmax(160px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 15px;
+}
+
+@media (min-width: 768px) {
+    .recent-grid {
+        /* Desktop: Fixed 5 columns, no scroll */
+        grid-template-columns: repeat(5, 1fr);
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
 }
 
 /* 3. Category View (Grid) */
@@ -123,8 +151,106 @@ body {
 
 .breadcrumb-section {
     grid-area: bread;
-    padding: 10px 0;
+    padding: 15px 0;
     border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Allow wrapping for mobile */
+    gap: 15px;
+}
+
+.crumbs {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.crumbs a {
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.crumbs a:hover {
+    color: var(--color-primary-blue);
+}
+
+.crumbs .current {
+    color: var(--color-primary-blue);
+    font-weight: 600;
+}
+
+/* Nav Group Pill Style */
+.nav-group {
+    display: inline-flex;
+    background: var(--bg-tertiary);
+    border-radius: 30px;
+    padding: 4px;
+    gap: 2px;
+}
+
+.nav-btn-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s;
+    background: transparent;
+}
+
+.nav-btn-pill:hover:not(.disabled) {
+    background: white;
+    color: var(--color-primary-blue);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+}
+
+.nav-btn-pill.disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* Responsive Visibility */
+.mobile-only-nav {
+    display: none !important;
+}
+
+@media (max-width: 767px) {
+    .desktop-only-nav {
+        display: none !important;
+    }
+
+    .mobile-only-nav {
+        display: flex !important;
+        margin-top: 20px;
+    }
+
+    .breadcrumb-section {
+        justify-content: center;
+        /* Center breadcrumbs when alone */
+        padding: 10px 0;
+    }
+
+    .crumbs {
+        margin-bottom: 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Mobile Nav Button Styling */
+    .mobile-only-nav .nav-btn-pill {
+        background: var(--bg-tertiary);
+        flex: 1;
+        /* Stretch buttons */
+        justify-content: center;
+        padding: 10px 16px;
+        /* Bigger touch target */
+    }
 }
 
 /* Main Area */
@@ -240,28 +366,45 @@ body {
 .price-row {
     display: flex;
     align-items: baseline;
-    gap: 15px;
+    /* Align text baselines */
+    gap: 12px;
     margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 
 .current-price {
-    font-size: 2.2rem;
-    font-weight: 700;
+    font-size: 2.6rem;
+    /* Very bold and big */
+    font-weight: 800;
     color: var(--color-primary-blue);
+    line-height: 1;
+    letter-spacing: -1px;
 }
 
 .mrp-strike {
     text-decoration: line-through;
     color: var(--text-muted);
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.8;
 }
 
 .discount-badge {
-    background: var(--color-success);
+    background: linear-gradient(135deg, #10B981, #059669);
+    /* Elegant Green Gradient */
     color: white;
-    padding: 4px 12px;
-    border-radius: var(--radius-full);
-    font-weight: 600;
-    font-size: 0.9rem;
+    padding: 8px 16px;
+    /* Bigger padding */
+    border-radius: 8px;
+    /* Slightly more rounded */
+    font-weight: 700;
+    font-size: 1rem;
+    /* Bigger font */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+    align-self: center;
+    /* Vertically center aligned relative to SP */
 }
 
 
@@ -381,17 +524,7 @@ body {
     object-fit: cover;
 }
 
-/* Recent History */
-.recent-section {
-    grid-area: recent;
-    padding-top: 40px;
-}
 
-.recent-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 15px;
-}
 
 /* Responsive Overrides */
 @media (min-width: 768px) {
@@ -422,9 +555,14 @@ body {
         padding: 15px;
     }
 
+    /* Keep prices in a row on mobile too, unless very tight */
     .price-row {
-        flex-direction: column;
-        gap: 5px;
+        gap: 10px;
+    }
+
+    .current-price {
+        font-size: 2.2rem;
+        /* Slightly smaller on mobile but still big */
     }
 
     .info-btns-row {
