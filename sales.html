@@ -70,7 +70,8 @@
 
                 state.settings = settingsRes.data || {};
                 state.allProducts = productsRes.data || [];
-                state.categories = categoriesRes.data || [];
+                // Filter out hidden categories
+                state.categories = (categoriesRes.data || []).filter(c => c.is_visible !== false);
                 state.placeholder = state.settings.product_placeholder_url || './images/placeholder-product.jpg';
 
                 // Sync Logo

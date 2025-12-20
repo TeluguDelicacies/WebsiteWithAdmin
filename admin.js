@@ -253,7 +253,7 @@ function renderCategoryList(categories) {
                          style="width: 48px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-light);">
                  </div>
             </td>
-            <td style="padding: 15px; font-weight: 600;">${cat.title}</td>
+            <td style="padding: 15px; font-weight: 600; ${!cat.is_visible ? 'opacity: 0.5;' : ''}">${cat.title} ${!cat.is_visible ? '<i class="fas fa-eye-slash" title="Hidden on Site" style="color: #64748b; margin-left: 5px;"></i>' : ''}</td>
             <td style="padding: 15px;">${cat.slug}</td>
             <td style="padding: 15px;">${cat.display_order}</td>
             <td style="padding: 15px; text-align: right;">
@@ -275,6 +275,7 @@ window.openCategoryModal = (id = null) => {
         loadCategoryData(id);
     } else {
         catModalTitle.textContent = 'Add Category';
+        document.getElementById('catVisible').checked = true; // Default visible
     }
 }
 window.closeCategoryModal = () => { categoryModal.style.display = 'none'; }
@@ -290,7 +291,9 @@ async function loadCategoryData(id) {
         document.getElementById('catTelugu').value = cat.telugu_title || '';
         document.getElementById('catDescription').value = cat.description || '';
         document.getElementById('catOrder').value = cat.display_order || 0;
+        document.getElementById('catOrder').value = cat.display_order || 0;
         document.getElementById('catImageUrl').value = cat.image_url || '';
+        document.getElementById('catVisible').checked = cat.is_visible !== false; // Default true if null
     }
 }
 
@@ -355,7 +358,9 @@ if (categoryForm) {
             telugu_title: document.getElementById('catTelugu').value,
             description: document.getElementById('catDescription').value,
             display_order: parseInt(document.getElementById('catOrder').value || 0),
-            image_url: document.getElementById('catImageUrl').value
+            display_order: parseInt(document.getElementById('catOrder').value || 0),
+            image_url: document.getElementById('catImageUrl').value,
+            is_visible: document.getElementById('catVisible').checked
         };
 
         try {

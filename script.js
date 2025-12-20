@@ -1480,7 +1480,8 @@ async function fetchCategories() {
             .order('display_order', { ascending: true });
 
         if (error) throw error;
-        return data || [];
+        // Filter out hidden categories globally at fetch level
+        return (data || []).filter(cat => cat.is_visible !== false);
     } catch (err) {
         console.error('Error fetching categories:', err);
         return [];
