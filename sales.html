@@ -188,6 +188,12 @@
 
                     <!-- Main Content -->
                     <article class="main-product-area">
+                        <!-- Navigation (Mobile Only - Top) -->
+                        <div class="nav-group mobile-only-nav" style="width: 100%; justify-content: space-between; padding: 10px 15px 5px 15px; margin-top: 0;">
+                            ${prev ? `<a href="sales.html?id=${prev.id}" class="nav-btn-pill prev" title="${prev.product_name}" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
+                            ${next ? `<a href="sales.html?id=${next.id}" class="nav-btn-pill next" title="${next.product_name}" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
+                        </div>
+
                         <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
                                 ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
@@ -251,12 +257,6 @@
                 style="background:var(--color-success); color:white; display:flex; align-items:center; justify-content:center; gap:10px; padding:15px; border-radius:30px; font-weight:700; text-decoration:none;">
                 <i class="fab fa-whatsapp"></i> Order on WhatsApp
             </a>
-        </div>
-
-        <!-- Navigation (Mobile Only - Bottom) -->
-        <div class="nav-group mobile-only-nav" style="margin-top: 20px; width: 100%; justify-content: space-between;">
-            ${prev ? `<a href="sales.html?id=${prev.id}" class="nav-btn-pill prev" title="${prev.product_name}" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
-            ${next ? `<a href="sales.html?id=${next.id}" class="nav-btn-pill next" title="${next.product_name}" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
         </div>
     </div>
     </article>
