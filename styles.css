@@ -2600,6 +2600,19 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   gap: 20px;
 }
 
+.quick-card {
+  background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
+  /* Warm Gold Gradient */
+  border: 1px solid #fcd34d;
+  /* Matching border */
+  border-radius: 24px;
+  /* Even rounder */
+  padding: 20px;
+  box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.4);
+  /* Colored shadow to match */
+  margin-bottom: 30px;
+}
+
 .quick-card.span-full {
   grid-column: 1 / -1;
   /* Prevent grid blowout */
@@ -2646,22 +2659,26 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   .quick-product-item {
     flex: 0 0 auto;
     /* Don't shrink/grow */
-    width: 42vw;
-    /* approx 2 visible (100-gap / 2) */
+    width: 48vw;
+    /* Increased size as requested */
     /* Fixed width for card */
     margin: 0;
     display: flex;
     flex-direction: column;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    /* More rounded */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Deeper shadow */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Subtle contrast border */
     overflow: hidden;
   }
 
   /* Ensure images fit nicely */
   .quick-product-item img {
-    height: 140px;
-    /* Fixed height for consistency */
+    height: 180px;
+    /* Increased from 140px */
     width: 100%;
     object-fit: cover;
   }
@@ -2734,11 +2751,12 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   border: none;
 }
 
-/* Image Container - Aspect Ratio 1:1 */
+/* Image Container - Taller Aspect Ratio */
 .quick-tab-pane .quick-product-item img {
   width: 100%;
   height: auto;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
+  /* Taller than 1:1 */
   object-fit: cover;
   margin: 0;
   display: block;

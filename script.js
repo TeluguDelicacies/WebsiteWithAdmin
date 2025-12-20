@@ -1948,7 +1948,7 @@ function renderQuickLayout(products, categories, container) {
                     <p class="quick-subtitle">${cat.telugu_title || ''}</p>
                 </div>
                 <div class="quick-header-action">
-                    <a href="#" class="view-all-link" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank'); return false;">View All <i class="fas fa-chevron-right"></i></a>
+                    <a href="sales.html?category=${cat.slug}" class="view-all-link">View All <i class="fas fa-chevron-right"></i></a>
                 </div>
             </div>
             <div class="quick-product-scroll" id="scroll-${cat.slug}">

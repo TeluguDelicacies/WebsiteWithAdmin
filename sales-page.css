@@ -152,7 +152,7 @@ body {
 
 .breadcrumb-section {
     grid-area: bread;
-    padding: 15px 0;
+    padding: 20px 0;
     border-bottom: 1px solid var(--border-light);
     display: flex;
     justify-content: space-between;
@@ -160,6 +160,11 @@ body {
     flex-wrap: wrap;
     /* Allow wrapping for mobile */
     gap: 15px;
+    max-width: 1300px;
+    /* Constrain width */
+    margin: 0 auto;
+    /* Center */
+    width: 100%;
 }
 
 .crumbs {
@@ -605,5 +610,192 @@ body {
 
     .info-btns-row {
         margin: 10px 0;
+    }
+}
+
+/* 5. Sales Product Grid (New) */
+/* 5. Sales Product Grid (Refined) */
+.sales-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+@media (min-width: 640px) {
+    .sales-product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 30px;
+    }
+}
+
+.sales-product-card {
+    background: var(--bg-primary);
+    border-radius: 24px;
+    /* More rounded */
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    /* Subtle shadow by default */
+}
+
+.sales-product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: transparent;
+}
+
+.sp-img-wrapper {
+    aspect-ratio: 4/5;
+    background: var(--bg-primary);
+    /* White bg */
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+    /* White space around image */
+}
+
+.sp-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Contain image within padding */
+    transition: transform 0.5s ease;
+}
+
+.sales-product-card:hover .sp-img-wrapper img {
+    transform: scale(1.1);
+}
+
+.sp-info {
+    padding: 20px;
+    /* More padding */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background: var(--bg-primary);
+}
+
+.sp-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.sp-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    color: var(--text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.sp-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.sp-price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-primary-blue);
+}
+
+.sp-mrp {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+.sp-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 50px;
+    /* Pill shape */
+    border: 1px solid var(--border-medium);
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.sales-product-card:hover .sp-btn {
+    background: var(--color-primary-blue);
+    color: white;
+    border-color: var(--color-primary-blue);
+}
+
+/* Category Header Theme (Yellow) */
+.category-header-yellow {
+    background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
+    border: 1px solid #fcd34d;
+    border-radius: 24px;
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 20px 25px -5px rgba(251, 191, 36, 0.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-header-yellow h1 {
+    margin: 0;
+    color: #422006;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    font-family: var(--font-primary);
+    letter-spacing: -0.02em;
+}
+
+.category-header-yellow p {
+    margin: 5px 0 0 0;
+    color: #713f12;
+    font-family: var(--font-telugu);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.category-header-yellow img {
+    height: 80px;
+    opacity: 1;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+@media (max-width: 640px) {
+    .category-header-yellow {
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .category-header-yellow img {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        height: 60px;
+    }
+
+    .category-header-yellow>div {
+        width: 100%;
+        padding-right: 70px;
     }
 }

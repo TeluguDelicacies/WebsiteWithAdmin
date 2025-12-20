@@ -100,6 +100,13 @@
         function renderCategoryView(slug) {
             const app = document.getElementById('app');
 
+            // 1. Single Category Grid View
+            if (slug) {
+                renderSingleCategoryGrid(slug);
+                return;
+            }
+
+            // 2. All Categories List (Master Cards)
             const cardsHtml = state.categories.map(cat => {
                 const catProducts = state.allProducts.filter(p =>
                     (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === cat.slug
@@ -140,11 +147,76 @@
                     </div>
                 </section>
             `;
+        }
 
-            if (slug) {
-                const el = document.getElementById(`card-${slug}`);
-                if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        function renderSingleCategoryGrid(slug) {
+            const app = document.getElementById('app');
+            const category = state.categories.find(c => c.slug === slug);
+
+            if (!category) {
+                app.innerHTML = '<h2 class="text-center">Category Not Found</h2>';
+                return;
             }
+
+            const catProducts = state.allProducts.filter(p =>
+                (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === slug
+            );
+
+            // Use the New CSS Classes
+            app.innerHTML = `
+                <div class="breadcrumb-section">
+                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
+                    <a href="sales.html" style="color:var(--text-secondary)">Collections</a> /
+                    <span style="color:var(--color-primary-blue); font-weight:600;">${category.title}</span>
+                </div>
+
+                <section class="category-grid-container" style="max-width:1300px; margin:0 auto; padding-bottom:50px;">
+                    <!-- New Yellow Theme Header Class -->
+                    <div class="category-header-yellow">
+                        <div>
+                            <h1>${category.title}</h1>
+                            <p>${category.telugu_title || ''}</p>
+                        </div>
+                        ${category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : ''}
+                    </div>
+
+                    <!-- New Product Grid Class -->
+                    <div class="sales-product-grid">
+                        ${catProducts.map(p => {
+                // Logic to find valid price
+                let price = p.price;
+                let mrp = p.mrp;
+
+                // If no base price, check variants
+                if (!price && p.quantity_variants) {
+                    try {
+                        const variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : p.quantity_variants;
+                        if (variants && variants.length > 0) {
+                            price = variants[0].price;
+                            mrp = variants[0].mrp;
+                        }
+                    } catch (e) { }
+                }
+
+                return `
+                            <div class="sales-product-card" onclick="window.location.href='sales.html?id=${p.id}'">
+                                <div class="sp-img-wrapper">
+                                    <img src="${p.showcase_image || state.placeholder}" alt="${p.product_name}" onerror="this.src='${state.placeholder}'">
+                                </div>
+                                <div class="sp-info">
+                                    ${category.sub_brand ? `<span class="sp-sub">${category.sub_brand}</span>` : ''}
+                                    <h3 class="sp-title">${p.product_name}</h3>
+                                    <div class="sp-price-row">
+                                        <span class="sp-price">₹${price !== undefined && price !== null ? price : 'N/A'}</span>
+                                        ${mrp > price ? `<span class="sp-mrp">₹${mrp}</span>` : ''}
+                                    </div>
+                                    <button class="sp-btn">View Details</button>
+                                </div>
+                            </div>
+                        `}).join('')}
+                    </div>
+                </section>
+            `;
         }
 
         // --- View: Product ---
