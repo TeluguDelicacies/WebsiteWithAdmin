@@ -618,10 +618,10 @@ body {
 /* 5. Sales Product Grid (Refined) */
 .sales-product-grid {
     display: grid;
-    /* 135px allows 2 columns on 360px screens (approx) */
-    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-    gap: 12px;
-    /* Tighter gap for mobile */
+    /* Increased to 150px (~10% boost from 135px) for wider cards */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    /* Slightly tighter gap to maximize card width */
     padding: 20px 0;
 }
 

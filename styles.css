@@ -245,6 +245,9 @@ html {
   scroll-behavior: smooth;
   font-size: 16px;
   line-height: 1.5;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
+  width: 100%;
 }
 
 body {
@@ -256,6 +259,12 @@ body {
   background-color: var(--bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* Double protection */
+  width: 100%;
+  margin: 0;
+  /* Enhance reset */
+  padding: 0;
 }
 
 /* Typography */
