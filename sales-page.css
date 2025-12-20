@@ -155,7 +155,8 @@ body {
     padding: 20px 0;
     border-bottom: 1px solid var(--border-light);
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    /* Left aligned */
     align-items: center;
     flex-wrap: wrap;
     /* Allow wrapping for mobile */
@@ -617,8 +618,10 @@ body {
 /* 5. Sales Product Grid (Refined) */
 .sales-product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 20px;
+    /* 135px allows 2 columns on 360px screens (approx) */
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 12px;
+    /* Tighter gap for mobile */
     padding: 20px 0;
 }
 
@@ -626,6 +629,7 @@ body {
     .sales-product-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 30px;
+        /* Restore larger gap for desktop */
     }
 }
 
