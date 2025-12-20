@@ -2602,6 +2602,12 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 .quick-card.span-full {
   grid-column: 1 / -1;
+  /* Prevent grid blowout */
+  min-width: 0;
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+  /* Ensure card itself bounds content */
 }
 
 @media (max-width: 1024px) {
