@@ -11,7 +11,8 @@
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/png"
+        href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
     <link rel="stylesheet" href="sales-page.css">
@@ -20,7 +21,8 @@
 <body>
     <header class="sales-header">
         <div class="logo-area" style="display:flex; align-items:center; gap:10px;">
-            <img src="/favicon.png" id="headerLogo" alt="Logo" class="logo"
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="headerLogo"
+                alt="Logo" class="logo"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="logo-fallback"
                 style="display:none; background:var(--bg-gradient-primary); color:white; width:40px; height:40px; border-radius:8px; align-items:center; justify-content:center; font-weight:bold;">
@@ -74,8 +76,15 @@
                 state.categories = (categoriesRes.data || []).filter(c => c.is_visible !== false);
                 state.placeholder = state.settings.product_placeholder_url || './images/placeholder-product.jpg';
 
-                // Sync Logo
-                if (state.settings.logo_url) document.getElementById('headerLogo').src = state.settings.logo_url;
+                // Sync Logo & Favicon
+                if (state.settings.logo_url) {
+                    const logoImg = document.getElementById('headerLogo');
+                    logoImg.src = state.settings.logo_url;
+
+                    // Also set favicon if available, otherwise use logo
+                    const faviconLink = document.getElementById('dynamic-favicon');
+                    faviconLink.href = state.settings.favicon_url || state.settings.logo_url;
+                }
 
                 handleRouting();
             } catch (err) {
