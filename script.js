@@ -1267,6 +1267,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     console.log('All functionality initialized successfully');
+
+    // Fallback: Remove preloader after 3 seconds if it hasn't been removed yet
+    setTimeout(() => {
+        const preloader = document.getElementById('preloader');
+        if (preloader && !preloader.classList.contains('fade-out')) {
+            console.warn('Preloader removed by fallback timeout');
+            preloader.classList.add('fade-out');
+            setTimeout(() => preloader.remove(), 500);
+        }
+    }, 3000);
 });
 
 // Handle page visibility changes (for performance optimization)
@@ -1438,10 +1448,23 @@ async function fetchSiteSettings() {
             }
 
         }
+        // REMOVE PRELOADER
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            preloader.classList.add('fade-out');
+            setTimeout(() => preloader.remove(), 500); // Remove after transition
+        }
+
         return data;
 
     } catch (err) {
         console.error('Error in fetchSiteSettings:', err);
+        // Ensure preloader is removed even on error
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            preloader.classList.add('fade-out');
+            setTimeout(() => preloader.remove(), 500);
+        }
         return null;
     }
 }
