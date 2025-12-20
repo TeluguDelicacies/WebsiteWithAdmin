@@ -20,7 +20,8 @@
 
 <body>
     <header class="sales-header">
-        <div class="logo-area" style="display:flex; align-items:center; gap:10px;">
+        <a href="index.html" class="logo-area"
+            style="display:flex; align-items:center; gap:10px; text-decoration: none;">
             <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="headerLogo"
                 alt="Logo" class="logo"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -29,9 +30,9 @@
                 TD
             </div>
             <span class="brand-name">Telugu Delicacies</span>
-        </div>
+        </a>
         <nav>
-            <a href="/" class="nav-btn">Home</a>
+            <a href="index.html" class="nav-btn">Home</a>
         </nav>
     </header>
 
@@ -147,7 +148,7 @@
 
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
+                    <a href="index.html" style="color:var(--text-secondary)">Home</a> / 
                     <span style="color:var(--color-primary-blue); font-weight:600;">All Collections</span>
                 </div>
                 <section class="category-view-container">
@@ -174,7 +175,7 @@
             // Use the New CSS Classes
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
+                    <a href="index.html" style="color:var(--text-secondary)">Home</a> / 
                     <a href="sales.html" style="color:var(--text-secondary)">Collections</a> /
                     <span style="color:var(--color-primary-blue); font-weight:600;">${category.title}</span>
                 </div>
@@ -255,7 +256,7 @@
                     <div class="breadcrumb-section">
                         <!-- Breadcrumbs (Left) -->
                         <div class="crumbs">
-                            <a href="/">Home</a> <span>/</span> 
+                            <a href="index.html">Home</a> <span>/</span> 
                             <a href="sales.html?category=${catSlug}">${category?.title || 'Back'}</a> <span>/</span> 
                             <span class="current">${product.product_name}</span>
                         </div>

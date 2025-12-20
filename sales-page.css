@@ -803,3 +803,17 @@ body {
         padding-right: 70px;
     }
 }
+
+/* Yellow Home Button */
+.sales-header .nav-btn {
+    background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
+    border: 1px solid #fcd34d;
+    color: #422006;
+    font-weight: 700;
+}
+
+.sales-header .nav-btn:hover {
+    background: linear-gradient(135deg, #ffe082 0%, #fff9c4 100%);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
