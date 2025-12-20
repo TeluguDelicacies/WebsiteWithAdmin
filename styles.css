@@ -2640,8 +2640,8 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   .quick-product-item {
     flex: 0 0 auto;
     /* Don't shrink/grow */
-    width: 85vw;
-    /* Max screen width usually means 85-90% to allow peek */
+    width: 42vw;
+    /* approx 2 visible (100-gap / 2) */
     /* Fixed width for card */
     margin: 0;
     display: flex;
