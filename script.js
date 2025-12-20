@@ -1903,27 +1903,16 @@ async function fetchAndRenderTestimonials() {
 /**
  * Renders the Quick Commerce Layout (Desktop Grid + Mobile Tabs)
  */
+/**
+ * Renders the Quick Commerce Layout (Unified Vertical List with Horizontal Scroll)
+ */
 function renderQuickLayout(products, categories, container) {
     container.innerHTML = '';
     const showMrp = window.currentSiteSettings?.show_mrp !== false;
 
-    // Create wrapper
+    // Create a unified wrapper
     const wrapper = document.createElement('div');
-    wrapper.className = 'quick-layout-wrapper';
-
-    // --- MOBILE TABS NAVIGATION ---
-    const mobileNav = document.createElement('div');
-    mobileNav.className = 'quick-mobile-nav';
-    mobileNav.innerHTML = `<div class="category-tabs" id="quickCategoryTabs"></div>`;
-
-    // --- MOBILE CONTENT AREA ---
-    const mobileContent = document.createElement('div');
-    mobileContent.className = 'quick-mobile-content';
-    mobileContent.id = 'quickMobileContent';
-
-    // --- DESKTOP GRID ---
-    const desktopGrid = document.createElement('div');
-    desktopGrid.className = 'quick-layout-grid';
+    wrapper.className = 'quick-layout-grid unified-layout';
 
     // Filter categories that have products
     const activeCategories = categories.filter(cat => {
@@ -1940,29 +1929,13 @@ function renderQuickLayout(products, categories, container) {
         return;
     }
 
-    // 1. Build Mobile Tabs & Content
-    activeCategories.forEach((cat, index) => {
-        // Tab
-        const tab = document.createElement('button');
-        tab.className = `cat-tab-btn ${index === 0 ? 'active' : ''}`;
-        tab.innerText = cat.title;
-        tab.onclick = () => switchQuickTab(cat.slug);
-        mobileNav.querySelector('.category-tabs').appendChild(tab);
-
-        // Content Container (Initially hidden except first)
-        const contentDiv = document.createElement('div');
-        contentDiv.className = `quick-tab-pane ${index === 0 ? 'active' : ''}`;
-        contentDiv.id = `tab-pane-${cat.slug}`;
-
-        // Render Products for this category
+    // Iterate through categories and create sections
+    activeCategories.forEach((cat) => {
         const catProducts = getProductsForCategory(products, cat);
-        contentDiv.innerHTML = renderQuickProductsHTML(catProducts, showMrp);
 
-        mobileContent.appendChild(contentDiv);
-
-        // 2. Build Desktop Grid Card
+        // Build Grid Card (Unified)
         const card = document.createElement('div');
-        // Ready to eat spans full
+        // Ready to eat spans full (though mostly relevant for grid layouts, keeping for consistency)
         const isFullWidth = cat.slug === 'ready-to-eat';
         card.className = `quick-card ${isFullWidth ? 'span-full' : ''}`;
 
@@ -1981,25 +1954,12 @@ function renderQuickLayout(products, categories, container) {
                 ${renderQuickProductsHTML(catProducts, showMrp)}
             </div>
         `;
-        desktopGrid.appendChild(card);
+        wrapper.appendChild(card);
     });
 
-    // Assemble DOM
-    // Mobile Wrapper
-    const mobileWrapper = document.createElement('div');
-    mobileWrapper.className = 'mobile-only-layout';
-    mobileWrapper.appendChild(mobileNav);
-    mobileWrapper.appendChild(mobileContent);
+    container.appendChild(wrapper);
 
-    // Desktop Wrapper
-    const desktopWrapper = document.createElement('div');
-    desktopWrapper.className = 'desktop-only-layout';
-    desktopWrapper.appendChild(desktopGrid);
-
-    container.appendChild(mobileWrapper);
-    container.appendChild(desktopWrapper);
-
-    // Initialize Drag Scroll for Desktop Lists
+    // Initialize Drag Scroll for All Lists
     setTimeout(() => {
         document.querySelectorAll('.quick-product-scroll').forEach(el => {
             enableDragScroll(el);

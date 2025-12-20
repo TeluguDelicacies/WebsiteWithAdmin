@@ -2593,217 +2593,217 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 }
 
 /* 2. Mobile Tabs Styles */
-.mobile-only-layout {
-  display: none;
-}
-
-.desktop-only-layout {
-  display: block;
-}
-
-.quick-mobile-nav {
-  position: sticky;
-  top: 70px;
-  /* Below header */
-  z-index: 100;
-  background: white;
-  padding: 10px 0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  margin: 0 -1rem 10px -1rem;
-  /* Full bleed tabs */
-  padding-left: 4px;
-  /* Shifted left */
-  padding-right: 1rem;
-}
-
-.category-tabs {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding: 0 4px;
-  /* Shifted left */
-  scrollbar-width: none;
-}
-
-.category-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.cat-tab-btn {
-  border: 1px solid var(--border-light);
-  background: var(--bg-secondary);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.cat-tab-btn.active {
-  background: var(--color-primary-blue);
-  color: white;
-  border-color: var(--color-primary-blue);
-  box-shadow: 0 2px 8px rgba(0, 119, 182, 0.3);
-}
-
-.quick-tab-pane {
-  display: none;
-  animation: fadeIn 0.3s ease;
-}
-
-.quick-tab-pane.active {
+/* 2. Unified Layout Styles */
+.quick-layout-grid.unified-layout {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  /* 2 columns on mobile for products */
-  gap: 10px;
+  gap: 20px;
 }
 
-/* Mobile Product Item Adjustments */
-.quick-tab-pane .quick-product-item {
-  width: 100%;
-  min-width: 0;
-  max-width: none;
-  margin-bottom: 0;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  /* Force column on mobile tabs view? User said "tabs for each", likely grid inside tab is better than list */
+.quick-card.span-full {
+  grid-column: 1 / -1;
 }
 
+@media (max-width: 1024px) {
+  .quick-layout-grid.unified-layout {
+    grid-template-columns: 1fr;
+    /* Stack vertically on tablet/mobile */
+    gap: 15px;
+  }
+}
+
+/* 3. Horizontal Scrolling for Mobile */
 @media (max-width: 768px) {
-  .mobile-only-layout {
-    display: block;
+
+  /* CRITICAL FIX: Ensure horizontal flow on mobile */
+  .quick-product-scroll {
+    display: flex !important;
+    /* Override any column settings */
+    flex-direction: row !important;
+    /* Force row */
+    overflow-x: auto !important;
+    /* Force scroll */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding-bottom: 10px;
+    gap: 10px;
+    justify-content: flex-start;
+    /* Align start */
   }
 
-  .desktop-only-layout {
+  .quick-product-scroll::-webkit-scrollbar {
     display: none;
   }
 
-  /* --- OPTION 4: STANDARD FLUID GRID (FRESH START) --- */
-
-  /* Reset container styles to default */
-  /* Reset container styles to default */
-  .quick-commerce-mode .container {
-    padding-left: 24px;
-    /* Reduced by 250% from 64px */
-    padding-right: 2%;
-    width: 100%;
-    overflow-x: visible;
-  }
-
-  .quick-tab-pane.active {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    /* 3 EQUAL FLUID COLUMNS */
-    gap: 8px;
-    width: 100%;
-    box-sizing: border-box;
-    padding-bottom: 80px;
-    justify-content: stretch;
-  }
-
-  /* Card Style - FLUID WIDTH */
-  .quick-tab-pane .quick-product-item {
+  /* Fixed width items for mobile scrolling */
+  .quick-product-item {
+    flex: 0 0 auto;
+    /* Don't shrink/grow */
+    width: 160px;
+    /* Fixed width for card */
+    margin: 0;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    /* Fluid width */
-    min-width: 0;
-    /* meaningful for grid items */
-    max-width: none;
-    /* Remove any caps */
-    margin: 0;
-    height: auto;
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    padding-bottom: 8px;
-    position: relative;
-    border: none;
   }
 
-  /* Image Container - Aspect Ratio 1:1 */
-  .quick-tab-pane .quick-product-item img {
+  /* Ensure images fit nicely */
+  .quick-product-item img {
+    height: 140px;
+    /* Fixed height for consistency */
     width: 100%;
-    height: auto;
-    aspect-ratio: 1 / 1;
     object-fit: cover;
-    margin: 0;
-    display: block;
-    border-bottom: 1px solid #f1f5f9;
   }
 
-  /* Info Block */
-  .quick-tab-pane .quick-product-item-info {
-    padding: 8px;
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    /* occupy remaining space */
+  .quick-product-item-info {
+    padding: 10px;
   }
 
-  /* Product Name - Smaller for 3-col */
-  .quick-tab-pane .quick-product-item h4 {
-    font-size: 0.75rem;
-    /* Reduced from 0.85rem */
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0 0 4px 0;
-    line-height: 1.2;
+  .quick-product-item h4 {
+    font-size: 0.85rem;
+    white-space: normal;
+    /* Allow text wrap */
     display: -webkit-box;
     -webkit-line-clamp: 2;
-    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    height: 2.4em;
+    /* aprox for 2 lines */
   }
 
-  /* Subtitle / Unit */
-  .quick-tab-pane .quick-product-item .weight {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-bottom: auto;
-    /* Push bottom elements down */
+  /* Adjust price row layout */
+  .price-row {
+    justify-content: flex-start;
+    margin-top: auto;
   }
+}
 
-  /* Price Tag (Overlay) */
-  .quick-tab-pane .price-row {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    /* Left aligned price tag usually looks better or top-right? Kept top-left or right as per pref. Let's stick to Right for visibility over image */
-    right: 8px;
-    left: auto;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 4px 8px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: #0f172a;
-    z-index: 5;
-    pointer-events: none;
-  }
+/* --- OPTION 4: STANDARD FLUID GRID (FRESH START) --- */
 
-  /* Add Button (Full Width Bottom) */
-  .quick-tab-pane .quick-product-item .add-btn {
-    margin-top: 4px;
-    width: 100%;
-    border-radius: 6px;
-    background: var(--color-primary-blue);
-    color: white;
-    font-size: 0.7rem;
-    /* Reduced size */
-    padding: 6px 0;
-    font-weight: 600;
-    border: none;
-  }
+/* Reset container styles to default */
+/* Reset container styles to default */
+.quick-commerce-mode .container {
+  padding-left: 24px;
+  /* Reduced by 250% from 64px */
+  padding-right: 2%;
+  width: 100%;
+  overflow-x: visible;
+}
+
+.quick-tab-pane.active {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* 3 EQUAL FLUID COLUMNS */
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 80px;
+  justify-content: stretch;
+}
+
+/* Card Style - FLUID WIDTH */
+.quick-tab-pane .quick-product-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  /* Fluid width */
+  min-width: 0;
+  /* meaningful for grid items */
+  max-width: none;
+  /* Remove any caps */
+  margin: 0;
+  height: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  padding-bottom: 8px;
+  position: relative;
+  border: none;
+}
+
+/* Image Container - Aspect Ratio 1:1 */
+.quick-tab-pane .quick-product-item img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  margin: 0;
+  display: block;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Info Block */
+.quick-tab-pane .quick-product-item-info {
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  /* occupy remaining space */
+}
+
+/* Product Name - Smaller for 3-col */
+.quick-tab-pane .quick-product-item h4 {
+  font-size: 0.75rem;
+  /* Reduced from 0.85rem */
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Subtitle / Unit */
+.quick-tab-pane .quick-product-item .weight {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: auto;
+  /* Push bottom elements down */
+}
+
+/* Price Tag (Overlay) */
+.quick-tab-pane .price-row {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  /* Left aligned price tag usually looks better or top-right? Kept top-left or right as per pref. Let's stick to Right for visibility over image */
+  right: 8px;
+  left: auto;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #0f172a;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Add Button (Full Width Bottom) */
+.quick-tab-pane .quick-product-item .add-btn {
+  margin-top: 4px;
+  width: 100%;
+  border-radius: 6px;
+  background: var(--color-primary-blue);
+  color: white;
+  font-size: 0.7rem;
+  /* Reduced size */
+  padding: 6px 0;
+  font-weight: 600;
+  border: none;
+}
 }
 
 
