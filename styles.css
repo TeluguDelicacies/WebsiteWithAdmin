@@ -2636,6 +2636,8 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
     gap: 10px;
     justify-content: flex-start;
     /* Align start */
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0;
   }
 
   .quick-product-scroll::-webkit-scrollbar {
@@ -2646,8 +2648,9 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   .quick-product-item {
     flex: 0 0 auto;
     /* Don't shrink/grow */
-    width: 42vw;
-    /* approx 2 visible (100-gap / 2) */
+    width: 46vw;
+    /* 2 items fully visible: 46*2 = 92vw + 10px gap approx 95vw */
+    scroll-snap-align: start;
     /* Fixed width for card */
     margin: 0;
     display: flex;
