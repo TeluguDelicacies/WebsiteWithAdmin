@@ -36,8 +36,8 @@ body {
 .sales-page-container {
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: 0 5px 50px 5px;
-    /* Minimal side padding, added bottom padding */
+    padding: 0 5px 20px 5px;
+    /* Minimal side padding, reduced bottom padding */
 }
 
 /* ... existing code ... */

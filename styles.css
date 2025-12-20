@@ -832,25 +832,32 @@ Enhanced product cards and modern styling
 */
 /* Adjusted for speed and spacing */
 .product-showcase {
-  padding: 1rem 0 0 0;
-  /* Removed bottom padding */
-  /* Drastically reduced from 40px */
-  /* Seamless flow: White -> Soft Blue */
+  padding: 1rem 0 6rem 0;
+  /* Increased bottom padding further */
   background: linear-gradient(180deg, #FFFFFF 0%, #F0F7FF 100%);
   position: relative;
   overflow: hidden;
   min-height: auto;
-  /* Removed fixed height to remove space below */
-  /* Ensure height visibility */
 }
 
 /* ... existing code ... */
 
+@keyframes scroll-ticker {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .product-scroll {
   display: flex;
-  gap: var(--space-6);
-  animation: scroll-ticker 10s linear infinite;
-  /* Increased speed to 10s */
+  gap: var(--space-3);
+  /* Reduced gap */
+  animation: scroll-ticker 40s linear infinite;
+  /* Reduced speed to 40s */
   will-change: transform;
   width: max-content;
   /* Prevent collapsing */
@@ -858,6 +865,95 @@ Enhanced product cards and modern styling
 
 .product-scroll:hover {
   animation-play-state: paused;
+}
+
+.product-item {
+  flex-shrink: 0;
+  width: 130px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  /* Reduced padding to fit larger image */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #d1d5db;
+  /* Permanent elegant border */
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--bg-gradient-primary);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.product-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: var(--color-secondary-blue);
+  /* Elegant Blue on hover */
+}
+
+.product-item:hover::before {
+  opacity: 1;
+}
+
+.product-item img {
+  width: 100%;
+  height: 220px;
+  /* Increased height by 50% */
+  object-fit: contain;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-1);
+  /* Reduced margin */
+  padding: 0;
+  transition: transform var(--transition-normal);
+}
+
+.product-item:hover img {
+  transform: scale(1.05);
+}
+
+.product-item h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-bottom: 4px;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: -0.01em;
+  height: 2.4em;
+  /* Fixed height for 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: auto;
+  /* Push text to bottom */
+}
+
+.product-item .telugu-name {
+  font-family: var(--font-telugu);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-secondary-blue);
+  text-align: center;
+  line-height: 1.3;
+  margin-top: 0;
+  padding-top: 2px;
+  border-top: 1px solid var(--border-light);
+  width: 100%;
 }
 
 /* ... existing code ... */
@@ -872,14 +968,14 @@ Enhanced product cards and modern styling
   /* ... */
 
   .product-item {
-    width: 160px;
-    padding: 8px;
-    border-radius: var(--radius-lg);
+    width: 110px;
+    padding: 6px;
+    border-radius: var(--radius-md);
   }
 
   .product-item img {
-    height: 110px;
-    margin-bottom: 8px;
+    height: 70px;
+    margin-bottom: 6px;
   }
 
   .product-item h3 {
