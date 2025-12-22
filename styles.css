@@ -2698,12 +2698,14 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
     font-size: 0.85rem;
     white-space: normal;
     /* Allow text wrap */
+    /* Truncate to 2 lines */
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     height: 2.4em;
-    /* aprox for 2 lines */
+    /* approx for 2 lines */
   }
 
   /* Adjust price row layout */
@@ -2934,7 +2936,8 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 @media (max-width: 768px) {
   .quick-commerce-mode #product-categories .section-title {
     font-size: 1.5rem !important;
-    padding-left: 1rem;
+    padding-left: 0 !important;
+    text-align: center !important;
   }
 }
 
