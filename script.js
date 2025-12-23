@@ -2134,6 +2134,18 @@ window.addEventListener('resize', () => {
 
 
 /**
+ * Filter Helper
+ */
+function getProductsForCategory(products, category) {
+    const targetSlug = category.slug.toLowerCase().trim();
+    return products.filter(p => {
+        const rawCat = (p.product_category || '').toLowerCase().trim();
+        const slugified = rawCat.replace(/\s+/g, '-');
+        return rawCat === targetSlug || slugified === targetSlug || rawCat === category.id;
+    });
+}
+
+/**
  * HTML Generator Helper
  */
 function renderQuickProductsHTML(products, showMrp) {
