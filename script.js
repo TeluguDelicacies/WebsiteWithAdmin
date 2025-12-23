@@ -2073,12 +2073,8 @@ function enableDragScroll(slider) {
  * Ensures consistent speed regardless of number of items
  */
 function updateScrollSpeeds() {
-    const isMobile = window.innerWidth <= 768;
-    // Seconds per card (adjust to taste)
-    const SPEED_PER_CARD_DESKTOP = 3;
-    const SPEED_PER_CARD_MOBILE = 1.5;
-
-    const secondsPerCard = isMobile ? SPEED_PER_CARD_MOBILE : SPEED_PER_CARD_DESKTOP;
+    // User Requested: Universal 2.5s per card irrespective of device or type
+    const secondsPerCard = 2.5;
 
     // 1. Main Product Ticker (Duplicated content)
     document.querySelectorAll('.product-scroll').forEach(el => {
