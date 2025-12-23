@@ -1944,6 +1944,8 @@ function renderQuickLayout(products, categories, container) {
         const isFullWidth = cat.slug === 'ready-to-eat';
         card.className = `quick-card ${isFullWidth ? 'span-full' : ''}`;
 
+        const productsHTML = renderQuickProductsHTML(catProducts, showMrp);
+
         card.innerHTML = `
             <div class="quick-header-row">
                 <div class="quick-header-text">
@@ -1956,7 +1958,9 @@ function renderQuickLayout(products, categories, container) {
                 </div>
             </div>
             <div class="quick-product-scroll" id="scroll-${cat.slug}">
-                ${renderQuickProductsHTML(catProducts, showMrp)}
+                <div class="quick-scroll-track">
+                    ${productsHTML}
+                </div>
             </div>
         `;
         wrapper.appendChild(card);
@@ -1964,12 +1968,12 @@ function renderQuickLayout(products, categories, container) {
 
     container.appendChild(wrapper);
 
-    // Initialize Drag Scroll for All Lists
-    setTimeout(() => {
-        document.querySelectorAll('.quick-product-scroll').forEach(el => {
-            enableDragScroll(el);
-        });
-    }, 500);
+    // Initialize Drag Scroll for All Lists - DISABLED due to Auto-Ticker Implementation
+    // setTimeout(() => {
+    //     document.querySelectorAll('.quick-product-scroll').forEach(el => {
+    //         enableDragScroll(el);
+    //     });
+    // }, 500);
 }
 
 /**

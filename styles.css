@@ -2440,19 +2440,42 @@ MASTER CARD LAYOUT (Redesign with Overlay)
 }
 
 /* Scroll Container */
+/* Scroll Container (Mask) */
 .quick-product-scroll {
-  display: flex;
-  gap: 15px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE/Edge */
+  overflow: hidden;
+  position: relative;
+  width: 100%;
 }
 
-.quick-product-scroll::-webkit-scrollbar {
-  display: none;
+/* Scroll Track (Animated) */
+.quick-scroll-track {
+  display: flex;
+  gap: 15px;
+  width: max-content;
+  min-width: 100%;
+  /* Ensure track can move fully off screen even if content is small */
+  animation: quick-scroll-ticker 40s linear infinite;
+  /* Faster speed */
+  animation-delay: -20s;
+  /* Start in the middle (Visible at 0) */
+  will-change: transform;
+}
+
+.quick-scroll-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes quick-scroll-ticker {
+  0% {
+    transform: translateX(100%);
+  }
+
+  /* Start completely off-screen RIGHT */
+  100% {
+    transform: translateX(-100%);
+  }
+
+  /* End completely off-screen LEFT */
 }
 
 /* Mobile Vertical Flow Override */
@@ -2665,24 +2688,20 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 @media (max-width: 768px) {
 
   /* CRITICAL FIX: Ensure horizontal flow on mobile */
+  /* CRITICAL FIX: Ensure horizontal flow on mobile */
   .quick-product-scroll {
-    display: flex !important;
-    /* Override any column settings */
-    flex-direction: row !important;
-    /* Force row */
-    overflow-x: auto !important;
-    /* Force scroll */
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
+    overflow-x: hidden !important;
+    /* Keep mask behavior */
     padding-bottom: 10px;
-    gap: 10px;
-    justify-content: flex-start;
-    /* Align start */
   }
 
-  .quick-product-scroll::-webkit-scrollbar {
-    display: none;
+  .quick-scroll-track {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px;
+    animation-duration: 30s;
+    /* Even faster on mobile */
+    animation-delay: -15s;
   }
 
   /* Fixed width items for mobile scrolling */
