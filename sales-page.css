@@ -72,29 +72,43 @@ body {
 }
 
 .master-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .master-card {
+    flex: 0 1 340px;
+    min-width: 300px;
+    min-height: 420px;
+    /* Slight bump */
     background: var(--bg-primary);
     border-radius: var(--radius-xl);
     border: 1px solid var(--border-light);
-    overflow: hidden;
+    overflow: visible !important;
+    /* Force visible to prevent popup clipping */
     display: flex;
     flex-direction: column;
     transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    z-index: 1;
+    /* Stack context */
 }
 
 .master-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
+    z-index: 10;
+    /* Bring to front on hover */
 }
 
 .card-hero-image {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 2.5 / 1;
+    /* Even flatter to safe space */
     overflow: hidden;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
 .card-hero-image img {
@@ -104,7 +118,9 @@ body {
 }
 
 .card-body {
-    padding: 20px;
+    padding: 15px;
+    padding-bottom: 30px;
+    /* NON-TRIVIAL BUFFER at bottom */
     display: flex;
     flex-direction: column;
     text-align: center;
@@ -112,23 +128,37 @@ body {
 }
 
 .card-title {
-    font-size: 1.4rem;
-    margin-bottom: 8px;
+    font-size: 1.15rem;
+    /* Reduced from 1.4rem */
+    margin-bottom: 6px;
+    font-weight: 700;
 }
 
 .card-desc {
     font-size: 0.9rem;
+    /* Restore size slightly */
     color: var(--text-secondary);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
+    /* Reduced from 20px */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    /* line-height removed to avoid clamp issues */
+    flex-shrink: 0;
+    /* Prevent collapse */
 }
 
 .dropdown-wrapper {
     margin-top: auto;
+    width: 100%;
+}
+
+/* Ensure select is fully visible */
+.product-select {
+    font-size: 0.85rem !important;
+    padding: 8px !important;
 }
 
 /* 4. Product View (Grid-Layout) */
@@ -625,6 +655,40 @@ body {
     padding: 20px 0;
 }
 
+@media (max-width: 640px) {
+    .sales-product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        /* Force 2 columns */
+        gap: 10px;
+    }
+
+    .sp-info {
+        padding: 10px;
+        /* Reduce padding for mobile */
+    }
+
+    .sp-title {
+        font-size: 0.9rem;
+        /* Smaller title */
+        margin-bottom: 5px;
+    }
+
+    .sp-price {
+        font-size: 1rem;
+        /* Smaller price */
+    }
+
+    .sp-mrp {
+        font-size: 0.8rem;
+    }
+
+    .sp-btn {
+        padding: 8px;
+        /* Smaller button */
+        font-size: 0.8rem;
+    }
+}
+
 @media (min-width: 640px) {
     .sales-product-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -748,19 +812,30 @@ body {
 }
 
 /* Category Header Theme (Yellow) */
-.category-header-yellow {
+/* Category Header Theme (Yellow) REFACTORED */
+
+/* Full Section Yellow Background */
+.yellow-theme-full {
     background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
-    border: 1px solid #fcd34d;
     border-radius: 24px;
     padding: 30px;
-    margin-bottom: 40px;
+    /* Padding for the whole container */
     box-shadow: 0 20px 25px -5px rgba(251, 191, 36, 0.25);
+    margin-top: 20px;
+}
+
+/* Simple Header (Transparent/Clean) */
+.category-header-simple {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(113, 63, 18, 0.1);
+    /* Subtle divider */
 }
 
-.category-header-yellow h1 {
+.category-header-simple h1 {
     margin: 0;
     color: #422006;
     font-size: clamp(2rem, 5vw, 2.5rem);
@@ -768,7 +843,7 @@ body {
     letter-spacing: -0.02em;
 }
 
-.category-header-yellow p {
+.category-header-simple p {
     margin: 5px 0 0 0;
     color: #713f12;
     font-family: var(--font-telugu);
@@ -776,7 +851,7 @@ body {
     font-weight: 500;
 }
 
-.category-header-yellow img {
+.category-header-simple img {
     height: 80px;
     opacity: 1;
     object-fit: contain;
@@ -784,23 +859,24 @@ body {
 }
 
 @media (max-width: 640px) {
-    .category-header-yellow {
+    .yellow-theme-full {
+        padding: 15px;
+        /* Less padding on mobile */
+        border-radius: 16px;
+    }
+
+    .category-header-simple {
         flex-direction: column-reverse;
         align-items: flex-start;
-        gap: 20px;
-        padding: 20px;
+        gap: 15px;
+        position: relative;
     }
 
-    .category-header-yellow img {
+    .category-header-simple img {
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 0;
+        right: 0;
         height: 60px;
-    }
-
-    .category-header-yellow>div {
-        width: 100%;
-        padding-right: 70px;
     }
 }
 
