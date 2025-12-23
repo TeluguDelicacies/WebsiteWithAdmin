@@ -2131,13 +2131,7 @@ window.addEventListener('resize', () => {
     clearTimeout(window.resizeTimer);
     window.resizeTimer = setTimeout(updateScrollSpeeds, 200);
 });
-const targetSlug = category.slug.toLowerCase().trim();
-return products.filter(p => {
-    const rawCat = (p.product_category || '').toLowerCase().trim();
-    const slugified = rawCat.replace(/\s+/g, '-');
-    return rawCat === targetSlug || slugified === targetSlug || rawCat === category.id;
-});
-}
+
 
 /**
  * HTML Generator Helper
