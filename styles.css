@@ -869,19 +869,46 @@ Enhanced product cards and modern styling
 
 .product-item {
   flex-shrink: 0;
-  width: 130px;
+  width: 220px;
+  /* Desktop Width */
+  aspect-ratio: 3 / 4;
+  /* Portrait 3:4 Ratio */
   background: var(--bg-primary);
   border-radius: var(--radius-lg);
-  padding: 4px;
-  /* Reduced padding to fit larger image */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0;
+  /* No padding on card itself, managed by children */
+  box-shadow: var(--shadow-md);
   border: 1px solid #d1d5db;
-  /* Permanent elegant border */
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.product-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  /* Square Image Area */
+  padding: 15px;
+  /* Padding AROUND the image */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  /* Clean background */
+}
+
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* Start from top of this section */
+  padding: 0 10px 10px 10px;
+  background: white;
+  width: 100%;
+  text-align: center;
 }
 
 .product-item::before {
@@ -909,51 +936,43 @@ Enhanced product cards and modern styling
 
 .product-item img {
   width: 100%;
-  height: 220px;
-  /* Increased height by 50% */
+  height: 100%;
   object-fit: contain;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-1);
-  /* Reduced margin */
-  padding: 0;
   transition: transform var(--transition-normal);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+  /* Subtle depth for image */
 }
 
 .product-item:hover img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .product-item h3 {
-  font-size: 0.9rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-primary-dark);
-  margin-bottom: 4px;
+  margin: 0 0 4px 0;
   line-height: 1.2;
-  text-align: center;
   letter-spacing: -0.01em;
-  height: 2.4em;
-  /* Fixed height for 2 lines */
+  /* Ensure consistent height for 2 lines of text if needed, 
+     but with top alignment, single lines stay at top. 
+     We can clamp to 2 lines to be safe. */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-top: auto;
-  /* Push text to bottom */
 }
 
 .product-item .telugu-name {
   font-family: var(--font-telugu);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--color-secondary-blue);
-  text-align: center;
   line-height: 1.3;
-  margin-top: 0;
+  margin: 0;
   padding-top: 2px;
-  border-top: 1px solid var(--border-light);
-  width: 100%;
 }
 
 /* ... existing code ... */
@@ -968,22 +987,26 @@ Enhanced product cards and modern styling
   /* ... */
 
   .product-item {
-    width: 110px;
+    width: 160px;
+    /* Reduced width for Mobile */
+    /* Aspect Ratio stays 3/4, so height will calculate automatically approx 213px */
     padding: 6px;
     border-radius: var(--radius-md);
   }
 
-  .product-item img {
-    height: 70px;
-    margin-bottom: 6px;
+  .product-image-wrapper {
+    padding: 10px;
+    /* Slightly less padding on mobile */
   }
+
+
 
   .product-item h3 {
     font-size: 0.9rem;
   }
 
   .product-item .telugu-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 }
 

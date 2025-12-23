@@ -1565,9 +1565,13 @@ function renderProducts(products, categories) {
                 }
 
                 showcaseItem.innerHTML = `
-                    <img src="${localImage}" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
-                    <h3>${product.product_name}</h3>
-                    <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
+                    <div class="product-image-wrapper">
+                        <img src="${localImage}" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
+                    </div>
+                    <div class="product-info">
+                        <h3>${product.product_name}</h3>
+                        <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
+                    </div>
                 `;
                 productScroll.appendChild(showcaseItem);
             });
