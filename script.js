@@ -1554,7 +1554,20 @@ function renderProducts(products, categories) {
 
         if (showTicker) {
             productScroll.innerHTML = '';
-            products.forEach(product => {
+
+            // Sort products to match Category Order
+            let filteredCarouselProducts = [];
+            categories.forEach(cat => {
+                const catSlug = cat.slug.toLowerCase().trim();
+                const catProducts = products.filter(p => {
+                    const pCat = (p.product_category || '').toLowerCase().trim();
+                    const slugified = pCat.replace(/\s+/g, '-');
+                    return pCat === catSlug || slugified === catSlug;
+                });
+                filteredCarouselProducts.push(...catProducts);
+            });
+
+            filteredCarouselProducts.forEach(product => {
                 const showcaseItem = document.createElement('div');
                 showcaseItem.className = 'product-item';
 
@@ -1577,7 +1590,7 @@ function renderProducts(products, categories) {
             });
 
             // Duplicate for seamless scrolling
-            if (products.length > 0) {
+            if (filteredCarouselProducts.length > 0) {
                 const items = Array.from(productScroll.children);
                 items.forEach(item => productScroll.appendChild(item.cloneNode(true)));
             }
@@ -1958,9 +1971,7 @@ function renderQuickLayout(products, categories, container) {
                 </div>
             </div>
             <div class="quick-product-scroll" id="scroll-${cat.slug}">
-                <div class="quick-scroll-track">
-                    ${productsHTML}
-                </div>
+                ${productsHTML}
             </div>
         `;
         wrapper.appendChild(card);
@@ -1968,12 +1979,49 @@ function renderQuickLayout(products, categories, container) {
 
     container.appendChild(wrapper);
 
-    // Initialize Drag Scroll for All Lists - DISABLED due to Auto-Ticker Implementation
-    // setTimeout(() => {
-    //     document.querySelectorAll('.quick-product-scroll').forEach(el => {
-    //         enableDragScroll(el);
-    //     });
-    // }, 500);
+    // Initialize Drag Scroll for All Lists
+    setTimeout(() => {
+        document.querySelectorAll('.quick-product-scroll').forEach(el => {
+            enableDragScroll(el);
+        });
+    }, 500);
+}
+
+/**
+ * Enables drag-to-scroll functionality for desktop mouse interactions
+ * @param {HTMLElement} slider - The scroll container element
+ */
+function enableDragScroll(slider) {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        slider.classList.add('active');
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+        // Prevent default text selection
+        e.preventDefault();
+    });
+
+    slider.addEventListener('mouseleave', () => {
+        isDown = false;
+        slider.classList.remove('active');
+    });
+
+    slider.addEventListener('mouseup', () => {
+        isDown = false;
+        slider.classList.remove('active');
+    });
+
+    slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll-fast multiplier
+        slider.scrollLeft = scrollLeft - walk;
+    });
 }
 
 /**
@@ -2017,13 +2065,16 @@ function renderQuickProductsHTML(products, showMrp) {
 
         return `
         <div class="quick-product-item ${extraClass}" onclick="window.openQuickProductModal('${pId}')">
-            <img src="${localImage}" 
-                    alt="${product.product_name}" 
-                    loading="lazy"
-                    onerror="this.onerror=null; this.src='${fallbackImg}';">
+            <div class="quick-product-image-wrapper">
+                <img src="${localImage}" 
+                        alt="${product.product_name}" 
+                        loading="lazy"
+                        onerror="this.onerror=null; this.src='${fallbackImg}';">
+            </div>
             
             <div class="quick-product-item-info">
                 <h4>${product.product_name}</h4>
+                <p class="telugu-name">${product.product_name_telugu || ''}</p>
                 <div class="weight">${qtyDisplay}</div>
                 ${showMrp ? `<div class="price-row">
                     <span class="price">₹${priceDisplay}</span>
@@ -2178,46 +2229,4 @@ window.switchQuickTab = function (slug) {
     document.getElementById(`tab-pane-${slug}`)?.classList.add('active');
 }
 
-/**
- * Enbles Drag-to-Scroll on any container
- */
-function enableDragScroll(element) {
-    if (!element) return;
 
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-
-    element.style.cursor = 'grab';
-
-    element.addEventListener('mousedown', (e) => {
-        isDown = true;
-        element.style.cursor = 'grabbing';
-        startX = e.pageX - element.offsetLeft;
-        scrollLeft = element.scrollLeft;
-
-        // Prevent default drag behavior of images inside
-        e.preventDefault();
-    });
-
-    element.addEventListener('mouseleave', () => {
-        isDown = false;
-        element.style.cursor = 'grab';
-    });
-
-    element.addEventListener('mouseup', () => {
-        isDown = false;
-        element.style.cursor = 'grab';
-    });
-
-    element.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - element.offsetLeft;
-        const walk = (x - startX) * 2; // Scroll-fast
-        element.scrollLeft = scrollLeft - walk;
-    });
-
-    // Touch is handled natively by overflow-x: auto, checking that...
-    // But we can add Momentum if needed (usually native is fine)
-}
