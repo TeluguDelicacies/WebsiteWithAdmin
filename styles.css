@@ -2465,14 +2465,7 @@ MASTER CARD LAYOUT (Redesign with Overlay)
   /* End completely off-screen LEFT */
 }
 
-/* Mobile Vertical Flow Override */
-@media (max-width: 767px) {
-  .quick-product-scroll {
-    flex-direction: column;
-    overflow-x: visible;
-    gap: 10px;
-  }
-}
+
 
 /* Quick Product Item */
 .quick-product-item {
@@ -2672,77 +2665,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 }
 
 /* 3. Horizontal Scrolling for Mobile */
-@media (max-width: 768px) {
 
-  /* CRITICAL FIX: Ensure horizontal flow on mobile */
-  /* CRITICAL FIX: Ensure horizontal flow on mobile */
-  .quick-product-scroll {
-    overflow-x: hidden !important;
-    /* Keep mask behavior */
-    padding-bottom: 10px;
-  }
-
-  .quick-scroll-track {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 10px;
-    animation-duration: 30s;
-    /* Even faster on mobile */
-    animation-delay: -15s;
-  }
-
-  /* Fixed width items for mobile scrolling */
-  .quick-product-item {
-    flex: 0 0 auto;
-    /* Don't shrink/grow */
-    width: 48vw;
-    /* Increased size as requested */
-    /* Fixed width for card */
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 16px;
-    /* More rounded */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    /* Deeper shadow */
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    /* Subtle contrast border */
-    overflow: hidden;
-  }
-
-  /* Ensure images fit nicely */
-  .quick-product-item img {
-    height: 180px;
-    /* Increased from 140px */
-    width: 100%;
-    object-fit: cover;
-  }
-
-  .quick-product-item-info {
-    padding: 10px;
-  }
-
-  .quick-product-item h4 {
-    font-size: 0.85rem;
-    white-space: normal;
-    /* Allow text wrap */
-    /* Truncate to 2 lines */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    height: 2.4em;
-    /* approx for 2 lines */
-  }
-
-  /* Adjust price row layout */
-  .price-row {
-    justify-content: flex-start;
-    margin-top: auto;
-  }
-}
 
 /* --- OPTION 4: STANDARD FLUID GRID (FRESH START) --- */
 

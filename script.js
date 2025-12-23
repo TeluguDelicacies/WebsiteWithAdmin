@@ -1953,8 +1953,8 @@ function renderQuickLayout(products, categories, container) {
 
         // Build Grid Card (Unified)
         const card = document.createElement('div');
-        // Ready to eat spans full (though mostly relevant for grid layouts, keeping for consistency)
-        const isFullWidth = cat.slug === 'ready-to-eat';
+        // Always span full width for consistent alignment
+        const isFullWidth = true;
         card.className = `quick-card ${isFullWidth ? 'span-full' : ''}`;
 
         const productsHTML = renderQuickProductsHTML(catProducts, showMrp);
