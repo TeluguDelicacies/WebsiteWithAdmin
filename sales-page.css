@@ -5,6 +5,11 @@ Mobile-First, Robust, Modern CSS
 ========================================
 */
 
+/* Prevent layout shift from scrollbar toggle */
+html {
+    overflow-y: scroll;
+}
+
 /* 1. Base Variables & Overrides */
 :root {
     --header-height: 64px;
@@ -306,6 +311,10 @@ body {
     width: 100%;
     aspect-ratio: 1 / 1;
     perspective: 1000px;
+    flex-shrink: 0;
+    /* Prevent shrinking */
+    min-height: 300px;
+    /* Lock minimum size regardless of sibling content */
     /* Enable 3D space */
 }
 
@@ -536,21 +545,24 @@ body {
 }
 
 /* Disclaimer text overlay on product image */
+/* Disclaimer text overlay on product image */
 .product-disclaimer-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 8px 10px;
+    padding: 6px 4px;
     background: rgba(255, 255, 255, 0.6);
-    /* More translucent as requested */
     backdrop-filter: blur(2px);
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--text-secondary);
     text-align: center;
     font-style: italic;
     z-index: 5;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Sidebar */
@@ -622,7 +634,9 @@ body {
 @media (min-width: 768px) {
     .main-product-area {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        /* Force equal width */
+        align-items: start;
         /* Balance Image and Details */
     }
 

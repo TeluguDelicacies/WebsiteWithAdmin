@@ -1981,9 +1981,12 @@ function renderQuickLayout(products, categories, container) {
 
     // Initialize Drag Scroll for All Lists
     setTimeout(() => {
-        document.querySelectorAll('.quick-product-scroll').forEach(el => {
-            enableDragScroll(el);
-        });
+        // Quick Commerce
+        document.querySelectorAll('.quick-product-scroll').forEach(el => enableDragScroll(el));
+        // Main Product Ticker
+        document.querySelectorAll('.product-scroll').forEach(el => enableDragScroll(el));
+        // Testimonials
+        document.querySelectorAll('.testimonial-container').forEach(el => enableDragScroll(el));
     }, 500);
 }
 
@@ -1991,37 +1994,76 @@ function renderQuickLayout(products, categories, container) {
  * Enables drag-to-scroll functionality for desktop mouse interactions
  * @param {HTMLElement} slider - The scroll container element
  */
+/**
+ * Enables drag-to-scroll functionality for both mouse and touch
+ * @param {HTMLElement} slider - The scroll container element
+ */
 function enableDragScroll(slider) {
     let isDown = false;
     let startX;
     let scrollLeft;
 
+    // Mouse Events
     slider.addEventListener('mousedown', (e) => {
         isDown = true;
         slider.classList.add('active');
+        // Pause animation on interaction
+        slider.style.animationPlayState = 'paused';
         startX = e.pageX - slider.offsetLeft;
         scrollLeft = slider.scrollLeft;
-        // Prevent default text selection
         e.preventDefault();
     });
 
     slider.addEventListener('mouseleave', () => {
         isDown = false;
         slider.classList.remove('active');
+        // Resume animation
+        slider.style.animationPlayState = 'running';
     });
 
     slider.addEventListener('mouseup', () => {
         isDown = false;
         slider.classList.remove('active');
+        // Resume animation
+        slider.style.animationPlayState = 'running';
     });
 
     slider.addEventListener('mousemove', (e) => {
         if (!isDown) return;
         e.preventDefault();
         const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 2; // Scroll-fast multiplier
+        const walk = (x - startX) * 2;
         slider.scrollLeft = scrollLeft - walk;
     });
+
+    // Touch Events (Mobile)
+    slider.addEventListener('touchstart', (e) => {
+        isDown = true;
+        slider.classList.add('active');
+        // Pause animation on interaction
+        slider.style.animationPlayState = 'paused';
+        startX = e.touches[0].pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+        // Don't prevent default here to allow vertical scroll if needed (browser handles it, but we capture horizontal)
+    }, { passive: true });
+
+    slider.addEventListener('touchend', () => {
+        isDown = false;
+        slider.classList.remove('active');
+        // Resume animation
+        slider.style.animationPlayState = 'running';
+    });
+
+    slider.addEventListener('touchmove', (e) => {
+        if (!isDown) return;
+        const x = e.touches[0].pageX - slider.offsetLeft;
+        const walk = (x - startX) * 2;
+        slider.scrollLeft = scrollLeft - walk;
+        // Prevent default only if scrolling horizontally to avoid blocking vertical scroll
+        if (Math.abs(walk) > 5) {
+            if (e.cancelable) e.preventDefault();
+        }
+    }, { passive: false });
 }
 
 /**

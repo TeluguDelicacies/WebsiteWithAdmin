@@ -852,6 +852,14 @@ Enhanced product cards and modern styling
   }
 }
 
+/* Mobile Scroll Speed Adjustment */
+@media (max-width: 768px) {
+  .product-track {
+    animation-duration: 40s !important;
+    /* Double speed for mobile */
+  }
+}
+
 .product-scroll {
   display: flex;
   gap: var(--space-3);
@@ -2457,12 +2465,18 @@ MASTER CARD LAYOUT (Redesign with Overlay)
     transform: translateX(100%);
   }
 
-  /* Start completely off-screen RIGHT */
+  /* End completely off-screen LEFT */
   100% {
     transform: translateX(-100%);
   }
+}
 
-  /* End completely off-screen LEFT */
+/* Mobile Scroll Speed Adjustment */
+@media (max-width: 768px) {
+  .quick-scroll-track {
+    animation-duration: 40s;
+    /* Double speed for mobile */
+  }
 }
 
 
