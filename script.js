@@ -1247,7 +1247,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeHeaderNavigation();
 
     // Initialize other functionality
+    // Initialize other functionality
     initializeScrollAnimations();
+    updateScrollSpeeds(); // Apply dynamic speeds
     initializeProductShowcaseControls();
     initializeMobileInteractions();
     enhanceAccessibility();
@@ -2067,15 +2069,74 @@ function enableDragScroll(slider) {
 }
 
 /**
- * Filter Helper
+ * Updates scroll animation speeds dynamically based on content length
+ * Ensures consistent speed regardless of number of items
  */
-function getProductsForCategory(products, category) {
-    const targetSlug = category.slug.toLowerCase().trim();
-    return products.filter(p => {
-        const rawCat = (p.product_category || '').toLowerCase().trim();
-        const slugified = rawCat.replace(/\s+/g, '-');
-        return rawCat === targetSlug || slugified === targetSlug || rawCat === category.id;
+function updateScrollSpeeds() {
+    const isMobile = window.innerWidth <= 768;
+    // Seconds per card (adjust to taste)
+    const SPEED_PER_CARD_DESKTOP = 3;
+    const SPEED_PER_CARD_MOBILE = 1.5;
+
+    const secondsPerCard = isMobile ? SPEED_PER_CARD_MOBILE : SPEED_PER_CARD_DESKTOP;
+
+    // 1. Main Product Ticker (Duplicated content)
+    document.querySelectorAll('.product-scroll').forEach(el => {
+        // Items are duplicated, so effective count is half
+        const count = el.children.length / 2;
+        if (count > 0) {
+            const duration = count * secondsPerCard;
+            el.style.animationDuration = `${duration}s`;
+        }
     });
+
+    // 2. Testimonial Ticker (Duplicated content)
+    document.querySelectorAll('.testimonial-container').forEach(el => {
+        const count = el.children.length / 2;
+        if (count > 0) {
+            const duration = count * secondsPerCard;
+            // Testimonials are wider, maybe slightly slower per item? Keeping same for now.
+            el.style.animationDuration = `${duration}s`;
+        }
+    });
+
+    // 3. Quick Commerce Ticker (Non-duplicated? or Duplicated?)
+    // In renderQuickLayout, we didn't duplicate. If we want infinite scroll, we should?
+    // Current CSS relies on quick-scroll-track going 100% -> -100%. 
+    // This traverses 200% width.
+    document.querySelectorAll('.quick-scroll-track').forEach(el => {
+        const count = el.children.length; // Assuming no dupes yet
+        if (count > 0) {
+            // Speed for 100% -> -100% (2x distance) might need adjustment
+            // But user wants "timer for one card to pass".
+            const duration = count * secondsPerCard;
+            el.style.animationDuration = `${duration}s`;
+        }
+    });
+
+    // Fallback for .quick-product-scroll if track not found (depending on HTML structure)
+    document.querySelectorAll('.quick-product-scroll').forEach(el => {
+        // Only apply if it doesn't have a track child handling it
+        if (!el.querySelector('.quick-scroll-track')) {
+            const count = el.children.length;
+            if (count > 0) el.style.animationDuration = `${count * secondsPerCard}s`;
+        }
+    });
+}
+
+// Call on load and resize
+window.addEventListener('load', updateScrollSpeeds);
+window.addEventListener('resize', () => {
+    // Debounce slightly
+    clearTimeout(window.resizeTimer);
+    window.resizeTimer = setTimeout(updateScrollSpeeds, 200);
+});
+const targetSlug = category.slug.toLowerCase().trim();
+return products.filter(p => {
+    const rawCat = (p.product_category || '').toLowerCase().trim();
+    const slugified = rawCat.replace(/\s+/g, '-');
+    return rawCat === targetSlug || slugified === targetSlug || rawCat === category.id;
+});
 }
 
 /**
