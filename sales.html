@@ -175,7 +175,7 @@
 
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    <a href="index.html" style="color:var(--text-secondary)">Home</a> / 
+                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
                     <span style="color:var(--color-primary-blue); font-weight:600;">All Collections</span>
                 </div>
                 <section class="category-view-container">
@@ -202,8 +202,8 @@
             // Use the New CSS Classes
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    <a href="index.html" style="color:var(--text-secondary)">Home</a> / 
-                    <a href="sales.html" style="color:var(--text-secondary)">Collections</a> /
+                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
+                    <a href="/sales.html" style="color:var(--text-secondary)">Collections</a> /
                     <span style="color:var(--color-primary-blue); font-weight:600;">${category.title}</span>
                 </div>
 
@@ -287,8 +287,8 @@
                     <div class="breadcrumb-section">
                         <!-- Breadcrumbs (Left) -->
                         <div class="crumbs">
-                            <a href="index.html">Home</a> <span>/</span> 
-                            <a href="sales.html?category=${catSlug}">${category?.title || 'Back'}</a> <span>/</span> 
+                            <a href="/">Home</a> <span>/</span> 
+                            <a href="/sales.html?category=${catSlug}">${category?.title || 'Back'}</a> <span>/</span> 
                             <span class="current">${product.product_name}</span>
                         </div>
                         

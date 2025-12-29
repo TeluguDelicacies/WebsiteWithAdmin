@@ -504,23 +504,22 @@ body {
 .info-content-block {
     background: var(--bg-tertiary);
     border-radius: var(--radius-md);
-    padding: 20px;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-    padding-top: 0;
-    padding-bottom: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+    padding: 0 15px;
     margin-bottom: 0;
 }
 
 .info-content-block.active {
-    max-height: none;
+    max-height: 250px;
     opacity: 1;
     visibility: visible;
     padding: 15px;
-    overflow: visible;
+    margin-bottom: 15px;
+    overflow-y: auto;
 }
 
 /* Action Pill Button (View Desc, Back to Image) */
