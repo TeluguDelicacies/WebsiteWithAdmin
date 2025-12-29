@@ -347,7 +347,25 @@ body {
     border-radius: var(--radius-lg);
     overflow: hidden;
     background: white;
-    /* Ensure background is solid */
+}
+
+/* Front face should be on top by default */
+.gallery-front {
+    z-index: 2;
+}
+
+/* Back face behind front by default */
+.gallery-back {
+    z-index: 1;
+}
+
+/* When flipped, swap z-indexes */
+.gallery-inner.flipped .gallery-front {
+    z-index: 1;
+}
+
+.gallery-inner.flipped .gallery-back {
+    z-index: 2;
 }
 
 /* Front Face */
@@ -389,12 +407,13 @@ body {
     top: 15px;
     right: 15px;
     width: 80px;
+    height: auto;
     z-index: 10;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 8px;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    /* Ensure it stays on front face logic if needed, or outside `inner` */
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    /* Keep PNG transparency */
 }
 
 /* Component: Details */
@@ -570,25 +589,47 @@ body {
     }
 }
 
-/* Disclaimer text overlay on product image */
-/* Disclaimer text overlay on product image */
+/* Disclaimer text overlay on product image - Marquee Style */
 .product-disclaimer-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 6px 4px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(2px);
+    height: 24px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.85) 100%);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     font-size: 0.65rem;
-    color: var(--text-secondary);
-    text-align: center;
+    color: var(--text-muted);
     font-style: italic;
     z-index: 5;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+}
+
+.product-disclaimer-overlay::before {
+    content: attr(data-text);
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: scrollDisclaimer 15s linear infinite;
+}
+
+/* Pause on hover for readability */
+.product-disclaimer-overlay:hover::before {
+    animation-play-state: paused;
+}
+
+@keyframes scrollDisclaimer {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
 }
 
 /* Sidebar */
@@ -676,8 +717,9 @@ body {
 
     .product-gallery {
         border-right: 1px solid var(--border-light);
-        max-height: calc(100vh - var(--header-height) - 140px);
-        aspect-ratio: unset;
+        max-height: calc(100vh - var(--header-height) - 200px);
+        min-height: 350px;
+        aspect-ratio: 1 / 1;
     }
 
     /* Product details - scrollable within fixed height */
