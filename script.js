@@ -405,7 +405,7 @@ function initializeProductShowcaseControls() {
     // Initialize showcase mode management
     initializeShowcaseMode();
 
-    // Initialize carousel controls (arrows, dots, drag-to-scroll)
+    // Initialize carousel controls (JS-based auto-scroll, arrows, dots)
     initializeCarouselControls();
 
     // Pause animation on mouse hover for better desktop UX
@@ -662,10 +662,18 @@ function initializeShowcaseMode() {
 
 /*
 ========================================
-CAROUSEL NAVIGATION CONTROLS
-Navigation arrows, progress dots, and drag-to-scroll
+CAROUSEL CONTROLS - JS-BASED SCROLLING
+Auto-scroll with navigation arrows and progress dots
 ========================================
 */
+
+// Global carousel state
+const carouselState = {
+    scrollInterval: null,
+    isPaused: false,
+    scrollSpeed: 1,
+    autoResumeTimeout: null
+};
 
 /**
  * Initializes carousel navigation arrows (prev/next buttons)
@@ -843,9 +851,101 @@ function initializeCarouselDrag() {
  * Master function to initialize all carousel controls
  */
 function initializeCarouselControls() {
-    initializeCarouselArrows();
-    initializeCarouselProgress();
-    // Drag-to-scroll removed per user request
+    const scrollWrapper = document.getElementById('productScrollWrapper') || document.querySelector('.product-scroll-wrapper');
+    const productScroll = document.getElementById('productScroll');
+    const prevBtn = document.getElementById('carouselPrev');
+    const nextBtn = document.getElementById('carouselNext');
+    const progressContainer = document.getElementById('carouselProgress');
+
+    if (!scrollWrapper || !productScroll) return;
+
+    // Wait for products to load
+    setTimeout(() => {
+        // 1. Initialize JS-based auto-scroll with setInterval
+        carouselState.scrollInterval = setInterval(() => {
+            if (carouselState.isPaused) return;
+            const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+            if (scrollWrapper.scrollLeft >= max - 5) {
+                scrollWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                scrollWrapper.scrollLeft += carouselState.scrollSpeed;
+            }
+        }, 30);
+
+        // Helper to schedule auto-resume
+        const scheduleResume = () => {
+            clearTimeout(carouselState.autoResumeTimeout);
+            carouselState.autoResumeTimeout = setTimeout(() => {
+                carouselState.isPaused = false;
+            }, 2500);
+        };
+
+        // 2. Arrow navigation
+        if (prevBtn && nextBtn) {
+            const scrollAmount = () => scrollWrapper.clientWidth * 0.35;
+            prevBtn.addEventListener('click', () => {
+                carouselState.isPaused = true;
+                scrollWrapper.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+                scheduleResume();
+            });
+            nextBtn.addEventListener('click', () => {
+                carouselState.isPaused = true;
+                scrollWrapper.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+                scheduleResume();
+            });
+            // Update arrow states on scroll
+            const updateArrows = () => {
+                const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+                prevBtn.classList.toggle('disabled', scrollWrapper.scrollLeft <= 5);
+                nextBtn.classList.toggle('disabled', scrollWrapper.scrollLeft >= max - 5);
+            };
+            scrollWrapper.addEventListener('scroll', updateArrows, { passive: true });
+            updateArrows();
+        }
+
+        // 3. Progress dots
+        if (progressContainer) {
+            const cards = productScroll.children;
+            if (cards.length > 0) {
+                const containerWidth = scrollWrapper.clientWidth;
+                const cardWidth = cards[0]?.offsetWidth || 150;
+                const cardsPerPage = Math.max(1, Math.floor(containerWidth / (cardWidth + 20)));
+                const dotCount = Math.min(Math.ceil(cards.length / cardsPerPage), 8);
+
+                if (dotCount > 1) {
+                    progressContainer.innerHTML = '';
+                    for (let i = 0; i < dotCount; i++) {
+                        const dot = document.createElement('button');
+                        dot.className = 'progress-dot';
+                        dot.addEventListener('click', () => {
+                            carouselState.isPaused = true;
+                            const max = scrollWrapper.scrollWidth - containerWidth;
+                            scrollWrapper.scrollTo({ left: max * (i / (dotCount - 1)), behavior: 'smooth' });
+                            scheduleResume();
+                        });
+                        progressContainer.appendChild(dot);
+                    }
+
+                    // Update active dot on scroll
+                    const updateDots = () => {
+                        const dots = progressContainer.querySelectorAll('.progress-dot');
+                        const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+                        const percent = max > 0 ? scrollWrapper.scrollLeft / max : 0;
+                        const active = Math.round(percent * (dots.length - 1));
+                        dots.forEach((d, i) => d.classList.toggle('active', i === active));
+                    };
+                    scrollWrapper.addEventListener('scroll', updateDots, { passive: true });
+                    updateDots();
+                }
+            }
+        }
+
+        // 4. Pause on hover/touch
+        scrollWrapper.addEventListener('mouseenter', () => { carouselState.isPaused = true; });
+        scrollWrapper.addEventListener('mouseleave', () => { scheduleResume(); });
+        scrollWrapper.addEventListener('touchstart', () => { carouselState.isPaused = true; }, { passive: true });
+        scrollWrapper.addEventListener('touchend', () => { scheduleResume(); }, { passive: true });
+    }, 1200);
 }
 
 /*

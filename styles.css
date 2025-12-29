@@ -3342,6 +3342,7 @@ Navigation arrows, progress dots, and drag-to-scroll
   .carousel-prev {
     left: 5px;
   }
+
   .carousel-next {
     right: 5px;
   }
@@ -3414,6 +3415,17 @@ Navigation arrows, progress dots, and drag-to-scroll
 /* Smooth scroll behavior for arrow navigation */
 .product-scroll-wrapper {
   scroll-behavior: smooth;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+/* Hide scrollbar for Chrome/Safari */
+.product-scroll-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 /* Snap scrolling for cleaner navigation */
@@ -3427,13 +3439,30 @@ Navigation arrows, progress dots, and drag-to-scroll
     gap: 6px;
     padding: 12px 0;
   }
-  
+
   .progress-dot {
     width: 8px;
     height: 8px;
   }
-  
+
   .progress-dot.active {
     width: 18px;
   }
+}
+
+/* Product Showcase - Edge to Edge */
+.product-showcase {
+  width: 100%;
+  padding: 0;
+}
+
+.product-showcase>.container {
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.product-showcase .carousel-wrapper {
+  padding-left: 0;
+  padding-right: 0;
 }
