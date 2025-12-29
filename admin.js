@@ -660,8 +660,8 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
             variantsHtml = variants.slice(0, 3).map(v => `
                 <div class="mini-variant">
                     <div class="v-qty">${v.quantity}</div>
-                    ${v.mrp ? `<div class="v-mrp">₹${v.mrp}</div>` : ''}
                     <div class="v-price">₹${v.price}</div>
+                    ${v.total_sold ? `<div class="v-sold" title="Total Sold"><i class="fas fa-shopping-bag"></i> ${v.total_sold}</div>` : ''}
                 </div>
             `).join('');
 
@@ -670,7 +670,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                 variantsHtml += `<div class="mini-variant" style="opacity: 0.3;">-</div>`;
             }
         } else {
-            variantsHtml = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); font-size: 0.8rem;">No variants</div>`;
+            variantsHtml = `<div style="grid-column: 1/span 3; text-align: center; color: var(--text-secondary); font-size: 0.8rem;">No variants</div>`;
         }
 
         return `
@@ -1170,6 +1170,7 @@ productForm.addEventListener('submit', async (e) => {
     // Collect Variants
     let variants = [];
     let calculatedTotalStock = 0;
+    let calculatedTotalSold = 0;
 
     // First check variant rows
     document.querySelectorAll('.variant-row').forEach(row => {
@@ -1187,6 +1188,7 @@ productForm.addEventListener('submit', async (e) => {
                 total_sold: sold
             });
             calculatedTotalStock += stock;
+            calculatedTotalSold += sold;
         }
     });
 
@@ -1232,6 +1234,7 @@ productForm.addEventListener('submit', async (e) => {
         mrp: topMrp,
         net_weight: topNetWeight,
         total_stock: calculatedTotalStock,
+        total_sold: calculatedTotalSold,
         showcase_image: document.getElementById('showcaseImage').value,
         is_trending: document.getElementById('productTrending').checked,
         is_visible: document.getElementById('productVisible').checked,

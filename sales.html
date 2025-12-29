@@ -1112,50 +1112,19 @@
             const updateStock = async () => {
                 for (const item of state.cart) {
                     try {
-                        // 1. Fetch latest product to get current variants/stock
-                        const { data: p, error: fetchErr } = await supabase
-                            .from('products')
-                            .select('quantity_variants, total_stock')
-                            .eq('id', item.id)
-                            .single();
-
-                        if (fetchErr || !p) continue;
-
-                        let variants = [];
-                        try {
-                            variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
-                        } catch (e) { }
-
-                        // 2. Update specific variant and top-level totals
-                        if (variants.length > 0 && item.variant) {
-                            const vIdx = variants.findIndex(v => v.quantity === item.variant.quantity);
-                            if (vIdx > -1) {
-                                // Update stock and sold count in JSON
-                                variants[vIdx].stock = Math.max(0, (variants[vIdx].stock || 0) - item.qty);
-                                variants[vIdx].total_sold = (variants[vIdx].total_sold || 0) + item.qty;
-
-                                // Recalculate top-level stock
-                                const newTotalStock = variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
-
-                                await supabase.from('products').update({
-                                    quantity_variants: variants,
-                                    total_stock: newTotalStock
-                                }).eq('id', item.id);
-                            }
-                        } else {
-                            // Non-variant fallback
-                            const newStock = Math.max(0, (p.total_stock || 0) - item.qty);
-                            await supabase.from('products').update({
-                                total_stock: newStock
-                            }).eq('id', item.id);
-                        }
+                        const { error } = await supabase.rpc('process_order_stock', {
+                            p_product_id: item.id,
+                            p_variant_label: item.variant ? item.variant.quantity : '',
+                            p_qty: item.qty
+                        });
+                        if (error) throw error;
                     } catch (e) {
                         console.error('Stock update failed for item:', item.id, e);
                     }
                 }
             };
 
-            // Initiate stock update in background (don't block user if possible, but user wants background update)
+            // Initiate stock update in background
             updateStock();
 
             let message = `🛒 *New Order from Telugu Delicacies*\n\n*Order Details:*`;
