@@ -1,4 +1,4 @@
 # Netlify Redirects for Clean Product URLs
 # This routes /sales/product-slug to sales.html while preserving the path
 
-/sales/*  /sales.html  200
+/sales/*    /sales.html    200
