@@ -9,14 +9,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Admin specific styles */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
         body {
             background-color: var(--bg-secondary);
         }
 
         .admin-container {
-            max-width: 1200px;
-            margin: 100px auto;
-            padding: 20px;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .admin-container.dashboard {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .login-box {
@@ -118,6 +130,123 @@
             border-color: var(--color-primary-blue);
         }
 
+        /* Modern Outline Button Style */
+        .nav-btn {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            border: 2px solid var(--color-primary-blue);
+            background: transparent;
+            color: var(--color-primary-blue);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: rgba(14, 165, 233, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* iOS-Style Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background-color: var(--color-primary-blue);
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        .toggle-switch input:focus+.toggle-slider {
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Smaller Toggle Switch for Forms */
+        .toggle-switch-sm {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
+        .toggle-switch-sm input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-switch-sm .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 22px;
+        }
+
+        .toggle-switch-sm .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch-sm input:checked+.toggle-slider {
+            background-color: var(--color-primary-blue);
+        }
+
+        .toggle-switch-sm input:checked+.toggle-slider:before {
+            transform: translateX(18px);
+        }
+
         .admin-product-card {
             background: white;
             border-radius: var(--radius-lg);
@@ -134,7 +263,75 @@
             transform: translateY(-2px);
         }
 
-        /* The main row container */
+        /* View Containers */
+        .view-container {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            width: 100%;
+            max-width: none;
+            margin: 0 auto 10px auto;
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
+
+        /* Warning Sidebars */
+        .warning-sidebar {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            background: linear-gradient(180deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            padding: 20px 8px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-sidebar.left {
+            left: 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-sidebar.right {
+            right: 0;
+            border-radius: 0 8px 8px 0;
+            writing-mode: vertical-lr;
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        /* Admin Content Area */
+        .admin-content-area {
+            display: flex;
+            flex-direction: column;
+            width: 88%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+
+        #productListContainer {
+            /* Products list uses individual cards, so we don't need a white background for the container itself */
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            display: grid;
+            gap: 15px;
+            grid-template-columns: 1fr;
+        }
+
         .card-row {
             display: grid;
             /* Image | Info | Variants | Order | Actions | Chevron */
@@ -258,574 +455,648 @@
     </div>
     <!-- Dashboard Section -->
     <div id="dashboardSection" class="admin-container dashboard">
-        <div class="dashboard-header" style="margin-bottom: 30px;">
-            <!-- Row 1: Title & Global Actions -->
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-light);">
-                <h2 style="color: var(--color-primary); margin: 0;">Admin Dashboard</h2><button onclick="handleLogout()"
-                    class="nav-btn"
-                    style="background: transparent; border: 1px solid var(--color-error); color: var(--color-error); padding: 8px 16px;"><i
-                        class="fas fa-sign-out-alt"></i>Logout </button>
-            </div>
-            <!-- Row 2: Navigation & Context Actions -->
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div class="view-toggle" style="display: flex; gap: 10px;"><button id="viewProductsBtn"
-                        class="nav-btn active" onclick="switchView('products')"
-                        style="padding: 8px 20px; border-radius: 20px; font-size: 0.9rem;">Products
-                    </button><button id="viewCategoriesBtn" class="nav-btn" onclick="switchView('categories')"
-                        style="padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">Categories
-                    </button><button id="viewTestimonialsBtn" class="nav-btn" onclick="switchView('testimonials')"
-                        style="padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">Testimonials
-                    </button><button id="viewWhyUsBtn" class="nav-btn" onclick="switchView('why-us')"
-                        style="padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">Why
-                        Us
-                    </button><button id="viewSettingsBtn" class="nav-btn" onclick="switchView('settings')"
-                        style="padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-medium);">Settings
-                    </button></div><button id="addBtn" onclick="handleAddClick()" class="submit-btn"
-                    style="width: auto; padding: 10px 24px; border-radius: 30px; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-md);"><i
-                        class="fas fa-plus"></i><span id="addBtnText">Add Product</span></button>
-            </div>
-            <!-- Category Filter Row (Only visible for Products view) -->
-            <div id="productFilterRow" style="margin-top: 15px; display: none; justify-content: flex-end;"><select
-                    id="categoryFilter"
-                    style="padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-medium); min-width: 200px; background: white;">
-                    <option value="all">All Categories</option>
-                </select>
+        <!-- Warning Sidebars -->
+        <div class="warning-sidebar left">
+            <i class="fas fa-exclamation-triangle"></i> BE MINDFUL OF THE CHANGES MADE
+        </div>
+        <div class="warning-sidebar right">
+            <i class="fas fa-exclamation-triangle"></i> BE MINDFUL OF THE CHANGES MADE
+        </div>
+
+        <!-- Content Area (88% width centered) -->
+        <div class="admin-content-area">
+            <div class="dashboard-header"
+                style="margin-bottom: 10px; padding: 12px 15px; background: white; border-bottom: 1px solid var(--border-light); border-radius: var(--radius-lg);">
+
+                <!-- ROW 1: Title (Left) | Tabs (Center) | Logout (Right) -->
                 <div
-                    style="display: flex; align-items: center; gap: 5px; margin-left: 10px; background: white; padding: 0 15px; border-radius: 20px; border: 1px solid var(--border-medium);">
-                    <input type="checkbox" id="trendingFilter" style="width: auto; margin: 0; cursor: pointer;">
-                    <label for="trendingFilter"
-                        style="margin: 0; font-size: 0.9rem; cursor: pointer; color: var(--text-secondary);">Trending
-                        Only</label>
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+
+                    <!-- LEFT: Admin Dashboard Title -->
+                    <h2
+                        style="color: var(--color-primary-blue); margin: 0; font-size: 1.4rem; font-weight: 600; flex-shrink: 0;">
+                        Admin Dashboard</h2>
+
+                    <!-- CENTER: Navigation Tabs -->
+                    <div class="view-toggle" style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                        <button id="viewProductsBtn" class="nav-btn active" onclick="switchView('products')"
+                            style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;">Products
+                        </button>
+                        <button id="viewCategoriesBtn" class="nav-btn" onclick="switchView('categories')"
+                            style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid transparent;">Categories
+                        </button>
+                        <button id="viewTestimonialsBtn" class="nav-btn" onclick="switchView('testimonials')"
+                            style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid transparent;">Testimonials
+                        </button>
+                        <button id="viewWhyUsBtn" class="nav-btn" onclick="switchView('why-us')"
+                            style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid transparent;">Why
+                            Us
+                        </button>
+                        <button id="viewSettingsBtn" class="nav-btn" onclick="switchView('settings')"
+                            style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; background: transparent; color: var(--text-secondary); border: 1px solid transparent;">Settings
+                        </button>
+                    </div>
+
+                    <!-- RIGHT: Logout Button -->
+                    <button onclick="handleLogout()" class="nav-btn"
+                        style="background: transparent; border: 1px solid var(--color-error); color: var(--color-error); padding: 8px 16px; border-radius: 8px; font-weight: 500; flex-shrink: 0;"
+                        title="Logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+
+                <!-- ROW 2: Tab-Specific Actions -->
+                <div id="actionRow"
+                    style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+
+                    <!-- LEFT: Product Filters (only for Products tab) -->
+                    <div id="productFilterRow" style="display: none; align-items: center; gap: 10px;">
+                        <!-- Category Dropdown (Improved Styling) -->
+                        <div
+                            style="background: white; padding: 10px 15px; border-radius: 25px; display: flex; align-items: center; border: 2px solid var(--color-primary-blue); box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15);">
+                            <i class="fas fa-filter"
+                                style="color: var(--color-primary-blue); margin-right: 10px; font-size: 0.85rem;"></i>
+                            <select id="categoryFilter"
+                                style="border: none; outline: none; background: transparent; font-size: 0.95rem; color: var(--color-primary-blue); width: 200px; font-weight: 600; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; padding-right: 20px;">
+                                <option value="all">All Categories</option>
+                            </select>
+                            <i class="fas fa-chevron-down"
+                                style="color: var(--color-primary-blue); font-size: 0.7rem; margin-left: -15px; pointer-events: none;"></i>
+                        </div>
+
+                        <!-- Trending Toggle (iOS-Style Switch) -->
+                        <label for="trendingFilter"
+                            style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-weight: 500; color: var(--color-primary-blue); padding: 8px 16px; border-radius: 25px; border: 2px solid var(--color-primary-blue); background: white;">
+                            <span class="toggle-switch">
+                                <input type="checkbox" id="trendingFilter">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <i class="fas fa-fire"></i> Trending Only
+                        </label>
+                    </div>
+
+                    <!-- RIGHT: Action Buttons -->
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <!-- Save Order Button (Hidden by default, shown after drag) -->
+                        <button id="saveOrderBtn" class="submit-btn"
+                            style="display: none; width: auto; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; background: var(--color-success);"
+                            onclick="saveNewOrder('product')">
+                            <i class="fas fa-save"></i> Save Order
+                        </button>
+
+                        <!-- Add Button (Context-Aware) -->
+                        <button id="addBtn" onclick="handleAddClick()" class="submit-btn"
+                            style="width: auto; padding: 8px 20px; border-radius: 20px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-plus"></i><span id="addBtnText">Add Product</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Products List (Cards) -->
-        <div id="productListContainer" class="product-list-container"
-            style="display: grid; gap: 15px; grid-template-columns: 1fr;">
-            <!-- Products injected here -->
-        </div>
-        <!-- Categories Table -->
-        <div id="categoriesTableContainer" class="table-container"
-            style="display: none; background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr
-                        style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
-                        <th style="padding: 15px;">Image</th>
-                        <th style="padding: 15px;">Title</th>
-                        <th style="padding: 15px;">Slug</th>
-                        <th style="padding: 15px;">Order</th>
-                        <th style="padding: 15px; text-align: right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="categoryList">
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 30px;">Loading categories...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <!-- Testimonials Table -->
-        <div id="testimonialsTableContainer" class="table-container"
-            style="display: none; background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr
-                        style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
-                        <th style="padding: 15px;">Name</th>
-                        <th style="padding: 15px;">Message</th>
-                        <th style="padding: 15px;">Location</th>
-                        <th style="padding: 15px;">Rating</th>
-                        <th style="padding: 15px; text-align: right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="testimonialList">
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 30px;">Loading
-                            testimonials...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <!-- Why Us Features Table -->
-        <div id="whyUsTableContainer" class="table-container"
-            style="display: none; background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr
-                        style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
-                        <th style="padding: 15px;">Icon/Image</th>
-                        <th style="padding: 15px;">Title</th>
-                        <th style="padding: 15px;">Description</th>
-                        <th style="padding: 15px;">Order</th>
-                        <th style="padding: 15px; text-align: right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="whyUsFeatureList">
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 30px;">Loading features...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <!-- Settings Section -->
-        <div id="settingsContainer" class="table-container"
-            style="display: none; background: white; padding: 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);">
-            <form id="settingsForm" class="contact-form">
-                <h3
-                    style="margin-bottom: 20px; color: var(--color-primary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
-                    Global Site Settings</h3>
-                <div class="form-row">
-                    <div class="form-group"><label>Site Title</label><input type="text" id="setSiteTitle"></div>
-                    <div class="form-group"><label>Site Title (Telugu)</label><input type="text"
-                            id="setSiteTitleTelugu"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Hero Title</label><input type="text" id="setHeroTitle"></div>
-                    <div class="form-group"><label>Hero Subtitle</label><input type="text" id="setHeroSubtitle"></div>
-                </div>
-                <!-- New Hero Description -->
-                <div class="form-group"><label>Hero Description</label><textarea id="setHeroDesc" rows="4"></textarea>
-                </div>
-                <div class="form-group"><label>Hero Telugu Subtitle</label><input type="text" id="setHeroTelugu"></div>
-                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Contact &
-                    Legal</h4>
-                <div class="form-row">
-                    <div class="form-group"><label>Primary Phone</label><input type="text" id="setPhonePri"></div>
-                    <div class="form-group"><label>Secondary Phone</label><input type="text" id="setPhoneSec"></div>
-                    <div class="form-group"><label>Email</label><input type="email" id="setEmail"></div>
-                </div>
-                <div class="form-group"><label>Embedded Google Map URL (iframe
-                        src)</label><input type="text" id="setMapUrl"
-                        placeholder="https://www.google.com/maps/embed?pb=..."></div>
-                <div class="form-group"><label>FSSAI Number</label><input type="text" id="setFssai"
-                        placeholder="e.g. 1001234567890"></div>
 
-                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Catalogue & Sharing</h4>
-                <div class="form-group">
-                    <label>Catalogue Image</label>
-                    <div class="upload-group">
-                        <input type="text" id="setCatalogueUrl" placeholder="Image URL">
-                        <label for="uploadCatalogueImg" class="upload-btn"><i class="fas fa-upload"></i></label>
-                        <input type="file" id="uploadCatalogueImg" accept="image/*" style="display: none;"
-                            onchange="handleAssetUpload(this, 'setCatalogueUrl')">
+            <!-- Products List (Cards) -->
+            <div id="productListContainer" class="view-container">
+                <!-- Products injected here -->
+            </div>
+            <!-- Categories Table -->
+            <div id="categoriesTableContainer" class="view-container" style="display: none; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr
+                            style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
+                            <th style="padding: 15px;">Image</th>
+                            <th style="padding: 15px;">Title</th>
+                            <th style="padding: 15px;">Slug</th>
+                            <th style="padding: 15px;">Order</th>
+                            <th style="padding: 15px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryList">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px;">Loading categories...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Testimonials Table -->
+            <div id="testimonialsTableContainer" class="view-container" style="display: none; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr
+                            style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
+                            <th style="padding: 15px;">Name</th>
+                            <th style="padding: 15px;">Message</th>
+                            <th style="padding: 15px;">Location</th>
+                            <th style="padding: 15px;">Rating</th>
+                            <th style="padding: 15px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testimonialList">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px;">Loading
+                                testimonials...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Why Us Features Table -->
+            <div id="whyUsTableContainer" class="view-container" style="display: none; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr
+                            style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
+                            <th style="padding: 15px;">Icon/Image</th>
+                            <th style="padding: 15px;">Title</th>
+                            <th style="padding: 15px;">Description</th>
+                            <th style="padding: 15px;">Order</th>
+                            <th style="padding: 15px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="whyUsFeatureList">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px;">Loading features...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Settings Section -->
+            <div id="settingsContainer" class="view-container" style="display: none;">
+                <form id="settingsForm">
+                    <h3
+                        style="margin-bottom: 20px; color: var(--color-primary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+                        Global Site Settings</h3>
+                    <div class="form-row">
+                        <div class="form-group"><label>Site Title</label><input type="text" id="setSiteTitle"></div>
+                        <div class="form-group"><label>Site Title (Telugu)</label><input type="text"
+                                id="setSiteTitleTelugu">
+                        </div>
                     </div>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">This image will be shared
-                        when users click "Share Catalogue".</p>
-                </div>
-                <div class="form-group">
-                    <label>Catalogue Share Message</label>
-                    <textarea id="setCatalogueMsg" rows="2" placeholder="Check out our latest catalogue..."></textarea>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Hero Title</label><input type="text" id="setHeroTitle"></div>
+                        <div class="form-group"><label>Hero Subtitle</label><input type="text" id="setHeroSubtitle">
+                        </div>
+                    </div>
+                    <!-- New Hero Description -->
+                    <div class="form-group"><label>Hero Description</label><textarea id="setHeroDesc"
+                            rows="4"></textarea>
+                    </div>
+                    <div class="form-group"><label>Hero Telugu Subtitle</label><input type="text" id="setHeroTelugu">
+                    </div>
+                    <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Contact &
+                        Legal</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Primary Phone</label><input type="text" id="setPhonePri"></div>
+                        <div class="form-group"><label>Secondary Phone</label><input type="text" id="setPhoneSec"></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="setEmail"></div>
+                    </div>
+                    <div class="form-group"><label>Embedded Google Map URL (iframe
+                            src)</label><input type="text" id="setMapUrl"
+                            placeholder="https://www.google.com/maps/embed?pb=..."></div>
+                    <div class="form-group"><label>FSSAI Number</label><input type="text" id="setFssai"
+                            placeholder="e.g. 1001234567890"></div>
 
-                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Address Settings</h4>
-                <div class="form-group">
-                    <label>Company Address</label>
-                    <textarea id="setAddress" rows="3" placeholder="Enter physical address..."></textarea>
-                </div>
-
-                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Display Settings</h4>
-                <div class="form-row">
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="setShowTicker" style="width: auto; margin: 0;">
-                        <label for="setShowTicker" style="margin: 0;">Show Product Carousel (Ticker)</label>
-                    </div>
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="setShowQuickLayout" style="width: auto; margin: 0;">
-                        <label for="setShowQuickLayout" style="margin: 0;">Show Quick Commerce Layout</label>
-                    </div>
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="setShowMrp" style="width: auto; margin: 0;">
-                        <label for="setShowMrp" style="margin: 0;">Show MRP/Price</label>
-                    </div>
-                    <!-- NEW: Sales Mode Toggle -->
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="setSalesMode" style="width: auto; margin: 0;">
-                        <label for="setSalesMode" style="margin: 0; color: #22c55e; font-weight: 600;">Enable Sales
-                            Mode</label>
-                    </div>
-                    <!-- NEW: Why Us Section Toggle -->
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="setShowWhyUs" style="width: auto; margin: 0;">
-                        <label for="setShowWhyUs" style="margin: 0; color: #0077b6; font-weight: 600;">Show "Why
-                            Delicacies" Section</label>
-                    </div>
-                </div>
-
-                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Quick Commerce Settings</h4>
-                <div class="form-row">
-                    <div class="form-group"><label>Quick Hero Title</label><input type="text" id="setQuickHeroTitle"
-                            placeholder="Groceries in Minutes"></div>
-                    <div class="form-group"><label>Quick Hero Subtitle</label><input type="text"
-                            id="setQuickHeroSubtitle" placeholder="Freshness delivered..."></div>
-                </div>
-                <div class="form-group"><label>Quick Hero Telugu Subtitle</label><input type="text"
-                        id="setQuickHeroTelugu" placeholder="Telugu text..."></div>
-                <div class="form-group"><label>Quick Hero Image</label>
-                    <div class="upload-group"><input type="text" id="setQuickHeroBg" placeholder="Image URL">
-                        <label for="uploadQuickHeroBg" class="upload-btn"><i class="fas fa-upload"></i></label>
-                        <input type="file" id="uploadQuickHeroBg" accept="image/*" style="display: none;"
-                            onchange="handleAssetUpload(this, 'setQuickHeroBg')">
-                    </div>
-                </div>
-
-                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Images
-                    & Assets</h4>
-                <div class="form-row">
-                    <div class="form-group"><label>Logo</label>
-                        <div class="upload-group"><input type="text" id="setLogoUrl" placeholder="Logo URL"><label
-                                for="uploadLogo" class="upload-btn"><i class="fas fa-upload"></i></label><input
-                                type="file" id="uploadLogo" accept="image/*" style="display: none;"
-                                onchange="handleAssetUpload(this, 'setLogoUrl')"></div>
-                    </div>
-                    <div class="form-group"><label>Favicon</label>
-                        <div class="upload-group"><input type="text" id="setFaviconUrl" placeholder="Favicon URL"><label
-                                for="uploadFavicon" class="upload-btn"><i class="fas fa-upload"></i></label><input
-                                type="file" id="uploadFavicon" accept="image/*" style="display: none;"
-                                onchange="handleAssetUpload(this, 'setFaviconUrl')"></div>
-                    </div>
-                </div>
-                <div class="form-group"><label>Hero Background Image</label>
-                    <div class="upload-group"><input type="text" id="setHeroBgUrl"
-                            placeholder="Hero Background URL"><label for="uploadHeroBg" class="upload-btn"><i
-                                class="fas fa-upload"></i></label><input type="file" id="uploadHeroBg" accept="image/*"
-                            style="display: none;" onchange="handleAssetUpload(this, 'setHeroBgUrl')"></div>
-                </div>
-                <!-- Product Placeholder -->
-                <div class="form-group"><label>Default Product Placeholder Image</label>
-                    <div class="upload-group"><input type="text" id="setProductPlaceholder"
-                            placeholder="Product Placeholder URL"><label for="uploadPaceholder" class="upload-btn"><i
-                                class="fas fa-upload"></i></label><input type="file" id="uploadPaceholder"
-                            accept="image/*" style="display: none;"
-                            onchange="handleAssetUpload(this, 'setProductPlaceholder')">
-                    </div><small style="color: var(--text-secondary);">Used when a
-                        product has no image.</small>
-                </div>
-                <div class="form-group" style="margin-top: 30px;"><button type="submit" class="submit-btn">Save All
-                        Settings</button></div>
-            </form>
-        </div>
-    </div>
-    <!-- Modals moved to end of body for better z-index and staking context -->
-
-    <!-- Add/Edit Product Modal -->
-    <div id="productModal" class="modal">
-        <div class="modal-content">
-            <h2 id="modalTitle">Add Product</h2>
-            <form id="productForm" class="contact-form">
-                <input type="hidden" id="productId">
-                <div class="form-row">
+                    <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Catalogue & Sharing</h4>
                     <div class="form-group">
-                        <label>Product Name (English)</label>
-                        <input type="text" id="productName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Product Name (Telugu)</label>
-                        <input type="text" id="productNameTelugu" placeholder="e.g. కడప కారం">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select id="productCategory" required class="form-input">
-                            <option value="">Select Category</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Display Order</label>
-                        <input type="number" id="productOrder" placeholder="e.g., 1, 2, 3" class="form-input" value="0">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="productTrending" style="width: auto; margin: 0;">
-                        <label for="productTrending"
-                            style="margin: 0; font-weight: 600; color: var(--color-primary-blue);">Mark as Trending
-                            Item</label>
-                    </div>
-                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="productVisible" style="width: auto; margin: 0;" checked>
-                        <label for="productVisible"
-                            style="margin: 0; font-weight: 600; color: var(--color-primary-blue);">Visible on
-                            Site</label>
-                    </div>
-                </div>
-
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Product Tagline</label>
-                        <input type="text" id="productTagline">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="productDescription" rows="3"></textarea>
-                </div>
-
-                <!-- Detailed Info Section -->
-                <h4
-                    style="margin: 20px 0 10px; color: var(--color-secondary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 5px;">
-                    Detailed Info
-                </h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Ingredients</label>
-                        <textarea id="productIngredients" rows="3" placeholder="Comma separated list..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Usage Instructions</label>
-                        <textarea id="productUsage" rows="3" placeholder="Serving suggestion..."></textarea>
-                    </div>
-                </div>
-
-                <h4
-                    style="margin: 20px 0 10px; color: var(--color-secondary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 5px;">
-                    Nutrition Facts (Per Serving)
-                </h4>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Serving Size Details</label>
-                        <input type="text" id="nutriDetails" placeholder="e.g. Per 100g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Calories (kcal)</label>
-                        <input type="text" id="nutriCalories" placeholder="e.g. 350 kcal">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Protein (g)</label>
-                        <input type="text" id="nutriProtein" placeholder="e.g. 12g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Saturated Fat (g)</label>
-                        <input type="text" id="nutriSatFat" placeholder="e.g. 2g">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Total Fat (g)</label>
-                        <input type="text" id="nutriFat" placeholder="e.g. 10g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Carbs (g)</label>
-                        <input type="text" id="nutriCarbs" placeholder="e.g. 45g">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Fiber (g)</label>
-                        <input type="text" id="nutriFiber" placeholder="e.g. 5g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Sugars (g)</label>
-                        <input type="text" id="nutriSugars" placeholder="e.g. 2g">
-                    </div>
-                    <div class="form-group">
-                        <label style="font-size: 0.85rem;">Sodium (g)</label>
-                        <input type="text" id="nutriSodium" placeholder="e.g. 0.5g">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Product Image</label>
-                    <div class="upload-group">
-                        <input type="text" id="showcaseImage" placeholder="Image URL or Upload File ->"
-                            style="flex: 1;">
-                        <label for="showcaseUpload" class="upload-btn">
-                            <i class="fas fa-cloud-upload-alt"></i> Upload
-                        </label>
-                        <input type="file" id="showcaseUpload" accept="image/*" style="display: none;"
-                            onchange="handleAssetUpload(this, 'showcaseImage')">
-                    </div>
-                    <small id="showcaseStatus" style="color: var(--text-secondary);"></small>
-                </div>
-
-                <div class="form-group">
-                    <label>Quantity Variants</label>
-                    <div id="variantsContainer">
-                        <!-- Variants injected here -->
-                    </div>
-                    <button type="button" onclick="addVariantRow()" class="nav-btn"
-                        style="margin-top: 10px; font-size: 0.8rem;">+ Add Variant</button>
-                </div>
-
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <button type="button" onclick="closeProductModal()" class="submit-btn"
-                        style="margin-top: 0; background: transparent; border: 2px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
-                    <button type="submit" class="submit-btn" style="margin-top: 0;">Save Product</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Category Modal -->
-    <div id="categoryModal" class="modal">
-        <div class="modal-content">
-            <h2 id="catModalTitle">Add Category</h2>
-            <form id="categoryForm" class="contact-form">
-                <input type="hidden" id="catId">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Title</label>
-                        <input type="text" id="catTitle" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Sub Brand / Tagline</label>
-                        <input type="text" id="catSubBrand" placeholder="e.g. Authentic Taste">
-                    </div>
-                    <div class="form-group">
-                        <label>Sub Brand Logo</label>
+                        <label>Catalogue Image</label>
                         <div class="upload-group">
-                            <input type="text" id="catSubBrandLogo" placeholder="Logo URL">
-                            <label for="uploadCatSubBrandLogo" class="upload-btn"><i class="fas fa-upload"></i></label>
-                            <input type="file" id="uploadCatSubBrandLogo" accept="image/*" style="display: none;"
-                                onchange="handleAssetUpload(this, 'catSubBrandLogo')">
+                            <input type="text" id="setCatalogueUrl" placeholder="Image URL">
+                            <label for="uploadCatalogueImg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                            <input type="file" id="uploadCatalogueImg" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'setCatalogueUrl')">
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">This image will be
+                            shared
+                            when users click "Share Catalogue".</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Catalogue Share Message</label>
+                        <textarea id="setCatalogueMsg" rows="2"
+                            placeholder="Check out our latest catalogue..."></textarea>
+                    </div>
+
+                    <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Address Settings</h4>
+                    <div class="form-group">
+                        <label>Company Address</label>
+                        <textarea id="setAddress" rows="3" placeholder="Enter physical address..."></textarea>
+                    </div>
+
+                    <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Display Settings</h4>
+                    <div class="form-row" style="flex-wrap: wrap; gap: 20px;">
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
+                            <span class="toggle-switch-sm">
+                                <input type="checkbox" id="setShowTicker">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <label for="setShowTicker" style="margin: 0; cursor: pointer;">Show Product Carousel</label>
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
+                            <span class="toggle-switch-sm">
+                                <input type="checkbox" id="setShowQuickLayout">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <label for="setShowQuickLayout" style="margin: 0; cursor: pointer;">Quick Commerce
+                                Layout</label>
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
+                            <span class="toggle-switch-sm">
+                                <input type="checkbox" id="setShowMrp">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <label for="setShowMrp" style="margin: 0; cursor: pointer;">Show MRP/Price</label>
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
+                            <span class="toggle-switch-sm">
+                                <input type="checkbox" id="setSalesMode">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <label for="setSalesMode"
+                                style="margin: 0; color: #22c55e; font-weight: 600; cursor: pointer;">Enable Sales
+                                Mode</label>
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
+                            <span class="toggle-switch-sm">
+                                <input type="checkbox" id="setShowWhyUs">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <label for="setShowWhyUs"
+                                style="margin: 0; color: #0077b6; font-weight: 600; cursor: pointer;">Show "Why
+                                Delicacies"</label>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Quick Commerce Settings</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Quick Hero Title</label><input type="text" id="setQuickHeroTitle"
+                                placeholder="Groceries in Minutes"></div>
+                        <div class="form-group"><label>Quick Hero Subtitle</label><input type="text"
+                                id="setQuickHeroSubtitle" placeholder="Freshness delivered..."></div>
+                    </div>
+                    <div class="form-group"><label>Quick Hero Telugu Subtitle</label><input type="text"
+                            id="setQuickHeroTelugu" placeholder="Telugu text..."></div>
+                    <div class="form-group"><label>Quick Hero Image</label>
+                        <div class="upload-group"><input type="text" id="setQuickHeroBg" placeholder="Image URL">
+                            <label for="uploadQuickHeroBg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                            <input type="file" id="uploadQuickHeroBg" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'setQuickHeroBg')">
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Images
+                        & Assets</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Logo</label>
+                            <div class="upload-group"><input type="text" id="setLogoUrl" placeholder="Logo URL"><label
+                                    for="uploadLogo" class="upload-btn"><i class="fas fa-upload"></i></label><input
+                                    type="file" id="uploadLogo" accept="image/*" style="display: none;"
+                                    onchange="handleAssetUpload(this, 'setLogoUrl')"></div>
+                        </div>
+                        <div class="form-group"><label>Favicon</label>
+                            <div class="upload-group"><input type="text" id="setFaviconUrl"
+                                    placeholder="Favicon URL"><label for="uploadFavicon" class="upload-btn"><i
+                                        class="fas fa-upload"></i></label><input type="file" id="uploadFavicon"
+                                    accept="image/*" style="display: none;"
+                                    onchange="handleAssetUpload(this, 'setFaviconUrl')"></div>
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Hero Background Image</label>
+                        <div class="upload-group"><input type="text" id="setHeroBgUrl"
+                                placeholder="Hero Background URL"><label for="uploadHeroBg" class="upload-btn"><i
+                                    class="fas fa-upload"></i></label><input type="file" id="uploadHeroBg"
+                                accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'setHeroBgUrl')"></div>
+                    </div>
+                    <!-- Product Placeholder -->
+                    <div class="form-group"><label>Default Product Placeholder Image</label>
+                        <div class="upload-group"><input type="text" id="setProductPlaceholder"
+                                placeholder="Product Placeholder URL"><label for="uploadPaceholder"
+                                class="upload-btn"><i class="fas fa-upload"></i></label><input type="file"
+                                id="uploadPaceholder" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'setProductPlaceholder')">
+                        </div><small style="color: var(--text-secondary);">Used when a
+                            product has no image.</small>
+                    </div>
+                    <div class="form-group" style="margin-top: 30px;"><button type="submit" class="submit-btn">Save All
+                            Settings</button></div>
+                </form>
+            </div>
+        </div> <!-- Close admin-content-area -->
+        <!-- Modals moved to end of body for better z-index and staking context -->
+
+        <!-- Add/Edit Product Modal -->
+        <div id="productModal" class="modal">
+            <div class="modal-content">
+                <h2 id="modalTitle">Add Product</h2>
+                <form id="productForm" class="contact-form">
+                    <input type="hidden" id="productId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Product Name (English)</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Product Name (Telugu)</label>
+                            <input type="text" id="productNameTelugu" placeholder="e.g. కడప కారం">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="productCategory" required class="form-input">
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Display Order</label>
+                            <input type="number" id="productOrder" placeholder="e.g., 1, 2, 3" class="form-input"
+                                value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                            <span class="toggle-switch-sm">
+                                <input type="checkbox" id="productTrending">
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <label for="productTrending"
+                                style="margin: 0; font-weight: 600; color: var(--color-primary-blue); cursor: pointer;">Mark
+                                as Trending
+                                Item</label>
+                        </div>
+                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                            <span class="toggle-switch-sm">
+                                <input type="checkbox" id="productVisible" checked>
+                                <span class="toggle-slider"></span>
+                            </span>
+                            <label for="productVisible"
+                                style="margin: 0; font-weight: 600; color: var(--color-primary-blue); cursor: pointer;">Visible
+                                on
+                                Site</label>
+                        </div>
+                    </div>
+
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Product Tagline</label>
+                            <input type="text" id="productTagline">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="productDescription" rows="3"></textarea>
+                    </div>
+
+                    <!-- Detailed Info Section -->
+                    <h4
+                        style="margin: 20px 0 10px; color: var(--color-secondary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 5px;">
+                        Detailed Info
+                    </h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ingredients</label>
+                            <textarea id="productIngredients" rows="3" placeholder="Comma separated list..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Usage Instructions</label>
+                            <textarea id="productUsage" rows="3" placeholder="Serving suggestion..."></textarea>
+                        </div>
+                    </div>
+
+                    <h4
+                        style="margin: 20px 0 10px; color: var(--color-secondary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 5px;">
+                        Nutrition Facts (Per Serving)
+                    </h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Serving Size Details</label>
+                            <input type="text" id="nutriDetails" placeholder="e.g. Per 100g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Calories (kcal)</label>
+                            <input type="text" id="nutriCalories" placeholder="e.g. 350 kcal">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Protein (g)</label>
+                            <input type="text" id="nutriProtein" placeholder="e.g. 12g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Saturated Fat (g)</label>
+                            <input type="text" id="nutriSatFat" placeholder="e.g. 2g">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Total Fat (g)</label>
+                            <input type="text" id="nutriFat" placeholder="e.g. 10g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Carbs (g)</label>
+                            <input type="text" id="nutriCarbs" placeholder="e.g. 45g">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Fiber (g)</label>
+                            <input type="text" id="nutriFiber" placeholder="e.g. 5g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Sugars (g)</label>
+                            <input type="text" id="nutriSugars" placeholder="e.g. 2g">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 0.85rem;">Sodium (g)</label>
+                            <input type="text" id="nutriSodium" placeholder="e.g. 0.5g">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Product Image</label>
+                        <div class="upload-group">
+                            <input type="text" id="showcaseImage" placeholder="Image URL or Upload File ->"
+                                style="flex: 1;">
+                            <label for="showcaseUpload" class="upload-btn">
+                                <i class="fas fa-cloud-upload-alt"></i> Upload
+                            </label>
+                            <input type="file" id="showcaseUpload" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'showcaseImage')">
+                        </div>
+                        <small id="showcaseStatus" style="color: var(--text-secondary);"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quantity Variants</label>
+                        <div id="variantsContainer">
+                            <!-- Variants injected here -->
+                        </div>
+                        <button type="button" onclick="addVariantRow()" class="nav-btn"
+                            style="margin-top: 10px; font-size: 0.8rem;">+ Add Variant</button>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button type="button" onclick="closeProductModal()" class="submit-btn"
+                            style="margin-top: 0; background: transparent; border: 2px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Category Modal -->
+        <div id="categoryModal" class="modal">
+            <div class="modal-content">
+                <h2 id="catModalTitle">Add Category</h2>
+                <form id="categoryForm" class="contact-form">
+                    <input type="hidden" id="catId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="catTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Sub Brand / Tagline</label>
+                            <input type="text" id="catSubBrand" placeholder="e.g. Authentic Taste">
+                        </div>
+                        <div class="form-group">
+                            <label>Sub Brand Logo</label>
+                            <div class="upload-group">
+                                <input type="text" id="catSubBrandLogo" placeholder="Logo URL">
+                                <label for="uploadCatSubBrandLogo" class="upload-btn"><i
+                                        class="fas fa-upload"></i></label>
+                                <input type="file" id="uploadCatSubBrandLogo" accept="image/*" style="display: none;"
+                                    onchange="handleAssetUpload(this, 'catSubBrandLogo')">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Slug (Unique ID)</label>
+                            <input type="text" id="catSlug" required>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Slug (Unique ID)</label>
-                        <input type="text" id="catSlug" required>
+                        <label>Telugu Title</label>
+                        <input type="text" id="catTelugu">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Telugu Title</label>
-                    <input type="text" id="catTelugu">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="catDescription" rows="2"></textarea>
-                </div>
-                <div class="form-row">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="catDescription" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Display Order</label>
+                            <input type="number" id="catOrder" value="0">
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 10px; margin-top: 10px;">
+                            <input type="checkbox" id="catVisible" style="width: auto; margin: 0;">
+                            <label for="catVisible"
+                                style="margin: 0; font-weight: 600; color: var(--color-primary-blue);">Visible on
+                                Site</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Category Image</label>
+                        <div class="upload-group">
+                            <input type="text" id="catImageUrl" placeholder="Image URL">
+                            <label for="uploadCatImg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                            <input type="file" id="uploadCatImg" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'catImageUrl')">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="submit-btn">Save Category</button>
+                        <button type="button" onclick="closeCategoryModal()" class="nav-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Testimonial Modal -->
+        <div id="testimonialModal" class="modal">
+            <div class="modal-content">
+                <h2 id="testimonialModalTitle">Add Testimonial</h2>
+                <form id="testimonialForm" class="contact-form">
+                    <input type="hidden" id="testimonialId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Customer Name</label>
+                            <input type="text" id="tName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="tLocation" placeholder="e.g. Hyderabad">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="tMessage" rows="3" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Rating (1-5)</label>
+                            <select id="tRating" class="form-input">
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Related Product (Optional)</label>
+                            <input type="text" id="tProduct" placeholder="e.g. Kura Karam">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Testimonial</button>
+                        <button type="button" onclick="closeTestimonialModal()" class="nav-btn"
+                            style="border: 1px solid var(--border-medium);">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script type="module" src="admin.js?v=3"></script>
+        <!-- Why Us Feature Modal -->
+        <div id="featureModal" class="modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="close" onclick="closeFeatureModal()">&times;</span>
+                <h2 id="featureModalTitle">Add Feature</h2>
+                <form id="featureForm" style="margin-top: 20px;">
+                    <input type="hidden" id="featureId">
+                    <div class="form-group">
+                        <label>Feature Title</label>
+                        <input type="text" id="featureTitle" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="featureDescription" rows="3" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Icon/Image URL</label>
+                        <div class="upload-group">
+                            <input type="text" id="featureImageUrl" placeholder="URL" class="form-input">
+                            <label for="uploadFeatureImg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                            <input type="file" id="uploadFeatureImg" accept="image/*" style="display: none;"
+                                onchange="handleAssetUpload(this, 'featureImageUrl')">
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label>Display Order</label>
-                        <input type="number" id="catOrder" value="0">
+                        <input type="number" id="featureOrder" value="0" class="form-input">
                     </div>
-                    <div class="form-group"
-                        style="flex-direction: row; align-items: center; gap: 10px; margin-top: 10px;">
-                        <input type="checkbox" id="catVisible" style="width: auto; margin: 0;">
-                        <label for="catVisible"
-                            style="margin: 0; font-weight: 600; color: var(--color-primary-blue);">Visible on
-                            Site</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Category Image</label>
-                    <div class="upload-group">
-                        <input type="text" id="catImageUrl" placeholder="Image URL">
-                        <label for="uploadCatImg" class="upload-btn"><i class="fas fa-upload"></i></label>
-                        <input type="file" id="uploadCatImg" accept="image/*" style="display: none;"
-                            onchange="handleAssetUpload(this, 'catImageUrl')">
-                    </div>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="submit" class="submit-btn">Save Category</button>
-                    <button type="button" onclick="closeCategoryModal()" class="nav-btn">Cancel</button>
-                </div>
-            </form>
+                    <button type="submit" class="submit-btn" style="margin-top: 20px;">Save Feature</button>
+                </form>
+            </div>
         </div>
-    </div>
-
-    <!-- Testimonial Modal -->
-    <div id="testimonialModal" class="modal">
-        <div class="modal-content">
-            <h2 id="testimonialModalTitle">Add Testimonial</h2>
-            <form id="testimonialForm" class="contact-form">
-                <input type="hidden" id="testimonialId">
-                <div class="header-actions">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search products..." id="productSearch">
-                    </div>
-                    <!-- Save Order Button (Hidden by default) -->
-                    <button id="saveOrderBtn" class="primary-btn"
-                        style="background-color: var(--color-success); margin-right: 10px;"
-                        onclick="saveCurrentOrder()">
-                        <i class="fas fa-save"></i> Save Order
-                    </button>
-                    <button id="addBtn" class="primary-btn" onclick="handleAddClick()">
-                        <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
-                    </button>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Customer Name</label>
-                        <input type="text" id="tName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Location</label>
-                        <input type="text" id="tLocation" placeholder="e.g. Hyderabad">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Message</label>
-                    <textarea id="tMessage" rows="3" required></textarea>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Rating (1-5)</label>
-                        <select id="tRating" class="form-input">
-                            <option value="5">5 Stars</option>
-                            <option value="4">4 Stars</option>
-                            <option value="3">3 Stars</option>
-                            <option value="2">2 Stars</option>
-                            <option value="1">1 Star</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Related Product (Optional)</label>
-                        <input type="text" id="tProduct" placeholder="e.g. Kura Karam">
-                    </div>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="submit" class="submit-btn" style="margin-top: 0;">Save Testimonial</button>
-                    <button type="button" onclick="closeTestimonialModal()" class="nav-btn"
-                        style="border: 1px solid var(--border-medium);">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <script type="module" src="admin.js?v=3"></script>
-    <!-- Why Us Feature Modal -->
-    <div id="featureModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="close" onclick="closeFeatureModal()">&times;</span>
-            <h2 id="featureModalTitle">Add Feature</h2>
-            <form id="featureForm" style="margin-top: 20px;">
-                <input type="hidden" id="featureId">
-                <div class="form-group">
-                    <label>Feature Title</label>
-                    <input type="text" id="featureTitle" required class="form-input">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="featureDescription" rows="3" class="form-textarea"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Icon/Image URL</label>
-                    <div class="upload-group">
-                        <input type="text" id="featureImageUrl" placeholder="URL" class="form-input">
-                        <label for="uploadFeatureImg" class="upload-btn"><i class="fas fa-upload"></i></label>
-                        <input type="file" id="uploadFeatureImg" accept="image/*" style="display: none;"
-                            onchange="handleAssetUpload(this, 'featureImageUrl')">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Display Order</label>
-                    <input type="number" id="featureOrder" value="0" class="form-input">
-                </div>
-                <button type="submit" class="submit-btn" style="margin-top: 20px;">Save Feature</button>
-            </form>
-        </div>
-    </div>
 </body>
 
 </html>

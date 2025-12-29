@@ -142,17 +142,8 @@ function showDashboard() {
     loginSection.style.display = 'none';
     dashboardSection.style.display = 'block';
 
-    // Default view
-    if (currentView === 'products') {
-        populateCategoryFilter(); // Ensure this runs!
-        fetchProducts();
-    } else if (currentView === 'testimonials') {
-        fetchTestimonials();
-    } else if (currentView === 'categories') {
-        fetchCategories();
-    } else if (currentView === 'settings') {
-        fetchSettings();
-    }
+    // Call switchView to properly initialize the UI (show/hide filters, etc.)
+    switchView(currentView);
 }
 
 window.switchView = (view) => {
@@ -190,6 +181,7 @@ window.switchView = (view) => {
         // Show Filter
         const filterRow = document.getElementById('productFilterRow');
         if (filterRow) filterRow.style.display = 'flex';
+        populateCategoryFilter(); // Populate dropdown options
         fetchProducts();
     } else if (view === 'testimonials') {
         testimonialsTableContainer.style.display = 'block';
@@ -801,15 +793,14 @@ window.handleDragLeave = (e) => {
 
 
 window.handleDrop = (e) => {
-    e.stopPropagation(); // Standard stop propagation
+    e.stopPropagation();
 
     const dragSrcEl = document.querySelector('.draggable-item.dragging, .draggable-row.dragging');
     const dropTarget = e.target.closest('.draggable-item, .draggable-row');
 
     if (dragSrcEl && dropTarget && dragSrcEl !== dropTarget) {
-        // Swap DOM elements
         const container = dragSrcEl.parentNode;
-        const allItems = Array.from(container.children);
+        const allItems = Array.from(container.children).filter(el => el.classList.contains('draggable-item') || el.classList.contains('draggable-row'));
         const srcIndex = allItems.indexOf(dragSrcEl);
         const targetIndex = allItems.indexOf(dropTarget);
 
@@ -819,11 +810,14 @@ window.handleDrop = (e) => {
             dropTarget.before(dragSrcEl);
         }
 
-        const type = dragSrcEl.getAttribute('data-type');
-        // updateOrderFromDom(type, container); // AUTO-SAVE DISABLED
+        const type = dragSrcEl.getAttribute('data-type') || (currentView === 'products' ? 'product' : (currentView === 'categories' ? 'category' : 'testimonial'));
 
         // Update Visual Numbers Only
         updateVisualOrder(type, container);
+
+        // Show the save button
+        const saveOrderBtn = document.getElementById('saveOrderBtn');
+        if (saveOrderBtn) saveOrderBtn.style.display = 'inline-block';
     }
 
     // Cleanup
@@ -855,106 +849,81 @@ function updateVisualOrder(type, container) {
     });
 }
 
-// Global Save Function
-window.saveCurrentOrder = async () => {
-    // Determine context based on currentView (since button is shared in header?) 
-    // Actually the button is new but logic depends on view.
-    // For now assuming we are in PRODUCTS view as that's where the request focused.
-    // But Categories uses drag drop too. 
-    // Let's check 'currentView'.
-
+// Global Save Function for Reordering
+window.saveCurrentOrder = async (overrideType = null) => {
     let container, type, tableName;
-    if (currentView === 'products') {
+
+    // Determine context based on currentView or overrideType
+    const view = overrideType || currentView;
+
+    if (view === 'products' || view === 'product') {
         container = document.getElementById('productListContainer');
         type = 'product';
         tableName = 'products';
-    } else if (currentView === 'categories') {
+    } else if (view === 'categories' || view === 'category') {
         container = document.getElementById('categoryList');
         type = 'category';
         tableName = 'categories';
-    } else if (currentView === 'testimonials') {
+    } else if (view === 'testimonials' || view === 'testimonial') {
         container = document.getElementById('testimonialList');
         type = 'testimonial';
         tableName = 'testimonials';
-    } else { return; }
+    } else {
+        console.error('Unknown view for saving order:', view);
+        return;
+    }
 
     const btn = document.getElementById('saveOrderBtn');
-    const oldHtml = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-    btn.disabled = true;
-
-    await updateOrderFromDom(type, container); // Re-use my batch logic but now manual
-
-    btn.innerHTML = oldHtml;
-    btn.disabled = false;
-    alert('Order saved successfully!');
-};
-
-async function updateOrderFromDom(type, container) {
-    if (!container) return;
-
-    const items = Array.from(container.children).filter(el => el.classList.contains('draggable-item') || el.classList.contains('draggable-row'));
-    const updates = [];
-
-    // Show visual feedback
-    const addBtnText = document.getElementById('addBtnText');
-    let originalBtnText = '';
-    if (addBtnText) {
-        originalBtnText = addBtnText.textContent;
-        addBtnText.textContent = "Saving Order...";
+    const oldHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
     }
 
-
-    // Determine Table Name and Local Update Logic
-    let tableName = 'products'; // Default
-    if (type === 'category') tableName = 'categories';
-    else if (type === 'testimonial') tableName = 'testimonials';
-
-    items.forEach((item, index) => {
-        const id = item.getAttribute('data-id');
-        const newOrder = index + 1; // 1-based index
-
-        // update visual order cell if exists
-        // Product has .order-cell. Category has it as 4th cell.
-        if (type === 'product') {
-            item.setAttribute('data-order', newOrder); // Update data-order attribute
-            const displayCell = item.querySelector('.display-order-cell');
-            if (displayCell) displayCell.textContent = newOrder;
-        } else if (type === 'category') {
-            // 4th cell is display_order
-            const cells = item.querySelectorAll('td');
-            if (cells[3]) cells[3].textContent = newOrder;
-        }
-        // Testimonials currently don't show order, so nothing to update visually in table
-
-        updates.push({
-            id: id,
-            display_order: newOrder
-        });
-    });
-
-    // Batch update to Supabase
     try {
-        const promises = updates.map(u =>
-            supabase.from(tableName).update({ display_order: u.display_order }).eq('id', u.id)
+        const items = Array.from(container.children).filter(el =>
+            el.classList.contains('draggable-item') || el.classList.contains('draggable-row')
         );
 
-        await Promise.all(promises);
+        const updates = items.map((item, index) => ({
+            id: item.getAttribute('data-id'),
+            display_order: index + 1
+        }));
 
-        // Update local state if needed (mainly for Products which has a global store)
-        if (type === 'product' && typeof allProducts !== 'undefined') {
-            updates.forEach(u => {
-                const p = allProducts.find(prod => prod.id === u.id);
-                if (p) p.display_order = u.display_order;
-            });
+        // Batch update in Supabase
+        for (const update of updates) {
+            const { error } = await supabase
+                .from(tableName)
+                .update({ display_order: update.display_order })
+                .eq('id', update.id);
+            if (error) throw error;
         }
 
-    } catch (error) {
-        console.error('Error saving order:', error);
-        alert('Failed to save new order.');
+        alert('Order saved successfully!');
+        if (btn) btn.style.display = 'none'; // Hide after success
+
+        // Refresh the view
+        if (view === 'products' || view === 'product') fetchProducts();
+        else if (view === 'categories' || view === 'category') fetchCategories();
+        else if (view === 'testimonials' || view === 'testimonial') fetchTestimonials();
+
+    } catch (e) {
+        console.error('Error saving order:', e);
+        alert('Failed to save order: ' + e.message);
     } finally {
-        addBtnText.textContent = originalBtnText;
+        if (btn) {
+            btn.innerHTML = oldHtml;
+            btn.disabled = false;
+        }
     }
+};
+
+// Map the HTML onclick handler name to our unified function
+window.saveNewOrder = window.saveCurrentOrder;
+
+async function updateOrderFromDom(type, container) {
+    // This is now redundant but kept for legacy calls if any
+    await window.saveCurrentOrder(type);
 }
 
 // Testimonial Management
