@@ -1123,18 +1123,19 @@ Styled exactly like product showcase
 }
 
 .stars {
-  font-size: var(--font-lg);
+  font-size: 1.3rem;
   color: #FFD700;
-  margin-bottom: var(--space-4);
-  letter-spacing: 2px;
+  margin-bottom: var(--space-3);
+  letter-spacing: 3px;
 }
 
 .testimonial-content p {
-  font-size: var(--font-sm);
+  font-size: var(--font-base);
   line-height: 1.6;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-6);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
   font-style: italic;
+  font-weight: var(--weight-medium);
   min-height: 60px;
   display: flex;
   align-items: center;
@@ -1144,20 +1145,24 @@ Styled exactly like product showcase
 .testimonial-author {
   border-top: 1px solid var(--border-light);
   padding-top: var(--space-4);
+  margin-top: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .testimonial-author strong {
   display: block;
-  font-size: var(--font-base);
-  font-weight: var(--weight-semibold);
-  color: var(--text-primary);
-  margin-bottom: var(--space-1);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  margin-bottom: 0;
 }
 
 .testimonial-author span {
-  font-size: var(--font-sm);
+  font-size: 0.7rem;
   color: var(--text-muted);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-normal);
 }
 
 /* Related Product Tag */
@@ -2678,6 +2683,10 @@ html {
   background-color: var(--bg-secondary);
   /* Matches body background to hide scroll bounce whitespace */
   height: 100%;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll to fix mobile centering */
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -2853,16 +2862,17 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
    ========================================= */
 
 .quick-product-item {
-  /* Dimensions: Increased by 20% (110px -> 132px) */
+  /* Dimensions */
   width: 132px;
   min-width: 132px;
   max-width: 132px;
-  aspect-ratio: 3 / 4;
+  height: auto;
+  /* Let content determine height */
+  min-height: 170px;
 
-  /* Styling match */
+  /* Styling */
   background: var(--bg-primary);
   border-radius: var(--radius-md);
-  /* Scaled down radius */
   box-shadow: var(--shadow-sm);
   border: 1px solid #d1d5db;
   transition: all var(--transition-normal);
@@ -2884,48 +2894,41 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 /* IMAGE WRAPPER */
 .quick-product-image-wrapper {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  /* Square Image Area */
-  padding: 0;
-  /* Removed padding */
+  height: 100px;
+  /* Fixed height for consistent cards */
+  padding: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: white;
-  border-bottom: 1px solid #f1f5f9;
   overflow: hidden;
-  /* Ensure zoomed image doesn't overflow */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  /* Separate image from content */
   position: relative;
   z-index: 1;
 }
 
 .quick-product-item img {
-  width: 100%;
+  width: auto;
   height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  object-fit: contain;
+  /* Maintain aspect ratio */
   transition: transform var(--transition-normal);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
   margin: 0;
   border: none;
-  /* Zoom in to remove internal whitespace */
-  transform: scale(1.5);
 }
 
 .quick-product-item:hover img {
-  transform: scale(1.6);
-  /* Zoom more on hover */
+  transform: scale(1.05);
 }
 
 /* INFO SECTION */
 .quick-product-item-info {
-  flex: 1;
+  flex: 0 0 auto;
+  /* Don't grow, prevent whitespace */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   padding: 6px;
-  /* Scaled up from 5px */
   background: white;
   width: 100%;
   text-align: center;
@@ -2991,6 +2994,15 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   font-size: 0.6rem;
   text-decoration: line-through;
   color: #94a3b8;
+}
+
+.quick-product-item .variant-qty {
+  font-size: 0.55rem;
+  font-weight: 500;
+  color: #64748b;
+  align-self: flex-end;
+  /* Align to bottom of price */
+  padding-bottom: 1px;
 }
 
 /* Hide unused button */

@@ -2627,6 +2627,7 @@ function renderQuickProductsHTML(products, showMrp) {
                 <div class="weight">${qtyDisplay}</div>
                 ${showMrp ? `<div class="price-row">
                     <span class="price">₹${priceDisplay}</span>
+                    ${qtyDisplay ? `<span class="variant-qty">(${qtyDisplay})</span>` : ''}
                     ${product.mrp && product.mrp > priceDisplay ? `<span class="mrp-strike">₹${product.mrp}</span>` : ''}
                 </div>` : ''}
             </div>
