@@ -258,12 +258,17 @@ body {
 
     .mobile-only-nav {
         display: flex !important;
-        margin-top: 20px;
+        margin-top: 5px;
+        /* Reduced from 20px */
+        padding: 0 10px;
+        /* Tighter padding */
     }
 
     .breadcrumb-section {
         justify-content: flex-start;
-        padding: 10px 15px;
+        padding: 2px 15px;
+        /* Further reduced from 5px */
+        margin-bottom: 0;
     }
 
     .crumbs {
@@ -342,7 +347,7 @@ body {
 .gallery-front .main-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     background: white;
 }
 
@@ -384,6 +389,17 @@ body {
 /* Component: Details */
 .product-details {
     padding: 20px;
+}
+
+@media (max-width: 767px) {
+    .product-details {
+        padding: 5px 15px;
+        /* Even tighter compact padding */
+    }
+
+    .product-title {
+        margin-top: 0;
+    }
 }
 
 .product-title {
