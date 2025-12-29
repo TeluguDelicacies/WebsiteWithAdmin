@@ -46,8 +46,8 @@ body {
 .sales-page-container {
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: var(--header-height) 5px 20px 5px;
-    /* Top padding accounts for fixed header */
+    padding: var(--header-height) 0 20px 0;
+    /* No side padding, top accounts for fixed header */
 }
 
 /* ... existing code ... */
@@ -78,45 +78,41 @@ body {
 
 /* 3. Category View (Grid) */
 .category-view-container {
-    padding: 20px 0;
+    padding: 10px 0;
+    width: 100%;
 }
 
 .master-cards-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
+    gap: 15px;
+    width: 100%;
+    padding: 0 10px;
 }
 
 .master-card {
-    flex: 0 1 340px;
-    min-width: 300px;
-    min-height: 420px;
-    /* Slight bump */
+    flex: 1 1 300px;
+    max-width: 400px;
     background: var(--bg-primary);
     border-radius: var(--radius-xl);
     border: 1px solid var(--border-light);
     overflow: visible !important;
-    /* Force visible to prevent popup clipping */
     display: flex;
     flex-direction: column;
     transition: transform var(--transition-normal), box-shadow var(--transition-normal);
     z-index: 1;
-    /* Stack context */
+    box-shadow: var(--shadow-md);
 }
 
 .master-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
     z-index: 10;
-    /* Bring to front on hover */
 }
 
 .card-hero-image {
-    aspect-ratio: 2.5 / 1;
-    /* Even flatter to safe space */
+    aspect-ratio: 3 / 1;
     overflow: hidden;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
@@ -128,9 +124,7 @@ body {
 }
 
 .card-body {
-    padding: 15px;
-    padding-bottom: 30px;
-    /* NON-TRIVIAL BUFFER at bottom */
+    padding: 12px;
     display: flex;
     flex-direction: column;
     text-align: center;
@@ -138,26 +132,21 @@ body {
 }
 
 .card-title {
-    font-size: 1.15rem;
-    /* Reduced from 1.4rem */
-    margin-bottom: 6px;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
     font-weight: 700;
 }
 
 .card-desc {
-    font-size: 0.9rem;
-    /* Restore size slightly */
+    font-size: 0.85rem;
     color: var(--text-secondary);
-    margin-bottom: 12px;
-    /* Reduced from 20px */
+    margin-bottom: 10px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    /* line-height removed to avoid clamp issues */
     flex-shrink: 0;
-    /* Prevent collapse */
 }
 
 .dropdown-wrapper {
