@@ -75,6 +75,9 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <script type="module">
         import { supabase } from './lib/supabase.js';
 
@@ -1154,11 +1157,15 @@
             message += `\n\nPlease confirm availability and share payment details.`;
 
             const phone = '919618519191';
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-            // Optional: Clear cart after order? User didn't ask but usually good. 
-            // state.cart = [];
-            // window.saveCart();
+            // Open in new tab but also clear cart
+            window.open(whatsappUrl, '_blank');
+
+            // --- Cart Reset Logic ---
+            state.cart = [];
+            window.saveCart();
+            window.showToast('Order initiated! Cart cleared.', 'success');
         };
 
         window.initCart();
