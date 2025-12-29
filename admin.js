@@ -677,9 +677,10 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                      style="${isFiltered ? 'margin-left: 15px;' : ''}">
                 
                 <div class="row-info">
-                    <h3>
+                    <h3 ${!product.is_visible ? 'style="opacity: 0.5;"' : ''}>
                         ${product.product_name}
                         ${product.is_trending ? '<i class="fas fa-fire" title="Trending Item" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
+                        ${product.is_visible === false ? '<i class="fas fa-eye-slash" title="Hidden on Site" style="color: #64748b; margin-left: 5px;"></i>' : ''}
                     </h3>
                     <div class="tagline">${product.product_tagline || ''}</div>
                     <span class="category-badge">${product.product_category.replace(/-/g, ' ')}</span>
@@ -1001,6 +1002,7 @@ window.openProductModal = async (productId = null) => {
     variantsContainer.innerHTML = '';
     document.getElementById('productId').value = '';
     document.getElementById('productOrder').value = '0'; // Default order
+    document.getElementById('productVisible').checked = true; // Default visible
 
     if (productId) {
         modalTitle.textContent = 'Edit Product';
@@ -1136,6 +1138,7 @@ async function loadProductData(productId) {
         // Populate display order
         document.getElementById('productOrder').value = product.display_order || 0;
         document.getElementById('productTrending').checked = product.is_trending || false;
+        document.getElementById('productVisible').checked = product.is_visible !== false; // Default true if null
 
     } catch (error) {
         console.error('Error loading product:', error);
@@ -1219,6 +1222,7 @@ productForm.addEventListener('submit', async (e) => {
         total_stock: calculatedTotalStock,
         showcase_image: document.getElementById('showcaseImage').value,
         is_trending: document.getElementById('productTrending').checked,
+        is_visible: document.getElementById('productVisible').checked,
         // info_image: document.getElementById('showcaseImage').value, // Use same image for both
         quantity_variants: variants,
         slug: productSlug // Auto-generated SEO-friendly slug

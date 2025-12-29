@@ -1868,8 +1868,11 @@ async function fetchAndRenderProducts() {
             showToast('Database connected but no products found.', 'info');
         }
 
-        window.allProductsCache = products || [];
-        renderProducts(products || [], categories);
+        // Filter out hidden products
+        const visibleProducts = (products || []).filter(p => p.is_visible !== false);
+
+        window.allProductsCache = visibleProducts;
+        renderProducts(visibleProducts, categories);
 
         // Re-initialize animations and controls after rendering
         setTimeout(() => {
