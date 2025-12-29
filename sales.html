@@ -506,7 +506,7 @@
         <div class="add-to-cart-section">
             <div class="qty-control-lg">
                 <button class="qty-btn-lg" onclick="updateDetailQty(-1)">−</button>
-                <span class="qty-val-lg" id="detailQty">1</span>
+                <input type="number" class="qty-input-lg" id="detailQty" value="1" min="1" onchange="window.validateDetailQty(this)">
                 <button class="qty-btn-lg" onclick="updateDetailQty(1)">+</button>
             </div>
             <button class="add-cart-btn" onclick="addToCartFromDetail()">
@@ -906,12 +906,64 @@
         };
 
         window.updateDetailQty = function (delta) {
-            const newQty = (state.detailQty || 1) + delta;
-            if (newQty >= 1) {
-                state.detailQty = newQty;
-                const el = document.getElementById('detailQty');
-                if (el) el.innerText = state.detailQty;
+            const input = document.getElementById('detailQty');
+            if (!input) return;
+            const currentVal = parseInt(input.value) || 1;
+            const newQty = currentVal + delta;
+
+            // Get max stock for current selection
+            let maxStock = 999;
+            if (state.currentProduct) {
+                let variants = [];
+                try {
+                    variants = typeof state.currentProduct.quantity_variants === 'string' ?
+                        JSON.parse(state.currentProduct.quantity_variants) :
+                        (state.currentProduct.quantity_variants || []);
+                } catch (e) { }
+
+                if (variants.length > 0) {
+                    const select = document.getElementById('variantSelect');
+                    const v = variants[select ? select.value : 0];
+                    if (v && v.stock !== undefined) maxStock = v.stock;
+                } else if (state.currentProduct.total_stock !== undefined) {
+                    maxStock = state.currentProduct.total_stock;
+                }
             }
+
+            if (newQty >= 1 && newQty <= maxStock) {
+                state.detailQty = newQty;
+                input.value = state.detailQty;
+            } else if (newQty > maxStock) {
+                alert(`Only ${maxStock} units available in stock.`);
+            }
+        };
+
+        window.validateDetailQty = function (input) {
+            let val = parseInt(input.value) || 1;
+
+            let maxStock = 999;
+            if (state.currentProduct) {
+                let variants = [];
+                try {
+                    variants = typeof state.currentProduct.quantity_variants === 'string' ?
+                        JSON.parse(state.currentProduct.quantity_variants) :
+                        (state.currentProduct.quantity_variants || []);
+                } catch (e) { }
+
+                if (variants.length > 0) {
+                    const select = document.getElementById('variantSelect');
+                    const v = variants[select ? select.value : 0];
+                    if (v && v.stock !== undefined) maxStock = v.stock;
+                }
+            }
+
+            if (val < 1) val = 1;
+            if (val > maxStock) {
+                alert(`Only ${maxStock} units available in stock.`);
+                val = maxStock;
+            }
+            state.detailQty = val;
+            input.value = val;
         };
 
         // Helper for cart animation
@@ -975,14 +1027,26 @@
             window.addToCart(state.currentProduct, selectedVariant, state.detailQty);
         };
 
-        window.updateCartItemQty = function (index, delta) {
+        window.updateCartItemQty = function (index, deltaOrVal, isDirect = false) {
             const item = state.cart[index];
-            const newQty = item.qty + delta;
+            let newQty;
+
+            if (isDirect) {
+                newQty = parseInt(deltaOrVal) || 1;
+            } else {
+                newQty = item.qty + deltaOrVal;
+            }
+
+            // Check stock if available
+            const maxStock = (item.variant && item.variant.stock !== undefined) ? item.variant.stock : 999;
 
             if (newQty <= 0) {
                 if (confirm('Remove item from cart?')) {
                     state.cart.splice(index, 1);
                 }
+            } else if (newQty > maxStock) {
+                alert(`Only ${maxStock} units available.`);
+                item.qty = maxStock;
             } else {
                 item.qty = newQty;
             }
@@ -1025,7 +1089,9 @@
                         <div class="cart-item-controls">
                             <div class="qty-control-sm">
                                 <button class="qty-btn-sm" onclick="window.updateCartItemQty(${index}, -1)">−</button>
-                                <span class="qty-val-sm">${item.qty}</span>
+                                <input type="number" class="cart-qty-input" value="${item.qty}" min="1" 
+                                    onchange="window.updateCartItemQty(${index}, this.value, true)"
+                                    style="width: 40px; text-align: center; border: 1px solid var(--color-gray-200); border-radius: 4px; font-size: 0.8rem; height: 24px; margin: 0 5px;">
                                 <button class="qty-btn-sm" onclick="window.updateCartItemQty(${index}, 1)">+</button>
                             </div>
                             <div class="cart-item-price">₹${item.price * item.qty}</div>
@@ -1037,16 +1103,67 @@
         }
 
         window.sendToWhatsApp = function () {
-            if (state.cart.length === 0) return;
+            if (state.cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
 
-            let message = "🛒 *New Order from Telugu Delicacies*\n\n*Order Details:*";
+            // --- Background Stock Update ---
+            const updateStock = async () => {
+                for (const item of state.cart) {
+                    try {
+                        // 1. Fetch latest product to get current variants/stock
+                        const { data: p, error: fetchErr } = await supabase
+                            .from('products')
+                            .select('quantity_variants, total_stock')
+                            .eq('id', item.id)
+                            .single();
+
+                        if (fetchErr || !p) continue;
+
+                        let variants = [];
+                        try {
+                            variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
+                        } catch (e) { }
+
+                        // 2. Update specific variant and top-level totals
+                        if (variants.length > 0 && item.variant) {
+                            const vIdx = variants.findIndex(v => v.quantity === item.variant.quantity);
+                            if (vIdx > -1) {
+                                // Update stock and sold count in JSON
+                                variants[vIdx].stock = Math.max(0, (variants[vIdx].stock || 0) - item.qty);
+                                variants[vIdx].total_sold = (variants[vIdx].total_sold || 0) + item.qty;
+
+                                // Recalculate top-level stock
+                                const newTotalStock = variants.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+
+                                await supabase.from('products').update({
+                                    quantity_variants: variants,
+                                    total_stock: newTotalStock
+                                }).eq('id', item.id);
+                            }
+                        } else {
+                            // Non-variant fallback
+                            const newStock = Math.max(0, (p.total_stock || 0) - item.qty);
+                            await supabase.from('products').update({
+                                total_stock: newStock
+                            }).eq('id', item.id);
+                        }
+                    } catch (e) {
+                        console.error('Stock update failed for item:', item.id, e);
+                    }
+                }
+            };
+
+            // Initiate stock update in background (don't block user if possible, but user wants background update)
+            updateStock();
+
+            let message = `🛒 *New Order from Telugu Delicacies*\n\n*Order Details:*`;
             let total = 0;
-
             state.cart.forEach(item => {
-                const lineTotal = item.price * item.qty;
-                total += lineTotal;
-                const variantStr = item.variant ? `(${item.variant.quantity})` : '';
-                message += `\n• ${item.name} ${variantStr} × ${item.qty} = ₹${lineTotal}`;
+                const sub = item.price * item.qty;
+                total += sub;
+                message += `\n• ${item.name} ${item.variant ? '(' + item.variant.quantity + ')' : ''} × ${item.qty} = ₹${sub}`;
             });
 
             message += `\n\n*Subtotal: ₹${total}*`;
@@ -1055,6 +1172,10 @@
 
             const phone = '919618519191';
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+
+            // Optional: Clear cart after order? User didn't ask but usually good. 
+            // state.cart = [];
+            // window.saveCart();
         };
 
         window.initCart();

@@ -1054,31 +1054,47 @@ async function loadTestimonialData(id) {
 window.addVariantRow = (data = null) => {
     const div = document.createElement('div');
     div.className = 'variant-row';
-    div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center; background: var(--bg-secondary); padding: 10px; border-radius: 8px;';
+    div.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 15px; align-items: start; background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);';
 
     div.innerHTML = `
-        <div style="flex: 1;">
-            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">Quantity/Size</label>
-            <input type="text" class="variant-qty form-input" placeholder="e.g. 250g" value="${data ? data.quantity : ''}" required>
+        <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Qty/Size</label>
+            <input type="text" class="variant-qty form-input" placeholder="e.g. 250g" value="${data ? data.quantity : ''}" required style="padding: 8px;">
         </div>
-        <div style="flex: 1;">
-            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">MRP (₹)</label>
-            <input type="number" class="variant-mrp form-input" placeholder="MRP" value="${data ? data.mrp || '' : ''}" required>
+        <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">MRP (₹)</label>
+            <input type="number" class="variant-mrp form-input" placeholder="MRP" value="${data ? data.mrp || '' : ''}" required style="padding: 8px;">
         </div>
-        <div style="flex: 1;">
-            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">Selling Price (₹)</label>
-            <input type="number" class="variant-price form-input" placeholder="Price" value="${data ? data.price : ''}" required>
+        <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Price (₹)</label>
+            <input type="number" class="variant-price form-input" placeholder="Price" value="${data ? data.price : ''}" required style="padding: 8px;">
         </div>
-        <div style="flex: 1;">
-            <label style="font-size: 0.8rem; margin-bottom: 2px; display: block;">Stock</label>
-            <input type="number" class="variant-stock form-input" placeholder="Qty" value="${data ? data.stock || 0 : 0}" required>
+        <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Stock</label>
+            <input type="number" class="variant-stock form-input" placeholder="Qty" value="${data ? data.stock || 0 : 0}" required style="padding: 8px;">
         </div>
-        <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: var(--color-error); margin-top: 15px;">
+        <div>
+            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Sold</label>
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <input type="number" class="variant-sold form-input" value="${data ? data.total_sold || 0 : 0}" readonly style="padding: 8px; background: #e9ecef; width: 50px;">
+                <button type="button" class="nav-btn" onclick="window.resetVariantSold(this)" style="padding: 6px; font-size: 0.7rem; min-width: auto; height: 35px;" title="Reset Sales">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: var(--color-error); margin-top: 24px; min-width: auto; padding: 8px;" title="Delete Variant">
             <i class="fas fa-trash"></i>
         </button>
     `;
 
     variantsContainer.appendChild(div);
+};
+
+window.resetVariantSold = (btn) => {
+    if (!confirm('Are you sure you want to reset sales for this variant to 0? This is usually done when restocking.')) return;
+    const row = btn.closest('.variant-row');
+    const input = row.querySelector('.variant-sold');
+    if (input) input.value = 0;
 };
 
 async function loadProductData(productId) {
@@ -1160,13 +1176,15 @@ productForm.addEventListener('submit', async (e) => {
         const qty = row.querySelector('.variant-qty').value;
         const price = row.querySelector('.variant-price').value;
         const stock = parseInt(row.querySelector('.variant-stock').value || 0);
+        const sold = parseInt(row.querySelector('.variant-sold').value || 0);
 
         if (qty && price) {
             variants.push({
                 quantity: qty,
                 price: parseFloat(price),
                 mrp: parseFloat(row.querySelector('.variant-mrp').value || 0),
-                stock: stock
+                stock: stock,
+                total_sold: sold
             });
             calculatedTotalStock += stock;
         }

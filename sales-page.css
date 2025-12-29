@@ -1027,6 +1027,45 @@ body {
     color: var(--color-primary-blue);
 }
 
+.qty-val-lg,
+.qty-input-lg {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary-blue);
+    width: 60px;
+    text-align: center;
+    border: 1px solid var(--color-gray-200);
+    border-radius: 6px;
+    padding: 4px;
+}
+
+/* Hide arrows for Chrome, Safari, Edge, Opera */
+.qty-input-lg::-webkit-outer-spin-button,
+.qty-input-lg::-webkit-inner-spin-button,
+.cart-qty-input::-webkit-outer-spin-button,
+.cart-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+/* Hide arrows for Firefox */
+.qty-input-lg[type=number],
+.cart-qty-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.cart-qty-input {
+    width: 45px;
+    text-align: center;
+    border: 1px solid var(--color-gray-200);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 2px;
+}
+
+
 .sp-mrp {
     font-size: 0.95rem;
     color: var(--text-muted);
@@ -1387,21 +1426,26 @@ body {
 }
 
 /* Nav Badge */
+.cart-btn {
+    position: relative;
+}
+
 .cart-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: -4px;
+    right: -4px;
     background: var(--color-error);
     color: white;
     font-size: 0.7rem;
     font-weight: 700;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Add to Cart Section in Product View */
