@@ -934,7 +934,11 @@
                 state.detailQty = newQty;
                 input.value = state.detailQty;
             } else if (newQty > maxStock) {
-                alert(`Only ${maxStock} units available in stock.`);
+                if (maxStock <= 0) {
+                    window.showToast('Sorry, this item is Out of Stock', 'error');
+                } else {
+                    window.showToast(`Only ${maxStock} units available in stock.`, 'error');
+                }
             }
         };
 
@@ -959,8 +963,13 @@
 
             if (val < 1) val = 1;
             if (val > maxStock) {
-                alert(`Only ${maxStock} units available in stock.`);
-                val = maxStock;
+                if (maxStock <= 0) {
+                    window.showToast('Out of Stock', 'error');
+                    val = 1; // reset or keep as is? User wants "Out of Stock". Let's show 1 but toast error.
+                } else {
+                    window.showToast(`Max ${maxStock} units available`, 'error');
+                    val = maxStock;
+                }
             }
             state.detailQty = val;
             input.value = val;
@@ -998,10 +1007,7 @@
             state.cart = [...state.cart];
             window.saveCart();
             animateCartBtn();
-
-            // Open drawer
-            const drawer = document.getElementById('cartDrawer');
-            if (!drawer.classList.contains('active')) window.toggleCartDrawer();
+            window.showToast(`${product.product_name} added to cart!`, 'success');
         };
 
         window.addToCartFromDetail = function () {
