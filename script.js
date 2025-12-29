@@ -1755,6 +1755,17 @@ async function fetchSiteSettings() {
                 logoImgs.forEach(img => img.src = data.logo_url);
             }
 
+            // Header Titles
+            if (data.site_title) {
+                const el = document.getElementById('header-site-title');
+                if (el) el.innerText = data.site_title;
+                document.title = data.site_title;
+            }
+            if (data.site_title_telugu) {
+                const el = document.getElementById('header-site-title-telugu');
+                if (el) el.innerText = data.site_title_telugu;
+            }
+
             // Favicon
             if (data.fav_icon_url) {
                 const link = document.querySelector("link[rel~='icon']");

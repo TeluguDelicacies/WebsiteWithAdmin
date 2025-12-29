@@ -427,6 +427,12 @@ Persistent header with hamburger menu and WhatsApp integration
   gap: var(--space-3);
 }
 
+@media (min-width: 1024px) {
+  .mobile-nav-catalogue-btn {
+    display: none !important;
+  }
+}
+
 /* Continuous Wiggle & Color Animation */
 /* Square Gradient Glow Animation */
 @keyframes logoGlowAndWiggle {
@@ -503,11 +509,24 @@ Persistent header with hamburger menu and WhatsApp integration
   }
 }
 
+.telugu-brand {
+  display: block;
+  font-size: 1.2rem !important;
+  font-family: 'Mallanna', sans-serif;
+  color: var(--color-secondary-blue);
+  margin-top: -3px;
+  /* Reduced gap */
+  line-height: 1;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
 /* Desktop Navigation */
 .desktop-nav {
   display: none;
   gap: var(--space-2);
   align-items: center;
+  margin-left: auto;
 }
 
 @media (min-width: 1024px) {

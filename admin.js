@@ -412,6 +412,7 @@ async function fetchSettings() {
 
         if (data) {
             document.getElementById('setSiteTitle').value = data.site_title || '';
+            document.getElementById('setSiteTitleTelugu').value = data.site_title_telugu || '';
             document.getElementById('setHeroTitle').value = data.hero_title || '';
             document.getElementById('setHeroSubtitle').value = data.hero_subtitle || '';
             document.getElementById('setHeroDesc').value = data.hero_description || '';
@@ -457,6 +458,7 @@ if (siteSettingsForm) {
 
         const settingsData = {
             site_title: document.getElementById('setSiteTitle').value,
+            site_title_telugu: document.getElementById('setSiteTitleTelugu').value,
             hero_title: document.getElementById('setHeroTitle').value,
             hero_subtitle: document.getElementById('setHeroSubtitle').value,
             hero_description: document.getElementById('setHeroDesc').value,
