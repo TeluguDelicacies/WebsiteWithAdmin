@@ -463,12 +463,18 @@ body {
 
 
 /* Toggleable Sections */
+.info-tabs {
+    position: relative;
+    min-height: 0;
+    /* Container for the tabs system */
+}
+
 .info-btns-row {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
     /* Allow wrapping */
-    margin: 20px 0;
+    margin: 20px 0 10px 0;
 }
 
 .info-btn {
@@ -488,19 +494,35 @@ body {
     border-color: var(--color-primary-blue);
 }
 
+/* Container for all content blocks - fixed height approach */
+.info-content-wrapper {
+    position: relative;
+    min-height: 120px;
+    /* Reserve minimum space for content */
+    margin-bottom: 20px;
+}
+
 .info-content-block {
-    display: none;
-    /* Hidden by default */
     background: var(--bg-tertiary);
     border-radius: var(--radius-md);
     padding: 20px;
-    margin-bottom: 20px;
-    animation: fadeIn 0.3s ease-in-out;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
 }
 
 .info-content-block.active {
-    display: block;
-    /* Show when active */
+    max-height: 400px;
+    /* Generous max height for content */
+    opacity: 1;
+    visibility: visible;
+    padding: 20px;
+    overflow-y: auto;
 }
 
 /* Action Pill Button (View Desc, Back to Image) */
@@ -641,8 +663,15 @@ body {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         /* Force equal width */
-        align-items: start;
-        /* Balance Image and Details */
+        align-items: stretch;
+        /* Stretch both columns to equal height - prevents layout shift */
+    }
+
+    /* Gallery wrapper needs to be self-aligned to start within the stretched cell */
+    .gallery-wrapper {
+        align-self: start;
+        position: sticky;
+        top: calc(var(--header-height) + 20px);
     }
 
     /* Force buttons to single line on desktop */
