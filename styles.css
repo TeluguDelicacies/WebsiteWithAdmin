@@ -541,14 +541,14 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .nav-btn.whatsapp-btn {
-  background: var(--bg-gradient-primary);
+  background: linear-gradient(135deg, #25D366, #128C7E);
   color: var(--text-inverse);
-  border-color: var(--color-primary-blue);
+  border-color: #128C7E;
 }
 
 .nav-btn.whatsapp-btn:hover {
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-secondary-dark));
-  border-color: var(--color-primary-dark);
+  background: linear-gradient(135deg, #128C7E, #075E54);
+  border-color: #075E54;
   transform: translateY(-2px);
   color: var(--text-inverse);
 }
