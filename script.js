@@ -1786,10 +1786,21 @@ async function fetchSiteSettings() {
                 }
             }
 
-            // Hero Background
             if (data.hero_background_url) {
                 const heroSection = document.querySelector('.hero');
                 if (heroSection) heroSection.style.backgroundImage = `url('${data.hero_background_url}')`;
+            }
+
+            // Why Us Section
+            if (data.show_why_us) {
+                const section = document.getElementById('why-us-section');
+                if (section) {
+                    section.style.display = 'block';
+                    fetchAndRenderWhyUs();
+                }
+            } else {
+                const section = document.getElementById('why-us-section');
+                if (section) section.style.display = 'none';
             }
 
             // Contact Info
@@ -2764,6 +2775,37 @@ window.switchQuickTab = function (slug) {
     // Update Panes
     document.querySelectorAll('.quick-tab-pane').forEach(pane => pane.classList.remove('active'));
     document.getElementById(`tab-pane-${slug}`)?.classList.add('active');
+}
+
+/**
+ * Fetch and Render "Why Us" Features
+ */
+async function fetchAndRenderWhyUs() {
+    const container = document.getElementById('why-us-features');
+    if (!container) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('why_us_features')
+            .select('*')
+            .order('order_index', { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            container.innerHTML = data.map(f => `
+                <div class="why-feature-card">
+                    <img src="${f.image_url}" alt="${f.title}" class="why-feature-img" onerror="this.src=window.siteSettings?.product_placeholder_url || ''">
+                    <div class="why-feature-content">
+                        <h3 class="why-feature-title">${f.title}</h3>
+                        <p class="why-feature-desc">${f.description || ''}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (e) {
+        console.error('Error fetching Why Us features:', e);
+    }
 }
 
 

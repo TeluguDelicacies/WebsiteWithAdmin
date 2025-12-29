@@ -3485,3 +3485,92 @@ Navigation arrows, progress dots, and drag-to-scroll
   padding-left: 0;
   padding-right: 0;
 }
+
+/* Why Us Section Styles */
+.why-us-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  /* Force 4 columns on desktop */
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.why-feature-card {
+  text-align: center;
+  padding: 1.5rem;
+  /* Reduced padding for compactness */
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.why-feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent-blue);
+}
+
+.why-feature-img {
+  width: 50px;
+  /* Smaller icons */
+  height: 50px;
+  margin-bottom: 1rem;
+  object-fit: contain;
+}
+
+.why-feature-title {
+  font-family: var(--font-primary);
+  font-size: var(--font-base);
+  /* Smaller title */
+  font-weight: var(--weight-bold);
+  color: var(--color-primary-blue);
+  margin-bottom: 0.5rem;
+}
+
+.why-feature-desc {
+  font-size: var(--font-xs);
+  /* Smaller text */
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Mobile: Compact Horizontal List */
+@media (max-width: 768px) {
+  .why-us-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .why-feature-card {
+    flex-direction: row;
+    /* Horizontal layout for mobile */
+    text-align: left;
+    padding: 1rem;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .why-feature-img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+  }
+
+  .why-feature-title {
+    font-size: var(--font-sm);
+    margin-bottom: 0.25rem;
+  }
+
+  .why-feature-desc {
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+}

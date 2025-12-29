@@ -29,8 +29,12 @@ const modalTitle = document.getElementById('modalTitle');
 const testimonialModalTitle = document.getElementById('testimonialModalTitle');
 const productsTableContainer = document.getElementById('productsTableContainer');
 const testimonialsTableContainer = document.getElementById('testimonialsTableContainer');
-const viewProductsBtn = document.getElementById('viewProductsBtn');
-const viewTestimonialsBtn = document.getElementById('viewTestimonialsBtn');
+const viewWhyUsBtn = document.getElementById('viewWhyUsBtn');
+const whyUsTableContainer = document.getElementById('whyUsTableContainer');
+const whyUsFeatureList = document.getElementById('whyUsFeatureList');
+const featureModal = document.getElementById('featureModal');
+const featureForm = document.getElementById('featureForm');
+const featureModalTitle = document.getElementById('featureModalTitle');
 const addBtnText = document.getElementById('addBtnText');
 
 // State
@@ -157,10 +161,11 @@ window.switchView = (view) => {
     if (productList) productList.style.display = 'none';
     testimonialsTableContainer.style.display = 'none';
     categoriesTableContainer.style.display = 'none';
+    whyUsTableContainer.style.display = 'none';
     settingsContainer.style.display = 'none';
 
     // Reset buttons
-    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewSettingsBtn].forEach(btn => {
+    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSettingsBtn].forEach(btn => {
         if (btn) {
             btn.classList.remove('active');
             btn.style.background = 'transparent';
@@ -204,6 +209,14 @@ window.switchView = (view) => {
         addBtnText.textContent = 'Add Category';
         document.getElementById('addBtn').style.display = 'inline-block';
         fetchCategories();
+    } else if (view === 'why-us') {
+        whyUsTableContainer.style.display = 'block';
+        activeStyle(viewWhyUsBtn);
+        const filterRow = document.getElementById('productFilterRow');
+        if (filterRow) filterRow.style.display = 'none';
+        addBtnText.textContent = 'Add Feature';
+        document.getElementById('addBtn').style.display = 'inline-block';
+        fetchWhyUsFeatures();
     } else if (view === 'settings') {
         settingsContainer.style.display = 'block';
         activeStyle(viewSettingsBtn);
@@ -219,6 +232,7 @@ window.handleAddClick = () => {
     if (currentView === 'products') openProductModal();
     else if (currentView === 'testimonials') openTestimonialModal();
     else if (currentView === 'categories') openCategoryModal();
+    else if (currentView === 'why-us') showWhyUsModal();
 }
 
 // ----------------------------------------------------
@@ -439,9 +453,9 @@ async function fetchSettings() {
             document.getElementById('setQuickHeroBg').value = data.quick_hero_image_url || '';
             document.getElementById('setShowTicker').checked = data.show_product_ticker !== false; // Default true
             document.getElementById('setShowQuickLayout').checked = data.show_quick_layout || false; // Default false
-            document.getElementById('setShowQuickLayout').checked = data.show_quick_layout || false; // Default false
             document.getElementById('setShowMrp').checked = data.show_mrp !== false; // Default true
             document.getElementById('setSalesMode').checked = data.sales_mode_enabled || false; // Default false
+            document.getElementById('setShowWhyUs').checked = data.show_why_us || false;
         }
     } catch (e) {
         console.error('Settings fetch error:', e);
@@ -486,10 +500,9 @@ if (siteSettingsForm) {
 
             show_product_ticker: document.getElementById('setShowTicker').checked,
             show_quick_layout: document.getElementById('setShowQuickLayout').checked,
-            show_product_ticker: document.getElementById('setShowTicker').checked,
-            show_quick_layout: document.getElementById('setShowQuickLayout').checked,
             show_mrp: document.getElementById('setShowMrp').checked,
-            sales_mode_enabled: document.getElementById('setSalesMode').checked
+            sales_mode_enabled: document.getElementById('setSalesMode').checked,
+            show_why_us: document.getElementById('setShowWhyUs').checked
         };
 
         try {
@@ -1446,3 +1459,106 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+// ----------------------------------------------------
+// WHY US FEATURES MANAGEMENT
+// ----------------------------------------------------
+
+async function fetchWhyUsFeatures() {
+    whyUsFeatureList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">Loading...</td></tr>';
+    try {
+        const { data, error } = await supabase.from('why_us_features').select('*').order('order_index', { ascending: true });
+        if (error) throw error;
+        renderWhyUsFeatures(data);
+    } catch (e) {
+        console.error(e);
+        whyUsFeatureList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${e.message}</td></tr>`;
+    }
+}
+
+function renderWhyUsFeatures(features) {
+    if (!features || features.length === 0) {
+        whyUsFeatureList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">No features found.</td></tr>';
+        return;
+    }
+
+    whyUsFeatureList.innerHTML = features.map(f => `
+        <tr>
+            <td style="padding: 15px;"><img src="${f.image_url || PLACEHOLDER_IMAGE}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
+            <td style="padding: 15px; font-weight: 600;">${f.title}</td>
+            <td style="padding: 15px; font-size: 0.9rem;">${f.description || ''}</td>
+            <td style="padding: 15px;">${f.order_index}</td>
+            <td style="padding: 15px; text-align: right;">
+                <button onclick="editWhyUsFeature('${f.id}')" class="btn-sm" style="background: var(--bg-secondary); border: 1px solid var(--border-medium); margin-right: 5px;"><i class="fas fa-edit"></i></button>
+                <button onclick="deleteWhyUsFeature('${f.id}')" class="btn-sm" style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+window.showWhyUsModal = (feature = null) => {
+    featureModal.style.display = 'flex';
+    if (feature) {
+        featureModalTitle.textContent = 'Edit Feature';
+        document.getElementById('featureId').value = feature.id;
+        document.getElementById('featureTitle').value = feature.title;
+        document.getElementById('featureDescription').value = feature.description || '';
+        document.getElementById('featureImageUrl').value = feature.image_url || '';
+        document.getElementById('featureOrder').value = feature.order_index;
+    } else {
+        featureModalTitle.textContent = 'Add Feature';
+        featureForm.reset();
+        document.getElementById('featureId').value = '';
+    }
+};
+
+window.closeFeatureModal = () => {
+    featureModal.style.display = 'none';
+};
+
+window.editWhyUsFeature = async (id) => {
+    try {
+        const { data, error } = await supabase.from('why_us_features').select('*').eq('id', id).single();
+        if (error) throw error;
+        showWhyUsModal(data);
+    } catch (e) {
+        alert('Error fetching feature: ' + e.message);
+    }
+};
+
+window.deleteWhyUsFeature = async (id) => {
+    if (!confirm('Are you sure you want to delete this feature?')) return;
+    try {
+        const { error } = await supabase.from('why_us_features').delete().eq('id', id);
+        if (error) throw error;
+        fetchWhyUsFeatures();
+    } catch (e) {
+        alert('Error deleting feature: ' + e.message);
+    }
+};
+
+if (featureForm) {
+    featureForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('featureId').value;
+        const featureData = {
+            title: document.getElementById('featureTitle').value,
+            description: document.getElementById('featureDescription').value,
+            image_url: document.getElementById('featureImageUrl').value,
+            order_index: parseInt(document.getElementById('featureOrder').value) || 0
+        };
+
+        try {
+            if (id) {
+                const { error } = await supabase.from('why_us_features').update(featureData).eq('id', id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('why_us_features').insert([featureData]);
+                if (error) throw error;
+            }
+            closeFeatureModal();
+            fetchWhyUsFeatures();
+        } catch (e) {
+            alert('Error saving feature: ' + e.message);
+        }
+    });
+}
