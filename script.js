@@ -405,6 +405,9 @@ function initializeProductShowcaseControls() {
     // Initialize showcase mode management
     initializeShowcaseMode();
 
+    // Initialize carousel controls (arrows, dots, drag-to-scroll)
+    initializeCarouselControls();
+
     // Pause animation on mouse hover for better desktop UX
     productScroll.addEventListener('mouseenter', () => {
         productScroll.style.animationPlayState = 'paused';
@@ -655,6 +658,194 @@ function initializeShowcaseMode() {
 
         lastScrollLeft = currentScrollLeft;
     }, { passive: true });
+}
+
+/*
+========================================
+CAROUSEL NAVIGATION CONTROLS
+Navigation arrows, progress dots, and drag-to-scroll
+========================================
+*/
+
+/**
+ * Initializes carousel navigation arrows (prev/next buttons)
+ */
+function initializeCarouselArrows() {
+    const scrollContainer = document.querySelector('.product-scroll-wrapper');
+    const prevBtn = document.getElementById('carouselPrev');
+    const nextBtn = document.getElementById('carouselNext');
+
+    if (!scrollContainer || !prevBtn || !nextBtn) return;
+
+    // Calculate scroll amount (80% of visible width)
+    const getScrollAmount = () => {
+        return scrollContainer.clientWidth * 0.8;
+    };
+
+    prevBtn.addEventListener('click', () => {
+        scrollContainer.scrollBy({
+            left: -getScrollAmount(),
+            behavior: 'smooth'
+        });
+    });
+
+    nextBtn.addEventListener('click', () => {
+        scrollContainer.scrollBy({
+            left: getScrollAmount(),
+            behavior: 'smooth'
+        });
+    });
+
+    // Update arrow visibility based on scroll position
+    const updateArrowState = () => {
+        const isAtStart = scrollContainer.scrollLeft <= 10;
+        const isAtEnd = scrollContainer.scrollLeft >=
+            scrollContainer.scrollWidth - scrollContainer.clientWidth - 10;
+
+        prevBtn.classList.toggle('disabled', isAtStart);
+        nextBtn.classList.toggle('disabled', isAtEnd);
+    };
+
+    scrollContainer.addEventListener('scroll', updateArrowState, { passive: true });
+    updateArrowState(); // Initial state
+}
+
+/**
+ * Initializes progress indicator dots
+ */
+function initializeCarouselProgress() {
+    const scrollContainer = document.querySelector('.product-scroll-wrapper');
+    const progressContainer = document.getElementById('carouselProgress');
+
+    if (!scrollContainer || !progressContainer) return;
+
+    // Wait for products to load, then create dots
+    const createDots = () => {
+        // Find direct children of product-scroll (the actual cards)
+        const productScroll = scrollContainer.querySelector('.product-scroll, #productScroll');
+        if (!productScroll) return;
+        const cards = productScroll.children;
+        if (cards.length === 0) return;
+
+        // Calculate visible cards and pages
+        const containerWidth = scrollContainer.clientWidth;
+        const cardWidth = cards[0]?.offsetWidth || 200;
+        const gap = 20;
+        const cardsPerPage = Math.floor(containerWidth / (cardWidth + gap)) || 1;
+        const totalPages = Math.ceil(cards.length / cardsPerPage);
+
+        // Create dots (max 10 to avoid clutter)
+        const dotCount = Math.min(totalPages, 10);
+        progressContainer.innerHTML = '';
+
+        for (let i = 0; i < dotCount; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'progress-dot';
+            dot.setAttribute('aria-label', `Go to page ${i + 1}`);
+            dot.dataset.page = i;
+
+            dot.addEventListener('click', () => {
+                const scrollTo = (scrollContainer.scrollWidth - containerWidth) * (i / (dotCount - 1));
+                scrollContainer.scrollTo({
+                    left: scrollTo,
+                    behavior: 'smooth'
+                });
+            });
+
+            progressContainer.appendChild(dot);
+        }
+
+        updateActiveDot();
+    };
+
+    // Update active dot based on scroll position
+    const updateActiveDot = () => {
+        const dots = progressContainer.querySelectorAll('.progress-dot');
+        if (dots.length === 0) return;
+
+        const scrollPercent = scrollContainer.scrollLeft /
+            Math.max(1, scrollContainer.scrollWidth - scrollContainer.clientWidth);
+        const activeIndex = Math.round(scrollPercent * (dots.length - 1));
+
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === activeIndex);
+        });
+    };
+
+    scrollContainer.addEventListener('scroll', updateActiveDot, { passive: true });
+
+    // Create dots when products are loaded
+    setTimeout(createDots, 500); // Delay to ensure products are rendered
+
+    // Re-create dots on window resize
+    window.addEventListener('resize', debounce(createDots, 250));
+}
+
+/**
+ * Initializes drag-to-scroll functionality for desktop
+ */
+function initializeCarouselDrag() {
+    const scrollContainer = document.querySelector('.product-scroll-wrapper');
+    const productScroll = document.getElementById('productScroll');
+
+    if (!scrollContainer) return;
+
+    let isDragging = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    // Mouse down - start drag
+    scrollContainer.addEventListener('mousedown', (e) => {
+        // Ignore if clicking on a link or button
+        if (e.target.closest('a, button')) return;
+
+        isDragging = true;
+        scrollContainer.classList.add('is-dragging');
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeft = scrollContainer.scrollLeft;
+
+        // Pause animation
+        if (productScroll) {
+            productScroll.style.animationPlayState = 'paused';
+        }
+    });
+
+    // Mouse move - drag scroll
+    scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 1.5; // Multiplier for drag speed
+        scrollContainer.scrollLeft = scrollLeft - walk;
+    });
+
+    // Mouse up - end drag
+    const endDrag = () => {
+        if (!isDragging) return;
+
+        isDragging = false;
+        scrollContainer.classList.remove('is-dragging');
+
+        // Resume animation after delay
+        setTimeout(() => {
+            if (productScroll && !scrollContainer.matches(':hover')) {
+                productScroll.style.animationPlayState = 'running';
+            }
+        }, 2000);
+    };
+
+    scrollContainer.addEventListener('mouseup', endDrag);
+    scrollContainer.addEventListener('mouseleave', endDrag);
+}
+
+/**
+ * Master function to initialize all carousel controls
+ */
+function initializeCarouselControls() {
+    initializeCarouselArrows();
+    initializeCarouselProgress();
+    // Drag-to-scroll removed per user request
 }
 
 /*
