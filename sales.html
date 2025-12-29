@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telugu Delicacies - Shop</title>
+    <title>Telugu Delicacies - Shop (Updated)</title>
     <!-- Core Assets -->
     <link rel="stylesheet" href="styles.css">
     <link
@@ -15,7 +15,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="sales-page.css">
+    <link rel="stylesheet" href="sales-page.css?v=2.0">
 </head>
 
 <body>
@@ -32,7 +32,8 @@
             <span class="brand-name">Telugu Delicacies</span>
         </a>
         <nav>
-            <i class="fas fa-share-alt"></i> <span class="btn-text">Catalogue</span>
+            <button class="nav-btn share-catalogue-btn" id="shareCatalogueBtn" onclick="window.shareCatalogue()">
+                <i class="fas fa-share-alt"></i> <span class="btn-text">Catalogue</span>
             </button>
             <button class="nav-btn cart-btn" id="cartBtn" onclick="window.toggleCartDrawer()">
                 <i class="fas fa-shopping-cart"></i>
@@ -898,18 +899,29 @@
         window.toggleCartDrawer = function () {
             const drawer = document.getElementById('cartDrawer');
             const overlay = document.getElementById('cartOverlay');
-            drawer.classList.toggle('active');
-            overlay.classList.toggle('active');
+            if (drawer && overlay) {
+                drawer.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
         };
 
         window.updateDetailQty = function (delta) {
-            const newQty = state.detailQty + delta;
+            const newQty = (state.detailQty || 1) + delta;
             if (newQty >= 1) {
                 state.detailQty = newQty;
                 const el = document.getElementById('detailQty');
                 if (el) el.innerText = state.detailQty;
             }
         };
+
+        // Helper for cart animation
+        function animateCartBtn() {
+            const btn = document.getElementById('cartBtn');
+            if (btn) {
+                btn.classList.add('cart-pop');
+                setTimeout(() => btn.classList.remove('cart-pop'), 400);
+            }
+        }
 
         window.addToCart = function (product, variant, qty) {
             const existingIdx = state.cart.findIndex(item =>
@@ -933,6 +945,7 @@
 
             state.cart = [...state.cart];
             window.saveCart();
+            animateCartBtn();
 
             // Open drawer
             const drawer = document.getElementById('cartDrawer');
