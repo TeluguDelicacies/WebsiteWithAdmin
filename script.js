@@ -1672,7 +1672,7 @@ function renderProducts(products, categories) {
                     if (product) {
                         // SALES MODE CHECK
                         if (window.currentSiteSettings?.sales_mode_enabled) {
-                            window.location.href = `sales.html?id=${product.id}`;
+                            window.location.href = `/sales/${product.slug || product.id}`;
                             return;
                         }
 
@@ -2196,9 +2196,9 @@ function renderQuickProductsHTML(products, showMrp) {
 // ----------------------------------------------------
 
 window.openQuickProductModal = function (productId) {
-    // SALES MODE CHECK
     if (window.currentSiteSettings?.sales_mode_enabled) {
-        window.location.href = `sales.html?id=${productId}`;
+        const product = (window.allProductsCache || []).find(p => String(p.id) === String(productId));
+        window.location.href = `/sales/${product?.slug || productId}`;
         return;
     }
 

@@ -95,6 +95,18 @@
         }
 
         function handleRouting() {
+            // Support clean URLs: /sales/product-slug
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
+            const lastPart = pathParts[pathParts.length - 1];
+
+            // Check if we're on a product page (path has slug after /sales/)
+            if (pathParts.length >= 2 && pathParts[pathParts.length - 2] === 'sales' && lastPart !== 'sales.html') {
+                // Clean URL: /sales/product-slug
+                renderProductView(lastPart);
+                return;
+            }
+
+            // Fallback: Support legacy query params for backwards compatibility
             const params = new URLSearchParams(window.location.search);
             const productId = params.get('id');
             const catSlug = params.get('category');
@@ -134,10 +146,10 @@
                             <p class="card-desc">${cat.description || ''}</p>
                             
                             <div class="dropdown-wrapper">
-                                <select class="product-select" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-medium);" onchange="if(this.value) window.location.href='sales.html?id='+this.value">
+                                <select class="product-select" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-medium);" onchange="if(this.value) window.location.href='/sales/'+this.value">
                                     <option value="" disabled selected>Select Product</option>
                                     ${catProducts.map(p => `
-                                        <option value="${p.id}">${p.product_name} ${p.product_name_telugu ? '(' + p.product_name_telugu + ')' : ''}</option>
+                                        <option value="${p.slug || p.id}">${p.product_name} ${p.product_name_telugu ? '(' + p.product_name_telugu + ')' : ''}</option>
                                     `).join('')}
                                 </select>
                             </div>
@@ -209,7 +221,7 @@
                 }
 
                 return `
-                            <div class="sales-product-card" onclick="window.location.href='sales.html?id=${p.id}'">
+                            <div class="sales-product-card" onclick="window.location.href='/sales/${p.slug || p.id}'">
                                 <div class="sp-img-wrapper">
                                     <img src="${p.showcase_image || state.placeholder}" alt="${p.product_name}" onerror="this.src='${state.placeholder}'">
                                 </div>
@@ -230,8 +242,12 @@
         }
 
         // --- View: Product ---
-        async function renderProductView(id) {
-            const product = state.allProducts.find(p => p.id == id);
+        async function renderProductView(slugOrId) {
+            // Find product by slug first, then by ID (backwards compatibility)
+            let product = state.allProducts.find(p => p.slug === slugOrId);
+            if (!product) {
+                product = state.allProducts.find(p => p.id == slugOrId);
+            }
             if (!product) {
                 document.getElementById('app').innerHTML = "<h2>Product Not Found</h2>";
                 return;
@@ -263,8 +279,8 @@
                         
                         <!-- Navigation (Right on Desktop, Hidden on Mobile) -->
                         <div class="nav-group desktop-only-nav">
-                            ${prev ? `<a href="sales.html?id=${prev.id}" class="nav-btn-pill prev" title="${prev.product_name}"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
-                            ${next ? `<a href="sales.html?id=${next.id}" class="nav-btn-pill next" title="${next.product_name}"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
+                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" title="${prev.product_name}"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
+                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" title="${next.product_name}"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
                         </div>
                     </div>
 
@@ -272,8 +288,8 @@
                     <article class="main-product-area">
                         <!-- Navigation (Mobile Only - Top) -->
                         <div class="nav-group mobile-only-nav" style="width: 100%; justify-content: space-between; padding: 10px 15px 5px 15px; margin-top: 0;">
-                            ${prev ? `<a href="sales.html?id=${prev.id}" class="nav-btn-pill prev" title="${prev.product_name}" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
-                            ${next ? `<a href="sales.html?id=${next.id}" class="nav-btn-pill next" title="${next.product_name}" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
+                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" title="${prev.product_name}" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
+                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" title="${next.product_name}" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
                         </div>
 
                         <div class="gallery-wrapper">
@@ -616,7 +632,7 @@
             if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.
         </p>`;
             return items.map(item => `
-        <div class="sim-item" onclick="window.location.href='sales.html?id=${item.id}'">
+        <div class="sim-item" onclick="window.location.href='/sales/${item.slug || item.id}'">
             <img src="${item.showcase_image || state.placeholder}" class="sim-img"
                 onerror="this.src='${state.placeholder}'">
             <div class="sim-info">
@@ -629,8 +645,8 @@
 
         function updateHistory(p) {
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }
-            hist = hist.filter(x => x.id !== p.id);
-            hist.unshift({ id: p.id, name: p.product_name, img: p.showcase_image });
+            hist = hist.filter(x => x.slug !== p.slug && x.id !== p.id);
+            hist.unshift({ id: p.id, slug: p.slug, name: p.product_name, img: p.showcase_image });
             localStorage.setItem('td_history', JSON.stringify(hist.slice(0, 8)));
         }
 
@@ -639,7 +655,7 @@
             if (!hist.length) return `<p style="grid-column:1/-1; color:var(--text-muted)">Your viewing history will appear
             here.</p>`;
             return hist.slice(0, 5).map(h => `
-        <div class="sim-item" onclick="window.location.href='sales.html?id=${h.id}'"
+        <div class="sim-item" onclick="window.location.href='/sales/${h.slug || h.id}'"
             style="background:var(--bg-primary); border:1px solid var(--border-light); display:flex; align-items:center; gap:10px; padding:5px;">
             <img src="${h.img || state.placeholder}" class="sim-img" style="width:50px; height:50px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.src='${state.placeholder}'">
             <div class="sim-info" style="min-width:0;">

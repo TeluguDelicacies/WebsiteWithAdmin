@@ -1,6 +1,16 @@
 
 import { supabase } from './lib/supabase.js';
 
+// Helper: Generate URL-friendly slug from product name
+function generateSlug(name) {
+    return name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-')          // Replace spaces with hyphens
+        .replace(/-+/g, '-');          // Remove consecutive hyphens
+}
+
 // DOM Elements
 const loginSection = document.getElementById('loginSection');
 const dashboardSection = document.getElementById('dashboardSection');
@@ -1179,8 +1189,12 @@ productForm.addEventListener('submit', async (e) => {
     const topMrp = firstVariant.mrp;
     const topNetWeight = firstVariant.quantity;
 
+    // Generate slug from product name
+    const productName = document.getElementById('productName').value;
+    const productSlug = generateSlug(productName);
+
     const productData = {
-        product_name: document.getElementById('productName').value,
+        product_name: productName,
         product_name_telugu: document.getElementById('productNameTelugu').value,
         product_category: document.getElementById('productCategory').value,
         product_tagline: document.getElementById('productTagline').value,
@@ -1206,7 +1220,8 @@ productForm.addEventListener('submit', async (e) => {
         showcase_image: document.getElementById('showcaseImage').value,
         is_trending: document.getElementById('productTrending').checked,
         // info_image: document.getElementById('showcaseImage').value, // Use same image for both
-        quantity_variants: variants
+        quantity_variants: variants,
+        slug: productSlug // Auto-generated SEO-friendly slug
     };
 
     try {
