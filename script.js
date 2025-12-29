@@ -380,17 +380,30 @@ Interactive controls for the product ticker
  * Initializes hover and touch controls for the product showcase
  * Pauses animation on interaction for better user experience
  * Now works seamlessly with rem-based responsive scaling
+ * FIXED: Reliable auto-scroll start using IntersectionObserver
  */
 function initializeProductShowcaseControls() {
     const productScroll = document.getElementById('productScroll');
     const scrollContainer = productScroll?.parentElement;
     if (!productScroll) return;
 
+    // Force animation restart to ensure it starts reliably
+    forceAnimationRestart(productScroll);
+
+    // Use IntersectionObserver to start animation when visible
+    const visibilityObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Element is visible - ensure animation is running
+                forceAnimationRestart(productScroll);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    visibilityObserver.observe(scrollContainer);
+
     // Initialize showcase mode management
     initializeShowcaseMode();
-
-    // Ensure ticker animation is running by default
-    productScroll.style.animationPlayState = 'running';
 
     // Pause animation on mouse hover for better desktop UX
     productScroll.addEventListener('mouseenter', () => {
@@ -402,7 +415,7 @@ function initializeProductShowcaseControls() {
         productScroll.style.animationPlayState = 'running';
     });
 
-    // Touch interaction handling - only pause when user actively interacts
+    // Touch interaction handling - only pause when user actively interacts horizontally
     let isUserInteracting = false;
     let interactionTimeout;
 
@@ -425,11 +438,6 @@ function initializeProductShowcaseControls() {
             isUserInteracting = false;
         }, 2000); // Resume ticker after 2 seconds of inactivity
     };
-
-    // Touch events - pause ticker during active touch interaction
-    scrollContainer.addEventListener('touchstart', handleInteractionStart, { passive: true });
-    scrollContainer.addEventListener('touchend', handleInteractionEnd, { passive: true });
-    scrollContainer.addEventListener('touchcancel', handleInteractionEnd, { passive: true });
 
     // Only pause ticker if user is actively scrolling (not just from ticker animation)
     let lastScrollLeft = scrollContainer.scrollLeft;
@@ -475,6 +483,19 @@ function initializeProductShowcaseControls() {
     });
 }
 
+/**
+ * Forces animation restart by triggering a reflow
+ * This ensures the animation starts reliably even if CSS wasn't ready
+ */
+function forceAnimationRestart(element) {
+    const currentAnimation = getComputedStyle(element).animation;
+    element.style.animation = 'none';
+    // Trigger reflow
+    void element.offsetHeight;
+    element.style.animation = '';
+    element.style.animationPlayState = 'running';
+}
+
 /*
 ========================================
 SHOWCASE MODE MANAGEMENT
@@ -485,6 +506,7 @@ Intelligent automatic/manual mode switching
 /**
  * Initializes the intelligent showcase mode system
  * Handles automatic/manual mode transitions
+ * FIXED: Direction-aware touch detection - allows vertical page scrolling
  */
 function initializeShowcaseMode() {
     const productScroll = document.getElementById('productScroll');
@@ -495,11 +517,17 @@ function initializeShowcaseMode() {
     let autoReturnTimeout;
     let hoverTimeout;
 
+    // Touch tracking for direction detection
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchDecided = false; // Whether we've decided if this is horizontal or vertical scroll
+
     // Configuration
     const config = {
         autoReturnDelay: 3000,
         hoverActivationDelay: 500,
-        transitionDuration: 300
+        transitionDuration: 300,
+        swipeThreshold: 10 // Minimum pixels to determine swipe direction
     };
 
     /**
@@ -516,8 +544,6 @@ function initializeShowcaseMode() {
         if (autoReturnTimeout) {
             clearTimeout(autoReturnTimeout);
         }
-
-        console.log('Manual mode activated');
     }
 
     /**
@@ -529,8 +555,6 @@ function initializeShowcaseMode() {
         isManualMode = false;
         productScroll.style.animationPlayState = 'running';
         scrollContainer.style.cursor = '';
-
-        console.log('Auto mode activated');
     }
 
     /**
@@ -560,13 +584,46 @@ function initializeShowcaseMode() {
         setupAutoReturn();
     });
 
-    // Touch intent detection (mobile)
-    scrollContainer.addEventListener('touchstart', () => {
-        activateManualMode();
+    // Direction-aware touch detection (mobile)
+    // Only activate manual mode for horizontal swipes, allowing vertical page scroll
+    scrollContainer.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchDecided = false;
+        }
+    }, { passive: true });
+
+    scrollContainer.addEventListener('touchmove', (e) => {
+        if (touchDecided || e.touches.length !== 1) return;
+
+        const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+        const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+
+        // Only decide direction once we've moved enough
+        if (deltaX > config.swipeThreshold || deltaY > config.swipeThreshold) {
+            touchDecided = true;
+
+            // If horizontal movement is greater, this is a carousel swipe
+            if (deltaX > deltaY) {
+                activateManualMode();
+            }
+            // If vertical, do nothing - let page scroll naturally
+        }
     }, { passive: true });
 
     scrollContainer.addEventListener('touchend', () => {
-        setupAutoReturn();
+        if (isManualMode) {
+            setupAutoReturn();
+        }
+        touchDecided = false;
+    }, { passive: true });
+
+    scrollContainer.addEventListener('touchcancel', () => {
+        if (isManualMode) {
+            setupAutoReturn();
+        }
+        touchDecided = false;
     }, { passive: true });
 
     // Scroll wheel intent detection
