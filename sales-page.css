@@ -589,17 +589,17 @@ body {
     }
 }
 
-/* Disclaimer text overlay on product image - Marquee Style */
+/* Disclaimer text overlay on product image - Scrolling Marquee */
 .product-disclaimer-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 24px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.85) 100%);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-    font-size: 0.65rem;
+    height: 22px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0.9) 100%);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    font-size: 0.6rem;
     color: var(--text-muted);
     font-style: italic;
     z-index: 5;
@@ -607,29 +607,23 @@ body {
     overflow: hidden;
     display: flex;
     align-items: center;
-}
-
-.product-disclaimer-overlay::before {
-    content: attr(data-text);
-    display: inline-block;
     white-space: nowrap;
-    padding-left: 100%;
-    animation: scrollDisclaimer 15s linear infinite;
-}
-
-/* Pause on hover for readability */
-.product-disclaimer-overlay:hover::before {
-    animation-play-state: paused;
+    animation: scrollDisclaimer 20s linear infinite;
 }
 
 @keyframes scrollDisclaimer {
     0% {
-        transform: translateX(0);
+        transform: translateX(100%);
     }
 
     100% {
         transform: translateX(-100%);
     }
+}
+
+/* Pause on hover for readability */
+.product-disclaimer-overlay:hover {
+    animation-play-state: paused;
 }
 
 /* Sidebar */

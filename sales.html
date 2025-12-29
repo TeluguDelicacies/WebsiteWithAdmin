@@ -304,20 +304,17 @@
 
                         <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
-                                ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
+                                        ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
-                                        <div class="product-disclaimer-overlay" data-text="All images are representative, change in colour expected due to variability in ingredients"></div>
+                                        <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                     </div>
                                     <!-- Back: Description -->
                                     <div class="gallery-back">
                                         <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
                                         <p>${product.product_description || 'No description available.'}</p>
-                                        <button onclick="toggleFlip()" class="action-btn-pill">
-                                            <i class="fas fa-undo"></i> Back to Image
-                                        </button>
                                     </div>
                                 </div>
                             </div>
