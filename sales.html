@@ -909,18 +909,11 @@
             const input = document.getElementById('detailQty');
             if (!input) return;
             const currentVal = parseInt(input.value) || 1;
-            const newQty = currentVal + delta;
+            let newQty = currentVal + delta;
 
-            // Get max stock for current selection
             let maxStock = 999;
             if (state.currentProduct) {
-                let variants = [];
-                try {
-                    variants = typeof state.currentProduct.quantity_variants === 'string' ?
-                        JSON.parse(state.currentProduct.quantity_variants) :
-                        (state.currentProduct.quantity_variants || []);
-                } catch (e) { }
-
+                const variants = state.currentProduct.quantity_variants || [];
                 if (variants.length > 0) {
                     const select = document.getElementById('variantSelect');
                     const v = variants[select ? select.value : 0];
@@ -930,42 +923,40 @@
                 }
             }
 
-            if (newQty >= 1 && newQty <= maxStock) {
-                state.detailQty = newQty;
-                input.value = state.detailQty;
-            } else if (newQty > maxStock) {
+            if (newQty < 1) newQty = 1;
+            if (newQty > maxStock) {
                 if (maxStock <= 0) {
                     window.showToast('Sorry, this item is Out of Stock', 'error');
                 } else {
-                    window.showToast(`Only ${maxStock} units available in stock.`, 'error');
+                    window.showToast(`Max ${maxStock} units available`, 'error');
                 }
+                newQty = Math.max(1, maxStock);
             }
+
+            state.detailQty = newQty;
+            input.value = state.detailQty;
         };
 
         window.validateDetailQty = function (input) {
-            let val = parseInt(input.value) || 1;
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 1) val = 1;
 
             let maxStock = 999;
             if (state.currentProduct) {
-                let variants = [];
-                try {
-                    variants = typeof state.currentProduct.quantity_variants === 'string' ?
-                        JSON.parse(state.currentProduct.quantity_variants) :
-                        (state.currentProduct.quantity_variants || []);
-                } catch (e) { }
-
+                const variants = state.currentProduct.quantity_variants || [];
                 if (variants.length > 0) {
                     const select = document.getElementById('variantSelect');
                     const v = variants[select ? select.value : 0];
                     if (v && v.stock !== undefined) maxStock = v.stock;
+                } else if (state.currentProduct.total_stock !== undefined) {
+                    maxStock = state.currentProduct.total_stock;
                 }
             }
 
-            if (val < 1) val = 1;
             if (val > maxStock) {
                 if (maxStock <= 0) {
                     window.showToast('Out of Stock', 'error');
-                    val = 1; // reset or keep as is? User wants "Out of Stock". Let's show 1 but toast error.
+                    val = 1;
                 } else {
                     window.showToast(`Max ${maxStock} units available`, 'error');
                     val = maxStock;
@@ -985,10 +976,23 @@
         }
 
         window.addToCart = function (product, variant, qty) {
+            // Hardened Validation: Check existing cart qty + new qty against stock
             const existingIdx = state.cart.findIndex(item =>
                 item.id === product.id &&
                 JSON.stringify(item.variant) === JSON.stringify(variant)
             );
+
+            const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
+            const maxStock = variant ? (variant.stock || 0) : (product.total_stock || 0);
+
+            if (currentCartQty + qty > maxStock) {
+                if (maxStock <= 0) {
+                    window.showToast('Out of Stock', 'error');
+                } else {
+                    window.showToast(`Cannot add more. Max stock is ${maxStock}. (You have ${currentCartQty} in cart)`, 'error');
+                }
+                return;
+            }
 
             if (existingIdx > -1) {
                 state.cart[existingIdx].qty += qty;
@@ -997,7 +1001,7 @@
                     id: product.id,
                     name: product.product_name,
                     telugu_name: product.product_name_telugu,
-                    price: variant ? variant.price : product.price,
+                    price: variant ? variant.price : product.mrp,
                     image: product.showcase_image,
                     variant: variant,
                     qty: qty
@@ -1035,28 +1039,32 @@
 
         window.updateCartItemQty = function (index, deltaOrVal, isDirect = false) {
             const item = state.cart[index];
+            if (!item) return;
             let newQty;
 
             if (isDirect) {
-                newQty = parseInt(deltaOrVal) || 1;
+                newQty = parseInt(deltaOrVal);
+                if (isNaN(newQty) || newQty < 1) newQty = 1;
             } else {
                 newQty = item.qty + deltaOrVal;
             }
 
-            // Check stock if available
-            const maxStock = (item.variant && item.variant.stock !== undefined) ? item.variant.stock : 999;
+            // Check stock
+            const maxStock = item.variant ? (item.variant.stock || 0) : 999;
 
             if (newQty <= 0) {
                 if (confirm('Remove item from cart?')) {
                     state.cart.splice(index, 1);
+                    window.saveCart();
                 }
             } else if (newQty > maxStock) {
-                alert(`Only ${maxStock} units available.`);
+                window.showToast(`Max stock reached (${maxStock})`, 'error');
                 item.qty = maxStock;
+                window.saveCart();
             } else {
                 item.qty = newQty;
+                window.saveCart();
             }
-            window.saveCart();
         };
 
         window.removeItem = function (index) {

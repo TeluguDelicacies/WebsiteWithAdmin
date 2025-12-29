@@ -661,7 +661,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                 <div class="mini-variant">
                     <div class="v-qty">${v.quantity}</div>
                     <div class="v-price">₹${v.price}</div>
-                    ${v.total_sold ? `<div class="v-sold" title="Total Sold"><i class="fas fa-shopping-bag"></i> ${v.total_sold}</div>` : ''}
+                    ${(v.global_sold || v.total_sold) ? `<div class="v-sold" title="Lifetime Global Sales"><i class="fas fa-shopping-bag"></i> ${v.global_sold || v.total_sold}</div>` : ''}
                 </div>
             `).join('');
 
@@ -1054,33 +1054,37 @@ async function loadTestimonialData(id) {
 window.addVariantRow = (data = null) => {
     const div = document.createElement('div');
     div.className = 'variant-row';
-    div.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
+    div.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
 
     div.innerHTML = `
         <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Qty/Size</label>
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Qty/Size</label>
             <input type="text" class="variant-qty form-input" placeholder="e.g. 250g" value="${data ? data.quantity : ''}" required style="padding: 10px;">
         </div>
         <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">MRP (₹)</label>
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">MRP (₹)</label>
             <input type="number" class="variant-mrp form-input" placeholder="MRP" value="${data ? data.mrp || '' : ''}" required style="padding: 10px;">
         </div>
         <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Price (₹)</label>
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Price (₹)</label>
             <input type="number" class="variant-price form-input" placeholder="Price" value="${data ? data.price : ''}" required style="padding: 10px;">
         </div>
         <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">In Stock</label>
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Stock</label>
             <input type="number" class="variant-stock form-input" placeholder="Qty" value="${data ? data.stock || 0 : 0}" required style="padding: 10px;">
         </div>
         <div>
-            <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Total Sold (Global)</label>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <input type="number" class="variant-sold form-input" value="${data ? data.total_sold || 0 : 0}" readonly style="padding: 10px; background: #f8fafc; border-color: var(--border-light); color: #0f172a; font-weight: bold; width: 60px;">
-                <button type="button" class="nav-btn" onclick="window.resetVariantSold(this)" style="padding: 8px; font-size: 0.8rem; min-width: auto; height: 40px; color: var(--color-primary-blue);" title="Reset Sales">
-                    <i class="fas fa-sync-alt"></i> Reset
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Batch</label>
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <input type="number" class="variant-sold-batch form-input" value="${data ? data.current_sold || data.total_sold || 0 : 0}" readonly style="padding: 10px; background: #f8fafc; font-weight: bold; width: 45px;">
+                <button type="button" class="nav-btn" onclick="window.resetVariantSold(this)" style="padding: 8px; font-size: 0.75rem; min-width: auto; height: 40px; color: var(--color-primary-blue);" title="Reset Batch Sales">
+                    <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
+        </div>
+        <div>
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Global</label>
+            <input type="number" class="variant-sold-global form-input" value="${data ? data.global_sold || data.total_sold || 0 : 0}" readonly style="padding: 10px; background: #f1f5f9; color: #64748b; font-weight: bold; width: 55px;">
         </div>
         <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: #ef4444; border-color: #ef4444; margin-top: 26px; min-width: auto; padding: 10px;" title="Delete Variant">
             <i class="fas fa-trash"></i>
@@ -1091,9 +1095,9 @@ window.addVariantRow = (data = null) => {
 };
 
 window.resetVariantSold = (btn) => {
-    if (!confirm('Are you sure you want to reset sales for this variant to 0? This is usually done when restocking.')) return;
+    if (!confirm('Are you sure you want to reset BATCH sales for this variant to 0? Global sales will be preserved.')) return;
     const row = btn.closest('.variant-row');
-    const input = row.querySelector('.variant-sold');
+    const input = row.querySelector('.variant-sold-batch');
     if (input) input.value = 0;
 };
 
@@ -1177,7 +1181,8 @@ productForm.addEventListener('submit', async (e) => {
         const qty = row.querySelector('.variant-qty').value;
         const price = row.querySelector('.variant-price').value;
         const stock = parseInt(row.querySelector('.variant-stock').value || 0);
-        const sold = parseInt(row.querySelector('.variant-sold').value || 0);
+        const currentSold = parseInt(row.querySelector('.variant-sold-batch').value || 0);
+        const globalSold = parseInt(row.querySelector('.variant-sold-global').value || 0);
 
         if (qty && price) {
             variants.push({
@@ -1185,10 +1190,11 @@ productForm.addEventListener('submit', async (e) => {
                 price: parseFloat(price),
                 mrp: parseFloat(row.querySelector('.variant-mrp').value || 0),
                 stock: stock,
-                total_sold: sold
+                current_sold: currentSold,
+                global_sold: globalSold
             });
             calculatedTotalStock += stock;
-            calculatedTotalSold += sold;
+            calculatedTotalSold += globalSold; // Product level tracking uses global total
         }
     });
 
@@ -1234,13 +1240,12 @@ productForm.addEventListener('submit', async (e) => {
         mrp: topMrp,
         net_weight: topNetWeight,
         total_stock: calculatedTotalStock,
-        total_sold: calculatedTotalSold,
+        global_sold: calculatedTotalSold,
         showcase_image: document.getElementById('showcaseImage').value,
         is_trending: document.getElementById('productTrending').checked,
         is_visible: document.getElementById('productVisible').checked,
-        // info_image: document.getElementById('showcaseImage').value, // Use same image for both
         quantity_variants: variants,
-        slug: productSlug // Auto-generated SEO-friendly slug
+        slug: productSlug
     };
 
     try {
