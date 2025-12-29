@@ -375,9 +375,32 @@
                 <div class="form-group"><label>Embedded Google Map URL (iframe
                         src)</label><input type="text" id="setMapUrl"
                         placeholder="https://www.google.com/maps/embed?pb=..."></div>
-                <!-- FSSAI -->
                 <div class="form-group"><label>FSSAI Number</label><input type="text" id="setFssai"
                         placeholder="e.g. 1001234567890"></div>
+
+                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Catalogue & Sharing</h4>
+                <div class="form-group">
+                    <label>Catalogue Image</label>
+                    <div class="upload-group">
+                        <input type="text" id="setCatalogueUrl" placeholder="Image URL">
+                        <label for="uploadCatalogueImg" class="upload-btn"><i class="fas fa-upload"></i></label>
+                        <input type="file" id="uploadCatalogueImg" accept="image/*" style="display: none;"
+                            onchange="handleAssetUpload(this, 'setCatalogueUrl')">
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">This image will be shared
+                        when users click "Share Catalogue".</p>
+                </div>
+                <div class="form-group">
+                    <label>Catalogue Share Message</label>
+                    <textarea id="setCatalogueMsg" rows="2" placeholder="Check out our latest catalogue..."></textarea>
+                </div>
+
+                <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Address Settings</h4>
+                <div class="form-group">
+                    <label>Company Address</label>
+                    <textarea id="setAddress" rows="3" placeholder="Enter physical address..."></textarea>
+                </div>
+
                 <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Display Settings</h4>
                 <div class="form-row">
                     <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">

@@ -425,7 +425,11 @@ async function fetchSettings() {
             document.getElementById('setFaviconUrl').value = data.fav_icon_url || '';
             document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
             document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
-            document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
+
+            // Catalogue & Address Settings
+            document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
+            document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
+            document.getElementById('setAddress').value = data.company_address || '';
 
             // QC Settings
             document.getElementById('setQuickHeroTitle').value = data.quick_hero_title || '';
@@ -466,6 +470,12 @@ if (siteSettingsForm) {
             fav_icon_url: document.getElementById('setFaviconUrl').value,
             hero_background_url: document.getElementById('setHeroBgUrl').value,
             product_placeholder_url: document.getElementById('setProductPlaceholder').value,
+
+            // Catalogue & Address
+            catalogue_image_url: document.getElementById('setCatalogueUrl').value,
+            catalogue_share_message: document.getElementById('setCatalogueMsg').value,
+            company_address: document.getElementById('setAddress').value,
+
             // QC Fields
             quick_hero_title: document.getElementById('setQuickHeroTitle').value,
             quick_hero_subtitle: document.getElementById('setQuickHeroSubtitle').value,

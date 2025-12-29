@@ -7,6 +7,71 @@ TELUGU DELICACIES WEBSITE JAVASCRIPT
 ========================================
 Author: Telugu Delicacies
 Description: Interactive functionality for responsive Telugu Delicacies website
+*/
+
+// GLOBAL SHARE FUNCTION
+window.shareCatalogue = async function () {
+    const settings = window.currentSiteSettings || {};
+    const catalogueUrl = settings.catalogue_image_url;
+    const shareMessage = settings.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
+
+    if (!catalogueUrl) {
+        alert('Catalogue is not available at the moment.');
+        return;
+    }
+
+    try {
+        const response = await fetch(catalogueUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        // 1. Mobile Sharing (Direct File Attachment)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile && navigator.share) {
+            const file = new File([blob], 'catalogue.jpg', { type: blob.type });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: 'Catalogue',
+                    text: shareMessage,
+                    files: [file]
+                });
+                return;
+            }
+        }
+
+        // 2. Desktop Fallback (Download + Paste approach)
+        // We never show the link to the customer as requested.
+
+        // Trigger Download
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'Telugu_Delicacies_Catalogue.jpg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Try Copy to Clipboard
+        if (navigator.clipboard && window.ClipboardItem) {
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({ [blob.type]: blob })
+                ]);
+            } catch (e) { console.warn('Clipboard copy failed', e); }
+        }
+
+        // Inform user and open WhatsApp
+        alert('Catalogue downloaded! You can now attach or paste it directly in WhatsApp.');
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+        window.open(whatsappUrl, '_blank');
+
+    } catch (err) {
+        console.error('Sharing failed:', err);
+        alert('Could not prepare the catalogue for sharing. Please try again.');
+    }
+};
+
+
+/*
 Features: Smooth scrolling, form handling, animations, enhanced product showcase with rem-based scaling
 Fonts: Montserrat (headers), Roboto (body text), Noto Sans Telugu (Telugu content)
 Scaling: Responsive rem-based system with fluid typography using clamp()
@@ -1733,7 +1798,12 @@ async function fetchSiteSettings() {
                 const el = document.getElementById('contact-fssai');
                 if (el) el.innerText = `FSSAI License No: ${data.fssai_number}`;
             }
-            if (data.address_line1 || data.address_line2) {
+            if (data.company_address) {
+                const el = document.getElementById('contact-address');
+                if (el) {
+                    el.innerHTML = `<p>${data.company_address}</p>`;
+                }
+            } else if (data.address_line1 || data.address_line2) {
                 const el = document.getElementById('contact-address');
                 if (el) {
                     el.innerHTML = `
