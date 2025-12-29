@@ -31,8 +31,8 @@ window.shareCatalogue = async function () {
             const file = new File([blob], 'catalogue.jpg', { type: blob.type });
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
-                    title: 'Catalogue',
-                    text: shareMessage,
+                    title: shareMessage, // Using message as title for better app support
+                    text: shareMessage,  // Using message as text as well
                     files: [file]
                 });
                 return;
