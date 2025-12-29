@@ -2334,6 +2334,7 @@ async function fetchAndRenderTestimonials() {
                         <strong>${t.name}</strong>
                         <span>${t.location || ''}</span>
                     </div>
+                    ${t.product_name ? `<div class="testimonial-product"><i class="fas fa-tag"></i> ${t.product_name}</div>` : ''}
                 </div>
              `;
             return div;
