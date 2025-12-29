@@ -62,14 +62,19 @@
             window.toggleFlip = function () {
                 const el = document.querySelector('.gallery-inner');
                 const btn = document.querySelector('.gallery-wrapper > div:last-child .action-btn-pill');
+                const disclaimer = document.querySelector('.product-disclaimer-overlay');
                 if (el) {
                     el.classList.toggle('flipped');
+                    const isFlipped = el.classList.contains('flipped');
                     // Update button text based on state
                     if (btn) {
-                        const isFlipped = el.classList.contains('flipped');
                         btn.innerHTML = isFlipped
                             ? '<i class="fas fa-image"></i> Back to Image'
                             : '<i class="fas fa-info-circle"></i> View Description';
+                    }
+                    // Hide/show disclaimer
+                    if (disclaimer) {
+                        disclaimer.style.opacity = isFlipped ? '0' : '1';
                     }
                 }
             };
