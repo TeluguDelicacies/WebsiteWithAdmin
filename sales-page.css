@@ -195,8 +195,8 @@ body {
     padding: 20px 0;
     border-bottom: 1px solid var(--border-light);
     display: flex;
-    justify-content: flex-start;
-    /* Left aligned */
+    justify-content: space-between;
+    /* Push nav buttons to right */
     align-items: center;
     flex-wrap: wrap;
     /* Allow wrapping for mobile */
@@ -349,25 +349,6 @@ body {
     background: white;
 }
 
-/* Front face should be on top by default */
-.gallery-front {
-    z-index: 2;
-}
-
-/* Back face behind front by default */
-.gallery-back {
-    z-index: 1;
-}
-
-/* When flipped, swap z-indexes */
-.gallery-inner.flipped .gallery-front {
-    z-index: 1;
-}
-
-.gallery-inner.flipped .gallery-back {
-    z-index: 2;
-}
-
 /* Front Face */
 .gallery-front {
     display: flex;
@@ -376,9 +357,9 @@ body {
 }
 
 .gallery-front .main-img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Back Face */
@@ -535,12 +516,12 @@ body {
 }
 
 .info-content-block.active {
-    max-height: 200px;
-    /* Fixed max height for content */
+    max-height: none;
+    /* No max height - expand fully */
     opacity: 1;
     visibility: visible;
     padding: 15px;
-    overflow-y: auto;
+    overflow-y: visible;
 }
 
 /* Action Pill Button (View Desc, Back to Image) */
@@ -599,7 +580,7 @@ body {
     background: linear-gradient(to right, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0.9) 100%);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     color: var(--text-muted);
     font-style: italic;
     z-index: 5;

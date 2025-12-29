@@ -304,10 +304,10 @@
 
                         <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
+                                ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
-                                        ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                     </div>
