@@ -25,24 +25,29 @@ body {
 
 /* 2. Global Layout Components */
 .sales-header {
-    background: var(--bg-primary);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-light);
     height: var(--header-height);
-    padding: 0 10px;
-    /* Reduced side padding */
+    padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
 }
 
 .sales-page-container {
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: 0 5px 20px 5px;
-    /* Minimal side padding, reduced bottom padding */
+    padding: var(--header-height) 5px 20px 5px;
+    /* Top padding accounts for fixed header */
 }
 
 /* ... existing code ... */
