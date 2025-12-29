@@ -75,8 +75,7 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
+    </div>
 
     <script type="module">
         import { supabase } from './lib/supabase.js';
@@ -888,24 +887,7 @@
 
         // --- UI Utilities ---
         window.showToast = function (message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            if (!container) return;
-
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-
-            let icon = '<i class="fas fa-info-circle"></i>';
-            if (type === 'success') icon = '<i class="fas fa-check-circle"></i>';
-            if (type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
-
-            toast.innerHTML = `${icon} <span>${message}</span>`;
-            container.appendChild(toast);
-
-            // Auto-remove
-            setTimeout(() => {
-                toast.classList.add('out');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            alert(message);
         };
 
         // --- Cart Functions ---

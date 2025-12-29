@@ -394,8 +394,9 @@ body {
 .gallery-front .main-img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    background: white;
+    object-fit: cover;
+    /* Fill the square to remove white bands */
+    background: #f8fafc;
 }
 
 /* Back Face */
@@ -850,7 +851,36 @@ body {
     .details-body {
         flex: 1;
         overflow-y: auto;
-        padding: 30px;
+        padding: 20px 30px;
+        /* Reduced padding */
+    }
+
+    /* Compact Typography for Desktop to avoid scroll */
+    .product-title {
+        font-size: 1.6rem !important;
+        margin-bottom: 2px !important;
+    }
+
+    .telugu-title {
+        font-size: 1.3rem !important;
+        margin-bottom: 4px !important;
+    }
+
+    .product-tagline {
+        font-size: 0.85rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    .current-price {
+        font-size: 2rem !important;
+    }
+
+    .price-row {
+        margin-bottom: 15px !important;
+    }
+
+    .selection-area {
+        margin-bottom: 15px !important;
     }
 
     /* Fixed bottom part */
@@ -858,7 +888,8 @@ body {
         position: sticky;
         bottom: 0;
         background: white;
-        padding: 20px 30px;
+        padding: 15px 30px;
+        /* Tighter padding */
         border-top: 1px solid var(--border-light);
         box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.03);
         margin: 0;
@@ -868,18 +899,19 @@ body {
     /* Force buttons to single line on desktop */
     .info-btns-row {
         flex-wrap: nowrap;
-        margin: 15px 0 10px 0;
+        margin: 10px 0 10px 0;
     }
 
     .info-btn {
-        padding: 8px 14px;
-        font-size: 0.85rem;
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 
     /* Compact the info content for desktop */
     .info-content-block.active {
-        max-height: 150px;
-        padding: 12px;
+        max-height: 120px;
+        padding: 10px;
+        font-size: 0.9rem;
     }
 }
 
