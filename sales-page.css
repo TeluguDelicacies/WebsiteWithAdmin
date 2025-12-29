@@ -388,14 +388,23 @@ body {
 
 .product-title {
     font-size: clamp(1.5rem, 5vw, 2.2rem);
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .telugu-title {
     color: var(--text-telugu);
     font-family: var(--font-telugu);
-    font-size: 1.2rem;
-    margin-bottom: 20px;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    /* ~80% of product-title */
+    margin-bottom: 8px;
+}
+
+.product-tagline {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 15px;
+    line-height: 1.4;
 }
 
 .price-row {

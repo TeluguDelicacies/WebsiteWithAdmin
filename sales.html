@@ -79,6 +79,43 @@
                 }
             };
 
+            // Mobile Swipe Navigation
+            window.initSwipeNavigation = function () {
+                const gallery = document.querySelector('.product-gallery');
+                if (!gallery) return;
+
+                let touchStartX = 0;
+                let touchEndX = 0;
+                const minSwipeDistance = 50;
+
+                gallery.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                gallery.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                }, { passive: true });
+
+                function handleSwipe() {
+                    const swipeDistance = touchEndX - touchStartX;
+
+                    if (Math.abs(swipeDistance) < minSwipeDistance) return;
+
+                    // Find navigation links
+                    const prevLink = document.querySelector('.nav-btn-pill.prev:not(.disabled)');
+                    const nextLink = document.querySelector('.nav-btn-pill.next:not(.disabled)');
+
+                    if (swipeDistance > 0 && prevLink) {
+                        // Swiped right -> go to previous product
+                        window.location.href = prevLink.href;
+                    } else if (swipeDistance < 0 && nextLink) {
+                        // Swiped left -> go to next product
+                        window.location.href = nextLink.href;
+                    }
+                }
+            };
+
             try {
                 const [settingsRes, productsRes, categoriesRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
@@ -341,6 +378,7 @@
             ${category.sub_brand}</div>` : ''}
         <h1 class="product-title">${product.product_name}</h1>
         <div class="telugu-title">${product.product_name_telugu || ''}</div>
+        ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
 
         <div class="price-row">
             <span class="current-price" id="view-price">₹${product.price}</span>
@@ -627,6 +665,11 @@
                         getSimilarProducts(p) : state.allProducts.filter(x => x.is_trending));
                 };
             });
+
+            // Initialize swipe navigation for mobile
+            if (window.initSwipeNavigation) {
+                window.initSwipeNavigation();
+            }
         }
 
         // --- Logic: Data Helpers ---
