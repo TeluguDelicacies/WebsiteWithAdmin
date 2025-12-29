@@ -451,10 +451,10 @@
 
                         <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
-                                ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
+                                        ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                     </div>
@@ -477,33 +477,34 @@
 
 
     <div class="product-details">
-        ${!category?.sub_brand_logo_url && category?.sub_brand ? `<div
-            style="text-transform:uppercase; font-size:0.8rem; font-weight:700; color:var(--text-muted);">
-            ${category.sub_brand}</div>` : ''}
-        <h1 class="product-title">${product.product_name}</h1>
-        <div class="telugu-title">${product.product_name_telugu || ''}</div>
-        ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
+        <div class="details-body">
+            ${!category?.sub_brand_logo_url && category?.sub_brand ? `<div
+                style="text-transform:uppercase; font-size:0.8rem; font-weight:700; color:var(--text-muted);">
+                ${category.sub_brand}</div>` : ''}
+            <h1 class="product-title">${product.product_name}</h1>
+            <div class="telugu-title">${product.product_name_telugu || ''}</div>
+            ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
 
-        <div class="price-row">
-            <span class="current-price" id="view-price">₹${product.price}</span>
-            <span class="mrp-strike" id="view-mrp"
-                style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
-            <span class="discount-badge" id="view-discount"
-                style="${product.mrp > product.price ? '' : 'display:none'}"></span>
-        </div>
-
-        <div class="selection-area">
-            ${renderVariants(product)}
-        </div>
-
-
-        <div class="info-tabs">
-            <div class="info-btns-row" id="tabs-buttons">
-                <!-- Buttons injected here -->
+            <div class="price-row">
+                <span class="current-price" id="view-price">₹${product.price}</span>
+                <span class="mrp-strike" id="view-mrp"
+                    style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
+                <span class="discount-badge" id="view-discount"
+                    style="${product.mrp > product.price ? '' : 'display:none'}"></span>
             </div>
-            <div id="ingredients-content" class="info-content-block"></div>
-            <div id="nutrition-content" class="info-content-block"></div>
-            <div id="usage-content" class="info-content-block"></div>
+
+            <div class="selection-area">
+                ${renderVariants(product)}
+            </div>
+
+            <div class="info-tabs">
+                <div class="info-btns-row" id="tabs-buttons">
+                    <!-- Buttons injected here -->
+                </div>
+                <div id="ingredients-content" class="info-content-block"></div>
+                <div id="nutrition-content" class="info-content-block"></div>
+                <div id="usage-content" class="info-content-block"></div>
+            </div>
         </div>
 
         <div class="add-to-cart-section">
@@ -885,6 +886,28 @@
             }
         };
 
+        // --- UI Utilities ---
+        window.showToast = function (message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            let icon = '<i class="fas fa-info-circle"></i>';
+            if (type === 'success') icon = '<i class="fas fa-check-circle"></i>';
+            if (type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
+
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+
+            // Auto-remove
+            setTimeout(() => {
+                toast.classList.add('out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+
         // --- Cart Functions ---
         window.initCart = function () {
             try {
@@ -988,6 +1011,11 @@
             const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
             const maxStock = variant ? (variant.stock || 0) : (product.total_stock || 0);
 
+            if (qty < 1) {
+                window.showToast('Quantity must be at least 1', 'error');
+                return;
+            }
+
             if (currentCartQty + qty > maxStock) {
                 if (maxStock <= 0) {
                     window.showToast('Out of Stock', 'error');
@@ -1037,7 +1065,10 @@
                 }
             }
 
-            window.addToCart(state.currentProduct, selectedVariant, state.detailQty);
+            const qtyInput = document.getElementById('detailQty');
+            const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+
+            window.addToCart(state.currentProduct, selectedVariant, qty);
         };
 
         window.updateCartItemQty = function (index, deltaOrVal, isDirect = false) {
