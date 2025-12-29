@@ -243,11 +243,11 @@
                                 <div class="sp-info">
                                     ${category.sub_brand ? `<span class="sp-sub">${category.sub_brand}</span>` : ''}
                                     <h3 class="sp-title">${p.product_name}</h3>
+                                    ${p.product_name_telugu ? `<span class="sp-telugu">${p.product_name_telugu}</span>` : ''}
                                     <div class="sp-price-row">
                                         <span class="sp-price">₹${price !== undefined && price !== null ? price : 'N/A'}</span>
                                         ${mrp > price ? `<span class="sp-mrp">₹${mrp}</span>` : ''}
                                     </div>
-                                    <button class="sp-btn">View Details</button>
                                 </div>
                             </div>
                         `}).join('')}
