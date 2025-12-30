@@ -74,10 +74,50 @@ window.shareCatalogue = async function () {
     }
 };
 
-// GLOBAL SHARE CURRENT PAGE FUNCTION
+// GLOBAL SHARE CURRENT PAGE FUNCTION - Context-aware
 window.shareCurrentPage = function () {
     const currentUrl = window.location.href;
-    const shareText = "Check out Telugu Delicacies for authentic South Indian treats! 😋";
+
+    // Detect which section is most visible or use page context
+    let shareText = "Check out Telugu Delicacies for authentic South Indian treats! 😋";
+
+    // Check if Quick Commerce mode is active
+    const isQuickCommerce = document.body.classList.contains('quick-commerce-mode');
+    if (isQuickCommerce) {
+        shareText = "🛒 Shop authentic Telugu Podies and Parotas at Telugu Delicacies! Quick & easy ordering 😋";
+    }
+
+    // Check URL hash for section context
+    const hash = window.location.hash;
+    if (hash) {
+        if (hash.includes('product') || hash.includes('categories')) {
+            shareText = "🍽️ Explore our delicious product collections at Telugu Delicacies!";
+        } else if (hash.includes('testimonial')) {
+            shareText = "⭐ See what our customers say about Telugu Delicacies!";
+        } else if (hash.includes('contact') || hash.includes('footer')) {
+            shareText = "📞 Get in touch with Telugu Delicacies for your orders!";
+        }
+    }
+
+    // Check visible section by scroll position
+    const sections = [
+        { id: 'product-categories', text: "🍽️ Check out our amazing product collections at Telugu Delicacies!" },
+        { id: 'testimonials-section', text: "⭐ Loved by customers! See reviews at Telugu Delicacies" },
+        { id: 'footer', text: "📞 Contact Telugu Delicacies for authentic homemade treats!" }
+    ];
+
+    const viewportCenter = window.innerHeight / 2;
+    for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top < viewportCenter && rect.bottom > viewportCenter) {
+                shareText = section.text;
+                break;
+            }
+        }
+    }
+
     const fullMessage = `${shareText}\n${currentUrl}`;
 
     // Mobile: Use native share if available
@@ -86,7 +126,6 @@ window.shareCurrentPage = function () {
         navigator.share({
             title: 'Telugu Delicacies',
             text: fullMessage
-            // Note: url: currentUrl is removed to prevent duplicate links in WhatsApp/Mobile Share
         }).catch(err => console.log('Share cancelled'));
         return;
     }
