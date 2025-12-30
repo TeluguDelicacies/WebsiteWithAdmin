@@ -1153,6 +1153,11 @@ Enhanced product cards and modern styling
     padding: 0 5px;
     /* Remove top/bottom padding from info wrapper */
   }
+
+  /* Hide progress dots on mobile per user request (iOS issue) */
+  .carousel-progress {
+    display: none !important;
+  }
 }
 
 /* 
