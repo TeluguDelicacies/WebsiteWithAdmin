@@ -1206,12 +1206,22 @@ Styled exactly like product showcase
   width: 95%;
 }
 
-/* Quick Commerce Mode: Expand Product Categories to 95% width */
+/* Quick Commerce Mode: Expand Product Categories to 95% width (all screens) */
 .quick-commerce-mode #product-categories .container {
   max-width: 95vw !important;
   width: 95vw !important;
   padding-left: 2.5vw !important;
   padding-right: 2.5vw !important;
+}
+
+/* Ensure 95vw on mobile too */
+@media (max-width: 768px) {
+  .quick-commerce-mode #product-categories .container {
+    max-width: 95vw !important;
+    width: 95vw !important;
+    padding-left: 2.5vw !important;
+    padding-right: 2.5vw !important;
+  }
 }
 
 /* Left align title specifically for testimonials on desktop */
@@ -2505,12 +2515,12 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 /* --- OPTION 4: STANDARD FLUID GRID (FRESH START) --- */
 
-/* Reset container styles to default */
-/* Reset container styles to default */
+/* Quick Commerce container - 95% viewport width to match other sections */
 .quick-commerce-mode .container {
-  padding-left: 8px;
-  padding-right: 8px;
-  width: 100%;
+  width: 95vw !important;
+  max-width: 95vw !important;
+  padding-left: 2.5vw !important;
+  padding-right: 2.5vw !important;
   overflow-x: visible;
 }
 
@@ -3402,11 +3412,25 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
 
 @media (max-width: 768px) {
 
-  /* Mobile category card adjustments */
+  /* Mobile category card - 95% viewport width, centered */
   .quick-card {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin-left: 2.5vw !important;
+    margin-right: 2.5vw !important;
     padding: 16px;
     border-radius: 20px;
     margin-bottom: 12px;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure parent grid centers cards */
+  .quick-layout-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 0 !important;
   }
 
   /* Mobile scroll container fix */
@@ -3420,7 +3444,7 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     scroll-snap-type: x mandatory;
   }
 
-  /* Mobile product card sizing - Wider */
+  /* Mobile product card sizing */
   .quick-product-item {
     min-width: 150px;
     max-width: 150px;
