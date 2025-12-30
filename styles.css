@@ -2510,49 +2510,22 @@ MASTER CARD LAYOUT (Redesign with Overlay)
   margin-bottom: 15px;
 }
 
-/* Scroll Container */
-/* Scroll Container (Mask) */
+/* Scroll Container - Native Horizontal Scroll */
 .quick-product-scroll {
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
-/* Scroll Track (Animated) */
-.quick-scroll-track {
   display: flex;
-  gap: 15px;
-  width: max-content;
-  min-width: 100%;
-  /* Ensure track can move fully off screen even if content is small */
-  animation: quick-scroll-ticker 80s linear infinite;
-  /* Slower speed */
-  animation-delay: -20s;
-  /* Start in the middle (Visible at 0) */
-  will-change: transform;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 12px;
+  padding: 10px 4px;
+  width: 100%;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
-.quick-scroll-track:hover {
-  animation-play-state: paused;
-}
-
-@keyframes quick-scroll-ticker {
-  0% {
-    transform: translateX(100%);
-  }
-
-  /* End completely off-screen LEFT */
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-/* Mobile Scroll Speed Adjustment */
-@media (max-width: 768px) {
-  .quick-scroll-track {
-    animation-duration: 40s;
-    /* Double speed for mobile */
-  }
+.quick-product-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 
@@ -2838,26 +2811,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   /* occupy remaining space */
 }
 
-/* Quick Commerce Scroll & Cards */
-.quick-product-scroll {
-  display: flex;
-  overflow-x: auto;
-  gap: 15px;
-  padding: 10px 4px;
-  width: 100%;
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE/Edge */
-  /* Ensure no wrap */
-  flex-wrap: nowrap;
-}
-
-.quick-product-scroll::-webkit-scrollbar {
-  display: none;
-  /* Chrome/Safari */
-}
-
+/* Quick Commerce Scroll - Cursor styles */
 .quick-product-scroll {
   cursor: grab;
 }
@@ -3032,12 +2986,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 
 
-/* 3. Drag Scroll & MRP Styles */
-.quick-product-scroll {
-  scrollbar-width: none;
-  /* Keep hidden, use drag */
-}
-
+/* Price row styling */
 .price-row {
   margin-top: 4px;
   display: flex;
@@ -3052,16 +3001,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   color: var(--text-muted);
 }
 
-/* Header link in Desktop Quick Card */
-.quick-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
-  padding: 0 4px;
-  /* Align with scroll items */
-}
-
+/* View all link styling */
 .view-all-link {
   font-size: 0.85rem;
   color: var(--color-primary-blue);
