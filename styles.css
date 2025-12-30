@@ -3714,14 +3714,14 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #92400e;
-    padding: 8px 0 4px 0;
+    padding: 6px 0 2px 0;
     animation: swipeHint 2s ease-in-out infinite;
   }
 
   .swipe-indicator i {
-    font-size: 1rem;
+    font-size: 0.85rem;
     animation: swipeArrow 1.5s ease-in-out infinite;
   }
 
@@ -3755,21 +3755,79 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     display: none;
   }
 
-  /* Mobile Telugu name adjustments */
+  /* Mobile category card adjustments */
+  .quick-card {
+    padding: 16px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* Mobile scroll container fix */
+  .quick-product-scroll {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 10px;
+    padding: 8px 4px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  /* Mobile product card sizing - FIXED */
+  .quick-product-item {
+    min-width: 130px;
+    max-width: 130px;
+    min-height: auto;
+    height: auto;
+    padding: 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  /* Mobile image wrapper */
+  .quick-product-image-wrapper {
+    height: 90px;
+    padding: 4px;
+  }
+
+  /* Mobile product name */
+  .quick-product-item h4 {
+    font-size: 0.75rem;
+    height: 34px;
+    margin: 0 0 2px 0;
+    line-height: 1.2;
+  }
+
+  /* Mobile Telugu name */
   .quick-product-item .telugu-name {
+    font-size: 0.7rem;
+    height: 18px;
+    line-height: 1.2;
+  }
+
+  /* Mobile price row */
+  .quick-product-item .price-row {
+    min-height: 20px;
+    padding-top: 4px;
+    gap: 3px;
+  }
+
+  .quick-product-item .price {
     font-size: 0.75rem;
   }
 
-  /* Mobile product card sizing */
-  .quick-product-item {
-    min-width: 160px;
-    max-width: 160px;
-    min-height: 260px;
+  .quick-product-item .variant-qty {
+    font-size: 0.5rem;
   }
 
-  .quick-product-item h4 {
-    font-size: 0.8rem;
-    height: 38px;
+  .quick-product-item .mrp-strike {
+    font-size: 0.55rem;
+  }
+
+  /* Mobile info section */
+  .quick-product-item-info {
+    padding: 6px 4px;
   }
 }
 
