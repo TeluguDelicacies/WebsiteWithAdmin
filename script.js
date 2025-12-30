@@ -2375,6 +2375,9 @@ async function fetchAndRenderTestimonials() {
             items.forEach(item => testimonialContainer.appendChild(item.cloneNode(true)));
         }
 
+        // Fix: Update scroll speeds immediately after rendering
+        updateScrollSpeeds();
+
     } catch (error) {
         console.error('Error fetching testimonials:', error);
         testimonialContainer.innerHTML = `
@@ -2565,11 +2568,12 @@ function updateScrollSpeeds() {
     });
 
     // 2. Testimonial Ticker (Duplicated content)
-    document.querySelectorAll('.testimonial-container').forEach(el => {
+    // FIX: Correct selector is .testimonials-scroll, not .testimonial-container
+    document.querySelectorAll('.testimonials-scroll').forEach(el => {
         const count = el.children.length / 2;
         if (count > 0) {
+            // Using same speed logic as Product Carousel (2.5s per card)
             const duration = count * secondsPerCard;
-            // Testimonials are wider, maybe slightly slower per item? Keeping same for now.
             el.style.animationDuration = `${duration}s`;
         }
     });

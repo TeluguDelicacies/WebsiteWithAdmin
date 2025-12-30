@@ -1150,6 +1150,12 @@ Modern card design with enhanced styling
 
 /* 
 ========================================
+TESTIMONIALS SECTION                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+Styled exactly like product showcase
+========================================
+*/
+/* 
+========================================
 TESTIMONIALS SECTION
 Styled exactly like product showcase
 ========================================
@@ -1160,11 +1166,22 @@ Styled exactly like product showcase
   background: linear-gradient(180deg, #E6EEF8 0%, #FFFFFF 100%);
 }
 
+/* Left align title specifically for testimonials on desktop */
+@media (min-width: 768px) {
+  .testimonials-showcase .section-title {
+    text-align: left;
+    margin-bottom: var(--space-8);
+    padding-left: var(--space-4);
+  }
+}
+
 .testimonials-scroll {
   display: flex;
   gap: var(--space-6);
   animation: testimonials-scroll 50s linear infinite;
   will-change: transform;
+  padding: var(--space-4);
+  /* Add padding for shadow visibility */
 }
 
 @keyframes testimonials-scroll {
@@ -1180,6 +1197,8 @@ Styled exactly like product showcase
 .testimonial-item {
   flex-shrink: 0;
   width: 320px;
+  min-height: 280px;
+  /* Enforce consistency */
   background: var(--bg-primary);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
@@ -1190,37 +1209,33 @@ Styled exactly like product showcase
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  /* Push content apart */
 }
 
-.testimonial-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--bg-gradient-primary);
-  opacity: 0;
-  transition: opacity var(--transition-normal);
-}
+/* REMOVED ::before thick top border as requested */
 
 .testimonial-item:hover {
   box-shadow: 0 8px 24px rgba(0, 119, 182, 0.15);
   border-color: var(--color-secondary-blue);
-}
-
-.testimonial-item:hover::before {
-  opacity: 1;
+  /* Keep blue outline color */
+  transform: translateY(-5px);
+  /* Add subtle lift */
 }
 
 .testimonial-content {
   text-align: center;
+  flex-grow: 1;
+  /* Allow content to fill space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .stars {
   font-size: 1.3rem;
   color: #FFD700;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
   letter-spacing: 3px;
 }
 
@@ -1231,7 +1246,8 @@ Styled exactly like product showcase
   margin-bottom: var(--space-4);
   font-style: italic;
   font-weight: var(--weight-medium);
-  min-height: 60px;
+  min-height: 80px;
+  /* Min height for alignment */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1240,9 +1256,10 @@ Styled exactly like product showcase
 .testimonial-author {
   border-top: 1px solid var(--border-light);
   padding-top: var(--space-4);
-  margin-top: var(--space-2);
+  margin-top: auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
 }
 
@@ -1280,18 +1297,22 @@ Styled exactly like product showcase
 /* Mobile: Compact Testimonials */
 @media (max-width: 768px) {
   .testimonial-item {
-    min-width: 220px;
+    width: 270px;
+    /* Reduced from 320px by ~15% */
+    min-width: 270px;
     padding: var(--space-4);
+    min-height: 240px;
   }
 
   .testimonial-content p {
-    font-size: var(--font-sm);
+    font-size: 0.9rem;
+    /* Slightly smaller text */
     line-height: 1.4;
     margin-bottom: var(--space-3);
   }
 
   .testimonial-content .stars {
-    font-size: var(--font-sm);
+    font-size: 1.1rem;
     margin-bottom: var(--space-2);
   }
 
