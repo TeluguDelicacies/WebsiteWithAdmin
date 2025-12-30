@@ -2404,10 +2404,10 @@ function renderQuickLayout(products, categories, container) {
         card.className = `quick-card ${isSmallCategory ? 'half-width' : 'span-full'}`;
         const productsHTML = renderQuickProductsHTML(catProducts, showMrp);
 
-        // Sub-brand logo HTML - left side, larger
+        // Sub-brand logo HTML - in square container with background
         const subBrandLogoHTML = cat.sub_brand_logo_url
-            ? `<img src="${cat.sub_brand_logo_url}" class="quick-sub-brand-logo" alt="${cat.sub_brand || 'Sub Brand'}" onerror="this.style.display='none'">`
-            : '';
+            ? `<div class="quick-sub-brand-container"><img src="${cat.sub_brand_logo_url}" class="quick-sub-brand-logo" alt="${cat.sub_brand || 'Sub Brand'}" onerror="this.parentElement.style.display='none'"></div>`
+            : '<div class="quick-sub-brand-placeholder"></div>';
 
         card.innerHTML = `
             <div class="quick-header-row">
@@ -2426,10 +2426,6 @@ function renderQuickLayout(products, categories, container) {
             <div class="quick-product-scroll" id="scroll-${cat.slug}">
                 ${productsHTML}
             </div>
-            <div class="swipe-indicator">
-                <span>Swipe to see more</span>
-                <i class="fas fa-arrow-right"></i>
-            </div>
         `;
         wrapper.appendChild(card);
     });
@@ -2441,10 +2437,6 @@ function renderQuickLayout(products, categories, container) {
         // Quick Commerce
         document.querySelectorAll('.quick-product-scroll').forEach(el => {
             enableDragScroll(el);
-            // Hide swipe indicator after scroll
-            el.addEventListener('scroll', () => {
-                el.classList.add('scrolled');
-            }, { once: true });
         });
         // Main Product Ticker
         document.querySelectorAll('.product-scroll').forEach(el => enableDragScroll(el));
