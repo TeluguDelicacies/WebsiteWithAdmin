@@ -304,53 +304,14 @@
         function renderCategoryView(slug) {
             const app = document.getElementById('app');
 
-            // 1. Single Category Grid View
-            if (slug) {
-                renderSingleCategoryGrid(slug);
+            // If no category slug, redirect to home page
+            if (!slug) {
+                window.location.href = '/';
                 return;
             }
 
-            // 2. All Categories List (Master Cards)
-            const cardsHtml = state.categories.map(cat => {
-                const catProducts = state.allProducts.filter(p =>
-                    (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === cat.slug
-                );
-
-                return `
-                    <article class="master-card" id="card-${cat.slug}">
-                        <div class="card-hero-image">
-                            <img src="${cat.image_url || state.placeholder}" alt="${cat.title}" onerror="this.src='${state.placeholder}'">
-                        </div>
-                        <div class="card-body">
-                            <h3 class="card-title">${cat.title}</h3>
-                            ${cat.sub_brand ? `<p class="category-sub-brand" style="font-weight:600; color:var(--text-secondary);">${cat.sub_brand}</p>` : ''}
-                            <p class="telugu-subtitle" style="font-family:var(--font-telugu); color:var(--text-muted);">${cat.telugu_title || ''}</p>
-                            <p class="card-desc">${cat.description || ''}</p>
-                            
-                            <div class="dropdown-wrapper">
-                                <select class="product-select" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-medium);" onchange="if(this.value) navigateToProduct(this.value, 'fade')">
-                                    <option value="" disabled selected>Select Product</option>
-                                    ${catProducts.map(p => `
-                                        <option value="${p.slug || p.id}">${p.product_name} ${p.product_name_telugu ? '(' + p.product_name_telugu + ')' : ''}</option>
-                                    `).join('')}
-                                </select>
-                            </div>
-                        </div>
-                    </article>
-                `;
-            }).join('');
-
-            app.innerHTML = `
-                <div class="breadcrumb-section">
-                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
-                    <span style="color:var(--color-primary-blue); font-weight:600;">All Collections</span>
-                </div>
-                <section class="category-view-container">
-                    <div class="master-cards-grid">
-                        ${cardsHtml}
-                    </div>
-                </section>
-            `;
+            // Single Category Grid View
+            renderSingleCategoryGrid(slug);
         }
 
         function renderSingleCategoryGrid(slug) {
@@ -370,7 +331,6 @@
             app.innerHTML = `
                 <div class="breadcrumb-section">
                     <a href="/" style="color:var(--text-secondary)">Home</a> / 
-                    <a href="/sales.html" style="color:var(--text-secondary)">Collections</a> /
                     <span style="color:var(--color-primary-blue); font-weight:600;">${category.title}</span>
                 </div>
 
@@ -487,10 +447,10 @@
 
                         <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
+                                ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
-                                        ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                     </div>

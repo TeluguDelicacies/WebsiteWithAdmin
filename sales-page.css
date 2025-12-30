@@ -176,30 +176,13 @@ body {
     /* No side padding, top accounts for fixed header */
 }
 
-/* ... existing code ... */
-
-/* Recent History */
+/* Recent History - HIDDEN per user request */
 .recent-section {
-    grid-area: recent;
-    padding-top: 40px;
+    display: none !important;
 }
 
 .recent-grid {
-    display: grid;
-    gap: 15px;
-    /* Mobile: Horizontal Scroll */
-    grid-template-columns: repeat(5, minmax(160px, 1fr));
-    overflow-x: auto;
-    padding-bottom: 15px;
-}
-
-@media (min-width: 768px) {
-    .recent-grid {
-        /* Desktop: Fixed 5 columns, no scroll */
-        grid-template-columns: repeat(5, 1fr);
-        overflow-x: visible;
-        padding-bottom: 0;
-    }
+    display: none !important;
 }
 
 /* 3. Category View (Grid) */
@@ -294,15 +277,17 @@ body {
         display: grid;
         grid-template-areas:
             "bread bread"
-            "main side"
-            "recent recent";
+            "main side";
         grid-template-columns: 1fr var(--sidebar-width);
     }
 }
 
 .breadcrumb-section {
     grid-area: bread;
-    padding: 15px 20px;
+    padding: 12px 20px;
+    /* Added top/bottom padding */
+    margin-top: 8px;
+    margin-bottom: 8px;
     background: linear-gradient(180deg, rgba(144, 224, 239, 0.1) 0%, transparent 100%);
     border-bottom: 1px solid var(--color-accent-blue);
     display: flex;
@@ -310,10 +295,12 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
-    max-width: 1300px;
-    margin: 0 auto;
-    width: 100%;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    max-width: 98vw;
+    /* Changed from 1300px to 98vw */
+    margin-left: auto;
+    margin-right: auto;
+    width: 98vw;
+    border-radius: var(--radius-lg);
 }
 
 .crumbs {
@@ -499,16 +486,15 @@ body {
     margin-bottom: 20px;
 }
 
+/* Sub-brand overlay logo - Now positioned on product-gallery (outside 3D transform) */
 .overlay-logo {
     position: absolute;
     top: 10px;
     right: 10px;
     width: clamp(50px, 15%, 80px);
-    /* Responsive but capped */
     height: auto;
-    z-index: 10;
+    z-index: 100;
     pointer-events: none;
-    /* Don't interfere with clicks/flips */
 }
 
 /* Component: Details */
