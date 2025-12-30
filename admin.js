@@ -1208,6 +1208,39 @@ async function loadProductData(productId) {
     }
 }
 
+// Product Slug Uniqueness Helper
+async function ensureUniqueSlug(baseSlug, existingId = null) {
+    let slug = baseSlug;
+    let counter = 1;
+    let isUnique = false;
+
+    while (!isUnique) {
+        // Query to see if slug exists
+        let query = supabase.from('products').select('id').eq('slug', slug);
+
+        // If updating, exclude self from check
+        if (existingId) {
+            query = query.neq('id', existingId);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+            console.error('Slug check error:', error);
+            throw error; // Fail safe
+        }
+
+        if (data && data.length > 0) {
+            // Collision found, append counter
+            slug = `${baseSlug}-${counter}`;
+            counter++;
+        } else {
+            isUnique = true;
+        }
+    }
+    return slug;
+}
+
 // Form Submission (Product)
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1261,41 +1294,44 @@ productForm.addEventListener('submit', async (e) => {
 
     // Generate slug from product name
     const productName = document.getElementById('productName').value;
-    const productSlug = generateSlug(productName);
-
-    const productData = {
-        product_name: productName,
-        product_name_telugu: document.getElementById('productNameTelugu').value,
-        product_category: document.getElementById('productCategory').value,
-        product_tagline: document.getElementById('productTagline').value,
-        product_description: document.getElementById('productDescription').value,
-        ingredients: document.getElementById('productIngredients').value,
-        serving_suggestion: document.getElementById('productUsage').value,
-        nutrition_info: {
-            // Save as snake_case standard
-            serving_size: document.getElementById('nutriDetails').value,
-            total_servings: '20', // Defaulting to 20 or we could add a field for it? User didn't ask for field but existing data has it. Let's keep it simple or default.
-            calories: document.getElementById('nutriCalories').value,
-            protein: document.getElementById('nutriProtein').value,
-            saturated_fat: document.getElementById('nutriSatFat').value,
-            total_fat: document.getElementById('nutriFat').value,
-            carbs: document.getElementById('nutriCarbs').value,
-            fiber: document.getElementById('nutriFiber').value,
-            sugars: document.getElementById('nutriSugars').value,
-            sodium: document.getElementById('nutriSodium').value
-        },
-        mrp: topMrp,
-        net_weight: topNetWeight,
-        total_stock: calculatedTotalStock,
-        global_sold: calculatedTotalSold,
-        showcase_image: document.getElementById('showcaseImage').value,
-        is_trending: document.getElementById('productTrending').checked,
-        is_visible: document.getElementById('productVisible').checked,
-        quantity_variants: variants,
-        slug: productSlug
-    };
+    const baseSlug = generateSlug(productName);
 
     try {
+        // Ensure Slug Uniqueness
+        const uniqueSlug = await ensureUniqueSlug(baseSlug, productId);
+
+        const productData = {
+            product_name: productName,
+            product_name_telugu: document.getElementById('productNameTelugu').value,
+            product_category: document.getElementById('productCategory').value,
+            product_tagline: document.getElementById('productTagline').value,
+            product_description: document.getElementById('productDescription').value,
+            ingredients: document.getElementById('productIngredients').value,
+            serving_suggestion: document.getElementById('productUsage').value,
+            nutrition_info: {
+                // Save as snake_case standard
+                serving_size: document.getElementById('nutriDetails').value,
+                total_servings: '20', // Defaulting to 20 or we could add a field for it? User didn't ask for field but existing data has it. Let's keep it simple or default.
+                calories: document.getElementById('nutriCalories').value,
+                protein: document.getElementById('nutriProtein').value,
+                saturated_fat: document.getElementById('nutriSatFat').value,
+                total_fat: document.getElementById('nutriFat').value,
+                carbs: document.getElementById('nutriCarbs').value,
+                fiber: document.getElementById('nutriFiber').value,
+                sugars: document.getElementById('nutriSugars').value,
+                sodium: document.getElementById('nutriSodium').value
+            },
+            mrp: topMrp,
+            net_weight: topNetWeight,
+            total_stock: calculatedTotalStock,
+            global_sold: calculatedTotalSold,
+            showcase_image: document.getElementById('showcaseImage').value,
+            is_trending: document.getElementById('productTrending').checked,
+            is_visible: document.getElementById('productVisible').checked,
+            quantity_variants: variants,
+            slug: uniqueSlug
+        };
+
         let error;
         if (productId) {
             // Update
@@ -1319,6 +1355,7 @@ productForm.addEventListener('submit', async (e) => {
         alert('Product saved successfully!');
 
     } catch (error) {
+        console.error('Save error:', error);
         alert('Error saving product: ' + error.message);
     } finally {
         submitBtn.textContent = originalText;
