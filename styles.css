@@ -407,24 +407,43 @@ Persistent header with hamburger menu and WhatsApp integration
   box-shadow: var(--shadow-sm);
 }
 
+.header .container {
+  max-width: 100% !important;
+  padding: 0 var(--space-2) !important;
+}
+
+@media (min-width: 768px) {
+  .header .container {
+    padding: 0 var(--space-4) !important;
+  }
+}
+
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 70px;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-2);
+  /* Reduced padding to start from left */
 }
 
 @media (min-width: 768px) {
   .header-content {
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-4);
   }
 }
 
-.logo-section {
+.logo-section,
+.logo-area {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-text-area {
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 1024px) {
@@ -463,15 +482,16 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  /* Bigger logo */
+  height: 50px;
   border-radius: var(--radius-md);
-  /* Square with rounded corners */
-  object-fit: cover;
+  object-fit: contain;
+  /* Ensure it fits without cutting */
+  background: transparent;
+  /* Ensure no background */
   border: none;
-  /* No solid border */
   animation: logoGlowAndWiggle 3s ease-in-out infinite;
-  box-shadow: 0 0 8px rgba(0, 119, 182, 0.4);
   transition: all var(--transition-normal);
 }
 
@@ -538,38 +558,94 @@ Persistent header with hamburger menu and WhatsApp integration
 .nav-btn {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
   background: transparent;
-  border: 2px solid var(--border-light);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  font-family: var(--font-primary);
-  font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  width: 42px;
+  /* Fixed size for icon-only */
+  height: 42px;
+  border-radius: 50%;
+  /* Circle for icon-only */
+  font-size: 1.1rem;
+  color: var(--color-primary-blue);
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
+  padding: 0;
 }
 
 .nav-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-secondary);
-  border-color: var(--border-medium);
-  transform: translateY(-1px);
+  color: var(--text-inverse);
+  background: var(--color-primary-blue);
+  border-color: var(--color-primary-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2);
 }
 
-.nav-btn.whatsapp-btn {
-  background: linear-gradient(135deg, #25D366, #128C7E);
-  color: var(--text-inverse);
-  border-color: #128C7E;
+.nav-btn.whatsapp-btn,
+.nav-btn.whatsapp-btn:hover {
+  background: transparent;
+  color: var(--color-primary-blue);
+  border-color: var(--border-light);
 }
 
 .nav-btn.whatsapp-btn:hover {
-  background: linear-gradient(135deg, #128C7E, #075E54);
-  border-color: #075E54;
-  transform: translateY(-2px);
-  color: var(--text-inverse);
+  background: var(--color-primary-blue);
+  color: white;
+  border-color: var(--color-primary-blue);
+}
+
+/* Custom Tooltips */
+.nav-btn {
+  position: relative;
+}
+
+.nav-btn::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: var(--color-gray-800);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+}
+
+.nav-btn::after {
+  content: '';
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--color-gray-800) transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.nav-btn:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Hamburger Menu Button */

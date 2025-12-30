@@ -70,6 +70,27 @@ window.shareCatalogue = async function () {
     }
 };
 
+// GLOBAL SHARE CURRENT PAGE FUNCTION
+window.shareCurrentPage = function () {
+    const currentUrl = window.location.href;
+    const pageTitle = document.title || 'Telugu Delicacies';
+    const shareMessage = `Check out ${pageTitle} at Telugu Delicacies!\n${currentUrl}`;
+
+    // Mobile: Use native share if available
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile && navigator.share) {
+        navigator.share({
+            title: pageTitle,
+            text: shareMessage,
+            url: currentUrl
+        }).catch(err => console.log('Share cancelled'));
+        return;
+    }
+
+    // Fallback: Open WhatsApp with URL
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+    window.open(whatsappUrl, '_blank');
+};
 
 /*
 Features: Smooth scrolling, form handling, animations, enhanced product showcase with rem-based scaling

@@ -25,12 +25,12 @@ body {
 
 /* 2. Global Layout Components */
 .sales-header {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 249, 255, 0.98) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 2px solid var(--color-accent-blue);
-    height: var(--header-height);
-    padding: 0 20px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-light);
+    height: 70px;
+    padding: 0 var(--space-2);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -39,38 +39,109 @@ body {
     left: 0;
     right: 0;
     z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0, 119, 182, 0.1);
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .sales-header {
+        padding: 0 var(--space-4);
+    }
 }
 
 .sales-header .nav-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 1.1rem;
     color: var(--color-primary-blue);
-    background: white;
-    border: 1px solid var(--color-accent-blue);
-    text-decoration: none;
-    transition: all 0.2s;
     cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    padding: 0;
 }
 
 .sales-header .nav-btn:hover {
-    background: var(--color-accent-blue);
+    background: var(--color-primary-blue);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 119, 182, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2);
 }
 
-.sales-header .home-btn {
-    padding: 8px;
-    width: 38px;
-    height: 38px;
-    justify-content: center;
+/* Custom Tooltips */
+.sales-header .nav-btn {
+    position: relative;
+}
+
+.sales-header .nav-btn::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    background: var(--color-gray-800);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+}
+
+.sales-header .nav-btn::after {
+    content: '';
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 5px 5px 5px;
+    border-style: solid;
+    border-color: transparent transparent var(--color-gray-800) transparent;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.sales-header .nav-btn:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.sales-header .nav-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sales-header .brand-name {
+    font-family: var(--font-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary-blue);
+    margin: 0;
+    line-height: 1.1;
+}
+
+.sales-header .telugu-brand {
+    display: block;
+    font-size: 1rem;
+    font-family: 'Mallanna', sans-serif;
+    color: var(--color-secondary-blue);
+    line-height: 1;
+    margin-top: 2px;
 }
 
 .sales-header nav {
@@ -1106,6 +1177,7 @@ body {
 .qty-input-lg[type=number],
 .cart-qty-input[type=number] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .cart-qty-input {

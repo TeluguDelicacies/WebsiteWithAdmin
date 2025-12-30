@@ -65,32 +65,27 @@
                     </div>
                 </div>
 
-                <!-- Desktop Navigation Buttons -->
+                <!-- Desktop Navigation Buttons - Icon Only -->
                 <nav class="desktop-nav">
-                    <button class="nav-btn" id="productsBtn">
+                    <button class="nav-btn" id="productsBtn" title="Products" data-tooltip="Our Products">
                         <i class="fas fa-shopping-bag"></i>
-                        <span>Products</span>
                     </button>
-                    <button class="nav-btn" id="contactBtn">
+                    <button class="nav-btn" id="contactBtn" title="Contact" data-tooltip="Contact Us">
                         <i class="fas fa-envelope"></i>
-                        <span>Contact</span>
                     </button>
-                    <button class="nav-btn share-catalogue-btn" id="shareCatalogueBtn"
-                        onclick="window.shareCatalogue()">
+                    <button class="nav-btn share-catalogue-btn" id="shareCatalogueBtn" onclick="window.shareCatalogue()"
+                        title="Share Catalogue" data-tooltip="Share Catalogue">
                         <i class="fas fa-share-alt"></i>
-                        <span class="btn-text">Catalogue</span>
                     </button>
-                    <button class="nav-btn whatsapp-btn" id="whatsappBtn">
+                    <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()" title="Share Page"
+                        data-tooltip="Share Page">
+                        <i class="fas fa-arrow-up-from-bracket"></i>
+                    </button>
+                    <button class="nav-btn whatsapp-btn" id="whatsappBtn" title="WhatsApp" data-tooltip="Chat WhatsApp">
                         <i class="fab fa-whatsapp"></i>
-                        <span>Buy Now</span>
                     </button>
                 </nav>
 
-                <button class="nav-btn mobile-nav-catalogue-btn" onclick="window.shareCatalogue()"
-                    aria-label="Share Catalogue"
-                    style="margin-left: auto; margin-right: 15px; border: none; background: transparent; color: var(--color-primary-blue); font-size: 1.2rem; display: flex; align-items: center;">
-                    <i class="fas fa-share-alt"></i>
-                </button>
                 <!-- Mobile Hamburger Button -->
                 <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">
                     <span class="hamburger-line"></span>
