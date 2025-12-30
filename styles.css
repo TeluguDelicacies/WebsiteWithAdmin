@@ -1225,11 +1225,19 @@ Styled exactly like product showcase
 
 .testimonial-scroll-wrapper {
   overflow-x: auto;
+  overflow-y: hidden;
+  /* Prevent vertical scroll */
   scrollbar-width: none;
   -ms-overflow-style: none;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
   cursor: grab;
+  -webkit-overflow-scrolling: touch;
+  /* iOS smooth scroll */
+  touch-action: pan-x;
+  /* Enable horizontal touch scrolling */
+  will-change: scroll-position;
+  /* GPU acceleration hint */
 }
 
 .testimonial-scroll-wrapper::-webkit-scrollbar {

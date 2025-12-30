@@ -969,20 +969,26 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
 
     // Wait for content load
     setTimeout(() => {
-        // 1. Initialize JS-based auto-scroll
-        state.scrollInterval = setInterval(() => {
-            if (state.isPaused) return;
-            // Check for duplicate scroll logic (infinite loop simulation)
-            // If strict parity with product scroll is desired, we rely on scrollLeft += speed
-            const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
+        // 1. Initialize RAF-based auto-scroll (iOS-friendly)
+        let lastTime = 0;
+        const scrollStep = (currentTime) => {
+            if (!state.isPaused) {
+                // Throttle to ~50fps (20ms between frames)
+                if (currentTime - lastTime >= 20) {
+                    const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
 
-            // Loop back if reached end
-            if (scrollWrapper.scrollLeft >= max - 2) {
-                scrollWrapper.scrollTo({ left: 0, behavior: 'auto' }); // Instant jump back
-            } else {
-                scrollWrapper.scrollLeft += state.scrollSpeed;
+                    // Loop back if reached end
+                    if (scrollWrapper.scrollLeft >= max - 2) {
+                        scrollWrapper.scrollTo({ left: 0, behavior: 'auto' }); // Instant jump back
+                    } else {
+                        scrollWrapper.scrollLeft += state.scrollSpeed;
+                    }
+                    lastTime = currentTime;
+                }
             }
-        }, 20); // 50fps approx
+            state.animationFrame = requestAnimationFrame(scrollStep);
+        };
+        state.animationFrame = requestAnimationFrame(scrollStep);
 
         const scheduleResume = () => {
             clearTimeout(state.autoResumeTimeout);
