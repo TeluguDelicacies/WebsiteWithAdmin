@@ -137,11 +137,12 @@ body {
 
 .sales-header .telugu-brand {
     display: block;
-    font-size: 1rem;
+    font-size: 1rem !important;
     font-family: 'Mallanna', sans-serif;
     color: var(--color-secondary-blue);
     line-height: 1;
-    margin-top: 2px;
+    margin-top: -2px;
+    font-weight: 600;
 }
 
 .sales-header nav {
@@ -1290,47 +1291,7 @@ body {
 }
 
 /* Refined Header Buttons */
-.sales-header .nav-btn {
-    background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
-    border: 1px solid #fcd34d;
-    color: #422006;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.sales-header .nav-btn:hover {
-    background: linear-gradient(135deg, #ffe082 0%, #fff9c4 100%);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.sales-header .home-btn {
-    padding: 8px;
-    width: 38px;
-    height: 38px;
-    justify-content: center;
-}
-
-/* Green Buy Now Button Override */
-.nav-btn.whatsapp-btn,
-.buy-btn {
-    background: linear-gradient(135deg, #25D366, #128C7E) !important;
-    border-color: #128C7E !important;
-    color: white !important;
-}
-
-.nav-btn.whatsapp-btn:hover,
-.buy-btn:hover {
-    background: linear-gradient(135deg, #128C7E, #075E54) !important;
-}
+/* Removed yellowish square button and green whatsapp overrides to match main site theme */
 
 .sales-header nav {
     display: flex;

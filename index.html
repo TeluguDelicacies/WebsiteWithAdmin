@@ -86,6 +86,17 @@
                     </button>
                 </nav>
 
+                <!-- Mobile Action Icons (Always Visible) -->
+                <div class="mobile-actions">
+                    <button class="nav-btn share-catalogue-btn" onclick="window.shareCatalogue()"
+                        title="Share Catalogue">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                    <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()" title="Share Page">
+                        <i class="fas fa-arrow-up-from-bracket"></i>
+                    </button>
+                </div>
+
                 <!-- Mobile Hamburger Button -->
                 <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">
                     <span class="hamburger-line"></span>
@@ -98,19 +109,17 @@
         <!-- Mobile Navigation Menu -->
         <div class="mobile-nav" id="mobileNav">
             <div class="mobile-nav-content">
-                <button class="mobile-nav-btn" id="mobileProductsBtn">
+                <button class="mobile-nav-card" id="mobileProductsBtn">
                     <i class="fas fa-shopping-bag"></i>
-                    <span>Products</span>
+                    <span>Our Products</span>
                 </button>
-                <button class="nav-btn mobile-nav-btn" id="mobileContactBtn" aria-label="Contact us">
-                    <i class="fas fa-phone"></i> Contact
+                <button class="mobile-nav-card" id="mobileContactBtn">
+                    <i class="fas fa-phone"></i>
+                    <span>Contact Us</span>
                 </button>
-                <button class="nav-btn mobile-nav-btn whatsapp-btn" id="mobileWhatsappBtn" aria-label="Buy on WhatsApp">
-                    <i class="fab fa-whatsapp"></i> Buy Now
-                </button>
-                <button class="nav-btn mobile-nav-btn share-catalogue-btn" id="mobileShareCatalogueBtn"
-                    onclick="window.shareCatalogue()" aria-label="Share Catalogue">
-                    <i class="fas fa-share-alt"></i> Catalogue
+                <button class="mobile-nav-card whatsapp-card" id="mobileWhatsappBtn">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Buy Now</span>
                 </button>
             </div>
         </div>

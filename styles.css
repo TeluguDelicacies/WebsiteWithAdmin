@@ -437,8 +437,21 @@ Persistent header with hamburger menu and WhatsApp integration
 .logo-area {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   text-decoration: none;
+}
+
+.mobile-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+  margin-right: var(--space-2);
+}
+
+@media (min-width: 1024px) {
+  .mobile-actions {
+    display: none;
+  }
 }
 
 .logo-text-area {
@@ -488,18 +501,19 @@ Persistent header with hamburger menu and WhatsApp integration
   border-radius: var(--radius-md);
   object-fit: contain;
   /* Ensure it fits without cutting */
-  background: transparent;
+  background: transparent !important;
   /* Ensure no background */
   border: none;
-  animation: logoGlowAndWiggle 3s ease-in-out infinite;
+  animation: logoGlowAndWiggle 3s ease-in-out infinite !important;
   transition: all var(--transition-normal);
+  filter: drop-shadow(0 0 8px rgba(0, 119, 182, 0.4));
 }
 
 .logo:hover {
   animation-play-state: paused;
   transform: scale(1.1);
   /* Stronger glow on hover */
-  box-shadow: 0 0 20px rgba(0, 119, 182, 0.6), 0 0 10px rgba(0, 180, 216, 0.5);
+  filter: drop-shadow(0 0 15px rgba(0, 119, 182, 0.6));
 }
 
 .logo-fallback {
@@ -725,48 +739,56 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .mobile-nav-content {
-  padding: var(--space-6) var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  max-width: 600px;
+  padding: var(--space-8) var(--space-4);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  max-width: 400px;
   margin: 0 auto;
 }
 
-.mobile-nav-btn {
+.mobile-nav-card {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: transparent;
-  border: 2px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  text-align: left;
-  color: var(--text-secondary);
-  font-weight: var(--weight-semibold);
-  font-size: var(--font-base);
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  color: var(--color-primary-blue);
+  font-weight: var(--weight-bold);
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
 }
 
-.mobile-nav-btn:hover {
-  background: var(--bg-secondary);
-  border-color: var(--border-medium);
-  color: var(--text-primary);
-  transform: translateX(4px);
+.mobile-nav-card i {
+  font-size: 1.4rem;
+  color: var(--color-primary-blue);
 }
 
-.mobile-nav-btn.whatsapp-btn {
-  background: var(--bg-gradient-primary);
-  color: var(--text-inverse);
+.mobile-nav-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary-blue);
+  background: var(--bg-tertiary);
+}
+
+.mobile-nav-card.whatsapp-card {
+  background: var(--color-primary-blue);
+  color: white;
   border-color: var(--color-primary-blue);
 }
 
-.mobile-nav-btn.whatsapp-btn:hover {
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-secondary-dark));
-  border-color: var(--color-primary-dark);
-  color: var(--text-inverse);
-  transform: translateX(4px);
+.mobile-nav-card.whatsapp-card i {
+  color: white;
+}
+
+.mobile-nav-card.whatsapp-card:hover {
+  background: var(--color-primary-dark);
 }
 
 /* 
