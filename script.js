@@ -2399,18 +2399,25 @@ function renderQuickLayout(products, categories, container) {
 
         // Build Grid Card (Unified)
         const card = document.createElement('div');
-        // Always span full width for consistent alignment
-        const isFullWidth = true;
-        card.className = `quick-card ${isFullWidth ? 'span-full' : ''}`;
-
+        // Use half-width for categories with ≤5 products, full-width otherwise
+        const isSmallCategory = catProducts.length <= 5;
+        card.className = `quick-card ${isSmallCategory ? 'half-width' : 'span-full'}`;
         const productsHTML = renderQuickProductsHTML(catProducts, showMrp);
+
+        // Sub-brand logo HTML - left side, larger
+        const subBrandLogoHTML = cat.sub_brand_logo_url
+            ? `<img src="${cat.sub_brand_logo_url}" class="quick-sub-brand-logo" alt="${cat.sub_brand || 'Sub Brand'}" onerror="this.style.display='none'">`
+            : '';
 
         card.innerHTML = `
             <div class="quick-header-row">
-                <div class="quick-header-text">
-                    <h3>${cat.title}</h3>
-                    ${cat.sub_brand ? `<p class="quick-category-tagline">${cat.sub_brand}</p>` : ''}
-                    <p class="quick-subtitle">${cat.telugu_title || ''}</p>
+                <div class="quick-header-left">
+                    ${subBrandLogoHTML}
+                    <div class="quick-header-text">
+                        <h3>${cat.title}</h3>
+                        ${cat.sub_brand ? `<p class="quick-category-tagline">${cat.sub_brand}</p>` : ''}
+                        <p class="quick-subtitle">${cat.telugu_title || ''}</p>
+                    </div>
                 </div>
                 <div class="quick-header-action">
                     <a href="sales.html?category=${cat.slug}" class="view-all-link">View All <i class="fas fa-chevron-right"></i></a>
@@ -2418,6 +2425,10 @@ function renderQuickLayout(products, categories, container) {
             </div>
             <div class="quick-product-scroll" id="scroll-${cat.slug}">
                 ${productsHTML}
+            </div>
+            <div class="swipe-indicator">
+                <span>Swipe to see more</span>
+                <i class="fas fa-arrow-right"></i>
             </div>
         `;
         wrapper.appendChild(card);
@@ -2428,7 +2439,13 @@ function renderQuickLayout(products, categories, container) {
     // Initialize Drag Scroll for All Lists
     setTimeout(() => {
         // Quick Commerce
-        document.querySelectorAll('.quick-product-scroll').forEach(el => enableDragScroll(el));
+        document.querySelectorAll('.quick-product-scroll').forEach(el => {
+            enableDragScroll(el);
+            // Hide swipe indicator after scroll
+            el.addEventListener('scroll', () => {
+                el.classList.add('scrolled');
+            }, { once: true });
+        });
         // Main Product Ticker
         document.querySelectorAll('.product-scroll').forEach(el => enableDragScroll(el));
         // Testimonials

@@ -2557,14 +2557,14 @@ MASTER CARD LAYOUT (Redesign with Overlay)
 
 
 
-/* Quick Product Item */
+/* Quick Product Item - Increased by 10% */
 .quick-product-item {
-  min-width: 165px;
-  /* Increased 10% from 150px */
-  max-width: 165px;
+  min-width: 182px;
+  /* 10% increase from 165px */
+  max-width: 182px;
   border: 1px solid #f1f5f9;
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 14px;
+  padding: 12px;
   text-align: center;
   transition: transform 0.2s;
   cursor: pointer;
@@ -2573,9 +2573,9 @@ MASTER CARD LAYOUT (Redesign with Overlay)
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 260px;
-  /* Force minimum height */
-  justify-content: space-between;
+  min-height: 286px;
+  /* 10% increase from 260px */
+  justify-content: flex-start;
 }
 
 
@@ -2724,7 +2724,10 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 .quick-layout-grid.unified-layout {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 12px;
+  padding: 0;
+  margin: 0 -12px;
+  /* Negative margin to expand cards into container padding */
 }
 
 .quick-card {
@@ -2732,11 +2735,12 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   /* Warm Gold Gradient */
   border: 1px solid #fcd34d;
   /* Matching border */
-  border-radius: 24px;
-  /* Even rounder */
-  padding: 20px;
-  box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.4);
-  /* Colored shadow to match */
+  border-radius: 28px;
+  /* Even rounder - expanded */
+  padding: 28px;
+  /* Expanded padding */
+  box-shadow: 0 12px 24px -5px rgba(251, 191, 36, 0.45);
+  /* Enhanced shadow */
   margin-bottom: 30px;
 }
 
@@ -2750,11 +2754,17 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   /* Ensure card itself bounds content */
 }
 
+/* Half-width category cards for categories with ≤5 products */
+.quick-card.half-width {
+  grid-column: span 1;
+}
+
 @media (max-width: 1024px) {
   .quick-layout-grid.unified-layout {
     grid-template-columns: 1fr;
     /* Stack vertically on tablet/mobile */
-    gap: 15px;
+    gap: 12px;
+    margin: 0;
   }
 }
 
@@ -2766,9 +2776,8 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 /* Reset container styles to default */
 /* Reset container styles to default */
 .quick-commerce-mode .container {
-  padding-left: 24px;
-  /* Reduced by 250% from 64px */
-  padding-right: 2%;
+  padding-left: 8px;
+  padding-right: 8px;
   width: 100%;
   overflow-x: visible;
 }
@@ -2923,28 +2932,29 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 /* INFO SECTION */
 .quick-product-item-info {
-  flex: 0 0 auto;
-  /* Don't grow, prevent whitespace */
+  flex: 1 0 auto;
+  /* Grow to fill space */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 6px;
+  padding: 8px;
   background: white;
   width: 100%;
   text-align: center;
 }
 
-/* Typography & Spacing - Scaled Down */
+/* Typography & Spacing - Aligned Heights */
 .quick-product-item h4 {
   font-family: 'Outfit', sans-serif;
-  font-size: 0.75rem;
-  /* Increased to fit 132px */
+  font-size: 0.85rem;
+  /* Increased for larger cards */
   font-weight: 700;
   color: var(--color-primary-dark);
-  margin: 0 0 2px 0;
-  line-height: 1.2;
+  margin: 0 0 4px 0;
+  line-height: 1.25;
   letter-spacing: -0.01em;
-
+  height: 42px;
+  /* Fixed height for 2 lines - ensures consistency */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -2954,15 +2964,21 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 .quick-product-item .telugu-name {
   font-family: var(--font-telugu);
-  font-size: 0.6rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  /* Increased from 0.6rem for legibility */
+  font-weight: 600;
   color: var(--color-secondary-blue);
-  line-height: 1.2;
+  /* Reverted to original color */
+  line-height: 1.3;
   margin: 0;
-  padding-top: 1px;
-  white-space: nowrap;
+  padding-top: 2px;
+  height: 22px;
+  /* Fixed height for alignment */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .quick-product-item .weight {
@@ -2974,14 +2990,18 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   /* Often too small to show clearly, but option to keep */
 }
 
-/* Price Row */
+/* Price Row - Fixed at bottom */
 .quick-product-item .price-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  margin-top: 2px;
+  gap: 4px;
+  margin-top: auto;
+  /* Push to bottom */
+  padding-top: 6px;
   line-height: 1;
+  min-height: 24px;
+  /* Fixed height for alignment */
 }
 
 .quick-product-item .price {
@@ -3640,5 +3660,172 @@ Navigation arrows, progress dots, and drag-to-scroll
     /* Increased from 0.6rem */
     line-height: 1.35;
     color: var(--text-secondary);
+  }
+}
+
+/* 
+========================================
+QUICK COMMERCE SCROLL IMPROVEMENTS
+========================================
+*/
+
+/* Desktop: Visible thin scrollbar */
+@media (min-width: 769px) {
+  .quick-product-scroll {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #fcd34d transparent;
+    cursor: grab;
+    padding-bottom: 10px;
+  }
+
+  .quick-product-scroll::-webkit-scrollbar {
+    height: 6px;
+    display: block;
+  }
+
+  .quick-product-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+  }
+
+  .quick-product-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #fcd34d, #f59e0b);
+    border-radius: 3px;
+  }
+
+  .quick-product-scroll::-webkit-scrollbar-thumb:hover {
+    background: #f59e0b;
+  }
+
+  .quick-product-scroll:active {
+    cursor: grabbing;
+  }
+}
+
+/* Mobile: Swipe indicator */
+.swipe-indicator {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .swipe-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: #92400e;
+    padding: 8px 0 4px 0;
+    animation: swipeHint 2s ease-in-out infinite;
+  }
+
+  .swipe-indicator i {
+    font-size: 1rem;
+    animation: swipeArrow 1.5s ease-in-out infinite;
+  }
+
+  @keyframes swipeHint {
+
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes swipeArrow {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    50% {
+      transform: translateX(5px);
+    }
+  }
+
+  /* Hide swipe indicator after user interacts */
+  .quick-product-scroll.scrolled+.swipe-indicator,
+  .swipe-indicator.hidden {
+    display: none;
+  }
+
+  /* Mobile Telugu name adjustments */
+  .quick-product-item .telugu-name {
+    font-size: 0.75rem;
+  }
+
+  /* Mobile product card sizing */
+  .quick-product-item {
+    min-width: 160px;
+    max-width: 160px;
+    min-height: 260px;
+  }
+
+  .quick-product-item h4 {
+    font-size: 0.8rem;
+    height: 38px;
+  }
+}
+
+/* Sub-brand logo in category header - left side, large */
+.quick-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+  gap: 16px;
+}
+
+.quick-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quick-sub-brand-logo {
+  height: 70px;
+  width: auto;
+  max-width: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.quick-header-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.quick-header-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+  .quick-sub-brand-logo {
+    height: 55px;
+    max-width: 70px;
+  }
+
+  .quick-header-row {
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+
+  .quick-header-left {
+    gap: 12px;
   }
 }
