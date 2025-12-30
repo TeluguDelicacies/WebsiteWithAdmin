@@ -1206,10 +1206,12 @@ Styled exactly like product showcase
   width: 95%;
 }
 
-/* Also expand Product Categories (Our Collections) to 95% width */
-#product-categories .container {
-  max-width: 95% !important;
-  width: 95%;
+/* Quick Commerce Mode: Expand Product Categories to 95% width */
+.quick-commerce-mode #product-categories .container {
+  max-width: 95vw !important;
+  width: 95vw !important;
+  padding-left: 2.5vw !important;
+  padding-right: 2.5vw !important;
 }
 
 /* Left align title specifically for testimonials on desktop */
@@ -3705,11 +3707,12 @@ Compact layout to prevent content cutoff
 /* 
 ========================================
 FINAL CONSOLIDATED CATEGORY CARD STYLES
+(NORMAL MODE ONLY - Not Quick Commerce)
 ========================================
 */
 
-/* 1. Grid Container */
-.master-cards-grid {
+/* 1. Grid Container - ONLY for normal mode */
+body:not(.quick-commerce-mode) .master-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 380px));
   /* FIXED width for centering */
@@ -3724,8 +3727,8 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   overflow: visible !important;
 }
 
-/* 2. Card Shell */
-.master-card {
+/* 2. Card Shell - ONLY for normal mode */
+body:not(.quick-commerce-mode) .master-card {
   background: white;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
@@ -3740,13 +3743,13 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   flex-direction: column !important;
 }
 
-.master-card:hover {
+body:not(.quick-commerce-mode) .master-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* 3. Faces - Adjusted for dynamic height */
-.card-face {
+/* 3. Faces - ONLY for normal mode */
+body:not(.quick-commerce-mode) .card-face {
   width: 100%;
   height: auto !important;
   background: #fff;
@@ -3755,17 +3758,17 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   flex-direction: column !important;
 }
 
-.card-front {
+body:not(.quick-commerce-mode) .card-front {
   position: relative !important;
 }
 
-.master-card.show-product .card-front {
+body:not(.quick-commerce-mode) .master-card.show-product .card-front {
   display: none !important;
   /* Fully remove from flow when product is shown */
 }
 
-/* 4. Hero Image + Overlay */
-.card-hero-image {
+/* 4. Hero Image + Overlay - ONLY for normal mode */
+body:not(.quick-commerce-mode) .card-hero-image {
   height: 200px;
   width: 100%;
   border-radius: 20px 20px 0 0;
@@ -3773,14 +3776,14 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   position: relative;
 }
 
-.card-hero-image img {
+body:not(.quick-commerce-mode) .card-hero-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.6s ease;
 }
 
-.sub-brand-overlay {
+body:not(.quick-commerce-mode) .sub-brand-overlay {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -3794,22 +3797,22 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   justify-content: center;
 }
 
-.sub-brand-logo-overlay-img {
+body:not(.quick-commerce-mode) .sub-brand-logo-overlay-img {
   height: 26px;
   width: auto;
   max-width: 80px;
   object-fit: contain;
 }
 
-.sub-brand-text {
+body:not(.quick-commerce-mode) .sub-brand-text {
   font-size: 0.75rem;
   font-weight: 800;
   color: #b45309;
   text-transform: uppercase;
 }
 
-/* 5. Card Body Content */
-.card-body {
+/* 5. Card Body Content - ONLY for normal mode */
+body:not(.quick-commerce-mode) .card-body {
   padding: 1.25rem 1.25rem 2rem 1.25rem !important;
   /* Extra bottom cushion for dropdown */
   display: flex !important;
@@ -3819,14 +3822,14 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   /* No stretching */
 }
 
-.card-title {
+body:not(.quick-commerce-mode) .card-title {
   font-size: 1.35rem !important;
   color: #1a1a1a !important;
   font-weight: 700 !important;
   margin: 0 !important;
 }
 
-.telugu-subtitle {
+body:not(.quick-commerce-mode) .telugu-subtitle {
   font-family: 'Noto Sans Telugu', sans-serif !important;
   font-size: 1rem !important;
   color: #0369a1 !important;
@@ -3834,7 +3837,7 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   margin: 0 !important;
 }
 
-.card-desc {
+body:not(.quick-commerce-mode) .card-desc {
   font-size: 0.95rem !important;
   color: #475569 !important;
   line-height: 1.5 !important;
@@ -3844,14 +3847,14 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   display: block !important;
 }
 
-/* 6. Dropdown Enhancement */
-.dropdown-wrapper {
+/* 6. Dropdown Enhancement - ONLY for normal mode */
+body:not(.quick-commerce-mode) .dropdown-wrapper {
   margin-top: 0.5rem !important;
   position: relative !important;
   overflow: visible !important;
 }
 
-.product-select {
+body:not(.quick-commerce-mode) .product-select {
   width: 100% !important;
   appearance: none !important;
   background-color: #f8fafc !important;
@@ -3870,24 +3873,21 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
   background-size: 16px !important;
 }
 
-/* 7. Card Back (Overlay selection) - RELATIVE to push page down */
-.card-back {
+/* 7. Card Back - ONLY for normal mode */
+body:not(.quick-commerce-mode) .card-back {
   position: relative !important;
   width: 100%;
   height: auto !important;
   z-index: 20;
   display: none !important;
-  /* Hidden from flow by default */
   background: white;
   padding: 1.5rem;
   border-radius: 20px;
   overflow: hidden;
-  /* Prevent spill */
 }
 
-.master-card.show-product .card-back {
+body:not(.quick-commerce-mode) .master-card.show-product .card-back {
   display: flex !important;
-  /* Injected into flow when product is active */
   opacity: 1 !important;
   visibility: visible !important;
 }
