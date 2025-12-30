@@ -2734,11 +2734,18 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 /* Half-width category cards for categories with ≤5 products */
 .quick-card.half-width {
   grid-column: span 1;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .quick-card.half-width .quick-product-scroll {
   overflow-x: auto;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.quick-card.half-width .quick-product-item {
+  flex: 0 0 auto;
+  /* Don't grow or shrink, use auto width */
 }
 
 @media (max-width: 1024px) {
