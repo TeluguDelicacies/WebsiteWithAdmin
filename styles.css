@@ -1172,6 +1172,12 @@ Styled exactly like product showcase
   width: 95%;
 }
 
+/* Also expand Product Categories (Our Collections) to 95% width */
+#product-categories .container {
+  max-width: 95% !important;
+  width: 95%;
+}
+
 /* Left align title specifically for testimonials on desktop */
 @media (min-width: 768px) {
   .testimonials-showcase .section-title {
