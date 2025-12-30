@@ -895,14 +895,17 @@ Enhanced visual appeal with modern design
 .telugu-subtitle {
   display: block;
   font-family: var(--font-telugu);
-  font-size: 0.85em;
+  font-size: 0.75em;
+  /* Reduced from 0.85em */
   font-weight: 500;
   color: var(--color-primary-yellow);
   margin-top: 0.5rem;
-  line-height: 1.4;
+  line-height: 1.2;
   opacity: 1;
   text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  /* Force single line */
 }
 
 .hero-cta {
