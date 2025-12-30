@@ -719,13 +719,19 @@ function initializeShowcaseMode() {
         touchDecided = false;
     }, { passive: true });
 
-    // Scroll wheel intent detection
-    scrollContainer.addEventListener('wheel', (e) => {
+    // Scroll wheel intent detection - REMOVED per user request ("stop responding to vertical scroll")
+    /* scrollContainer.addEventListener('wheel', (e) => {
         activateManualMode();
         scrollContainer.scrollLeft += e.deltaY * 0.5;
-        setupAutoReturn();
-        e.preventDefault();
-    });
+        
+        // Prevent default only if we're actually scrolling horizontally 
+        // to allow vertical page scrolling
+        const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+        if ((scrollContainer.scrollLeft > 0 && e.deltaY < 0) || 
+            (scrollContainer.scrollLeft < maxScroll && e.deltaY > 0)) {
+            // e.preventDefault(); // Don't block vertical scroll of page, just don't hijack it
+        }
+    }, { passive: true }); */
 
     // Focus intent detection (accessibility)
     scrollContainer.addEventListener('focus', () => {
@@ -1024,12 +1030,19 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
                     for (let i = 0; i < dotCount; i++) {
                         const dot = document.createElement('button');
                         dot.className = 'progress-dot';
-                        dot.addEventListener('click', () => {
+                        dot.ariaLabel = `Go to slide ${i + 1}`;
+
+                        const navigateTo = (e) => {
+                            if (e.cancelable) e.preventDefault(); // Prevent double-fire
                             state.isPaused = true;
                             const max = scrollWrapper.scrollWidth - containerWidth;
                             scrollWrapper.scrollTo({ left: max * (i / (dotCount - 1)), behavior: 'smooth' });
                             scheduleResume();
-                        });
+                        };
+
+                        dot.addEventListener('click', navigateTo);
+                        dot.addEventListener('touchend', navigateTo, { passive: false });
+
                         progressContainer.appendChild(dot);
                     }
                     // Update dots
