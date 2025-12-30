@@ -97,6 +97,12 @@ body {
     pointer-events: none;
     box-shadow: var(--shadow-lg);
     z-index: 100;
+
+    /* Compact tooltip for smaller screens */
+    @media (max-width: 768px) {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+    }
 }
 
 .sales-header .nav-btn::after {

@@ -30,16 +30,14 @@
             </div>
         </a>
         <nav>
-            <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()" title="Share Page"
-                data-tooltip="Share Page">
+            <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()" data-tooltip="Share Page">
                 <i class="fas fa-arrow-up-from-bracket"></i>
             </button>
-            <button class="nav-btn cart-btn" id="cartBtn" onclick="window.toggleCartDrawer()" title="Cart"
-                data-tooltip="View Cart">
+            <button class="nav-btn cart-btn" id="cartBtn" onclick="window.toggleCartDrawer()" data-tooltip="View Cart">
                 <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count" id="cartCount" style="display:none">0</span>
+                <span class="cart-count">0</span>
             </button>
-            <a href="index.html" class="nav-btn home-btn" title="Home" data-tooltip="Back Home">
+            <a href="index.html" class="nav-btn home-btn" data-tooltip="Back Home">
                 <i class="fas fa-home"></i>
             </a>
         </nav>
@@ -252,6 +250,14 @@
                     // Also set favicon if available, otherwise use logo
                     const faviconLink = document.getElementById('dynamic-favicon');
                     faviconLink.href = state.settings.favicon_url || state.settings.logo_url;
+                }
+
+                // Populate Telugu Brand Name in Header
+                if (state.settings.site_title_telugu) {
+                    const teluguBrand = document.getElementById('header-telugu-brand');
+                    if (teluguBrand) {
+                        teluguBrand.textContent = state.settings.site_title_telugu;
+                    }
                 }
 
                 handleRouting();
