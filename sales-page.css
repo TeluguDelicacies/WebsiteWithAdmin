@@ -147,7 +147,8 @@ body {
     font-family: 'Mallanna', sans-serif;
     color: var(--color-secondary-blue);
     line-height: 1;
-    margin-top: -2px;
+    margin-top: 4px;
+    /* Increased gap */
     font-weight: 600;
 }
 

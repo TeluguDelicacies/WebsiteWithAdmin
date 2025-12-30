@@ -28,14 +28,18 @@ window.shareCatalogue = async function () {
         // 1. Mobile Sharing (Direct File Attachment)
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile && navigator.share) {
-            const file = new File([blob], 'catalogue.jpg', { type: blob.type });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    title: shareMessage, // Using message as title for better app support
-                    text: shareMessage,  // Using message as text as well
-                    files: [file]
-                });
-                return;
+            try {
+                const file = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'Telugu Delicacies Catalogue',
+                        text: shareMessage,
+                        files: [file]
+                    });
+                    return;
+                }
+            } catch (shareErr) {
+                console.error('Direct file share failed, falling back to URL share:', shareErr);
             }
         }
 
@@ -73,22 +77,22 @@ window.shareCatalogue = async function () {
 // GLOBAL SHARE CURRENT PAGE FUNCTION
 window.shareCurrentPage = function () {
     const currentUrl = window.location.href;
-    const pageTitle = document.title || 'Telugu Delicacies';
-    const shareMessage = `Check out ${pageTitle} at Telugu Delicacies!\n${currentUrl}`;
+    const shareText = "Check out Telugu Delicacies for authentic South Indian treats! 😋";
+    const fullMessage = `${shareText}\n${currentUrl}`;
 
     // Mobile: Use native share if available
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (isMobile && navigator.share) {
         navigator.share({
-            title: pageTitle,
-            text: shareMessage,
-            url: currentUrl
+            title: 'Telugu Delicacies',
+            text: fullMessage
+            // Note: url: currentUrl is removed to prevent duplicate links in WhatsApp/Mobile Share
         }).catch(err => console.log('Share cancelled'));
         return;
     }
 
     // Fallback: Open WhatsApp with URL
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
     window.open(whatsappUrl, '_blank');
 };
 
