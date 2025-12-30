@@ -209,15 +209,28 @@
         <section class="testimonials-showcase section">
             <div class="container">
                 <h2 class="section-title">What Our Customers Say</h2>
-                <div class="scroll-container">
-                    <div class="testimonials-scroll" id="testimonialsScroll">
-                        <!-- Testimonials will be loaded dynamically -->
-                        <div class="testimonial-item">
-                            <div class="testimonial-content">
-                                <p style="text-align: center;">Loading reviews...</p>
+                <div class="carousel-wrapper">
+                    <!-- Left Navigation Arrow -->
+                    <button class="carousel-arrow carousel-prev" id="testimonialPrev"
+                        aria-label="Previous testimonials">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+
+                    <div class="product-scroll-wrapper" id="testimonialScrollWrapper">
+                        <div class="testimonials-scroll" id="testimonialsScroll">
+                            <!-- Testimonials will be loaded dynamically -->
+                            <div class="testimonial-item">
+                                <div class="testimonial-content">
+                                    <p style="text-align: center;">Loading reviews...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Right Navigation Arrow -->
+                    <button class="carousel-arrow carousel-next" id="testimonialNext" aria-label="Next testimonials">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </section>

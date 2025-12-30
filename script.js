@@ -940,33 +940,48 @@ function initializeCarouselDrag() {
 /**
  * Master function to initialize all carousel controls
  */
-function initializeCarouselControls() {
-    const scrollWrapper = document.getElementById('productScrollWrapper') || document.querySelector('.product-scroll-wrapper');
-    const productScroll = document.getElementById('productScroll');
-    const prevBtn = document.getElementById('carouselPrev');
-    const nextBtn = document.getElementById('carouselNext');
-    const progressContainer = document.getElementById('carouselProgress');
+/**
+ * Generic Carousel Setup Function
+ * Replaces hardcoded logic to allow multiple carousels (Products, Testimonials)
+ */
+function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed = 1 }) {
+    const scrollWrapper = document.getElementById(wrapperId);
+    const scrollContent = document.getElementById(contentId);
+    const prevBtn = document.getElementById(prevId);
+    const nextBtn = document.getElementById(nextId);
+    const progressContainer = document.getElementById(progressId);
 
-    if (!scrollWrapper || !productScroll) return;
+    if (!scrollWrapper || !scrollContent) return;
 
-    // Wait for products to load
+    // State specific to this carousel instance
+    const state = {
+        scrollInterval: null,
+        isPaused: false,
+        autoResumeTimeout: null,
+        scrollSpeed: speed
+    };
+
+    // Wait for content load
     setTimeout(() => {
-        // 1. Initialize JS-based auto-scroll with setInterval
-        carouselState.scrollInterval = setInterval(() => {
-            if (carouselState.isPaused) return;
+        // 1. Initialize JS-based auto-scroll
+        state.scrollInterval = setInterval(() => {
+            if (state.isPaused) return;
+            // Check for duplicate scroll logic (infinite loop simulation)
+            // If strict parity with product scroll is desired, we rely on scrollLeft += speed
             const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-            if (scrollWrapper.scrollLeft >= max - 5) {
-                scrollWrapper.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                scrollWrapper.scrollLeft += carouselState.scrollSpeed;
-            }
-        }, 30);
 
-        // Helper to schedule auto-resume
+            // Loop back if reached end
+            if (scrollWrapper.scrollLeft >= max - 2) {
+                scrollWrapper.scrollTo({ left: 0, behavior: 'auto' }); // Instant jump back
+            } else {
+                scrollWrapper.scrollLeft += state.scrollSpeed;
+            }
+        }, 20); // 50fps approx
+
         const scheduleResume = () => {
-            clearTimeout(carouselState.autoResumeTimeout);
-            carouselState.autoResumeTimeout = setTimeout(() => {
-                carouselState.isPaused = false;
+            clearTimeout(state.autoResumeTimeout);
+            state.autoResumeTimeout = setTimeout(() => {
+                state.isPaused = false;
             }, 2500);
         };
 
@@ -974,16 +989,17 @@ function initializeCarouselControls() {
         if (prevBtn && nextBtn) {
             const scrollAmount = () => scrollWrapper.clientWidth * 0.35;
             prevBtn.addEventListener('click', () => {
-                carouselState.isPaused = true;
+                state.isPaused = true;
                 scrollWrapper.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
                 scheduleResume();
             });
             nextBtn.addEventListener('click', () => {
-                carouselState.isPaused = true;
+                state.isPaused = true;
                 scrollWrapper.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
                 scheduleResume();
             });
-            // Update arrow states on scroll
+
+            // Arrow state update
             const updateArrows = () => {
                 const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
                 prevBtn.classList.toggle('disabled', scrollWrapper.scrollLeft <= 5);
@@ -993,12 +1009,13 @@ function initializeCarouselControls() {
             updateArrows();
         }
 
-        // 3. Progress dots
+        // 3. Progress dots (Optional)
         if (progressContainer) {
-            const cards = productScroll.children;
+            const cards = scrollContent.children;
             if (cards.length > 0) {
                 const containerWidth = scrollWrapper.clientWidth;
-                const cardWidth = cards[0]?.offsetWidth || 150;
+                // Estimate card width
+                const cardWidth = cards[0]?.offsetWidth || 220;
                 const cardsPerPage = Math.max(1, Math.floor(containerWidth / (cardWidth + 20)));
                 const dotCount = Math.min(Math.ceil(cards.length / cardsPerPage), 8);
 
@@ -1008,20 +1025,19 @@ function initializeCarouselControls() {
                         const dot = document.createElement('button');
                         dot.className = 'progress-dot';
                         dot.addEventListener('click', () => {
-                            carouselState.isPaused = true;
+                            state.isPaused = true;
                             const max = scrollWrapper.scrollWidth - containerWidth;
                             scrollWrapper.scrollTo({ left: max * (i / (dotCount - 1)), behavior: 'smooth' });
                             scheduleResume();
                         });
                         progressContainer.appendChild(dot);
                     }
-
-                    // Update active dot on scroll
+                    // Update dots
                     const updateDots = () => {
                         const dots = progressContainer.querySelectorAll('.progress-dot');
                         const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
                         const percent = max > 0 ? scrollWrapper.scrollLeft / max : 0;
-                        const active = Math.round(percent * (dots.length - 1));
+                        const active = Math.min(dots.length - 1, Math.max(0, Math.round(percent * (dots.length - 1))));
                         dots.forEach((d, i) => d.classList.toggle('active', i === active));
                     };
                     scrollWrapper.addEventListener('scroll', updateDots, { passive: true });
@@ -1031,11 +1047,37 @@ function initializeCarouselControls() {
         }
 
         // 4. Pause on hover/touch
-        scrollWrapper.addEventListener('mouseenter', () => { carouselState.isPaused = true; });
+        scrollWrapper.addEventListener('mouseenter', () => { state.isPaused = true; });
         scrollWrapper.addEventListener('mouseleave', () => { scheduleResume(); });
-        scrollWrapper.addEventListener('touchstart', () => { carouselState.isPaused = true; }, { passive: true });
+        scrollWrapper.addEventListener('touchstart', () => { state.isPaused = true; }, { passive: true });
         scrollWrapper.addEventListener('touchend', () => { scheduleResume(); }, { passive: true });
-    }, 1200);
+
+    }, 1000);
+}
+
+/**
+ * Master function to initialize all carousel controls
+ */
+function initializeCarouselControls() {
+    // 1. Setup Product Carousel (Existing)
+    setupCarousel({
+        wrapperId: 'productScrollWrapper',
+        contentId: 'productScroll',
+        prevId: 'carouselPrev',
+        nextId: 'carouselNext',
+        progressId: 'carouselProgress',
+        speed: 1 // Base speed
+    });
+
+    // 2. Setup Testimonial Carousel (New - Replicated Logic)
+    setupCarousel({
+        wrapperId: 'testimonialScrollWrapper',
+        contentId: 'testimonialsScroll',
+        prevId: 'testimonialPrev',
+        nextId: 'testimonialNext',
+        progressId: null, // No dots requested for now
+        speed: 1 // Start with same speed, adjustable
+    });
 }
 
 /*

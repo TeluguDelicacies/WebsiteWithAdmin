@@ -1166,6 +1166,12 @@ Styled exactly like product showcase
   background: linear-gradient(180deg, #E6EEF8 0%, #FFFFFF 100%);
 }
 
+.testimonials-showcase .container {
+  max-width: 95% !important;
+  /* User requested 95% viewport width */
+  width: 95%;
+}
+
 /* Left align title specifically for testimonials on desktop */
 @media (min-width: 768px) {
   .testimonials-showcase .section-title {
@@ -1178,11 +1184,18 @@ Styled exactly like product showcase
 .testimonials-scroll {
   display: flex;
   gap: var(--space-6);
-  animation: testimonials-scroll 50s linear infinite;
+  /* animation: testimonials-scroll 50s linear infinite; REMOVED for JS control */
   will-change: transform;
   padding: var(--space-4);
   /* Add padding for shadow visibility */
+  width: max-content;
+  /* Ensure track spans full width of duplicated items */
 }
+
+/* .testimonials-scroll:hover {
+  animation-play-state: paused;
+} REMOVED - Handled by JS */
+/* Consistent with product scroll */
 
 @keyframes testimonials-scroll {
   0% {
