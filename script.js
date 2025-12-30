@@ -2102,10 +2102,11 @@ function renderProducts(products, categories) {
             });
 
             // Duplicate for seamless scrolling
+            /* DISABLED per user request to fix progress dots
             if (filteredCarouselProducts.length > 0) {
                 const items = Array.from(productScroll.children);
                 items.forEach(item => productScroll.appendChild(item.cloneNode(true)));
-            }
+            } */
         }
     }
 

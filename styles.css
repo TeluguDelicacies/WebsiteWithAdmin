@@ -948,7 +948,8 @@ Enhanced product cards and modern styling
 .product-showcase {
   padding: 15px 0;
   /* Reduced padding to ensure section is only ~10% taller than cards */
-  background: linear-gradient(180deg, #FFFFFF 0%, #F0F7FF 100%);
+  background: #FFFFFF;
+  /* White background per user request */
   position: relative;
   overflow: hidden;
   min-height: auto;
@@ -995,7 +996,8 @@ Enhanced product cards and modern styling
   /* Desktop Width */
   aspect-ratio: 3 / 4;
   /* Portrait 3:4 Ratio */
-  background: var(--bg-primary);
+  background: #FFFFFF;
+  /* White background per user request */
   border-radius: var(--radius-lg);
   padding: 0;
   /* No padding on card itself, managed by children */
@@ -3536,7 +3538,8 @@ Navigation arrows, progress dots, and drag-to-scroll
 }
 
 .product-showcase>.container {
-  max-width: 100%;
+  max-width: 95% !important;
+  width: 95%;
   padding-left: 0;
   padding-right: 0;
 }
