@@ -649,29 +649,21 @@
                     const packWeight = parseWeight(currentVariant.quantity);
                     const sSize = parseWeight(servingSize);
                     if (packWeight > 0 && sSize > 0) {
-                        displayedServings = Math.round(packWeight / sSize); // Integer servings
+                        displayedServings = Math.round(packWeight / sSize);
                     }
                 }
 
-                let grid = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">`;
+                // Build inline text with separators
+                const items = [];
 
-                // 1. Serving Size
-                if (servingSize) {
-                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Serving
-                    Size</strong> <br> ${servingSize}</div>`;
-                }
-                // 2. Total Servings
-                if (displayedServings) {
-                    grid += `<div style="padding:8px; background:white; border-radius:6px; font-size:0.8rem;"><strong>Total
-                    Servings</strong> <br> ~${displayedServings}</div>`;
-                }
+                if (servingSize) items.push(`<strong>Serving:</strong> ${servingSize}`);
+                if (displayedServings) items.push(`<strong>~${displayedServings} servings</strong>`);
 
-                // Field Mapping (Order 3-10)
+                // Field Mapping
                 const fields = [
                     { k: ['calories', 'Calories'], label: 'Calories' },
                     { k: ['protein', 'Protein'], label: 'Protein' },
-                    { k: ['total_fat', 'fat', 'Total Fat', 'Fat'], label: 'Total Fat' },
-                    { k: ['saturated_fat', 'saturatedFat', 'Saturated Fat'], label: 'Saturated Fat' },
+                    { k: ['total_fat', 'fat', 'Total Fat', 'Fat'], label: 'Fat' },
                     { k: ['carbs', 'Carbs'], label: 'Carbs' },
                     { k: ['fiber', 'Fiber'], label: 'Fiber' },
                     { k: ['sugars', 'sugar', 'Sugars'], label: 'Sugar' },
@@ -681,15 +673,12 @@
                 fields.forEach(f => {
                     const val = getVal(f.k);
                     if (val !== null) {
-                        grid += `<div
-                style="padding:8px 10px; background:white; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
-                <strong>${f.label}</strong> <span>${val}</span>
-            </div>`;
+                        items.push(`<strong>${f.label}:</strong> ${val}`);
                     }
                 });
 
-                grid += `</div>`;
-                return grid;
+                // Return as inline wrapped text with bullet separators
+                return `<p style="font-size:0.85rem; line-height:1.8; color:var(--text-secondary); margin:0;">${items.join(' <span style="color:#ccc;">•</span> ')}</p>`;
             };
 
             if (nutritionData) {
