@@ -22,6 +22,13 @@ Modern color palette with semantic naming
   --color-secondary-blue: #00B4D8;
   --color-accent-blue: #90E0EF;
 
+  /* Primary Yellow/Gold Theme (Phase 12) */
+  --color-primary-yellow: #FBC02D;
+  --color-secondary-yellow: #FFF176;
+  --color-light-yellow: #FFFDE7;
+  --color-dark-yellow: #F9A825;
+  --color-butter: #FFF9C4;
+
   /* Derived Color Variations */
   --color-primary-dark: #005577;
   --color-primary-light: #339FCC;
@@ -55,9 +62,10 @@ Modern color palette with semantic naming
   --bg-secondary: var(--color-gray-50);
   --bg-tertiary: var(--color-gray-100);
   --bg-dark: var(--color-gray-900);
-  --bg-gradient-primary: linear-gradient(135deg, var(--color-primary-blue), var(--color-secondary-blue));
-  --bg-gradient-light: linear-gradient(135deg, var(--color-accent-light), var(--color-white));
-  --bg-gradient-hero: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #BAE6FD 100%);
+  --bg-gradient-primary: linear-gradient(135deg, var(--color-primary-yellow), var(--color-dark-yellow));
+  --bg-gradient-yellow: linear-gradient(135deg, var(--color-primary-yellow), var(--color-dark-yellow));
+  --bg-gradient-light: linear-gradient(135deg, var(--color-light-yellow), var(--color-white));
+  --bg-gradient-hero: linear-gradient(135deg, #FFFDE7 0%, #FFF9C4 50%, #FFF176 100%);
 
   /* Text Colors */
   --text-primary: var(--color-gray-900);
@@ -828,11 +836,27 @@ Enhanced visual appeal with modern design
   right: 0;
   bottom: 0;
   background-image:
-    linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.7) 50%, rgba(51, 65, 85, 0.6) 100%),
-    radial-gradient(ellipse at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  backdrop-filter: blur(3px) saturate(120%);
-  -webkit-backdrop-filter: blur(3px) saturate(120%);
+    /* Sophisticated overlay: Dark on the left (for text), fading to transparent on the right */
+    linear-gradient(90deg,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.4) 40%,
+      rgba(0, 0, 0, 0.15) 70%,
+      transparent 100%);
+  /* Blur removed as per user request to keep image clear */
+  /* backdrop-filter: blur(3px) saturate(120%); - DISABLED */
+  z-index: 1;
   pointer-events: none;
+}
+
+/* Mobile specific overlay for full-width readability */
+@media (max-width: 768px) {
+  .hero::before {
+    background-image:
+      linear-gradient(180deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.4) 60%,
+        rgba(0, 0, 0, 0.7) 100%);
+  }
 }
 
 .hero-container {
@@ -846,26 +870,26 @@ Enhanced visual appeal with modern design
 }
 
 .hero-title {
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  /* Slightly reduced */
-  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
   line-height: 1.1;
   margin-bottom: 1rem;
-  color: var(--color-accent-light);
+  color: var(--color-white);
   text-align: left;
-  letter-spacing: -0.02em;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  letter-spacing: -0.03em;
+  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 0, 0, 0.4);
 }
 
 .hero-subtitle {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  font-weight: 400;
-  line-height: 1.6;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.5;
   color: var(--color-white);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   text-align: left;
-  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
-  opacity: 0.9;
+  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.9);
+  opacity: 1;
+  max-width: 500px;
 }
 
 .telugu-subtitle {
@@ -873,7 +897,7 @@ Enhanced visual appeal with modern design
   font-family: var(--font-telugu);
   font-size: 0.85em;
   font-weight: 500;
-  color: var(--color-accent-blue);
+  color: var(--color-primary-yellow);
   margin-top: 0.5rem;
   line-height: 1.4;
   opacity: 1;
@@ -885,7 +909,7 @@ Enhanced visual appeal with modern design
   display: none;
   align-items: center;
   gap: var(--space-3);
-  background: var(--bg-gradient-primary);
+  background: var(--bg-gradient-yellow);
   color: var(--text-inverse);
   border: none;
   padding: var(--space-4) var(--space-8);
@@ -895,7 +919,7 @@ Enhanced visual appeal with modern design
   font-weight: var(--weight-semibold);
   cursor: pointer;
   transition: all var(--transition-normal);
-  box-shadow: var(--shadow-primary);
+  box-shadow: 0 4px 15px rgba(251, 192, 45, 0.4);
 }
 
 .hero-cta:hover {
@@ -1035,27 +1059,9 @@ Enhanced product cards and modern styling
   text-align: center;
 }
 
-.product-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--bg-gradient-primary);
-  opacity: 0;
-  transition: opacity var(--transition-normal);
-}
-
 .product-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-color: var(--color-secondary-blue);
-  /* Elegant Blue on hover */
-}
-
-.product-item:hover::before {
-  opacity: 1;
 }
 
 .product-item img {
@@ -1169,8 +1175,8 @@ Modern card design with enhanced styling
 .products-section {
   padding: 30px 0;
   /* Reduced top padding */
-  /* Seamless flow: Soft Blue -> Light Gray-Blue */
-  background: linear-gradient(180deg, #F0F7FF 0%, #E6EEF8 100%);
+  /* Seamless flow: White -> Light Yellow */
+  background: linear-gradient(180deg, #FFFFFF 0%, var(--color-light-yellow) 100%);
   position: relative;
 }
 
@@ -1215,15 +1221,24 @@ Styled exactly like product showcase
   }
 }
 
+.testimonial-scroll-wrapper {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  cursor: grab;
+}
+
+.testimonial-scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
 .testimonials-scroll {
   display: flex;
   gap: var(--space-6);
-  /* animation: testimonials-scroll 50s linear infinite; REMOVED for JS control */
-  will-change: transform;
   padding: var(--space-4);
-  /* Add padding for shadow visibility */
   width: max-content;
-  /* Ensure track spans full width of duplicated items */
 }
 
 /* .testimonials-scroll:hover {
@@ -1390,8 +1405,8 @@ Modern form design with enhanced UX
 */
 .contact-form-section {
   padding: var(--space-24) 0;
-  /* Seamless flow: White -> Brand Blue Tint (leading to dark footer) */
-  background: linear-gradient(180deg, #FFFFFF 0%, #D8EAF9 100%);
+  /* Seamless flow: White -> Butter Yellow */
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF9C4 100%);
   position: relative;
 }
 
@@ -1421,13 +1436,14 @@ Modern form design with enhanced UX
   z-index: 1;
 }
 
-/* Enhanced section transitions */
+/* Enhanced section transitions - Yellow Theme */
 .hero+.product-showcase {
-  border-top: 4px solid var(--color-primary-blue);
+  border-top: 5px solid var(--color-primary-yellow);
+  box-shadow: 0 -10px 30px rgba(251, 192, 45, 0.15);
 }
 
 .product-showcase+.products-section {
-  border-top: 4px solid var(--color-secondary-blue);
+  border-top: 5px solid var(--color-secondary-yellow);
 }
 
 /* Unified Yellow Theme Sections */
@@ -3552,21 +3568,10 @@ Navigation arrows, progress dots, and drag-to-scroll
   scroll-snap-type: x proximity;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .carousel-progress {
-    gap: 6px;
-    padding: 12px 0;
-  }
-
-  .progress-dot {
-    width: 8px;
-    height: 8px;
-  }
-
-  .progress-dot.active {
-    width: 18px;
-  }
+/* Progress Indicators - Hidden globally per user request */
+.carousel-progress,
+.progress-dot {
+  display: none !important;
 }
 
 /* Product Showcase - Edge to Edge */
@@ -3804,8 +3809,8 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
 /* Mobile scroll optimization */
 .product-scroll-wrapper,
 .testimonial-scroll-wrapper {
-  touch-action: pan-x pan-y;
-  /* Allow both directions */
+  touch-action: pan-y !important;
+  /* Forces vertical scroll for page, prevents accidental horizontal shifts */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -3910,5 +3915,117 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
   .quick-card .quick-subtitle {
     font-size: 0.8rem;
     margin: 0;
+  }
+}
+
+/* Smart Filter Styles */
+.custom-filter-container {
+  position: relative;
+  font-family: var(--font-primary);
+}
+
+.filter-trigger {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.filter-trigger:hover {
+  border-color: var(--color-primary-blue);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.filter-trigger .filter-icon {
+  color: var(--color-primary-blue);
+  font-size: 0.9rem;
+}
+
+.filter-trigger .chevron {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.filter-trigger.active {
+  border-color: var(--color-primary-blue);
+  background: #f0f9ff;
+}
+
+.filter-trigger.active .chevron {
+  transform: rotate(180deg);
+}
+
+.filter-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 240px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-light);
+  z-index: 100;
+  overflow: hidden;
+  animation: slideDown 0.2s ease forwards;
+  transform-origin: top left;
+}
+
+.filter-dropdown.show {
+  display: block;
+}
+
+.filter-option {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.filter-option:hover {
+  background: #f8fafc;
+  color: var(--color-primary-blue);
+}
+
+.filter-option.selected {
+  background: #f0f9ff;
+  color: var(--color-primary-blue);
+  font-weight: 600;
+}
+
+.filter-option .check-icon {
+  opacity: 0;
+  color: var(--color-primary-blue);
+  font-size: 0.8rem;
+}
+
+.filter-option.selected .check-icon {
+  opacity: 1;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

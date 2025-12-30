@@ -1015,8 +1015,8 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
             updateArrows();
         }
 
-        // 3. Progress dots (Optional)
-        if (progressContainer) {
+        // 3. Progress dots (DISABLED per user request)
+        if (false && progressContainer) {
             const cards = scrollContent.children;
             if (cards.length > 0) {
                 const containerWidth = scrollWrapper.clientWidth;

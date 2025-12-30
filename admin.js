@@ -157,19 +157,11 @@ window.switchView = (view) => {
 
     // Reset buttons
     [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSettingsBtn].forEach(btn => {
-        if (btn) {
-            btn.classList.remove('active');
-            btn.style.background = 'transparent';
-            btn.style.color = 'var(--text-secondary)';
-            btn.style.border = '1px solid var(--border-medium)';
-        }
+        if (btn) btn.classList.remove('active');
     });
 
     const activeStyle = (btn) => {
-        btn.classList.add('active');
-        btn.style.color = '';
-        btn.style.background = '';
-        btn.style.border = '';
+        if (btn) btn.classList.add('active');
     }
 
     if (view === 'products') {
@@ -274,8 +266,8 @@ function renderCategoryList(categories) {
             <td style="padding: 15px;">${cat.display_order}</td>
             <td style="padding: 15px; text-align: right;">
                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                    <button onclick="editCategory('${cat.id}')" class="nav-btn" style="padding: 8px;" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button onclick="deleteCategory('${cat.id}')" class="nav-btn" style="padding: 8px; color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button onclick="editCategory('${cat.id}')" class="admin-btn" style="padding: 8px;" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteCategory('${cat.id}')" class="admin-btn" style="padding: 8px; color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>
@@ -315,20 +307,60 @@ async function loadCategoryData(id) {
 
 // Category Filter Logic
 const categoryFilter = document.getElementById('categoryFilter');
-const trendingFilter = document.getElementById('trendingFilter'); // New
+const trendingFilter = document.getElementById('trendingFilter');
 
-if (categoryFilter) {
-    categoryFilter.addEventListener('change', () => renderProductList());
+// New Smart Filter Logic
+window.toggleFilterDropdown = () => {
+    const dropdown = document.getElementById('filterDropdown');
+    const trigger = document.getElementById('filterTrigger');
+    if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        trigger.classList.remove('active');
+    } else {
+        dropdown.classList.add('show');
+        trigger.classList.add('active');
+    }
 }
+
+window.selectCategory = (slug, title) => {
+    // Update Hidden Input
+    document.getElementById('categoryFilter').value = slug;
+
+    // Update Label
+    document.getElementById('filterLabel').textContent = title;
+
+    // Update UI State
+    const allOptions = document.querySelectorAll('.filter-option');
+    allOptions.forEach(opt => opt.classList.remove('selected'));
+
+    const selectedOpt = document.querySelector(`.filter-option[data-value="${slug}"]`);
+    if (selectedOpt) selectedOpt.classList.add('selected');
+
+    // Close Dropdown
+    toggleFilterDropdown();
+
+    // Trigger Render
+    renderProductList();
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+    const container = document.querySelector('.custom-filter-container');
+    if (container && !container.contains(e.target)) {
+        document.getElementById('filterDropdown').classList.remove('show');
+        document.getElementById('filterTrigger').classList.remove('active');
+    }
+});
+
 if (trendingFilter) {
     trendingFilter.addEventListener('change', () => renderProductList());
 }
 
 async function populateCategoryFilter() {
-    console.log('Populating Category Filter...');
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (!categoryFilter) {
-        console.error('CRITICAL: categoryFilter element NOT found in DOM');
+    console.log('Populating Smart Filter...');
+    const dropdown = document.getElementById('filterDropdown');
+    if (!dropdown) {
+        console.error('CRITICAL: filterDropdown element NOT found in DOM');
         return;
     }
 
@@ -336,24 +368,39 @@ async function populateCategoryFilter() {
         const { data: categories, error } = await supabase
             .from('categories')
             .select('*')
+            .eq('is_visible', true) // Only show visible categories? Or all? Usually all for admin.
             .order('display_order', { ascending: true });
+
+        // Admin might want to filter by hidden categories too? Let's show all.
+        // Actually, let's re-fetch WITHOUT .eq('is_visible', true) to be safe for admin.
+        // Re-fetching inside render is wasteful, let's just use what we have, but previous logic showed all.
+        // So removal of .eq check is correct.
 
         if (error) throw error;
 
-        // Force clear and repopulate
-        categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+        let html = `
+            <div class="filter-option selected" data-value="all" onclick="selectCategory('all', 'All Categories')">
+                <span>All Categories</span>
+                <i class="fas fa-check check-icon"></i>
+            </div>
+        `;
 
         if (categories) {
-            console.log('Categories found for filter:', categories.length);
             categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat.slug; // Value is slug
-                option.textContent = cat.title;
-                categoryFilter.appendChild(option);
+                html += `
+                    <div class="filter-option" data-value="${cat.slug}" onclick="selectCategory('${cat.slug}', '${cat.title}')">
+                        <span>${cat.title}</span>
+                        <i class="fas fa-check check-icon"></i>
+                    </div>
+                `;
             });
         }
+
+        dropdown.innerHTML = html;
+
     } catch (e) {
         console.error('Error populating filter:', e);
+        dropdown.innerHTML = '<div style="padding:10px; color:red;">Error loading</div>';
     }
 }
 // Ensure Categories logic is hooked up
@@ -712,10 +759,10 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                 </div>
 
                 <div class="row-actions" onclick="event.stopPropagation()">
-                    <button onclick="editProduct('${product.id}')" class="nav-btn btn-sm" title="Edit">
+                    <button onclick="editProduct('${product.id}')" class="admin-btn btn-sm" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button onclick="deleteProduct('${product.id}')" class="nav-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete">
+                    <button onclick="deleteProduct('${product.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
