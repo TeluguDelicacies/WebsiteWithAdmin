@@ -2150,15 +2150,23 @@ function renderProducts(products, categories) {
 
             card.innerHTML = `
                 <div class="card-face card-front">
-                    <div class="card-hero-image">
+                    <div class="card-hero-image" style="position: relative;">
                         <img src="${cardImage}" alt="${category.title}" onerror="this.src='./images/placeholder-product-portrait.jpg'">
+                        
+                        <!-- Sub-brand Overlay -->
+                        <div class="sub-brand-overlay">
+                             ${category.sub_brand_logo_url
+                    ? `<img src="${category.sub_brand_logo_url}" class="sub-brand-logo-overlay-img" alt="${category.sub_brand || 'Sub Brand'}">`
+                    : (category.sub_brand ? `<span class="sub-brand-text">${category.sub_brand}</span>` : '')}
+                        </div>
                     </div>
+                    
                     <div class="card-body">
-                        <h3 class="card-title">${category.title}</h3>
-                        ${category.sub_brand_logo_url
-                    ? `<img src="${category.sub_brand_logo_url}" class="sub-brand-logo-img" alt="${category.sub_brand || 'Sub Brand'}">`
-                    : (category.sub_brand ? `<p class="category-sub-brand">${category.sub_brand}</p>` : '')}
-                        <p class="telugu-subtitle">${category.telugu_title || ''}</p>
+                        <div style="margin-bottom: 0.5rem;">
+                            <h3 class="card-title">${category.title}</h3>
+                            <p class="telugu-subtitle">${category.telugu_title || ''}</p>
+                        </div>
+                        
                         <p class="card-desc">${category.description || ''}</p>
                         <div class="dropdown-wrapper">
                             <select class="product-select" id="select-${category.slug}">

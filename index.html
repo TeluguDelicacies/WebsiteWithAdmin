@@ -192,190 +192,188 @@
 
     <!-- Product Categories Master Section -->
     <section id="product-categories" class="section">
-        <section class="section" id="product-categories">
-            <div class="container">
-                <h2 class="section-title">Our Collections</h2>
-                <!-- Dynamic Categories Container -->
-                <div class="master-cards-grid" id="categories-container">
-                    <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
-                        <i class="fas fa-spinner fa-spin fa-2x"></i>
-                        <p>Loading collections...</p>
-                    </div>
+        <div class="container">
+            <h2 class="section-title">Our Collections</h2>
+            <!-- Dynamic Categories Container -->
+            <div class="master-cards-grid" id="categories-container">
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Loading collections...</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Customer Testimonials Section -->
-        <section class="testimonials-showcase section">
-            <div class="container">
-                <h2 class="section-title">What Our Customers Say</h2>
-                <div class="carousel-wrapper">
-                    <!-- Left Navigation Arrow -->
-                    <button class="carousel-arrow carousel-prev" id="testimonialPrev"
-                        aria-label="Previous testimonials">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
+    <!-- Customer Testimonials Section -->
+    <section class="testimonials-showcase section">
+        <div class="container">
+            <h2 class="section-title">What Our Customers Say</h2>
+            <div class="carousel-wrapper">
+                <!-- Left Navigation Arrow -->
+                <button class="carousel-arrow carousel-prev" id="testimonialPrev" aria-label="Previous testimonials">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
 
-                    <div class="product-scroll-wrapper" id="testimonialScrollWrapper">
-                        <div class="testimonials-scroll" id="testimonialsScroll">
-                            <!-- Testimonials will be loaded dynamically -->
-                            <div class="testimonial-item">
-                                <div class="testimonial-content">
-                                    <p style="text-align: center;">Loading reviews...</p>
-                                </div>
+                <div class="product-scroll-wrapper" id="testimonialScrollWrapper">
+                    <div class="testimonials-scroll" id="testimonialsScroll">
+                        <!-- Testimonials will be loaded dynamically -->
+                        <div class="testimonial-item">
+                            <div class="testimonial-content">
+                                <p style="text-align: center;">Loading reviews...</p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Right Navigation Arrow -->
-                    <button class="carousel-arrow carousel-next" id="testimonialNext" aria-label="Next testimonials">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
                 </div>
+
+                <!-- Right Navigation Arrow -->
+                <button class="carousel-arrow carousel-next" id="testimonialNext" aria-label="Next testimonials">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Customer Testimonials Section (Loaded from external file) -->
-        <section id="testimonials-placeholder">
-            <!-- Testimonials will be loaded here -->
-        </section>
+    <!-- Customer Testimonials Section (Loaded from external file) -->
+    <section id="testimonials-placeholder">
+        <!-- Testimonials will be loaded here -->
+    </section>
 
-        <!-- Why Us Section (Trust-building before Contact) -->
-        <section id="why-us-section" class="section" style="display: none;">
-            <div class="container">
-                <h2 class="section-title">Why Telugu Delicacies?</h2>
-                <div class="why-us-grid" id="why-us-features">
-                    <!-- Features dynamically inserted here -->
-                </div>
+    <!-- Why Us Section (Trust-building before Contact) -->
+    <section id="why-us-section" class="section" style="display: none;">
+        <div class="container">
+            <h2 class="section-title">Why Telugu Delicacies?</h2>
+            <div class="why-us-grid" id="why-us-features">
+                <!-- Features dynamically inserted here -->
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 
+    <!-- 
     ========================================
     CONTACT FORM SECTION
     Modern form design with enhanced UX
     ========================================
     -->
-        <section id="contact" class="contact-form-section">
-            <div class="container">
-                <div class="contact-form-content">
-                    <h2 class="section-title text-center">Get In Touch</h2>
-                    <p class="form-subtitle">Have questions about our products or want to place a custom
-                        order? We'd
-                        love to
-                        hear from you!</p>
+    <section id="contact" class="contact-form-section">
+        <div class="container">
+            <div class="contact-form-content">
+                <h2 class="section-title text-center">Get In Touch</h2>
+                <p class="form-subtitle">Have questions about our products or want to place a custom
+                    order? We'd
+                    love to
+                    hear from you!</p>
 
-                    <form class="contact-form" onsubmit="handleFormSubmit(event)" method="POST" netlify>
-                        <input type="hidden" name="form-name" value="FormVersion1.2">
+                <form class="contact-form" onsubmit="handleFormSubmit(event)" method="POST" netlify>
+                    <input type="hidden" name="form-name" value="FormVersion1.2">
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Full Name *</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="phone">Phone Number *</label>
-                                <input type="tel" id="phone" name="phone" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="subject">Subject</label>
-                                <select id="subject" name="subject">
-                                    <option value="">Select Subject</option>
-                                    <option value="product-inquiry">Product Inquiry</option>
-                                    <option value="bulk-order">Bulk Order</option>
-                                    <option value="distributor">Become a Distributor</option>
-                                    <option value="feedback">Feedback</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="message">Message *</label>
-                            <textarea id="message" name="message" rows="5" placeholder="Tell us about your inquiry..."
-                                required></textarea>
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required>
                         </div>
 
-                        <button type="submit" class="submit-btn">
-                            <i class="fas fa-paper-plane"></i>
-                            Send Message
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <select id="subject" name="subject">
+                                <option value="">Select Subject</option>
+                                <option value="product-inquiry">Product Inquiry</option>
+                                <option value="bulk-order">Bulk Order</option>
+                                <option value="distributor">Become a Distributor</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <!-- 
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Tell us about your inquiry..."
+                            required></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 
     ========================================
     FOOTER SECTION
     Compact footer with embedded Google Maps and essential information
     ========================================
     -->
-        <footer class="footer">
-            <div class="container">
-                <div class="footer-content">
-                    <!-- Company Information -->
-                    <div class="footer-brand">
-                        <h2>Telugu Delicacies</h2>
-                        <p class="footer-tagline">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
-                        <p class="fssai-license" id="contact-fssai">FSSAI License: 13623999000239</p>
-                    </div>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Company Information -->
+                <div class="footer-brand">
+                    <h2>Telugu Delicacies</h2>
+                    <p class="footer-tagline">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
+                    <p class="fssai-license" id="contact-fssai">FSSAI License: 13623999000239</p>
+                </div>
 
-                    <!-- Contact Information -->
-                    <div class="footer-section footer-contact" id="footer-contact">
-                        <h4>Contact Us</h4>
-                        <p><a href="#" id="contact-phone-primary">Loading...</a></p>
-                        <p><a href="#" id="contact-phone-secondary"></a></p>
-                        <p><a href="#" id="contact-email">Loading...</a></p>
-                    </div>
+                <!-- Contact Information -->
+                <div class="footer-section footer-contact" id="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p><a href="#" id="contact-phone-primary">Loading...</a></p>
+                    <p><a href="#" id="contact-phone-secondary"></a></p>
+                    <p><a href="#" id="contact-email">Loading...</a></p>
+                </div>
 
-                    <!-- Address Information -->
-                    <div class="footer-section footer-address">
-                        <h4>Our Location</h4>
-                        <div id="contact-address">
-                            <p>Loading address...</p>
-                        </div>
-                    </div>
-
-                    <!-- Google Maps Section -->
-                    <div class="footer-map">
-                        <h4>Find Us</h4>
-                        <div class="map-container" id="footer-map-container">
-                            <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.8428871601745!2d78.60164107521217!3d17.46723238343367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9d007f562aaf%3A0x2f13d0ef2a0f7614!2sTelugu%20Delicacies!5e0!3m2!1sen!2sin!4v1756361897165!5m2!1sen!2sin"
-                                width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade">
-                            </iframe>
-                        </div>
+                <!-- Address Information -->
+                <div class="footer-section footer-address">
+                    <h4>Our Location</h4>
+                    <div id="contact-address">
+                        <p>Loading address...</p>
                     </div>
                 </div>
 
-                <!-- Copyright -->
-                <div class="footer-bottom">
-                    <p>&copy; 2025 Telugu Delicacies. All rights reserved. | Crafted with ❤️ for authentic
-                        South Indian
-                        Taste</p>
-
-
+                <!-- Google Maps Section -->
+                <div class="footer-map">
+                    <h4>Find Us</h4>
+                    <div class="map-container" id="footer-map-container">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.8428871601745!2d78.60164107521217!3d17.46723238343367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9d007f562aaf%3A0x2f13d0ef2a0f7614!2sTelugu%20Delicacies!5e0!3m2!1sen!2sin!4v1756361897165!5m2!1sen!2sin"
+                            width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
                 </div>
             </div>
-        </footer>
 
-        <!-- WhatsApp Buy Now Button 
+            <!-- Copyright -->
+            <div class="footer-bottom">
+                <p>&copy; 2025 Telugu Delicacies. All rights reserved. | Crafted with ❤️ for authentic
+                    South Indian
+                    Taste</p>
+
+
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Buy Now Button 
 <button class="nav-btn nav-btn-cta" onclick="redirectToWhatsApp()">
     <i class="fab fa-whatsapp"></i> Buy Now
 </button>-->
 
-        <!-- WhatsApp Buy Now Functionality 
+    <!-- WhatsApp Buy Now Functionality 
 <script>
     /**
      * Redirects the user to the WhatsApp catalog in a new tab.
@@ -387,11 +385,11 @@
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     }
 </script>-->
-        <!-- QRCode library -->
-        <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <!-- QRCode library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
-        <!-- Main JavaScript -->
-        <script type="module" src="script.js"></script>
+    <!-- Main JavaScript -->
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>
