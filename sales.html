@@ -23,16 +23,16 @@
         <div class="container">
             <div class="header-content">
                 <!-- Logo Section - Same as Main Page structure -->
-                <div class="logo-section" onclick="window.location.href='index.html'" style="cursor: pointer;">
+                <a href="index.html" class="logo-section" onclick="event.stopPropagation();">
                     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                         id="headerLogo" alt="Telugu Delicacies Logo" class="logo"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <div class="logo-fallback" style="display: none;">TD</div>
-                    <div class="logo-text" style="display: flex; flex-direction: column;">
+                    <div class="logo-text">
                         <h1 class="brand-name" id="header-site-title">Telugu Delicacies</h1>
                         <span id="header-telugu-brand" class="telugu-brand"></span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Navigation Buttons (Sales Specific - Always Visible) -->
                 <nav class="sales-nav">

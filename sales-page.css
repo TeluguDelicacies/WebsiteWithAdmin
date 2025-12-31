@@ -58,25 +58,42 @@ textarea {
     }
 }
 
-/* Logo Section - Enforce exact same styles as main page */
+/* Logo Section - Enforce exact same styles as main page with HARDCODED values */
 .header.sales-header .logo-section {
     display: flex;
     align-items: center;
     gap: 8px;
+    text-decoration: none;
+}
+
+/* Prevent anchor link from affecting child text colors */
+.header.sales-header .logo-section,
+.header.sales-header .logo-section:visited,
+.header.sales-header .logo-section:hover,
+.header.sales-header .logo-section:active {
+    text-decoration: none;
+}
+
+.header.sales-header .logo-text {
+    display: flex;
+    flex-direction: column;
 }
 
 .header.sales-header .brand-name {
-    font-family: var(--font-primary);
-    font-size: var(--font-lg) !important;
-    font-weight: var(--weight-bold);
-    color: var(--text-brand);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.125rem !important;
+    /* Hardcoded: same as --font-lg */
+    font-weight: 700;
+    color: #0077B6 !important;
+    /* Hardcoded: same as --text-brand */
     margin: 0;
     line-height: 1.2;
 }
 
 @media (min-width: 768px) {
     .header.sales-header .brand-name {
-        font-size: var(--font-xl) !important;
+        font-size: 1.25rem !important;
+        /* Hardcoded: same as --font-xl */
     }
 }
 
@@ -84,7 +101,8 @@ textarea {
     display: block;
     font-size: 1.2rem !important;
     font-family: 'Mallanna', sans-serif;
-    color: var(--text-telugu);
+    color: #00B4D8 !important;
+    /* Hardcoded: same as --text-telugu */
     margin-top: -3px;
     line-height: 1;
     font-weight: 600;
