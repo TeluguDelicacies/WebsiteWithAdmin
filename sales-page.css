@@ -607,7 +607,8 @@ textarea {
 
 .product-title {
     font-size: clamp(1.4rem, 4vw, 1.8rem);
-    /* Reduced */
+    color: var(--text-brand);
+    /* Brand blue for product names */
     margin-bottom: 2px;
 }
 
