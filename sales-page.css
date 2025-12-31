@@ -47,51 +47,8 @@ textarea {
 }
 
 /* Logo Section - Matching Main Page */
-.sales-header .logo-section {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-}
-
-.sales-header .logo-section .logo {
-    height: 50px;
-    width: auto;
-    animation: wobble 3s ease-in-out infinite;
-}
-
-.sales-header .logo-section .logo-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.sales-header .logo-section .brand-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--text-brand);
-    margin: 0;
-    line-height: 1.2;
-}
-
-.sales-header .logo-section .telugu-brand {
-    font-size: 0.9rem;
-    font-family: var(--font-telugu);
-    color: var(--text-telugu);
-    line-height: 1.2;
-}
-
-.sales-header .logo-section .logo-fallback {
-    width: 50px;
-    height: 50px;
-    background: var(--color-primary-blue);
-    color: white;
-    font-weight: 700;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-}
+/* Logo Section - Inherits from styles.css */
+/* No overrides needed - uses global .logo-section, .brand-name, .telugu-brand */
 
 .sales-header .nav-btn {
     display: flex;
