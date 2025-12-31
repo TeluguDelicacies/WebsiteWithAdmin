@@ -17,16 +17,21 @@ Modern color palette with semantic naming
 ========================================
 */
 :root {
-  /* Primary Brand Colors */
+  /* === PRIMARY ACCENT (THE ONLY YELLOW) === */
+  --color-accent: #FBC02D;
+  --color-accent-hover: #F9A825;
+  --color-accent-light: #FFFDE7;
+
+  /* === BRAND BLUES === */
   --color-primary-blue: #0077B6;
   --color-secondary-blue: #00B4D8;
   --color-accent-blue: #90E0EF;
 
-  /* Primary Yellow/Gold Theme (Phase 12) */
-  --color-primary-yellow: #FBC02D;
+  /* Legacy Yellow Aliases (for backwards compatibility) */
+  --color-primary-yellow: var(--color-accent);
   --color-secondary-yellow: #FFF176;
-  --color-light-yellow: #FFFDE7;
-  --color-dark-yellow: #F9A825;
+  --color-light-yellow: var(--color-accent-light);
+  --color-dark-yellow: var(--color-accent-hover);
   --color-butter: #FFF9C4;
 
   /* Derived Color Variations */
@@ -35,7 +40,6 @@ Modern color palette with semantic naming
   --color-secondary-dark: #0090AA;
   --color-secondary-light: #33C4E5;
   --color-accent-dark: #6BDAFF;
-  --color-accent-light: #B8E8F5;
 
   /* Neutral Colors */
   --color-white: #FFFFFF;
@@ -62,18 +66,22 @@ Modern color palette with semantic naming
   --bg-secondary: var(--color-gray-50);
   --bg-tertiary: var(--color-gray-100);
   --bg-dark: var(--color-gray-900);
-  --bg-gradient-primary: linear-gradient(135deg, var(--color-primary-yellow), var(--color-dark-yellow));
-  --bg-gradient-yellow: linear-gradient(135deg, var(--color-primary-yellow), var(--color-dark-yellow));
-  --bg-gradient-light: linear-gradient(135deg, var(--color-light-yellow), var(--color-white));
+  --bg-gradient-primary: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+  --bg-gradient-yellow: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+  --bg-gradient-light: linear-gradient(135deg, var(--color-accent-light), var(--color-white));
   --bg-gradient-hero: linear-gradient(135deg, #FFFDE7 0%, #FFF9C4 50%, #FFF176 100%);
 
-  /* Text Colors */
+  /* === TEXT COLORS (HARD RULES) === */
   --text-primary: var(--color-gray-900);
   --text-secondary: var(--color-gray-600);
   --text-muted: var(--color-gray-500);
   --text-inverse: var(--color-white);
-  --text-accent: var(--color-primary-blue);
+  --text-brand: var(--color-primary-blue);
+  /* English Brand Names */
   --text-telugu: var(--color-secondary-blue);
+  /* Telugu Names - Lighter Blue */
+  --text-accent: var(--color-primary-blue);
+  /* Legacy alias */
 
   /* Border Colors */
   --border-light: var(--color-gray-200);
@@ -530,7 +538,7 @@ Persistent header with hamburger menu and WhatsApp integration
   font-family: var(--font-primary);
   font-size: var(--font-lg);
   font-weight: var(--weight-bold);
-  color: var(--color-primary-blue);
+  color: var(--text-brand);
   margin: 0;
 }
 
@@ -544,7 +552,7 @@ Persistent header with hamburger menu and WhatsApp integration
   display: block;
   font-size: 1.2rem !important;
   font-family: 'Mallanna', sans-serif;
-  color: var(--color-secondary-blue);
+  color: var(--text-telugu);
   margin-top: -3px;
   /* Reduced gap */
   line-height: 1;
@@ -1102,7 +1110,7 @@ Enhanced product cards and modern styling
   font-family: var(--font-telugu);
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--color-secondary-blue);
+  color: var(--text-telugu);
   line-height: 1.3;
   margin: 0;
   padding-top: 2px;
@@ -1600,9 +1608,9 @@ Modern form design with enhanced UX
 
 .submit-btn {
   width: 100%;
-  background: linear-gradient(135deg, #FDD835 0%, #FBC02D 100%);
-  /* Warm yellow gradient */
-  color: #1a1a1a;
+  background: var(--bg-gradient-primary);
+  /* Uses --color-accent gradient */
+  color: #1E293B;
   /* Dark text for contrast on yellow */
   border: none;
   padding: var(--space-4) var(--space-8);
@@ -1623,8 +1631,7 @@ Modern form design with enhanced UX
 .submit-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #FBC02D 0%, #F9A825 100%);
-  /* Slightly darker on hover */
+  background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 100%);
 }
 
 .submit-btn:disabled {
@@ -2685,7 +2692,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   font-family: var(--font-telugu);
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--color-secondary-blue);
+  color: var(--text-telugu);
   line-height: 1.35;
   margin: 0 0 6px 0;
   min-height: 20px;
@@ -2835,7 +2842,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 .quick-category-tagline {
   font-size: 0.85rem;
-  color: var(--color-secondary-blue);
+  color: var(--text-brand);
   margin: -2px 0 2px 0;
   font-weight: 500;
 }

@@ -84,7 +84,7 @@ textarea {
 .sales-header .logo-section .brand-name {
     font-size: 1.2rem;
     font-weight: 700;
-    color: var(--color-primary-blue);
+    color: var(--text-brand);
     margin: 0;
     line-height: 1.2;
 }
@@ -92,7 +92,7 @@ textarea {
 .sales-header .logo-section .telugu-brand {
     font-size: 0.9rem;
     font-family: var(--font-telugu);
-    color: var(--color-secondary-blue);
+    color: var(--text-telugu);
     line-height: 1.2;
 }
 
@@ -205,7 +205,7 @@ textarea {
     display: block;
     font-size: 1rem !important;
     font-family: 'Mallanna', sans-serif;
-    color: var(--color-secondary-blue);
+    color: var(--text-telugu);
     line-height: 1;
     margin-top: 4px;
     /* Increased gap */
@@ -1674,8 +1674,8 @@ textarea {
 
 .add-cart-btn {
     width: 100%;
-    background: var(--color-primary-blue);
-    color: white;
+    background: var(--bg-gradient-primary);
+    color: #1E293B;
     border: none;
     padding: 1rem;
     border-radius: 12px;
@@ -1690,7 +1690,7 @@ textarea {
 }
 
 .add-cart-btn:hover {
-    background: var(--color-primary-dark);
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 100%);
     transform: translateY(-2px);
 }
 
@@ -1782,31 +1782,31 @@ textarea {
     box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35);
 }
 
-/* Add to Cart Button - Yellow Gradient */
+/* Add to Cart Button - Yellow Gradient (Uses Global Accent) */
 .add-cart-btn {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: var(--bg-gradient-primary) !important;
     border: none !important;
-    color: white !important;
+    color: #1E293B !important;
     font-weight: 700;
     box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
     transition: all 0.3s ease;
 }
 
 .add-cart-btn:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 100%) !important;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
 }
 
 /* Quantity Controls - Yellow Theme */
 .qty-btn-lg {
-    background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%) !important;
-    border: 1px solid #fcd34d !important;
+    background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%) !important;
+    border: 1px solid var(--color-accent) !important;
     color: #92400e !important;
 }
 
 .qty-btn-lg:hover {
-    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%) !important;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%) !important;
 }
 
 /* Action Pill Buttons - Yellow Theme */
