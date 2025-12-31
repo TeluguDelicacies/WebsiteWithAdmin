@@ -1822,8 +1822,12 @@ async function fetchSiteSettings() {
                 document.title = data.site_title;
             }
             if (data.site_title_telugu) {
+                // Main page Telugu brand
                 const el = document.getElementById('header-site-title-telugu');
                 if (el) el.innerText = data.site_title_telugu;
+                // Sales page Telugu brand
+                const el2 = document.getElementById('header-telugu-brand');
+                if (el2) el2.innerText = data.site_title_telugu;
             }
 
             // Favicon
