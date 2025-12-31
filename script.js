@@ -1018,14 +1018,20 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
             if (!state.isPaused) {
                 // Throttle to ~50fps (20ms between frames)
                 if (currentTime - lastTime >= 20) {
-                    const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
 
-                    // Loop back if reached end (hardened threshold for mobile scaling)
-                    if (scrollWrapper.scrollLeft >= max - 5) {
-                        scrollWrapper.scrollTo({ left: 0, behavior: 'auto' }); // Instant jump back
-                    } else {
-                        scrollWrapper.scrollLeft += state.scrollSpeed;
+                    // Infinite Loop Logic: Reset at 50% width
+                    // Assumes content is duplicated [A, A]
+                    const resetThreshold = scrollWrapper.scrollWidth / 2;
+
+                    if (scrollWrapper.scrollLeft >= resetThreshold) {
+                        // Seamlessly jump back to start of first set
+                        scrollWrapper.scrollLeft -= resetThreshold;
+                    } else if (scrollWrapper.scrollLeft <= 0) {
+                        // Seamlessly jump forward to start of second set (for reverse scrolling)
+                        scrollWrapper.scrollLeft += resetThreshold;
                     }
+
+                    scrollWrapper.scrollLeft += state.scrollSpeed;
                     lastTime = currentTime;
                 }
             }
@@ -1054,11 +1060,11 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
                 scheduleResume();
             });
 
-            // Arrow state update
+            // Arrow state update (Infinite scroll - arrows always active if content exists)
             const updateArrows = () => {
-                const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-                prevBtn.classList.toggle('disabled', scrollWrapper.scrollLeft <= 5);
-                nextBtn.classList.toggle('disabled', scrollWrapper.scrollLeft >= max - 5);
+                const canScroll = scrollWrapper.scrollWidth > scrollWrapper.clientWidth;
+                prevBtn.classList.toggle('disabled', !canScroll);
+                nextBtn.classList.toggle('disabled', !canScroll);
             };
             scrollWrapper.addEventListener('scroll', updateArrows, { passive: true });
             updateArrows();
@@ -2493,11 +2499,25 @@ async function fetchAndRenderTestimonials() {
             testimonialContainer.appendChild(createItem(t));
         });
 
-        // Duplicate for infinite scroll if needed (e.g. if count is small but > 0)
-        if (testimonials.length > 0) {
-            const items = Array.from(testimonialContainer.children);
-            items.forEach(item => testimonialContainer.appendChild(item.cloneNode(true)));
+        // Create "Base Set" that is wide enough
+        // Ensure content fills at least 1.5 screen widths (for mobile safety) before doubling
+        const minBaseWidth = Math.max(window.innerWidth * 1.5, 600);
+        let currentBaseWidth = testimonialContainer.scrollWidth;
+        const originalItems = Array.from(testimonialContainer.children);
+
+        // Fill base set if too small (e.g. only 1 or 2 reviews)
+        while (currentBaseWidth < minBaseWidth && originalItems.length > 0) {
+            originalItems.forEach(item => {
+                testimonialContainer.appendChild(item.cloneNode(true));
+            });
+            // Re-measure roughly (accumulating width)
+            currentBaseWidth = testimonialContainer.scrollWidth;
         }
+
+        // Now Create [A, A] Structure for 50% reset logic
+        // We clone the ENTIRE current base set once
+        const baseSet = Array.from(testimonialContainer.children);
+        baseSet.forEach(item => testimonialContainer.appendChild(item.cloneNode(true)));
 
         // Initialize carousel specifically for testimonials after content is rendered
         initializeTestimonialCarousel();
