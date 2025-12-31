@@ -944,13 +944,13 @@ textarea {
 }
 
 .sidebar-tab:hover {
-    background: rgba(251, 191, 36, 0.3);
+    background: rgba(238, 220, 41, 0.3);
 }
 
 .sidebar-tab.active {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    background: var(--bg-button-gradient);
     color: white;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+    box-shadow: 0 2px 8px rgba(238, 220, 41, 0.4);
 }
 
 .similar-items-grid {
@@ -1752,34 +1752,34 @@ textarea {
 }
 
 #variantSelect:hover {
-    border-color: #f59e0b;
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    border-color: var(--color-brand-yellow-hover);
+    box-shadow: 0 4px 12px rgba(238, 220, 41, 0.3);
 }
 
 #variantSelect:focus {
     outline: none;
-    border-color: #f59e0b;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.25);
+    border-color: var(--color-brand-yellow-hover);
+    box-shadow: 0 0 0 3px rgba(238, 220, 41, 0.25);
 }
 
 /* Info Buttons - Yellow Theme */
 .info-btn {
-    background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%) !important;
-    border: 1px solid #fcd34d !important;
+    background: linear-gradient(135deg, var(--color-brand-yellow-light) 0%, var(--color-brand-yellow) 50%) !important;
+    border: 1px solid var(--color-brand-yellow) !important;
     color: #92400e !important;
 }
 
 .info-btn:hover {
-    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%) !important;
-    border-color: #f59e0b !important;
+    background: var(--bg-button-gradient) !important;
+    border-color: var(--color-brand-yellow-hover) !important;
     transform: translateY(-1px);
 }
 
 .info-btn.active {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: var(--bg-button-gradient) !important;
     color: white !important;
-    border-color: #f59e0b !important;
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35);
+    border-color: var(--color-brand-yellow-hover) !important;
+    box-shadow: 0 4px 12px rgba(238, 220, 41, 0.35);
 }
 
 /* Add to Cart Button - Yellow Gradient (Uses Global Accent) */
@@ -1811,31 +1811,31 @@ textarea {
 
 /* Action Pill Buttons - Yellow Theme */
 .action-btn-pill {
-    background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%) !important;
-    border: 1px solid #fcd34d !important;
+    background: linear-gradient(135deg, var(--color-brand-yellow-light) 0%, var(--color-brand-yellow) 50%) !important;
+    border: 1px solid var(--color-brand-yellow) !important;
     color: #92400e !important;
 }
 
 .action-btn-pill:hover {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: var(--bg-button-gradient) !important;
     color: white !important;
-    border-color: #f59e0b !important;
+    border-color: var(--color-brand-yellow-hover) !important;
 }
 
 .action-btn-pill.outline {
     background: transparent !important;
-    border: 2px solid #fbbf24 !important;
+    border: 2px solid var(--color-brand-yellow) !important;
     color: #b45309 !important;
 }
 
 .action-btn-pill.outline:hover {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: var(--bg-button-gradient) !important;
     color: white !important;
 }
 
 /* Sidebar Tabs - Yellow Theme */
 .sidebar-tab.active {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: var(--bg-button-gradient) !important;
     color: white !important;
 }
 

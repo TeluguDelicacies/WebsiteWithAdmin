@@ -17,21 +17,24 @@ Modern color palette with semantic naming
 ========================================
 */
 :root {
-  /* === PRIMARY ACCENT (THE ONLY YELLOW) === */
-  --color-accent: #FBC02D;
-  --color-accent-hover: #F9A825;
-  --color-accent-light: #FFFDE7;
+  /* === BRAND IDENTITY (SOURCE OF TRUTH) === */
+  --color-brand-blue-primary: #0077B6;
+  --color-brand-blue-secondary: #00B4D8;
+  --color-brand-yellow: #EEDC29;
+  --color-brand-yellow-hover: #D4C625;
+  --color-brand-yellow-light: #FFF9C4;
 
-  /* === BRAND BLUES === */
-  --color-primary-blue: #0077B6;
-  --color-secondary-blue: #00B4D8;
+  /* === LEGACY ALIASES (for backwards compatibility) === */
+  --color-primary-blue: var(--color-brand-blue-primary);
+  --color-secondary-blue: var(--color-brand-blue-secondary);
+  --color-accent: var(--color-brand-yellow);
+  --color-accent-hover: var(--color-brand-yellow-hover);
+  --color-accent-light: var(--color-brand-yellow-light);
   --color-accent-blue: #90E0EF;
-
-  /* Legacy Yellow Aliases (for backwards compatibility) */
-  --color-primary-yellow: var(--color-accent);
+  --color-primary-yellow: var(--color-brand-yellow);
   --color-secondary-yellow: #FFF176;
-  --color-light-yellow: var(--color-accent-light);
-  --color-dark-yellow: var(--color-accent-hover);
+  --color-light-yellow: var(--color-brand-yellow-light);
+  --color-dark-yellow: var(--color-brand-yellow-hover);
   --color-butter: #FFF9C4;
 
   /* Derived Color Variations */
@@ -59,29 +62,31 @@ Modern color palette with semantic naming
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
-  --color-info: var(--color-secondary-blue);
+  --color-info: var(--color-brand-blue-secondary);
 
-  /* Background Colors */
+  /* === BACKGROUND GRADIENTS === */
+  --color-bg-gradient-start: #FFFFFF;
+  --color-bg-gradient-end: var(--color-brand-yellow);
   --bg-primary: var(--color-white);
   --bg-secondary: var(--color-gray-50);
   --bg-tertiary: var(--color-gray-100);
   --bg-dark: var(--color-gray-900);
-  --bg-gradient-primary: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
-  --bg-gradient-yellow: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
-  --bg-gradient-light: linear-gradient(135deg, var(--color-accent-light), var(--color-white));
-  --bg-gradient-hero: linear-gradient(135deg, #FFFDE7 0%, #FFF9C4 50%, #FFF176 100%);
+  --bg-brand-gradient: linear-gradient(135deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
+  --bg-button-gradient: linear-gradient(135deg, var(--color-brand-yellow) 0%, var(--color-brand-yellow-hover) 100%);
+  --bg-gradient-primary: var(--bg-button-gradient);
+  --bg-gradient-yellow: var(--bg-button-gradient);
+  --bg-gradient-light: linear-gradient(135deg, var(--color-brand-yellow-light), var(--color-white));
+  --bg-gradient-hero: linear-gradient(135deg, #FFFDE7 0%, #FFF9C4 50%, var(--color-brand-yellow) 100%);
 
-  /* === TEXT COLORS (HARD RULES) === */
-  --text-primary: var(--color-gray-900);
+  /* === TEXT COLORS (STRICT RULES) === */
+  --color-text-primary: #0F172A;
+  --text-primary: var(--color-text-primary);
   --text-secondary: var(--color-gray-600);
   --text-muted: var(--color-gray-500);
   --text-inverse: var(--color-white);
-  --text-brand: var(--color-primary-blue);
-  /* English Brand Names */
-  --text-telugu: var(--color-secondary-blue);
-  /* Telugu Names - Lighter Blue */
-  --text-accent: var(--color-primary-blue);
-  /* Legacy alias */
+  --text-brand: var(--color-brand-blue-primary);
+  --text-telugu: var(--color-brand-blue-secondary);
+  --text-accent: var(--color-brand-blue-primary);
 
   /* Border Colors */
   --border-light: var(--color-gray-200);
@@ -184,6 +189,15 @@ Modern color palette with semantic naming
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === UTILITY CLASSES === */
+.bg-brand-gradient {
+  background: var(--bg-brand-gradient);
+}
+
+.bg-button-gradient {
+  background: var(--bg-button-gradient);
 }
 
 /* 
@@ -1557,8 +1571,8 @@ Modern form design with enhanced UX
 .form-group input:hover,
 .form-group select:hover,
 .form-group textarea:hover {
-  border-color: #FBC02D;
-  /* Darker yellow hover */
+  border-color: var(--color-brand-yellow);
+  /* Brand yellow hover */
   background-color: var(--bg-primary);
 }
 
@@ -1566,10 +1580,10 @@ Modern form design with enhanced UX
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #FBC02D;
-  /* Warm yellow/amber focus */
-  box-shadow: 0 0 0 3px rgba(251, 192, 45, 0.2);
-  /* Warm glow */
+  border-color: var(--color-brand-yellow);
+  /* Brand yellow focus */
+  box-shadow: 0 0 0 3px rgba(238, 220, 41, 0.25);
+  /* Brand yellow glow */
   background-color: var(--bg-primary);
 }
 
@@ -3400,12 +3414,12 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
   }
 
   .quick-product-scroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #fcd34d, #f59e0b);
+    background: linear-gradient(90deg, var(--color-brand-yellow-light), var(--color-brand-yellow-hover));
     border-radius: 3px;
   }
 
   .quick-product-scroll::-webkit-scrollbar-thumb:hover {
-    background: #f59e0b;
+    background: var(--color-brand-yellow-hover);
   }
 
   .quick-product-scroll:active {
@@ -4030,10 +4044,10 @@ body:not(.quick-commerce-mode) .master-card.show-product .card-back {
 }
 
 .toggle-btn.active {
-  background: var(--color-primary-yellow, #FBC02D);
-  border-color: var(--color-primary-yellow, #FBC02D);
+  background: var(--color-brand-yellow);
+  border-color: var(--color-brand-yellow);
   color: #1a1a1a;
-  box-shadow: 0 4px 12px rgba(251, 192, 45, 0.3);
+  box-shadow: 0 4px 12px rgba(238, 220, 41, 0.3);
 }
 
 /* WhatsApp Button */
