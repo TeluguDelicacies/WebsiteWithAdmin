@@ -34,8 +34,8 @@
                     </div>
                 </a>
 
-                <!-- Desktop Navigation Buttons (Slot - Sales Specific) -->
-                <nav class="desktop-nav">
+                <!-- Navigation Buttons (Sales Specific - Always Visible) -->
+                <nav class="sales-nav">
                     <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()"
                         data-tooltip="Share Page">
                         <i class="fas fa-arrow-up-from-bracket"></i>
@@ -49,19 +49,6 @@
                         <i class="fas fa-home"></i>
                     </a>
                 </nav>
-
-                <!-- Mobile Action Icons (Always Visible) -->
-                <div class="mobile-actions">
-                    <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()"
-                        data-tooltip="Share Page">
-                        <i class="fas fa-arrow-up-from-bracket"></i>
-                    </button>
-                    <button class="nav-btn cart-btn" id="mobileCartBtn" onclick="window.toggleCartDrawer()"
-                        data-tooltip="View Cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count" id="mobileCartCount">0</span>
-                    </button>
-                </div>
             </div>
         </div>
     </header>

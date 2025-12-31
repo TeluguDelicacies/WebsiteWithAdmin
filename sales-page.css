@@ -50,6 +50,14 @@ textarea {
 /* Logo Section - Inherits from styles.css */
 /* No overrides needed - uses global .logo-section, .brand-name, .telugu-brand */
 
+/* Sales Navigation - Always Visible */
+.sales-nav {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin-left: auto;
+}
+
 .sales-header .nav-btn {
     display: flex;
     align-items: center;
