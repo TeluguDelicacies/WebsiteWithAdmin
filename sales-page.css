@@ -58,9 +58,38 @@ textarea {
     }
 }
 
-/* Logo Section - Matching Main Page */
-/* Logo Section - Inherits from styles.css */
-/* No overrides needed - uses global .logo-section, .brand-name, .telugu-brand */
+/* Logo Section - Enforce exact same styles as main page */
+.header.sales-header .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header.sales-header .brand-name {
+    font-family: var(--font-primary);
+    font-size: var(--font-lg) !important;
+    font-weight: var(--weight-bold);
+    color: var(--text-brand);
+    margin: 0;
+    line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+    .header.sales-header .brand-name {
+        font-size: var(--font-xl) !important;
+    }
+}
+
+.header.sales-header .telugu-brand {
+    display: block;
+    font-size: 1.2rem !important;
+    font-family: 'Mallanna', sans-serif;
+    color: var(--text-telugu);
+    margin-top: -3px;
+    line-height: 1;
+    font-weight: 600;
+    opacity: 0.9;
+}
 
 /* Sales Navigation - Always Visible */
 .sales-nav {
