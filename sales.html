@@ -20,15 +20,17 @@
 
 <body>
     <header class="sales-header">
-        <a href="index.html" class="logo-area">
+        <!-- Logo Section - Same as Main Page -->
+        <div class="logo-section" onclick="window.location.href='index.html'" style="cursor: pointer;">
             <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="headerLogo"
-                alt="Logo" class="logo"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div class="logo-text-area">
-                <span class="brand-name">Telugu Delicacies</span>
-                <span class="telugu-brand" id="header-telugu-brand"></span>
+                alt="Telugu Delicacies Logo" class="logo"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="logo-fallback" style="display: none;">TD</div>
+            <div class="logo-text" style="display: flex; flex-direction: column;">
+                <h1 class="brand-name" id="header-site-title">Telugu Delicacies</h1>
+                <span id="header-telugu-brand" class="telugu-brand"></span>
             </div>
-        </a>
+        </div>
         <nav>
             <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()" data-tooltip="Share Page">
                 <i class="fas fa-arrow-up-from-bracket"></i>
