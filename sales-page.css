@@ -141,42 +141,8 @@ textarea {
     visibility: visible;
 }
 
-.sales-header .brand-name {
-    font-family: var(--font-primary);
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-primary-blue);
-    margin: 0;
-    line-height: 1.1;
-}
-
-.sales-header .telugu-brand {
-    display: block;
-    font-size: 1rem !important;
-    font-family: 'Mallanna', sans-serif;
-    color: var(--text-telugu);
-    line-height: 1;
-    margin-top: 4px;
-    /* Increased gap */
-    font-weight: 600;
-}
-
-.sales-header nav {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-left: auto;
-}
-
-@media (max-width: 480px) {
-    .sales-header .share-catalogue-btn .btn-text {
-        display: none;
-    }
-
-    .sales-header .nav-btn {
-        padding: 8px 10px;
-    }
-}
+/* Brand block inherits from styles.css - NO OVERRIDES */
+/* .brand-name, .telugu-brand, nav use global styles */
 
 .sales-page-container {
     max-width: var(--content-max-width);
@@ -1338,24 +1304,7 @@ textarea {
     }
 }
 
-/* Refined Header Buttons */
-/* Removed yellowish square button and green whatsapp overrides to match main site theme */
-
-.sales-header nav {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-@media (max-width: 480px) {
-    .sales-header .share-catalogue-btn .btn-text {
-        display: none;
-    }
-
-    .sales-header .nav-btn {
-        padding: 8px 10px;
-    }
-}
+/* Header buttons use global .nav-btn styles from styles.css */
 
 /* Cart Drawer & Functionality */
 .cart-overlay {
