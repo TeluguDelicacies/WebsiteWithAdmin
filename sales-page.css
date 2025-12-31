@@ -471,13 +471,15 @@ textarea {
     /* Critical for container health */
 }
 
-/* Component: Gallery (3D Flip) - Responsive */
+/* Component: Gallery (3D Flip) - Responsive Square */
 .product-gallery {
     position: relative;
     width: 100%;
     max-width: 450px;
-    /* Increased for better visual on Desktop */
-    height: 450px;
+    aspect-ratio: 1 / 1;
+    /* Strict square aspect ratio */
+    height: auto;
+    /* Height derived from width */
     margin: 0 auto;
     perspective: 1000px;
     flex-shrink: 0;
@@ -486,16 +488,13 @@ textarea {
 @media (max-width: 767px) {
     .product-gallery {
         max-width: 300px;
-        /* Compact on Mobile */
-        height: 300px;
-        /* Force square aspect ratio */
+        /* Compact on Mobile - Aspect ratio is inherited */
     }
 
     .gallery-front .main-img {
         object-fit: cover;
         /* Eliminate white bars */
         object-position: center bottom;
-        /* Center bottom usually keeps the jar/product in view */
     }
 
     .overlay-logo {
@@ -542,9 +541,10 @@ textarea {
 .gallery-front .main-img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    /* Preserve aspect ratio, no distortion */
-    background: #f8fafc;
+    object-fit: cover;
+    /* Ensure fill without bars */
+    background: transparent;
+    /* Remove white/grey bars */
 }
 
 /* Back Face */
