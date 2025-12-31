@@ -1170,7 +1170,13 @@
             // --- Cart Reset Logic ---
             state.cart = [];
             window.saveCart();
-            window.showToast('Order initiated! Cart cleared.', 'success');
+
+            // Close the cart drawer
+            const cartDrawer = document.getElementById('cartDrawer');
+            if (cartDrawer) cartDrawer.classList.remove('open');
+
+            // Show thank you message
+            alert('Thanks for the order! We will get back to you very soon. 🙏');
         };
 
         window.initCart();
