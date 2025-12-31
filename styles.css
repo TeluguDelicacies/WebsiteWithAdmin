@@ -1269,16 +1269,7 @@ Styled exactly like product showcase
 } REMOVED - Handled by JS */
 /* Consistent with product scroll */
 
-@keyframes testimonials-scroll {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
+/* .testimonial-item */
 .testimonial-item {
   flex-shrink: 0;
   width: 320px;

@@ -1008,6 +1008,10 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
 
     // Wait for content load
     setTimeout(() => {
+        // Ensure no CSS animations interfere with JS scroll
+        scrollWrapper.style.animation = 'none';
+        scrollContent.style.animation = 'none';
+
         // 1. Initialize RAF-based auto-scroll (iOS-friendly)
         let lastTime = 0;
         const scrollStep = (currentTime) => {
@@ -1016,8 +1020,8 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
                 if (currentTime - lastTime >= 20) {
                     const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
 
-                    // Loop back if reached end
-                    if (scrollWrapper.scrollLeft >= max - 2) {
+                    // Loop back if reached end (hardened threshold for mobile scaling)
+                    if (scrollWrapper.scrollLeft >= max - 5) {
                         scrollWrapper.scrollTo({ left: 0, behavior: 'auto' }); // Instant jump back
                     } else {
                         scrollWrapper.scrollLeft += state.scrollSpeed;
@@ -1114,28 +1118,39 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
 }
 
 /**
- * Master function to initialize all carousel controls
+ * Setup Product Carousel specifically
  */
-function initializeCarouselControls() {
-    // 1. Setup Product Carousel (Existing)
+function initializeProductCarousel() {
     setupCarousel({
         wrapperId: 'productScrollWrapper',
         contentId: 'productScroll',
         prevId: 'carouselPrev',
         nextId: 'carouselNext',
         progressId: 'carouselProgress',
-        speed: 1 // Base speed
+        speed: 1
     });
+}
 
-    // 2. Setup Testimonial Carousel (New - Replicated Logic)
+/**
+ * Setup Testimonial Carousel specifically
+ */
+function initializeTestimonialCarousel() {
     setupCarousel({
         wrapperId: 'testimonialScrollWrapper',
         contentId: 'testimonialsScroll',
         prevId: 'testimonialPrev',
         nextId: 'testimonialNext',
-        progressId: null, // No dots requested for now
-        speed: 1 // Start with same speed, adjustable
+        progressId: null,
+        speed: 1
     });
+}
+
+/**
+ * Master function to initialize all carousel controls
+ */
+function initializeCarouselControls() {
+    initializeProductCarousel();
+    // Testimonials will be initialized after fetch
 }
 
 /*
@@ -2483,6 +2498,9 @@ async function fetchAndRenderTestimonials() {
             const items = Array.from(testimonialContainer.children);
             items.forEach(item => testimonialContainer.appendChild(item.cloneNode(true)));
         }
+
+        // Initialize carousel specifically for testimonials after content is rendered
+        initializeTestimonialCarousel();
 
         // Fix: Update scroll speeds immediately after rendering
         updateScrollSpeeds();
