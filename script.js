@@ -1008,117 +1008,31 @@ function setupCarousel({ wrapperId, contentId, prevId, nextId, progressId, speed
 
     // Wait for content load
     setTimeout(() => {
-        // Ensure no CSS animations interfere with JS scroll
-        scrollWrapper.style.animation = 'none';
-        scrollContent.style.animation = 'none';
-
-        // 1. Initialize RAF-based auto-scroll (iOS-friendly)
-        let lastTime = 0;
-        const scrollStep = (currentTime) => {
-            if (!state.isPaused) {
-                // Throttle to ~50fps (20ms between frames)
-                if (currentTime - lastTime >= 20) {
-
-                    // Infinite Loop Logic: Reset at 50% width
-                    // Assumes content is duplicated [A, A]
-                    const resetThreshold = scrollWrapper.scrollWidth / 2;
-
-                    if (scrollWrapper.scrollLeft >= resetThreshold) {
-                        // Seamlessly jump back to start of first set
-                        scrollWrapper.scrollLeft -= resetThreshold;
-                    } else if (scrollWrapper.scrollLeft <= 0) {
-                        // Seamlessly jump forward to start of second set (for reverse scrolling)
-                        scrollWrapper.scrollLeft += resetThreshold;
-                    }
-
-                    scrollWrapper.scrollLeft += state.scrollSpeed;
-                    lastTime = currentTime;
-                }
-            }
-            state.animationFrame = requestAnimationFrame(scrollStep);
-        };
-        state.animationFrame = requestAnimationFrame(scrollStep);
+        // Ensure CSS animations are RUNNING for auto-scroll
+        // The CSS 'animation' property in styles.css handles the scrolling
+        scrollWrapper.style.animationPlayState = 'running';
+        if (scrollContent) scrollContent.style.animationPlayState = 'running';
 
         const scheduleResume = () => {
             clearTimeout(state.autoResumeTimeout);
             state.autoResumeTimeout = setTimeout(() => {
                 state.isPaused = false;
+                // Resume CSS Animation
+                scrollWrapper.style.animationPlayState = 'running';
+                if (scrollContent) scrollContent.style.animationPlayState = 'running';
             }, 2500);
         };
+        // 4. Pause on hover/touch (CSS Animation Control)
+        const pauseAnimation = () => {
+            state.isPaused = true;
+            scrollWrapper.style.animationPlayState = 'paused';
+            if (scrollContent) scrollContent.style.animationPlayState = 'paused';
+        };
 
-        // 2. Arrow navigation
-        if (prevBtn && nextBtn) {
-            const scrollAmount = () => scrollWrapper.clientWidth * 0.35;
-            prevBtn.addEventListener('click', () => {
-                state.isPaused = true;
-                scrollWrapper.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
-                scheduleResume();
-            });
-            nextBtn.addEventListener('click', () => {
-                state.isPaused = true;
-                scrollWrapper.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
-                scheduleResume();
-            });
-
-            // Arrow state update (Infinite scroll - arrows always active if content exists)
-            const updateArrows = () => {
-                const canScroll = scrollWrapper.scrollWidth > scrollWrapper.clientWidth;
-                prevBtn.classList.toggle('disabled', !canScroll);
-                nextBtn.classList.toggle('disabled', !canScroll);
-            };
-            scrollWrapper.addEventListener('scroll', updateArrows, { passive: true });
-            updateArrows();
-        }
-
-        // 3. Progress dots (DISABLED per user request)
-        if (false && progressContainer) {
-            const cards = scrollContent.children;
-            if (cards.length > 0) {
-                const containerWidth = scrollWrapper.clientWidth;
-                // Estimate card width
-                const cardWidth = cards[0]?.offsetWidth || 220;
-                const cardsPerPage = Math.max(1, Math.floor(containerWidth / (cardWidth + 20)));
-                const dotCount = Math.min(Math.ceil(cards.length / cardsPerPage), 8);
-
-                if (dotCount > 1) {
-                    progressContainer.innerHTML = '';
-                    for (let i = 0; i < dotCount; i++) {
-                        const dot = document.createElement('button');
-                        dot.className = 'progress-dot';
-                        dot.ariaLabel = `Go to slide ${i + 1}`;
-
-                        const navigateTo = (e) => {
-                            if (e.cancelable) e.preventDefault(); // Prevent double-fire
-                            state.isPaused = true;
-                            const max = scrollWrapper.scrollWidth - containerWidth;
-                            scrollWrapper.scrollTo({ left: max * (i / (dotCount - 1)), behavior: 'smooth' });
-                            scheduleResume();
-                        };
-
-                        dot.addEventListener('click', navigateTo);
-                        dot.addEventListener('touchend', navigateTo, { passive: false });
-
-                        progressContainer.appendChild(dot);
-                    }
-                    // Update dots
-                    const updateDots = () => {
-                        const dots = progressContainer.querySelectorAll('.progress-dot');
-                        const max = scrollWrapper.scrollWidth - scrollWrapper.clientWidth;
-                        const percent = max > 0 ? scrollWrapper.scrollLeft / max : 0;
-                        const active = Math.min(dots.length - 1, Math.max(0, Math.round(percent * (dots.length - 1))));
-                        dots.forEach((d, i) => d.classList.toggle('active', i === active));
-                    };
-                    scrollWrapper.addEventListener('scroll', updateDots, { passive: true });
-                    updateDots();
-                }
-            }
-        }
-
-        // 4. Pause on hover/touch
-        scrollWrapper.addEventListener('mouseenter', () => { state.isPaused = true; });
-        scrollWrapper.addEventListener('mouseleave', () => { scheduleResume(); });
-        scrollWrapper.addEventListener('touchstart', () => { state.isPaused = true; }, { passive: true });
-        scrollWrapper.addEventListener('touchend', () => { scheduleResume(); }, { passive: true });
+        scrollWrapper.addEventListener('mouseenter', pauseAnimation);
+        scrollWrapper.addEventListener('mouseleave', scheduleResume);
+        scrollWrapper.addEventListener('touchstart', pauseAnimation, { passive: true });
+        scrollWrapper.addEventListener('touchend', scheduleResume, { passive: true });
 
     }, 1000);
 }

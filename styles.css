@@ -1262,12 +1262,14 @@ Styled exactly like product showcase
   gap: var(--space-6);
   padding: var(--space-4);
   width: max-content;
+  animation: scroll-ticker 80s linear infinite;
+  /* Match Product Ticker */
 }
 
-/* .testimonials-scroll:hover {
+/* Pause on hover */
+.testimonials-scroll:hover {
   animation-play-state: paused;
-} REMOVED - Handled by JS */
-/* Consistent with product scroll */
+}
 
 /* .testimonial-item */
 .testimonial-item {
