@@ -485,10 +485,17 @@ textarea {
 
 @media (max-width: 767px) {
     .product-gallery {
-        max-width: 320px;
+        max-width: 300px;
         /* Compact on Mobile */
-        height: 320px;
+        height: 300px;
         /* Force square aspect ratio */
+    }
+
+    .gallery-front .main-img {
+        object-fit: cover;
+        /* Eliminate white bars */
+        object-position: center bottom;
+        /* Center bottom usually keeps the jar/product in view */
     }
 
     .overlay-logo {
