@@ -37,12 +37,24 @@ textarea {
 }
 
 /* 2. Global Layout Components */
-/* Sales Header - Inherits from .header in styles.css */
+/* Sales Header - Fixed position on all devices */
+.header.sales-header {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #FFFFFF;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
 
 /* Override for sales-header: reduce top padding on mobile page container */
 @media (max-width: 767px) {
     .sales-page-container {
-        padding-top: 75px;
+        padding-top: 80px;
     }
 }
 

@@ -425,12 +425,12 @@ Persistent header with hamburger menu and WhatsApp integration
 ========================================
 */
 .header {
-  position: fixed;
+  position: fixed !important;
   top: 0;
   left: 0;
   right: 0;
-  z-index: var(--z-fixed);
-  background: rgba(255, 255, 255, 0.9);
+  z-index: 1000;
+  background: #FFFFFF;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-light);
