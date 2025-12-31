@@ -19,31 +19,51 @@
 </head>
 
 <body>
-    <header class="sales-header">
-        <!-- Logo Section - Same as Main Page structure, but wrapped in a link -->
-        <a href="index.html" class="logo-section"
-            style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
-            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="headerLogo"
-                alt="Telugu Delicacies Logo" class="logo"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div class="logo-fallback" style="display: none;">TD</div>
-            <div class="logo-text" style="display: flex; flex-direction: column;">
-                <h1 class="brand-name" id="header-site-title">Telugu Delicacies</h1>
-                <span id="header-telugu-brand" class="telugu-brand"></span>
+    <header class="header sales-header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo Section - Same as Main Page structure -->
+                <a href="index.html" class="logo-section" style="text-decoration: none;">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        id="headerLogo" alt="Telugu Delicacies Logo" class="logo"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-fallback" style="display: none;">TD</div>
+                    <div class="logo-text" style="display: flex; flex-direction: column;">
+                        <h1 class="brand-name" id="header-site-title">Telugu Delicacies</h1>
+                        <span id="header-telugu-brand" class="telugu-brand"></span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Buttons (Slot - Sales Specific) -->
+                <nav class="desktop-nav">
+                    <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()"
+                        data-tooltip="Share Page">
+                        <i class="fas fa-arrow-up-from-bracket"></i>
+                    </button>
+                    <button class="nav-btn cart-btn" id="cartBtn" onclick="window.toggleCartDrawer()"
+                        data-tooltip="View Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </button>
+                    <a href="index.html" class="nav-btn home-btn" data-tooltip="Back Home">
+                        <i class="fas fa-home"></i>
+                    </a>
+                </nav>
+
+                <!-- Mobile Action Icons (Always Visible) -->
+                <div class="mobile-actions">
+                    <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()"
+                        data-tooltip="Share Page">
+                        <i class="fas fa-arrow-up-from-bracket"></i>
+                    </button>
+                    <button class="nav-btn cart-btn" id="mobileCartBtn" onclick="window.toggleCartDrawer()"
+                        data-tooltip="View Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="mobileCartCount">0</span>
+                    </button>
+                </div>
             </div>
-        </a>
-        <nav>
-            <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()" data-tooltip="Share Page">
-                <i class="fas fa-arrow-up-from-bracket"></i>
-            </button>
-            <button class="nav-btn cart-btn" id="cartBtn" onclick="window.toggleCartDrawer()" data-tooltip="View Cart">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count" id="cartCount">0</span>
-            </button>
-            <a href="index.html" class="nav-btn home-btn" data-tooltip="Back Home">
-                <i class="fas fa-home"></i>
-            </a>
-        </nav>
+        </div>
     </header>
 
     <main class="sales-page-container" id="app">

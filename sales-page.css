@@ -37,28 +37,12 @@ textarea {
 }
 
 /* 2. Global Layout Components */
-.sales-header {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-light);
-    height: 70px;
-    padding: 0 var(--space-2);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-}
+/* Sales Header - Inherits from .header in styles.css */
 
-@media (min-width: 768px) {
-    .sales-header {
-        padding: 0 var(--space-4);
+/* Override for sales-header: reduce top padding on mobile page container */
+@media (max-width: 767px) {
+    .sales-page-container {
+        padding-top: 75px;
     }
 }
 
