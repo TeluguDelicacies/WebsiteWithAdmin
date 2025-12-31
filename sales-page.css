@@ -471,16 +471,32 @@ textarea {
     /* Critical for container health */
 }
 
-/* Component: Gallery (3D Flip) - LARGER SIZE */
+/* Component: Gallery (3D Flip) - Responsive */
 .product-gallery {
     position: relative;
     width: 100%;
     max-width: 450px;
-    /* Increased for better visual */
+    /* Increased for better visual on Desktop */
     height: 450px;
     margin: 0 auto;
     perspective: 1000px;
     flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+    .product-gallery {
+        max-width: 320px;
+        /* Compact on Mobile */
+        height: 320px;
+        /* Force square aspect ratio */
+    }
+
+    .overlay-logo {
+        width: 60px;
+        /* Smaller overlay on mobile */
+        top: 5px;
+        right: 5px;
+    }
 }
 
 .gallery-inner {
@@ -568,11 +584,22 @@ textarea {
 
     .product-title {
         margin-top: 0;
+        font-size: 1.4rem;
+        /* Compact title */
+    }
+
+    .telugu-title {
+        font-size: 1.1rem;
+    }
+
+    .product-tagline {
+        font-size: 0.8rem;
+        margin-bottom: 5px;
     }
 }
 
 .product-title {
-    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
     /* Reduced */
     margin-bottom: 2px;
 }
