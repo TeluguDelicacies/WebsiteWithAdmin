@@ -789,7 +789,7 @@
             </div>
 
             <div class="info-tabs">
-                <div class="info-btns-row" id="tabs-buttons">
+                <div class="info-toggles" id="tabs-buttons">
                     <!-- Buttons injected here -->
                 </div>
                 <div id="ingredients-content" class="info-content-block"></div>
@@ -974,7 +974,7 @@
                 return `<p style="font-size:0.85rem; line-height:1.8; color:var(--text-secondary); margin:0;">${items.join(' <span style="color:#ccc;">•</span> ')}</p>`;
             };
 
-            if (nutritionData) {
+            if (nutritionData && Object.keys(nutritionData).length >= 3) {
                 sections.push({
                     id: 'nut',
                     label: 'Nutrition',
@@ -996,7 +996,7 @@
             // Render Buttons & Inject Content
             if (btnContainer) {
                 btnContainer.innerHTML = sections.map(s =>
-                    `<button class="info-btn" id="btn-${s.id}" data-target="${s.target}"><i class="${s.icon}"></i>
+                    `<button class="toggle-btn" id="btn-${s.id}" data-target="${s.target}">
             ${s.label}</button>`
                 ).join('');
 
@@ -1007,7 +1007,7 @@
                 // Add Toggle Logic
                 // Add Toggle Logic
                 btnContainer.onclick = (e) => {
-                    const btn = e.target.closest('.info-btn');
+                    const btn = e.target.closest('.toggle-btn');
                     if (!btn) return;
 
                     const targetId = btn.dataset.target;
@@ -1017,7 +1017,7 @@
                     const wasActive = btn.classList.contains('active');
 
                     // Close ALL
-                    document.querySelectorAll('.info-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.info-content-block').forEach(d => d.classList.remove('active'));
 
                     // If it wasn't active, open it (If it was active, we just closed it above)

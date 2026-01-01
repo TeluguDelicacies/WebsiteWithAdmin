@@ -3736,9 +3736,12 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 .quick-toggles {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 5px;
+  /* Tight gap */
   margin-bottom: 15px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap !important;
+  /* FORCE Single Row */
+  width: 100%;
 }
 
 .quick-toggles .toggle-btn {
