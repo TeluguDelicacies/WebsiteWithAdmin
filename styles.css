@@ -598,12 +598,10 @@ Persistent header with hamburger menu and WhatsApp integration
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid var(--border-light);
+  border: none;
   width: 42px;
   /* Fixed size for icon-only */
   height: 42px;
-  border-radius: 50%;
-  /* Circle for icon-only */
   font-size: 1.1rem;
   color: var(--color-primary-blue);
   cursor: pointer;
@@ -613,11 +611,9 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .nav-btn:hover {
-  color: var(--text-inverse);
-  background: var(--color-primary-blue);
-  border-color: var(--color-primary-blue);
+  color: var(--color-primary-blue);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2);
+  filter: brightness(0.85);
 }
 
 .nav-btn.whatsapp-btn,
