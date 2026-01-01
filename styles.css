@@ -550,21 +550,22 @@ Persistent header with hamburger menu and WhatsApp integration
 
 .brand-name {
   font-family: var(--font-primary);
-  font-size: var(--font-lg);
+  font-size: clamp(0.9rem, 3.5vw, 1.125rem);
   font-weight: var(--weight-bold);
   color: var(--text-brand);
   margin: 0;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .brand-name {
-    font-size: var(--font-xl);
+    font-size: clamp(1.125rem, 4vw, var(--font-xl));
   }
 }
 
 .telugu-brand {
   display: block;
-  font-size: 1.2rem !important;
+  font-size: clamp(1rem, 3.8vw, 1.2rem) !important;
   font-family: 'Mallanna', sans-serif;
   color: var(--text-telugu);
   margin-top: -3px;
@@ -572,6 +573,7 @@ Persistent header with hamburger menu and WhatsApp integration
   line-height: 1;
   font-weight: 600;
   opacity: 0.9;
+  white-space: nowrap;
 }
 
 /* Desktop Navigation */

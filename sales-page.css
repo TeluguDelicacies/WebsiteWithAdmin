@@ -81,32 +81,30 @@ textarea {
 
 .header.sales-header .brand-name {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.125rem !important;
-    /* Hardcoded: same as --font-lg */
+    font-size: clamp(0.9rem, 3.5vw, 1.125rem) !important;
     font-weight: 700;
     color: #0077B6 !important;
-    /* Hardcoded: same as --text-brand */
     margin: 0;
     line-height: 1.2;
+    white-space: nowrap;
 }
 
 @media (min-width: 768px) {
     .header.sales-header .brand-name {
-        font-size: 1.25rem !important;
-        /* Hardcoded: same as --font-xl */
+        font-size: clamp(1.125rem, 4vw, 1.25rem) !important;
     }
 }
 
 .header.sales-header .telugu-brand {
     display: block;
-    font-size: 1.2rem !important;
+    font-size: clamp(1rem, 3.8vw, 1.2rem) !important;
     font-family: 'Mallanna', sans-serif;
     color: #00B4D8 !important;
-    /* Hardcoded: same as --text-telugu */
     margin-top: -3px;
     line-height: 1;
     font-weight: 600;
     opacity: 0.9;
+    white-space: nowrap;
 }
 
 /* Sales Navigation - Always Visible */
