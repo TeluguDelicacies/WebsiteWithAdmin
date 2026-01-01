@@ -181,8 +181,12 @@ window.shareCurrentPage = function () {
     }
 
     // Fallback: Open WhatsApp with URL
-    const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`;
-    window.open(whatsappUrl, '_blank');
+    // Fix: Use correct URL scheme based on device
+    if (isMobile) {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`, '_blank');
+    } else {
+        window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`, '_blank');
+    }
 };
 
 /*
@@ -232,6 +236,94 @@ function scrollToSection(sectionId) {
 
 // Make scrollToSection globally accessible for inline onclick handlers
 window.scrollToSection = scrollToSection;
+
+// Helper: Generate URL-friendly slug
+function generateSlug(name) {
+    if (!name) return '';
+    return name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
+
+// ----------------------------------------------------
+// CLIENT-SIDE ROUTING (Clean URLs)
+// ----------------------------------------------------
+
+// Handle internal links without reload
+window.handleLinkClick = function (e, path) {
+    e.preventDefault();
+    history.pushState({}, '', path);
+    handleRouting();
+};
+
+// Main Routing Logic
+window.handleRouting = async function () {
+    const path = window.location.pathname;
+
+    // 1. Handle Sales/Category or Product URLs
+    // Expected format: /sales/screen-slug (where screen-slug could be product or category)
+    // Or just /slug if at root, but user asked for /sales/slug
+
+    // We check if path matches /sales/something
+    const match = path.match(/\/sales\/([^\/]+)/);
+
+    if (match && match[1]) {
+        const slug = match[1];
+        console.log('Routing to slug:', slug);
+
+        // Wait for data if not ready (simple check)
+        if (!window.allProductsCache || window.allProductsCache.length === 0) {
+            console.log('Data not loaded yet, routing will loop or wait...');
+            // In a real app we'd queue this. For now, we assume this is called AFTER fetch.
+            // If called directly on load, we rely on the init function calling this after fetch.
+            return;
+        }
+
+        // A. Check if Product
+        // Use allProductsCache
+        const products = window.allProductsCache;
+        const productMatch = products.find(p => (p.slug === slug) || (generateSlug(p.product_name) === slug));
+
+        if (productMatch) {
+            console.log('Found Product:', productMatch.product_name);
+            // Open Modal
+            if (window.openQuickProductModal) {
+                window.openQuickProductModal(productMatch.id);
+            }
+            return;
+        }
+
+        // B. Check if Category
+        // Categories are usually just strings in 'allProducts' map? No, fetchCategories() stores them in UI? 
+        // Actually script.js uses `fetchCategories` for the filter bar. 
+        // We might need to fetch categories or check the filter dropdown?
+        // Let's rely on `window.allCategories` if it exists, OR check the `filterProducts` logic.
+        // Using the filter function: `filterProducts(slug)`
+        console.log('Assuming Category, filtering:', slug);
+        if (window.filterProducts) {
+            window.filterProducts(slug);
+            // Also scroll to top or product section
+            const prodSection = document.getElementById('product-categories');
+            if (prodSection) prodSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    } else {
+        // Fallback for Query Params (Legacy Support + Direct Loads)
+        const params = new URLSearchParams(window.location.search);
+        const category = params.get('category');
+        if (category && window.filterProducts) {
+            window.filterProducts(category);
+            const prodSection = document.getElementById('product-categories');
+            if (prodSection) prodSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+};
+
+// Listen for PopState (Back/Forward button)
+window.addEventListener('popstate', handleRouting);
+
 
 /*
 ========================================
@@ -2079,6 +2171,13 @@ async function fetchAndRenderProducts() {
         setTimeout(() => {
             initializeScrollAnimations();
             initializeProductShowcaseControls();
+            // Re-initialize animations and controls after rendering
+            setTimeout(() => {
+                initializeScrollAnimations();
+                initializeProductShowcaseControls();
+                // Trigger Client-Side Routing (for Deep Links)
+                handleRouting();
+            }, 100);
         }, 100);
 
     } catch (err) {
@@ -2558,7 +2657,7 @@ function renderQuickLayout(products, categories, container) {
                     </div>
                 </div>
                 <div class="quick-header-action">
-                    <a href="sales.html?category=${cat.slug}" class="view-all-link">View All <i class="fas fa-chevron-right"></i></a>
+                    <a href="/sales/${cat.slug}" onclick="handleLinkClick(event, '/sales/${cat.slug}')" class="view-all-link">View All <i class="fas fa-chevron-right"></i></a>
                 </div>
             </div>
             <div class="quick-product-scroll" id="scroll-${cat.slug}">

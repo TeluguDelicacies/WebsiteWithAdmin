@@ -75,6 +75,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             showLogin();
         }
     });
+
+    // AUTO-SLUG GENERATION LISTENERS
+    // Product Slug
+    const prodNameInput = document.getElementById('productName');
+    const prodSlugInput = document.getElementById('productSlug');
+    if (prodNameInput && prodSlugInput) {
+        prodNameInput.addEventListener('input', () => {
+            // Only auto-fill if slug is empty or was previously auto-generated (implied by user not manually editing it? 
+            // distinct tracking is hard, so we just check if it's empty or matches the old likely slug)
+            // Simpler: Just auto-fill if slug is empty. User can overwrite.
+            if (!prodSlugInput.value) {
+                prodSlugInput.value = generateSlug(prodNameInput.value);
+            }
+        });
+        // Optional: Force a "Re-generate" button or just let them type. 
+        // Better UX: If they haven't touched the slug input, keep it synced. 
+        // But for now, simple "fill on empty" or "fill on blur" is improved enough.
+        prodNameInput.addEventListener('blur', () => {
+            if (!prodSlugInput.value) prodSlugInput.value = generateSlug(prodNameInput.value);
+        });
+    }
+
+    // Category Slug
+    const catNameInput = document.getElementById('catTitle');
+    const catSlugInput = document.getElementById('catSlug');
+    if (catNameInput && catSlugInput) {
+        catNameInput.addEventListener('input', () => {
+            if (!catSlugInput.value) {
+                catSlugInput.value = generateSlug(catNameInput.value);
+            }
+        });
+        catNameInput.addEventListener('blur', () => {
+            if (!catSlugInput.value) catSlugInput.value = generateSlug(catNameInput.value);
+        });
+    }
 });
 
 // Auth Functions
