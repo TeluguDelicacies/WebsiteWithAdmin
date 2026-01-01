@@ -1156,18 +1156,15 @@
                 link.click();
                 document.body.removeChild(link);
 
-                link.click();
-                document.body.removeChild(link);
-
                 // Removed Clipboard write attempt to be consistent with script.js (simple Download + Open flow)
 
-                // alert('Catalogue downloaded! You can now attach or paste it directly in WhatsApp.'); 
+                window.showToast('Catalogue downloaded! You can now attach or paste it directly in WhatsApp.', 'success');
                 const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
                 window.open(whatsappUrl, '_blank');
 
             } catch (err) {
                 console.error('Sharing failed:', err);
-                alert('Could not prepare the catalogue for sharing.');
+                window.showToast('Could not prepare the catalogue for sharing.', 'error');
             }
         };
 
@@ -1377,10 +1374,10 @@
             const maxStock = item.variant ? (item.variant.stock || 0) : 999;
 
             if (newQty <= 0) {
-                if (confirm('Remove item from cart?')) {
-                    state.cart.splice(index, 1);
-                    window.saveCart();
-                }
+                // QUICK COMMERCE PATTERN: Immediate removal + Toast (No confirm dialog)
+                state.cart.splice(index, 1);
+                window.saveCart();
+                window.showToast('Item removed from cart', 'info');
             } else if (newQty > maxStock) {
                 window.showToast(`Max stock reached (${maxStock})`, 'error');
                 item.qty = maxStock;
@@ -1442,7 +1439,7 @@
 
         window.sendToWhatsApp = function () {
             if (state.cart.length === 0) {
-                alert('Your cart is empty!');
+                window.showToast('Your cart is empty!', 'error');
                 return;
             }
 
@@ -1480,19 +1477,17 @@
             const phone = '919618519191';
             const whatsappUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
 
-            // Open in new tab but also clear cart
-            window.open(whatsappUrl, '_blank');
-
-            // --- Cart Reset Logic ---
-            state.cart = [];
-            window.saveCart();
-
             // Close the cart drawer
             const cartDrawer = document.getElementById('cartDrawer');
             if (cartDrawer) cartDrawer.classList.remove('open');
 
-            // Show thank you message
-            alert('Thanks for the order! We will get back to you very soon. 🙏');
+            window.open(whatsappUrl, '_blank');
+            window.showToast('Thanks for the order! We will get back to you very soon. 🙏', 'success');
+
+            // Clear cart
+            state.cart = [];
+            window.saveCart();
+            window.toggleCartDrawer();
         };
 
         window.initCart();

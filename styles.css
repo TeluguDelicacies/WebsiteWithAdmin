@@ -2009,8 +2009,8 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   gap: 12px;
   /* Mobile: 12px gap */
   width: 100%;
-  margin: 0;
-  /* Task 1: No outer margins */
+  margin-top: 0;
+  /* STRICT: No margin top */
   padding: 0;
   /* Ensure no padding interferes */
 }
@@ -2195,7 +2195,8 @@ QUICK COMMERCE GRID & CARD (New Implementation)
 .product-title {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-primary-dark);
+  /* MATCHED: #005577 */
   margin-bottom: 2px;
   line-height: 1.3;
   /* Ensure title wraps cleanly */
@@ -2209,7 +2210,8 @@ QUICK COMMERCE GRID & CARD (New Implementation)
 
 .product-subtitle {
   font-size: 0.8rem;
-  color: var(--color-text-secondary);
+  color: var(--text-telugu);
+  /* MATCHED: #00B4D8 */
   font-family: 'Mallanna', sans-serif;
   /* Telugu font */
   margin-bottom: 8px;

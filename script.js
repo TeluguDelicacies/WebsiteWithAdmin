@@ -41,7 +41,7 @@ window.shareCatalogue = async function () {
     const shareMessage = settings.catalogue_share_message || 'Check out our latest catalogue!';
 
     if (!catalogueUrl) {
-        alert('Catalogue is not available at the moment.');
+        window.showToast('Catalogue is not available at the moment.', 'error');
         return;
     }
 
@@ -281,9 +281,44 @@ function generateSlug(name) {
 
 // Handle internal links without reload
 window.handleLinkClick = function (e, path) {
+    // FIX: Force hard navigation for Sales Page links
+    // This fixes the "View All" bug where SPA router tried (and failed) to load sales.html content
+    if (path.includes('/sales/')) {
+        return; // Allow default browser behavior (hard reload)
+    }
+
     e.preventDefault();
     history.pushState({}, '', path);
     handleRouting();
+};
+
+// GLOBAL TOAST NOTIFICATION (Replaces alert)
+window.showToast = function (message, type = 'info') {
+    // Remove existing toast
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+
+    // Create new toast
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    // Add icon based on type (optional)
+    const icon = type === 'success' ? '<i class="fas fa-check-circle" style="color:#4ade80"></i> ' :
+        type === 'error' ? '<i class="fas fa-exclamation-circle" style="color:#ef4444"></i> ' : '';
+
+    toast.innerHTML = icon + message;
+
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    // Auto dismiss
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2500); // 2.5 seconds
 };
 
 // Main Routing Logic
