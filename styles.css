@@ -484,9 +484,11 @@ Persistent header with hamburger menu and WhatsApp integration
   }
 }
 
-.logo-text-area {
+.logo-text-area,
+.logo-text {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 @media (min-width: 1024px) {
@@ -1112,12 +1114,10 @@ Enhanced product cards and modern styling
   margin: 0 0 4px 0;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  /* Ensure consistent height for 2 lines of text if needed, 
-     but with top alignment, single lines stay at top. 
-     We can clamp to 2 lines to be safe. */
+  /* Consistently clamp to 1 line as requested for 'no 2 lines' */
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
