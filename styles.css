@@ -2255,28 +2255,30 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-/* Toast Notification */
+
+/* Toast Notification - High Z-Index & Style */
 .toast-notification {
   position: fixed;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background-color: #0F172A;
-  /* Dark Slate */
-  color: #FFFFFF;
+  background-color: var(--color-gray-900);
+  /* Dark Background */
+  color: var(--color-white);
   padding: 12px 24px;
   border-radius: 50px;
   /* Pill shape */
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   z-index: 9999;
+  /* Highest Priority */
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   white-space: nowrap;
 }
 
@@ -2284,6 +2286,70 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* Clear Cart Button */
+.clear-cart-btn {
+  background: none;
+  border: none;
+  color: var(--color-error);
+  /* Red Text */
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.clear-cart-btn:hover {
+  background: var(--color-gray-100);
+}
+
+/* Category Header Polish */
+.category-header-simple {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.category-header-simple h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  /* Global Brand Color */
+  margin: 0 0 4px 0;
+  text-align: left;
+}
+
+.category-header-simple p {
+  font-family: 'Mallanna', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-telugu);
+  /* Global Muted Color */
+  margin: 0;
+  text-align: left;
+}
+
+.category-header-simple img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  margin-left: 20px;
+  /* Breathing room */
+}
+
+/* Breadcrumbs Spacing */
+.breadcrumb-section {
+  margin-top: var(--section-spacing);
+  /* Vertical Rhythm */
+  margin-bottom: calc(var(--section-spacing) / 2);
+  text-align: left;
+  /* Strict Left Align */
+}
+
 
 
 .variant-selector i {

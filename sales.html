@@ -78,7 +78,10 @@
     <div id="cartDrawer" class="cart-drawer">
         <div class="cart-header">
             <h3>Your Cart</h3>
-            <button class="close-cart-btn" onclick="window.toggleCartDrawer()">&times;</button>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <button class="clear-cart-btn" onclick="window.clearCart()" style="display:none;">Clear All</button>
+                <button class="close-cart-btn" onclick="window.toggleCartDrawer()">&times;</button>
+            </div>
         </div>
         <div class="cart-items" id="cartItems">
             <!-- Items will be populated here -->
@@ -1395,47 +1398,67 @@
             }
         };
 
-        function updateCartUI() {
-            const container = document.getElementById('cartItems');
-            const totalEl = document.getElementById('cartTotal');
-            const countEl = document.getElementById('cartCount');
+        window.clearCart = function () {
+            if (state.cart.length === 0) return;
+
+            // Immediate Clear + Toast
+            state.cart = [];
+            window.saveCart();
+            window.showToast('Cart cleared', 'info');
+        };
+
+        window.updateCartUI = function () {
+            const cartCount = document.getElementById('cartCount');
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            const clearBtn = document.querySelector('.clear-cart-btn');
 
             // Update Badge
-            const totalItems = state.cart.reduce((sum, item) => sum + item.qty, 0);
-            countEl.innerText = totalItems;
-            countEl.style.display = totalItems > 0 ? 'flex' : 'none';
+            const totalQty = state.cart.reduce((sum, item) => sum + item.qty, 0);
+            if (cartCount) {
+                cartCount.innerText = totalQty;
+                cartCount.style.display = totalQty > 0 ? 'flex' : 'none';
+            }
 
-            // Calculate Total
-            const totalCost = state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            totalEl.innerText = totalCost;
+            // Show/Hide Clear Button
+            if (clearBtn) {
+                clearBtn.style.display = state.cart.length > 0 ? 'block' : 'none';
+            }
 
+            // Update Drawer
             if (state.cart.length === 0) {
-                container.innerHTML = '<div class="empty-cart-msg">Your cart is empty <br> <i class="fas fa-shopping-basket" style="font-size:2rem; margin-top:1rem; opacity:0.5;"></i></div>';
+                if (cartItems) cartItems.innerHTML = '<div class="empty-cart-msg">Your cart is empty</div>';
+                if (cartTotal) cartTotal.innerText = '0';
                 return;
             }
 
-            container.innerHTML = state.cart.map((item, index) => `
-                <div class="cart-item">
-                    <img src="${item.image || state.placeholder}" class="cart-item-img" onerror="this.src='${state.placeholder}'">
-                    <div class="cart-item-details">
-                        <div class="cart-item-title">${item.name}</div>
-                        ${item.variant ? `<div class="cart-item-variant">${item.variant.quantity}</div>` : ''}
-                        
-                        <div class="cart-item-controls">
-                            <div class="qty-control-sm">
-                                <button class="qty-btn-sm" onclick="window.updateCartItemQty(${index}, -1)">−</button>
-                                <input type="number" class="cart-qty-input" value="${item.qty}" min="1" 
-                                    onchange="window.updateCartItemQty(${index}, this.value, true)"
-                                    style="width: 40px; text-align: center; border: 1px solid var(--color-gray-200); border-radius: 4px; font-size: 0.8rem; height: 24px; margin: 0 5px;">
-                                <button class="qty-btn-sm" onclick="window.updateCartItemQty(${index}, 1)">+</button>
+            let total = 0;
+            if (cartItems) {
+                cartItems.innerHTML = state.cart.map((item, index) => {
+                    const itemTotal = item.price * item.qty;
+                    total += itemTotal;
+                    const variantLabel = item.variant ? `<div class="cart-item-variant">${item.variant.quantity}</div>` : '';
+
+                    return `
+                        <div class="cart-item">
+                            <img src="${item.image || state.placeholder}" alt="${item.name}" onerror="this.src='${state.placeholder}'">
+                            <div class="cart-item-details">
+                                <h4>${item.name}</h4>
+                                ${variantLabel}
+                                <div class="cart-item-price">₹${item.price} x ${item.qty} = ₹${itemTotal}</div>
+                                <div class="cart-item-controls">
+                                    <button onclick="window.updateCartItemQty(${index}, -1)">−</button>
+                                    <span>${item.qty}</span>
+                                    <button onclick="window.updateCartItemQty(${index}, 1)">+</button>
+                                </div>
                             </div>
-                            <div class="cart-item-price">₹${item.price * item.qty}</div>
+                            </button>
                         </div>
-                    </div>
-                    <button class="close-cart-btn" style="font-size:1.2rem; margin-left:5px; align-self:flex-start;" onclick="window.removeItem(${index})">&times;</button>
-                </div>
-            `).join('');
-        }
+                    `;
+                }).join('');
+            }
+            if (cartTotal) cartTotal.innerText = total;
+        };
 
         window.sendToWhatsApp = function () {
             if (state.cart.length === 0) {
