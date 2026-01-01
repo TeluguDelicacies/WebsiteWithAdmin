@@ -98,6 +98,16 @@ Modern color palette with semantic naming
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* === LAYOUT TOKENS === */
+  --header-height-mobile: 75px;
+  --header-height-desktop: 90px;
+  --header-height: var(--header-height-mobile);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-primary: 0 10px 25px -5px rgba(0, 119, 182, 0.3);
   --shadow-secondary: 0 10px 25px -5px rgba(0, 180, 216, 0.3);
@@ -488,7 +498,7 @@ Persistent header with hamburger menu and WhatsApp integration
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 9999;
   background: #FFFFFF;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -886,26 +896,44 @@ Enhanced visual appeal with modern design
 */
 .hero {
   position: relative;
-  min-height: 100vh;
+
+  /* 1. Layout Engine */
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  text-align: center;
+  width: 100%;
+
+  /* 2. Remove Fixed Heights (Crucial) */
+  height: auto !important;
+  min-height: auto !important;
+
+  /* 3. The "Safe" Spacing Math (Mobile First) */
+  /* Mobile Header is approx 80px */
+  padding-top: 140px;
+  /* 80px Header + 60px Visual Space */
+  padding-bottom: 0px;
+  /* Just the Visual Space */
+  padding-left: 12px;
+  padding-right: 12px;
+
+  /* 4. Background */
   background: var(--bg-secondary);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-blend-mode: normal;
   overflow: hidden;
-  transition: min-height var(--transition-normal);
 }
 
-.hero.hero-quick-commerce {
-  min-height: 450px;
-  /* Sleek, shorter height */
-}
-
-@media (max-width: 768px) {
-  .hero.hero-quick-commerce {
-    min-height: 350px;
+/* Desktop Adjustment */
+@media (min-width: 1024px) {
+  .hero {
+    /* Desktop Header is approx 100px */
+    padding-top: 180px;
+    /* 100px Header + 80px Space */
+    padding-bottom: 0px;
+    /* Just the 80px Space */
   }
 }
 
@@ -917,38 +945,35 @@ Enhanced visual appeal with modern design
   left: 0;
   right: 0;
   bottom: 0;
-  background-image:
-    /* Sophisticated overlay: Dark on the left (for text), fading to transparent on the right */
-    linear-gradient(90deg,
-      rgba(0, 0, 0, 0.8) 0%,
-      rgba(0, 0, 0, 0.4) 40%,
-      rgba(0, 0, 0, 0.15) 70%,
-      transparent 100%);
-  /* Blur removed as per user request to keep image clear */
-  /* backdrop-filter: blur(3px) saturate(120%); - DISABLED */
+  background: rgba(0, 0, 0, 0.4);
+  /* Subtitle dark overlay for legibility */
   z-index: 1;
   pointer-events: none;
 }
 
-/* Mobile specific overlay for full-width readability */
+/* Mobile specific overlay for full-width readability - simplified */
 @media (max-width: 768px) {
   .hero::before {
-    background-image:
-      linear-gradient(180deg,
-        rgba(0, 0, 0, 0.7) 0%,
-        rgba(0, 0, 0, 0.4) 60%,
-        rgba(0, 0, 0, 0.7) 100%);
+    background: rgba(0, 0, 0, 0.5);
   }
 }
 
 .hero-container {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 var(--space-4);
+  display: flex;
+  justify-content: center;
 }
 
 .hero-content {
-  padding: clamp(1rem, 3vh, 2rem) clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vh, 1rem);
-  max-width: 600px;
+  text-align: center;
+  /* Center all text */
+  margin: 0;
+  padding: 0;
+  max-width: 800px;
 }
 
 .hero-title {
@@ -957,9 +982,8 @@ Enhanced visual appeal with modern design
   line-height: 1.1;
   margin-bottom: 1rem;
   color: var(--color-white);
-  text-align: left;
   letter-spacing: -0.03em;
-  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 0, 0, 0.4);
+  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8);
 }
 
 .hero-subtitle {
@@ -968,10 +992,10 @@ Enhanced visual appeal with modern design
   line-height: 1.5;
   color: var(--color-white);
   margin-bottom: 2rem;
-  text-align: left;
   text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.9);
-  opacity: 1;
-  max-width: 500px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .telugu-subtitle {
@@ -983,11 +1007,7 @@ Enhanced visual appeal with modern design
   color: var(--color-primary-yellow);
   margin-top: 0.5rem;
   line-height: 1.2;
-  opacity: 1;
   text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  /* Force single line */
 }
 
 .hero-cta {
@@ -1021,20 +1041,6 @@ Enhanced visual appeal with modern design
 }
 
 @media (max-width: 767px) {
-  .hero {
-    text-align: center;
-  }
-
-  .hero-title,
-  .hero-subtitle,
-  .telugu-subtitle {
-    text-align: center;
-  }
-
-  .hero-content {
-    padding-top: var(--space-16);
-  }
-
   .hero-cta {
     font-size: var(--font-base);
     padding: var(--space-3) var(--space-6);
