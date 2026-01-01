@@ -477,8 +477,6 @@
                          loading="lazy"
                          onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
                     
-                    ${category.sub_brand ? `<span class="product-tag">${category.sub_brand}</span>` : ''}
-                    
                     <!-- Floating Action -->
                     <div class="card-action-container">
                          <!-- Add Button (Visible if Qty 0) -->
@@ -500,31 +498,35 @@
 
                 <!-- Info Area -->
                 <div class="card-info">
-                    
-                     <!-- Price Row -->
+                     <!-- 1. Sub-Brand (Top) -->
+                     ${category.sub_brand ? `<span class="card-sub-brand">${category.sub_brand}</span>` : ''}
+
+                     <!-- 2. English Title -->
+                    <h3 class="product-title" onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
+                        ${product.product_name}
+                    </h3>
+
+                    <!-- 3. Telugu Title -->
+                    <p class="product-subtitle">${product.product_name_telugu || category.telugu_title || ''}</p>
+
+                     <!-- 4. Price Row -->
                     <div class="price-row">
                         <span class="price-pill" id="price-${product.id}">₹${defaultVar.price}</span>
                         ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
                         ${discountTag}
                     </div>
 
-                    <!-- Titles -->
-                    <h3 class="product-title" onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
-                        ${product.product_name}
-                    </h3>
-                    <p class="product-subtitle">${product.product_name_telugu || category.telugu_title || ''}</p>
-
-                     <!-- Variant Selector (Dropdown Trigger) -->
+                     <!-- 5. Variant Selector (Bottom) -->
                     ${sortedVariants.length > 0 ? `
                         <div class="variant-selector" onclick="window.toggleGridVariantDropdown('${product.id}')" tabindex="0">
                             <span class="current-variant" id="var-label-${product.id}">${defaultVar.quantity || 'Standard'}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
-                        <!-- Hidden Dropdown List (Absolute or Appended) -->
-                        <div class="variant-dropdown-list" id="var-list-${product.id}" style="display:none; position:absolute; bottom:40px; left:12px; background:white; border:1px solid #eee; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:20; width:150px; overflow:hidden;">
+                        <!-- Dropdown List -->
+                        <div class="variant-dropdown-list" id="var-list-${product.id}" style="display:none; position:absolute; bottom:50px; left:12px; background:white; border:1px solid #eee; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:20; width:150px; overflow:hidden;">
                             ${sortedVariants.map((v, idx) => `
                                 <div class="var-option" 
-                                     style="padding:8px 12px; font-size:0.8rem; cursor:pointer; color:#333; border-bottom:1px solid #f0f0f0;" 
+                                     style="padding:10px 14px; font-size:0.85rem; cursor:pointer; color:#333; border-bottom:1px solid #f0f0f0;" 
                                      onclick="window.selectGridVariant('${product.id}', ${idx})">
                                     <div style="font-weight:600;">${v.quantity}</div>
                                     <div style="font-size:0.75rem; color:#666;">₹${v.price}</div>
@@ -1115,7 +1117,7 @@
             const shareMessage = settings.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
 
             if (!catalogueUrl) {
-                alert('Catalogue is not available at the moment.');
+                window.showToast('Catalogue is not available at the moment.', 'error');
                 return;
             }
 
@@ -1170,8 +1172,30 @@
         };
 
         // --- UI Utilities ---
+        // --- UI Utilities ---
         window.showToast = function (message, type = 'info') {
-            alert(message);
+            // Remove existing toast
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            // Add icon based on type? For now just text
+            toast.innerHTML = type === 'success' ? '<i class="fas fa-check-circle" style="color:#4ade80"></i> ' + message : message;
+
+            document.body.appendChild(toast);
+
+            // Trigger animation
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            // Auto dismiss
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000); // 2 seconds
         };
 
         // --- Cart Functions ---
