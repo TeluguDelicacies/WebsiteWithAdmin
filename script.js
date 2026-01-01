@@ -35,7 +35,7 @@ async function preloadCatalogue() {
 window.shareCatalogue = async function () {
     const settings = window.currentSiteSettings || {};
     const catalogueUrl = settings.catalogue_image_url;
-    const shareMessage = settings.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
+    const shareMessage = settings.catalogue_share_message || 'Check out our latest catalogue!';
 
     if (!catalogueUrl) {
         alert('Catalogue is not available at the moment.');
@@ -43,75 +43,81 @@ window.shareCatalogue = async function () {
     }
 
     try {
-        // Use pre-loaded file if available, otherwise fetch it
-        let file = window.td_catalogueFile;
-        let blob;
-        let blobUrl;
+        // --- STEP 1: LOAD & RE-BAKE IMAGE (Fixes "Red Exclamation Mark") ---
+        let sourceBlob;
 
-        if (!file) {
-            const response = await fetch(catalogueUrl, { mode: 'cors' });
-            blob = await response.blob();
-
-            // Fixed: Always enforce PNG for Android compatibility
-            const mimeType = 'image/png';
-            const fileName = 'Telugu_Delicacies_Catalogue.png';
-
-            file = new File([blob], fileName, { type: mimeType });
+        // Use preloaded file if available, otherwise fetch
+        if (window.td_catalogueFile) {
+            sourceBlob = window.td_catalogueFile;
+        } else {
+            // Fetch fresh if needed
+            const cleanUrl = catalogueUrl + (catalogueUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+            const response = await fetch(cleanUrl, { mode: 'cors' });
+            sourceBlob = await response.blob();
         }
 
-        blobUrl = URL.createObjectURL(file);
+        // Draw to Canvas to create a fresh, clean JPEG file
+        const imageBitmap = await createImageBitmap(sourceBlob);
+        const canvas = document.createElement('canvas');
+        canvas.width = imageBitmap.width;
+        canvas.height = imageBitmap.height;
+        const ctx = canvas.getContext('2d');
 
-        // 1. Mobile Sharing (Direct File Attachment)
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile && navigator.share) {
-            try {
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    // FIX: Copy text to clipboard first (Reliable cross-platform approach)
-                    try {
-                        await navigator.clipboard.writeText(shareMessage);
-                        alert('Caption copied! Paste it in WhatsApp.');
-                    } catch (clipErr) {
-                        console.warn('Clipboard write failed:', clipErr);
-                        // Fallback: Continue to share without clipboard copy
-                    }
+        // White background handles transparent PNGs safely
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(imageBitmap, 0, 0);
 
-                    // Share ONLY the file (Text + File is unreliable on Android/WhatsApp)
-                    await navigator.share({
-                        files: [file]
-                    });
-                    return;
-                }
-            } catch (shareErr) {
-                console.error('Direct file share failed, falling back to URL share:', shareErr);
+        // Convert to JPEG (High Quality)
+        const jpegBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+
+        // Create the File object with a timestamp (Crucial for Android)
+        const fileToShare = new File([jpegBlob], 'Telugu_Delicacies_Menu.jpg', {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+
+        // --- STEP 2: SHARE (Fixes "Blurry Image") ---
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+        const isAndroid = /Android/i.test(userAgent);
+
+        if (navigator.share && navigator.canShare({ files: [fileToShare] })) {
+            let shareData = { files: [fileToShare] };
+
+            // RULE: 
+            // iOS -> Send Text + Image
+            // Android -> Send Image ONLY (Adding text here often breaks the image)
+            if (isIOS) {
+                shareData.text = shareMessage;
             }
+
+            // Optional: Auto-copy text to clipboard for Android users
+            if (isAndroid && navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(shareMessage);
+                    // alert('Caption copied! Paste it in WhatsApp.'); // Optional feedback
+                } catch (e) { }
+            }
+
+            await navigator.share(shareData);
+        } else {
+            throw new Error("Native share not supported");
         }
-
-        // 2. Desktop Fallback (Download + Paste approach)
-        // Trigger Download
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = 'Telugu_Delicacies_Catalogue.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Try Copy to Clipboard
-        if (navigator.clipboard && window.ClipboardItem) {
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({ [file.type]: file })
-                ]);
-            } catch (e) { console.warn('Clipboard copy failed', e); }
-        }
-
-        // Inform user and open WhatsApp
-        alert('Catalogue downloaded! You can now attach or paste it directly in WhatsApp.');
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
-        window.open(whatsappUrl, '_blank');
 
     } catch (err) {
-        console.error('Sharing failed:', err);
-        alert('Could not prepare the catalogue for sharing. Please try again.');
+        console.error('Share failed:', err);
+
+        // Fallback: Download file and open WhatsApp Web
+        if (catalogueUrl) {
+            const link = document.createElement('a');
+            link.href = catalogueUrl;
+            link.download = 'Telugu_Delicacies_Catalogue.jpg'; // Consistent default
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`, '_blank');
     }
 }
 
