@@ -144,7 +144,7 @@
             }
 
             // Fallback: Open WhatsApp with URL
-            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
+            const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`;
             window.open(whatsappUrl, '_blank');
         };
 
@@ -899,7 +899,7 @@
                 }
 
                 alert('Catalogue downloaded! You can now attach or paste it directly in WhatsApp.');
-                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+                const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
                 window.open(whatsappUrl, '_blank');
 
             } catch (err) {
@@ -1193,7 +1193,7 @@
             message += `\n\nPlease confirm availability and share payment details.`;
 
             const phone = '919618519191';
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            const whatsappUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
 
             // Open in new tab but also clear cart
             window.open(whatsappUrl, '_blank');

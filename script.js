@@ -10,6 +10,9 @@ Description: Interactive functionality for responsive Telugu Delicacies website
 */
 
 window.td_catalogueFile = null;
+const WHATSAPP_NUMBER = '919618519191';
+const WHATSAPP_CATALOG_URL = `https://wa.me/c/${WHATSAPP_NUMBER}`;
+const WHATSAPP_DESKTOP_URL = `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent("Hi! I'd like to place an order.")}`;
 
 async function preloadCatalogue() {
     const settings = window.currentSiteSettings || {};
@@ -117,7 +120,7 @@ window.shareCatalogue = async function () {
             link.click();
             document.body.removeChild(link);
         }
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`, '_blank');
+        window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`, '_blank');
     }
 }
 
@@ -178,7 +181,7 @@ window.shareCurrentPage = function () {
     }
 
     // Fallback: Open WhatsApp with URL
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(fullMessage)}`;
+    const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`;
     window.open(whatsappUrl, '_blank');
 };
 
@@ -1433,8 +1436,8 @@ Complete header navigation with WhatsApp integration
 ========================================
 */
 
-// WhatsApp catalog configuration
-const WHATSAPP_CATALOG_URL = "https://wa.me/c/919618519191";
+// WhatsApp catalog configuration - Already defined globally
+// const WHATSAPP_CATALOG_URL = "https://wa.me/c/919618519191";
 
 /**
  * Check if user is on mobile device
@@ -1446,16 +1449,10 @@ function isMobileDevice() {
 
 /**
  * Handle WhatsApp button click
- * Mobile: Direct to catalog, Desktop: Show QR modal
+ * Mobile: Direct to catalog, Desktop: Use Standardized Web Interface
  */
 function handleWhatsAppClick() {
-    if (isMobileDevice()) {
-        // Direct to WhatsApp catalog on mobile
-        window.open(WHATSAPP_CATALOG_URL, '_blank', 'noopener,noreferrer');
-    } else {
-        // Show QR code modal on desktop
-        showWhatsAppQR();
-    }
+    window.openWhatsAppCatalog();
 }
 
 /**
@@ -2346,7 +2343,7 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
                     <span style="color: var(--text-secondary);">${quantitiesText}</span>
                 </div>
 
-                <button class="add-btn" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
+                <button class="add-btn" onclick="window.openWhatsAppCatalog()">
                     <i class="fab fa-whatsapp"></i> Buy on WhatsApp
                 </button>
             </div>
@@ -2894,7 +2891,7 @@ window.openQuickProductModal = function (productId) {
                      <div class="variant-info">
                         <strong>Available:</strong> ${quantitiesText}
                     </div>
-                    <button class="whatsapp-buy-btn" onclick="window.open('${WHATSAPP_CATALOG_URL}', '_blank')">
+                    <button class="whatsapp-buy-btn" onclick="window.openWhatsAppCatalog()">
                         <i class="fab fa-whatsapp"></i> Buy on WhatsApp
                     </button>
                 </div>
@@ -2960,5 +2957,31 @@ async function fetchAndRenderWhyUs() {
         console.error('Error fetching Why Us features:', e);
     }
 }
+
+
+// ----------------------------------------------------
+// GLOBAL EVENT LISTENERS
+// ----------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Wire up Main Navigation WhatsApp Button
+    // Note: ID-based selector finds first match, but we have multiple IDs potentially?
+    // Actually IDs should be unique. But we might have separate IDs for desktop/mobile.
+    const waBtns = document.querySelectorAll('#whatsappBtn, #mobileWhatsappBtn');
+    waBtns.forEach(btn => {
+        btn.onclick = function () {
+            window.openWhatsAppCatalog();
+        };
+    });
+});
+
+// Explicitly expose for onclick attributes if any
+window.openWhatsAppCatalog = function () {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        window.open(WHATSAPP_CATALOG_URL, '_blank');
+    } else {
+        window.open(WHATSAPP_DESKTOP_URL, '_blank');
+    }
+};
 
 
