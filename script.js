@@ -2312,8 +2312,8 @@ async function fetchAndRenderProducts() {
             // Fetch products sorted by category and then display_order
             supabase.from('products')
                 .select('*')
-                .order('product_category', { ascending: true })
-                .order('display_order', { ascending: true }),
+                .order('display_order', { ascending: true })
+                .order('created_at', { ascending: false }),
             fetchCategories()
         ]);
 
@@ -2550,11 +2550,11 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
 
         navButtons = `
             <div class="overlay-nav-controls">
-                <button class="nav-arrow-btn prev-btn" onclick="switchProduct('${categoryName}', '${prevProduct.id}')" aria-label="Previous Product">
+                <button class="nav-arrow-btn prev-btn" onclick="navigateNeighbor('${product.id}', '${categoryName}', 'prev')" aria-label="Previous Product">
                     <i class="fas fa-chevron-left"></i> Prev
                 </button>
                 <span class="nav-label">Other Products</span>
-                <button class="nav-arrow-btn next-btn" onclick="switchProduct('${categoryName}', '${nextProduct.id}')" aria-label="Next Product">
+                <button class="nav-arrow-btn next-btn" onclick="navigateNeighbor('${product.id}', '${categoryName}', 'next')" aria-label="Next Product">
                     Next <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
@@ -3248,3 +3248,71 @@ window.openWhatsAppCatalog = function () {
 };
 
 
+
+/**
+ * ------------------------------------------------------------------
+ * Refactored Next/Previous Logic (Neighbor Search)
+ * Per User Requirement: Uses specific Supabase queries to find neighbors
+ * based on display_order rather than array index.
+ * ------------------------------------------------------------------
+ */
+window.navigateNeighbor = async function (currentId, categorySlug, direction) {
+    // 1. Get Current Product Details
+    const currentProduct = (window.allProductsCache || []).find(p => String(p.id) === String(currentId));
+
+    if (!currentProduct) {
+        console.error("Current product not found in cache for navigation.");
+        return;
+    }
+
+    const isNext = direction === 'next';
+    const currentOrder = currentProduct.display_order !== null ? currentProduct.display_order : 0;
+
+    // 2. Build the Query
+    // Logic: Same Category AND Greater/Less than current display_order
+    let query = supabase
+        .from('products')
+        .select('id')
+        .eq('product_category', currentProduct.product_category);
+
+    if (isNext) {
+        // Find next: > display_order, Order Ascending (get the closest larger value)
+        query = query
+            .gt('display_order', currentOrder)
+            .order('display_order', { ascending: true });
+    } else {
+        // Find prev: < display_order, Order Descending (get the closest smaller value)
+        query = query
+            .lt('display_order', currentOrder)
+            .order('display_order', { ascending: false });
+    }
+
+    const { data, error } = await query.limit(1).maybeSingle();
+
+    if (error) {
+        console.error("Error fetching neighbor product:", error);
+        return;
+    }
+
+    if (data) {
+        // Found a direct neighbor
+        window.switchProduct(categorySlug, data.id);
+    } else {
+        // 3. Loop Logic (Fallback)
+        let loopQuery = supabase
+            .from('products')
+            .select('id')
+            .eq('product_category', currentProduct.product_category);
+
+        if (isNext) {
+            loopQuery = loopQuery.order('display_order', { ascending: true });
+        } else {
+            loopQuery = loopQuery.order('display_order', { ascending: false });
+        }
+
+        const { data: loopData } = await loopQuery.limit(1).maybeSingle();
+        if (loopData && loopData.id !== currentId) {
+            window.switchProduct(categorySlug, loopData.id);
+        }
+    }
+};
