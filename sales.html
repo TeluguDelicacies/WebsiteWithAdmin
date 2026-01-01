@@ -358,7 +358,7 @@
             // Use the New CSS Classes
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
+                    <a href="/" style="color:var(--text-secondary)">Home</a> <span>/</span> 
                     <span style="color:var(--color-primary-blue); font-weight:600;">${category.title}</span>
                 </div>
 
@@ -378,30 +378,48 @@
                 // Logic to find valid price
                 let price = p.price;
                 let mrp = p.mrp;
+                let quantity = "Standard";
 
-                // If no base price, check variants
+                // If no base price, check variants for "starting at" logic
                 if (!price && p.quantity_variants) {
                     try {
                         const variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : p.quantity_variants;
                         if (variants && variants.length > 0) {
                             price = variants[0].price;
                             mrp = variants[0].mrp;
+                            quantity = variants[0].quantity;
                         }
                     } catch (e) { }
+                }
+
+                // Calculate Discount Percentage
+                let discountBadge = '';
+                if (price && mrp && mrp > price) {
+                    const discount = Math.round(((mrp - price) / mrp) * 100);
+                    if (discount > 0) {
+                        discountBadge = `<span class="sp-offer-badge">${discount}% OFF</span>`;
+                    }
                 }
 
                 return `
                             <div class="sales-product-card" onclick="navigateToProduct('${p.slug || p.id}', 'fade')">
                                 <div class="sp-img-wrapper">
+                                    ${discountBadge}
                                     <img src="${p.showcase_image || state.placeholder}" alt="${p.product_name}" onerror="this.src='${state.placeholder}'">
                                 </div>
                                 <div class="sp-info">
-                                    ${category.sub_brand ? `<span class="sp-sub">${category.sub_brand}</span>` : ''}
+                                    <div class="sp-time-badge"><i class="fas fa-bolt"></i> Ready</div>
                                     <h3 class="sp-title">${p.product_name}</h3>
-                                    ${p.product_name_telugu ? `<span class="sp-telugu">${p.product_name_telugu}</span>` : ''}
-                                    <div class="sp-price-row">
-                                        <span class="sp-price">₹${price !== undefined && price !== null ? price : 'N/A'}</span>
-                                        ${mrp > price ? `<span class="sp-mrp">₹${mrp}</span>` : ''}
+                                    <div class="sp-weight">${quantity}</div>
+                                    
+                                    <div class="sp-action-row">
+                                        <div class="sp-price-block">
+                                            <span class="sp-current-price">₹${price !== undefined && price !== null ? price : 'N/A'}</span>
+                                            ${mrp > price ? `<span class="sp-mrp">₹${mrp}</span>` : ''}
+                                        </div>
+                                        <button class="sp-add-btn" onclick="event.stopPropagation(); addToCartSimple('${p.id}')">
+                                            ADD
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1154,6 +1172,72 @@
                 </div>
             `).join('');
         }
+
+        // --- Quick Actions ---
+        window.addToCartSimple = function (productId) {
+            const product = state.allProducts.find(p => p.id == productId);
+            if (!product) return;
+
+            // Use default variant logic or base product
+            let variant = null;
+            let finalPrice = product.price;
+
+            if (product.quantity_variants) {
+                try {
+                    const vars = typeof product.quantity_variants === 'string'
+                        ? JSON.parse(product.quantity_variants)
+                        : product.quantity_variants;
+                    if (vars && vars.length > 0) {
+                        variant = vars[0]; // Default to first variant
+                        finalPrice = variant.price;
+                    }
+                } catch (e) { }
+            }
+
+            // Check if item exists in cart
+            const existingIndex = state.cart.findIndex(item =>
+                item.id === product.id &&
+                ((!item.variant && !variant) || (item.variant && variant && item.variant.quantity === variant.quantity))
+            );
+
+            if (existingIndex > -1) {
+                // Increment
+                state.cart[existingIndex].qty += 1;
+            } else {
+                // Add new
+                state.cart.push({
+                    id: product.id,
+                    name: product.product_name,
+                    image: product.showcase_image,
+                    product_category: product.product_category,
+                    qty: 1,
+                    variant: variant,
+                    price: finalPrice
+                });
+            }
+
+            window.saveCart();
+            window.showToast('Item added to cart!');
+
+            // Optional: Vibrate on mobile
+            if (navigator.vibrate) navigator.vibrate(50);
+        };
+
+        window.toggleWishlist = function (productId) {
+            // Placeholder: Toggle heart state visual (needs persistence implementation if desired)
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('i');
+
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                window.showToast('Added to Wishlist');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                window.showToast('Removed from Wishlist');
+            }
+        };
 
         window.sendToWhatsApp = function () {
             if (state.cart.length === 0) {
