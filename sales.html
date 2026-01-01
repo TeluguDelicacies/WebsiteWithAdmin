@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentic Telugu Podis, Chapati & Parota Online | Telugu Delicacies</title>
+    <title>Telugu Delicacies</title>
     <meta name="description"
         content="Order authentic Telugu podis, soft chapatis and crispy parotas made with traditional recipes and hygienic methods. Taste real Andhra flavours at Telugu Delicacies." />
 
@@ -235,10 +235,16 @@
                 if (pathParts[pathParts.length - 1] === slugOrId) return;
 
                 // Update URL without reload
-                history.pushState({ slugOrId, direction }, '', newUrl);
+                history.pushState({ slugOrId, direction, type: 'product' }, '', newUrl);
 
                 // Perform view update with animation
                 performTransition(slugOrId, direction);
+            };
+
+            window.navigateToCategory = function (slug) {
+                const newUrl = `/sales/${slug}`;
+                history.pushState({ slug, type: 'category' }, '', newUrl);
+                renderCategoryView(slug);
             };
 
             async function performTransition(slugOrId, direction) {
@@ -322,10 +328,15 @@
             const pathParts = window.location.pathname.split('/').filter(Boolean);
             const lastPart = pathParts[pathParts.length - 1];
 
-            // Check if we're on a product page (path has slug after /sales/)
+            // Check if it's a product or category
             if (pathParts.length >= 2 && pathParts[pathParts.length - 2] === 'sales' && lastPart !== 'sales.html') {
-                // Clean URL: /sales/product-slug
-                renderProductView(lastPart);
+                // Check if it's a category
+                const isCategory = state.categories.find(c => c.slug === lastPart);
+                if (isCategory) {
+                    renderCategoryView(lastPart);
+                } else {
+                    renderProductView(lastPart);
+                }
                 return;
             }
 
@@ -336,8 +347,15 @@
 
             if (productId) {
                 renderProductView(productId);
-            } else {
+            } else if (catSlug) {
                 renderCategoryView(catSlug);
+            } else {
+                // If clean URL but matching 'sales.html' exactly (no slug), show first category or home
+                // Actually, if we are just at /sales.html, we might want to default to something?
+                // For now, let's default to the first category if available
+                if (state.categories.length > 0) {
+                    renderCategoryView(state.categories[0].slug);
+                }
             }
         }
 
@@ -467,7 +485,7 @@
                         <!-- Breadcrumbs (Left) -->
                         <div class="crumbs">
                             <a href="/">Home</a> <span>/</span> 
-                            <a href="/sales.html?category=${catSlug}">${category?.title || 'Back'}</a> <span>/</span> 
+                            <a href="/sales/${catSlug}" onclick="event.preventDefault(); navigateToCategory('${catSlug}')">${category?.title || 'Back'}</a> <span>/</span> 
                             <span class="current">${product.product_name}</span>
                         </div>
                         
