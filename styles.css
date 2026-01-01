@@ -2305,11 +2305,26 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   background: var(--color-gray-100);
 }
 
-/* --- Task 3: Restore Global Branding --- */
+/* --- Task 3: Restore Global Branding (REVERTED SCALAR) --- */
+/* Body back to default or specific main page style if needed, 
+   but ensuring Category Page has its own Vibrant Theme */
 body {
-  background: linear-gradient(135deg, #FFF8E7 0%, #FFFFFF 100%);
-  /* Brand Yellow Gradient */
-  background-attachment: fixed;
+  background-color: #ffffff;
+  /* Default back to white/clean */
+  /* Remove global yellow gradient */
+}
+
+/* --- Scoped Theme: Category Page Only --- */
+.sales-page-container {
+  background: linear-gradient(180deg, #FFF9C4 0%, #FFF176 100%);
+  /* Vibrant Butter Yellow */
+  min-height: 100vh;
+  /* Full Immersion */
+  width: 100%;
+  /* Ensure padding for spacing if layout touches edges */
+  box-sizing: border-box;
+  padding-bottom: 40px;
+  /* Avoid footer clash */
 }
 
 /* --- Task 2: Fix Category Header Alignment --- */
