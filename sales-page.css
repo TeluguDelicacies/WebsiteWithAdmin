@@ -86,7 +86,7 @@ textarea {
     font-weight: 700;
     color: #0077B6 !important;
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.1;
     white-space: nowrap;
 }
 
@@ -101,7 +101,7 @@ textarea {
     font-size: clamp(1rem, 3.8vw, 1.2rem) !important;
     font-family: 'Mallanna', sans-serif;
     color: #00B4D8 !important;
-    margin-top: 0;
+    margin-top: 2px;
     line-height: 1.2;
     font-weight: 600;
     opacity: 0.9;

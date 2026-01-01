@@ -556,6 +556,7 @@ Persistent header with hamburger menu and WhatsApp integration
   font-weight: var(--weight-bold);
   color: var(--text-brand);
   margin: 0;
+  line-height: 1.1;
   white-space: nowrap;
 }
 
@@ -570,9 +571,9 @@ Persistent header with hamburger menu and WhatsApp integration
   font-size: clamp(1rem, 3.8vw, 1.2rem) !important;
   font-family: 'Mallanna', sans-serif;
   color: var(--text-telugu);
-  margin-top: -3px;
-  /* Reduced gap */
-  line-height: 1;
+  margin-top: 2px;
+  /* Balanced gap */
+  line-height: 1.2;
   font-weight: 600;
   opacity: 0.9;
   white-space: nowrap;
