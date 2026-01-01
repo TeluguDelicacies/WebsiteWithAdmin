@@ -4735,10 +4735,12 @@ body:not(.quick-commerce-mode) .master-card.show-product .card-back {
 }
 
 .toggle-btn.active {
-  background: var(--color-brand-yellow);
-  border-color: var(--color-brand-yellow);
-  color: #1a1a1a;
-  box-shadow: 0 4px 12px rgba(238, 220, 41, 0.3);
+  background: #1a1a1a;
+  /* Dark background instead of yellow */
+  border-color: #1a1a1a;
+  color: var(--color-brand-yellow);
+  /* Yellow text accent */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* WhatsApp Button */

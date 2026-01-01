@@ -2577,8 +2577,8 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
                 
                 <div class="info-toggles">
                     ${product.ingredients ? `<button class="toggle-btn" onclick="switchInfoTab('${contentIngId}', this)">Ingredients</button>` : ''}
-                    ${Object.keys(nutInfo).length > 0 && (nutInfo.calories || nutInfo.protein || nutInfo.fat) ? `<button class="toggle-btn" onclick="switchInfoTab('${contentNutId}', this)">Nutrition Info</button>` : ''}
-                    ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('content-usage-${product.id}', this)">Usage Instructions</button>` : ''}
+                    ${Object.keys(nutInfo).length >= 3 ? `<button class="toggle-btn" onclick="switchInfoTab('${contentNutId}', this)">Nutrition</button>` : ''}
+                    ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('content-usage-${product.id}', this)">Usage</button>` : ''}
                 </div>
 
                 <div id="${contentIngId}" class="info-content-box" style="display: none;">
@@ -3130,7 +3130,7 @@ window.openQuickProductModal = function (productId) {
                 <!-- Toggles Container -->
                 <div class="info-toggles quick-toggles">
                     ${product.ingredients ? `<button class="toggle-btn" onclick="switchInfoTab('${contentIngId}', this)">Ingredients</button>` : ''}
-                    ${Object.keys(nutInfo).length > 0 ? `<button class="toggle-btn" onclick="switchInfoTab('${contentNutId}', this)">Nutrition</button>` : ''}
+                    ${Object.keys(nutInfo).length >= 3 ? `<button class="toggle-btn" onclick="switchInfoTab('${contentNutId}', this)">Nutrition</button>` : ''}
                     ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('${contentUsageId}', this)">Usage</button>` : ''}
                 </div>
 
