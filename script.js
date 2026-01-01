@@ -20,14 +20,12 @@ async function preloadCatalogue() {
         const response = await fetch(catalogueUrl, { mode: 'cors' });
         const blob = await response.blob();
 
-        // CORRECTION: Dynamic Type Detection for Preloader
-        // Detect correct MIME type and Extension
-        const mimeType = blob.type || 'image/jpeg';
-        const extension = mimeType.split('/')[1] || 'jpg';
-        const fileName = `Telugu_Delicacies_Catalogue.${extension}`;
+        // Fixed: Always enforce PNG for Android compatibility
+        const mimeType = 'image/png';
+        const fileName = 'Telugu_Delicacies_Catalogue.png';
 
         window.td_catalogueFile = new File([blob], fileName, { type: mimeType });
-        console.log('Catalogue pre-loaded successfully');
+        console.log('Catalogue pre-loaded successfully (PNG enforced)');
     } catch (err) {
         console.error('Failed to pre-load catalogue:', err);
     }
@@ -54,10 +52,9 @@ window.shareCatalogue = async function () {
             const response = await fetch(catalogueUrl, { mode: 'cors' });
             blob = await response.blob();
 
-            // Detect correct MIME type and Extension
-            const mimeType = blob.type || 'image/jpeg';
-            const extension = mimeType.split('/')[1] || 'jpg';
-            const fileName = `Telugu_Delicacies_Catalogue.${extension}`;
+            // Fixed: Always enforce PNG for Android compatibility
+            const mimeType = 'image/png';
+            const fileName = 'Telugu_Delicacies_Catalogue.png';
 
             file = new File([blob], fileName, { type: mimeType });
         }
@@ -69,9 +66,17 @@ window.shareCatalogue = async function () {
         if (isMobile && navigator.share) {
             try {
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    // FIX: Copy text to clipboard first (Reliable cross-platform approach)
+                    try {
+                        await navigator.clipboard.writeText(shareMessage);
+                        alert('Caption copied! Paste it in WhatsApp.');
+                    } catch (clipErr) {
+                        console.warn('Clipboard write failed:', clipErr);
+                        // Fallback: Continue to share without clipboard copy
+                    }
+
+                    // Share ONLY the file (Text + File is unreliable on Android/WhatsApp)
                     await navigator.share({
-                        title: 'Telugu Delicacies Catalogue',
-                        text: shareMessage,
                         files: [file]
                     });
                     return;
