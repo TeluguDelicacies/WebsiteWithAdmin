@@ -876,6 +876,8 @@
         }
 
         // --- Global Share Function ---
+        // NOTE: This functionality is currently NOT used on the Sales Page (no button triggers it).
+        // It is kept here for consistency with the Main Page. If needed, add a button calling shareCatalogue().
         window.shareCatalogue = async function () {
             const settings = state.settings || {};
             const catalogueUrl = settings.catalogue_image_url;
@@ -921,15 +923,12 @@
                 link.click();
                 document.body.removeChild(link);
 
-                if (navigator.clipboard && window.ClipboardItem) {
-                    try {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({ [file.type]: file })
-                        ]);
-                    } catch (e) { }
-                }
+                link.click();
+                document.body.removeChild(link);
 
-                alert('Catalogue downloaded! You can now attach or paste it directly in WhatsApp.');
+                // Removed Clipboard write attempt to be consistent with script.js (simple Download + Open flow)
+
+                // alert('Catalogue downloaded! You can now attach or paste it directly in WhatsApp.'); 
                 const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
                 window.open(whatsappUrl, '_blank');
 

@@ -80,47 +80,74 @@ window.shareCatalogue = async function () {
             lastModified: Date.now()
         });
 
-        // --- STEP 2: SHARE (Fixes "Blurry Image") ---
+        // --- STEP 2: SHARE (Rules: Mobile=Native, Desktop=Download+Web) ---
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
-        const isAndroid = /Android/i.test(userAgent);
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
 
-        if (navigator.share && navigator.canShare({ files: [fileToShare] })) {
+        // Strict Check: Only attempt native share on actual Mobile devices
+        if (isMobile && navigator.share && navigator.canShare({ files: [fileToShare] })) {
             let shareData = { files: [fileToShare] };
 
-            // RULE: 
-            // iOS -> Send Text + Image
-            // Android -> Send Image ONLY (Adding text here often breaks the image)
             if (isIOS) {
                 shareData.text = shareMessage;
             }
 
-            // Optional: Auto-copy text to clipboard for Android users
-            if (isAndroid && navigator.clipboard) {
-                try {
-                    await navigator.clipboard.writeText(shareMessage);
-                    // alert('Caption copied! Paste it in WhatsApp.'); // Optional feedback
-                } catch (e) { }
+            if (/Android/i.test(userAgent) && navigator.clipboard) {
+                try { await navigator.clipboard.writeText(shareMessage); } catch (e) { }
             }
 
             await navigator.share(shareData);
         } else {
-            throw new Error("Native share not supported");
+            // Force Desktop flow even if navigator.share exists (e.g. Chrome on Windows)
+            throw new Error("Switching to Desktop Flow");
         }
 
     } catch (err) {
-        console.error('Share failed:', err);
-
-        // Fallback: Download file and open WhatsApp Web
-        if (catalogueUrl) {
-            const link = document.createElement('a');
-            link.href = catalogueUrl;
-            link.download = 'Telugu_Delicacies_Catalogue.jpg'; // Consistent default
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        // 1. IGNORE USER CANCELLATION
+        // If the user simply closed the share menu, do NOTHING.
+        if (err.name === 'AbortError') {
+            console.log('User cancelled the share.');
+            return;
         }
-        window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`, '_blank');
+
+        console.error('Share failed, switching to fallback:', err);
+
+        // Check device type again for the fallback
+        const isMobileFallback = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobileFallback) {
+            // --- MOBILE FALLBACK ---
+            // Use the "Deep Link" scheme. This tries to force the APP to open directly.
+            // It avoids the browser "Download App" landing page.
+            window.location.href = `whatsapp://send?text=${encodeURIComponent(shareMessage)}`;
+        }
+        else {
+            // --- DESKTOP FALLBACK ---
+            // 1. Download the image first
+            // We use the blob we already created (or the URL) to force a download
+            if (window.td_catalogueFile || catalogueUrl) {
+                const link = document.createElement('a');
+                // Use the created file blob if we have it, otherwise the raw URL
+                const blobUrl = window.td_catalogueFile
+                    ? URL.createObjectURL(window.td_catalogueFile)
+                    : catalogueUrl;
+
+                link.href = blobUrl;
+                link.download = 'Telugu_Delicacies_Catalogue.jpg'; // Force a clean filename
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Clean up the blob URL to free memory
+                if (window.td_catalogueFile) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            }
+
+            // 2. OPEN WHATSAPP WEB
+            // We use 'web.whatsapp.com' to bypass the "Download App" page
+            const whatsappWebUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
+            window.open(whatsappWebUrl, '_blank');
+        }
     }
 }
 
