@@ -44,9 +44,15 @@ window.shareCatalogue = async function () {
         let blobUrl;
 
         if (!file) {
-            const response = await fetch(catalogueUrl);
+            const response = await fetch(catalogueUrl, { mode: 'cors' });
             blob = await response.blob();
-            file = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
+
+            // Detect correct MIME type and Extension
+            const mimeType = blob.type || 'image/jpeg';
+            const extension = mimeType.split('/')[1] || 'jpg';
+            const fileName = `Telugu_Delicacies_Catalogue.${extension}`;
+
+            file = new File([blob], fileName, { type: mimeType });
         }
 
         blobUrl = URL.createObjectURL(file);
