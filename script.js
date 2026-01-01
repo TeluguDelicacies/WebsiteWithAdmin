@@ -17,9 +17,16 @@ async function preloadCatalogue() {
     if (!catalogueUrl) return;
 
     try {
-        const response = await fetch(catalogueUrl);
+        const response = await fetch(catalogueUrl, { mode: 'cors' });
         const blob = await response.blob();
-        window.td_catalogueFile = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
+
+        // CORRECTION: Dynamic Type Detection for Preloader
+        // Detect correct MIME type and Extension
+        const mimeType = blob.type || 'image/jpeg';
+        const extension = mimeType.split('/')[1] || 'jpg';
+        const fileName = `Telugu_Delicacies_Catalogue.${extension}`;
+
+        window.td_catalogueFile = new File([blob], fileName, { type: mimeType });
         console.log('Catalogue pre-loaded successfully');
     } catch (err) {
         console.error('Failed to pre-load catalogue:', err);
@@ -78,7 +85,7 @@ window.shareCatalogue = async function () {
         // Trigger Download
         const link = document.createElement('a');
         link.href = blobUrl;
-        link.download = 'Telugu_Delicacies_Catalogue.jpg';
+        link.download = 'Telugu_Delicacies_Catalogue.png';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
