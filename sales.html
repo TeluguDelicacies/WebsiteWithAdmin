@@ -1401,9 +1401,26 @@
         window.clearCart = function () {
             if (state.cart.length === 0) return;
 
-            // Immediate Clear + Toast
+            // 1. Clear Data
             state.cart = [];
             window.saveCart();
+
+            // 2. Reset Header Badge
+            const cartCount = document.getElementById('cartCount');
+            if (cartCount) {
+                cartCount.innerText = '0';
+                cartCount.style.display = 'none';
+            }
+
+            // 3. VISUAL RESET (The Fix)
+            // Restore "ADD" buttons and hide Qty Counters for ALL cards
+            document.querySelectorAll('.qty-counter').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.btn-add').forEach(el => el.style.display = 'block');
+            document.querySelectorAll('.qty-val').forEach(el => el.innerText = '0');
+
+            // 4. Update Cart Drawer UI
+            window.updateCartUI();
+
             window.showToast('Cart cleared', 'info');
         };
 
@@ -1422,6 +1439,7 @@
 
             // Show/Hide Clear Button
             if (clearBtn) {
+                // Ensure display logic is correct based on cart state
                 clearBtn.style.display = state.cart.length > 0 ? 'block' : 'none';
             }
 
@@ -1452,6 +1470,8 @@
                                     <button onclick="window.updateCartItemQty(${index}, 1)">+</button>
                                 </div>
                             </div>
+                            <button class="remove-item-btn" onclick="window.updateCartItemQty(${index}, 0, true)">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     `;
@@ -1498,18 +1518,16 @@
             message += `\n\nPlease confirm availability and share payment details.`;
 
             const phone = '919618519191';
-            const whatsappUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
-
-            // Close the cart drawer
-            const cartDrawer = document.getElementById('cartDrawer');
-            if (cartDrawer) cartDrawer.classList.remove('open');
+            // USE UNIVERSAL API LINK
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
 
             window.open(whatsappUrl, '_blank');
-            window.showToast('Thanks for the order! We will get back to you very soon. 🙏', 'success');
 
-            // Clear cart
-            state.cart = [];
-            window.saveCart();
+            // Immediate Actions
+            window.clearCart(); // Handles reset and toast
+            window.showToast('Thanks for the order! Cart cleared.', 'success'); // Override toast msg
+
+            // Close the cart drawer
             window.toggleCartDrawer();
         };
 
