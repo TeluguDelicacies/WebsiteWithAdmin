@@ -4125,3 +4125,108 @@ body:not(.quick-commerce-mode) .master-card.show-product .card-back {
     padding: 0 1.5rem !important;
   }
 }
+
+/* 
+========================================
+VELOCITY-BASED INFINITE CAROUSELS
+Hardware-accelerated smooth scrolling
+========================================
+*/
+
+/* Keyframe for infinite scroll animation */
+@keyframes infiniteScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Product Showcase Carousel */
+.product-scroll-wrapper {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  touch-action: pan-y;
+  /* Allow vertical scrolling, prevent horizontal */
+  pointer-events: none;
+  /* CRITICAL: Block scroll wheel */
+}
+
+.product-scroll {
+  display: flex;
+  gap: var(--space-4);
+  will-change: transform;
+  /* Hardware acceleration hint */
+  width: max-content;
+  /* CRITICAL: Forces container to be as wide as children */
+  overflow-x: hidden;
+  /* Disable horizontal scroll */
+  overflow-y: visible;
+  /* Allow vertical page scroll */
+  padding-left: 0;
+  margin-left: 0;
+  pointer-events: auto;
+  /* Re-enable for child items */
+  /* Animation duration will be set dynamically via JS */
+}
+
+/* Testimonials Carousel */
+.testimonials-scroll {
+  display: flex;
+  gap: var(--space-6);
+  will-change: transform;
+  /* Hardware acceleration hint */
+  touch-action: pan-y;
+  /* Allow vertical scrolling */
+  width: max-content;
+  /* CRITICAL: Forces container to be as wide as children */
+  overflow-x: hidden;
+  /* Disable horizontal scroll */
+  overflow-y: visible;
+  /* Allow vertical page scroll */
+  padding-left: 0;
+  margin-left: 0;
+  pointer-events: none;
+  /* CRITICAL: Disable ALL mouse/touch interaction */
+  /* Animation duration will be set dynamically via JS */
+}
+
+/* Pause animation on hover (desktop only) */
+@media (hover: hover) and (pointer: fine) {
+
+  .product-scroll:hover,
+  .testimonials-scroll:hover {
+    animation-play-state: paused;
+  }
+}
+
+/* Ensure carousel containers don't create horizontal scroll */
+.product-showcase,
+.testimonials-showcase {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Product Item Styles (preserved - no changes to card internals) */
+.product-item {
+  flex-shrink: 0;
+  width: 200px;
+  pointer-events: auto;
+  /* CRITICAL: Re-enable clicks on products */
+  cursor: pointer;
+  /* Cards maintain their existing styles */
+}
+
+/* Testimonial Item Styles (preserved - no changes to card internals) */
+.testimonial-item {
+  flex-shrink: 0;
+  min-width: 300px;
+  max-width: 400px;
+  pointer-events: auto;
+  /* CRITICAL: Re-enable interaction on testimonials */
+  /* Cards maintain their existing styles */
+}

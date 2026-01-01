@@ -1444,11 +1444,92 @@ function enhanceAccessibility() {
     });
 }
 
+/*
+========================================
+VELOCITY-BASED CAROUSEL LOGIC
+========================================
+*/
+
 /**
- * Gets the next form field for keyboard navigation
- * @param {HTMLElement} currentField - The current form field
- * @returns {HTMLElement|null} - The next form field or null
+ * Initialize velocity-based infinite carousel
+ * @param {HTMLElement} container - The scrolling container
+ * @param {number} pixelsPerSecond - Speed in pixels per second (default: 50)
  */
+function initVelocityCarousel(container, pixelsPerSecond = 50) {
+    if (!container || container.children.length === 0) return;
+
+    // HELPER: The actual logic moves here so we can delay it
+    const setup = () => {
+        console.log('🔄 Setting up carousel...', container);
+
+        // 1. Remove previous animation if re-initializing
+        container.style.animation = 'none';
+
+        const originalItems = Array.from(container.children);
+        console.log('📦 Original items count:', originalItems.length);
+
+        // SAFETY: If styles haven't loaded, width might be 0. Stop to prevent crash.
+        if (originalItems[0] && originalItems[0].offsetWidth === 0) {
+            console.warn('⚠️ Carousel items have 0 width. Waiting...');
+            requestAnimationFrame(setup); // Try again next frame
+            return;
+        }
+
+        console.log('📏 First item width:', originalItems[0]?.offsetWidth);
+        console.log('📐 Initial scrollWidth:', container.scrollWidth);
+
+        const requiredWidth = window.innerWidth * 2; // Fill 2x screen width
+        console.log('🎯 Required width:', requiredWidth);
+
+        // 3. Clone items to fill screen width
+        // Added 'safety' counter to prevent browser crash if width stays small
+        let safety = 0;
+        while (container.scrollWidth < requiredWidth && safety < 100) {
+            originalItems.forEach(item => container.appendChild(item.cloneNode(true)));
+            safety++;
+        }
+        console.log('🔁 Cloned', safety, 'times to fill width');
+
+        // 4. THE LOOPER: Duplicate EVERYTHING once more for the A+A pattern
+        const currentChildren = Array.from(container.children);
+        currentChildren.forEach(item => container.appendChild(item.cloneNode(true)));
+        console.log('✅ Total items after A+A pattern:', container.children.length);
+
+        // 5. Calculate Duration
+        const totalScrollDistance = container.scrollWidth / 2;
+        let duration = totalScrollDistance / pixelsPerSecond;
+
+        console.log('📊 Final scrollWidth:', container.scrollWidth);
+        console.log('📏 Scroll distance (50%):', totalScrollDistance);
+        console.log('⏱️ Calculated duration:', duration);
+
+        // FALLBACK: If duration is invalid, use 20s default
+        if (!duration || duration <= 0 || !isFinite(duration)) {
+            console.warn('⚠️ Invalid duration, using fallback: 20s');
+            duration = 20;
+        }
+
+        // 6. Apply Animation (with reflow trigger)
+        container.offsetHeight; // Trigger reflow (flush CSS changes)
+        container.style.animation = `infiniteScroll ${duration}s linear infinite`;
+
+        console.log('🎬 Animation started! Speed:', pixelsPerSecond, 'px/s');
+        console.log('✨ Final animation:', container.style.animation);
+    };
+
+    // EXECUTION STRATEGY: Wait for images to load
+    if (document.readyState === 'complete') {
+        setup();
+    } else {
+        window.addEventListener('load', setup);
+    }
+}
+
+/*
+========================================
+WHATSAPP INTEGRATION
+========================================
+*/
 function getNextFormField(currentField) {
     const form = currentField.closest('form');
     const fields = Array.from(form.querySelectorAll('input, select, textarea'));
@@ -2269,12 +2350,8 @@ function renderProducts(products, categories) {
                 productScroll.appendChild(showcaseItem);
             });
 
-            // Duplicate for seamless scrolling
-            /* DISABLED per user request to fix progress dots
-            if (filteredCarouselProducts.length > 0) {
-                const items = Array.from(productScroll.children);
-                items.forEach(item => productScroll.appendChild(item.cloneNode(true)));
-            } */
+            // Initialize velocity-based carousel
+            initVelocityCarousel(productScroll, 50);
         }
     }
 
@@ -2608,11 +2685,8 @@ async function fetchAndRenderTestimonials() {
         const baseSet = Array.from(testimonialContainer.children);
         baseSet.forEach(item => testimonialContainer.appendChild(item.cloneNode(true)));
 
-        // Initialize carousel specifically for testimonials after content is rendered
-        initializeTestimonialCarousel();
-
-        // Fix: Update scroll speeds immediately after rendering
-        updateScrollSpeeds();
+        // Initialize velocity-based carousel
+        initVelocityCarousel(testimonialContainer, 40);
 
     } catch (error) {
         console.error('Error fetching testimonials:', error);
