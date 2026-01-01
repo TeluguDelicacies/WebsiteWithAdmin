@@ -4146,31 +4146,28 @@ Hardware-accelerated smooth scrolling
 
 /* Product Showcase Carousel */
 .product-scroll-wrapper {
-  overflow: hidden;
+  overflow: hidden !important;
   position: relative;
   width: 100%;
   touch-action: pan-y;
-  /* Allow vertical scrolling, prevent horizontal */
-  pointer-events: none;
-  /* CRITICAL: Block scroll wheel */
+  /* Allow vertical page scroll */
+}
+
+.product-scroll-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 .product-scroll {
   display: flex;
   gap: var(--space-4);
   will-change: transform;
-  /* Hardware acceleration hint */
-  width: max-content;
-  /* CRITICAL: Forces container to be as wide as children */
-  overflow-x: hidden;
-  /* Disable horizontal scroll */
-  overflow-y: visible;
-  /* Allow vertical page scroll */
-  padding-left: 0;
-  margin-left: 0;
-  pointer-events: auto;
-  /* Re-enable for child items */
-  /* Animation duration will be set dynamically via JS */
+  overflow: hidden !important;
+  backface-visibility: hidden;
+  /* GPU activation */
+  perspective: 1000px;
+  /* GPU activation */
+  padding: 0;
+  margin: 0;
 }
 
 /* Testimonials Carousel */
@@ -4178,32 +4175,16 @@ Hardware-accelerated smooth scrolling
   display: flex;
   gap: var(--space-6);
   will-change: transform;
-  /* Hardware acceleration hint */
-  touch-action: pan-y;
-  /* Allow vertical scrolling */
-  width: max-content;
-  /* CRITICAL: Forces container to be as wide as children */
-  overflow-x: hidden;
-  /* Disable horizontal scroll */
-  overflow-y: visible;
-  /* Allow vertical page scroll */
-  padding-left: 0;
-  margin-left: 0;
-  pointer-events: none;
-  /* CRITICAL: Disable ALL mouse/touch interaction */
-  /* Animation duration will be set dynamically via JS */
+  overflow: hidden !important;
+  backface-visibility: hidden;
+  /* GPU activation */
+  perspective: 1000px;
+  /* GPU activation */
+  padding: 0;
+  margin: 0;
 }
 
-/* Pause animation on hover (desktop only) */
-@media (hover: hover) and (pointer: fine) {
-
-  .product-scroll:hover,
-  .testimonials-scroll:hover {
-    animation-play-state: paused;
-  }
-}
-
-/* Ensure carousel containers don't create horizontal scroll */
+/* JS now handles hover pause via requestAnimationFrame */
 .product-showcase,
 .testimonials-showcase {
   overflow: hidden;
@@ -4215,10 +4196,7 @@ Hardware-accelerated smooth scrolling
 .product-item {
   flex-shrink: 0;
   width: 200px;
-  pointer-events: auto;
-  /* CRITICAL: Re-enable clicks on products */
   cursor: pointer;
-  /* Cards maintain their existing styles */
 }
 
 /* Testimonial Item Styles (preserved - no changes to card internals) */
@@ -4226,7 +4204,4 @@ Hardware-accelerated smooth scrolling
   flex-shrink: 0;
   min-width: 300px;
   max-width: 400px;
-  pointer-events: auto;
-  /* CRITICAL: Re-enable interaction on testimonials */
-  /* Cards maintain their existing styles */
 }

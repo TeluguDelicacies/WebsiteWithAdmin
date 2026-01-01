@@ -1447,11 +1447,12 @@ function enhanceAccessibility() {
 /*
 ========================================
 VELOCITY-BASED CAROUSEL LOGIC
+JavaScript-driven animation using requestAnimationFrame
 ========================================
 */
 
 /**
- * Initialize velocity-based infinite carousel
+ * Initialize JS-driven infinite carousel animation
  * @param {HTMLElement} container - The scrolling container
  * @param {number} pixelsPerSecond - Speed in pixels per second (default: 50)
  */
@@ -1460,10 +1461,11 @@ function initVelocityCarousel(container, pixelsPerSecond = 50) {
 
     // HELPER: The actual logic moves here so we can delay it
     const setup = () => {
-        console.log('🔄 Setting up carousel...', container);
+        console.log('🔄 Setting up JS-driven carousel...', container);
 
-        // 1. Remove previous animation if re-initializing
+        // 1. Clear any previous CSS animation
         container.style.animation = 'none';
+        container.style.transform = 'translate3d(0, 0, 0)';
 
         const originalItems = Array.from(container.children);
         console.log('📦 Original items count:', originalItems.length);
@@ -1471,18 +1473,15 @@ function initVelocityCarousel(container, pixelsPerSecond = 50) {
         // SAFETY: If styles haven't loaded, width might be 0. Stop to prevent crash.
         if (originalItems[0] && originalItems[0].offsetWidth === 0) {
             console.warn('⚠️ Carousel items have 0 width. Waiting...');
-            requestAnimationFrame(setup); // Try again next frame
+            requestAnimationFrame(setup);
             return;
         }
 
         console.log('📏 First item width:', originalItems[0]?.offsetWidth);
-        console.log('📐 Initial scrollWidth:', container.scrollWidth);
 
-        const requiredWidth = window.innerWidth * 2; // Fill 2x screen width
-        console.log('🎯 Required width:', requiredWidth);
+        const requiredWidth = window.innerWidth * 2;
 
-        // 3. Clone items to fill screen width
-        // Added 'safety' counter to prevent browser crash if width stays small
+        // Clone items to fill screen width
         let safety = 0;
         while (container.scrollWidth < requiredWidth && safety < 100) {
             originalItems.forEach(item => container.appendChild(item.cloneNode(true)));
@@ -1490,31 +1489,60 @@ function initVelocityCarousel(container, pixelsPerSecond = 50) {
         }
         console.log('🔁 Cloned', safety, 'times to fill width');
 
-        // 4. THE LOOPER: Duplicate EVERYTHING once more for the A+A pattern
+        // Duplicate EVERYTHING once more for the A+A seamless loop pattern
         const currentChildren = Array.from(container.children);
         currentChildren.forEach(item => container.appendChild(item.cloneNode(true)));
         console.log('✅ Total items after A+A pattern:', container.children.length);
 
-        // 5. Calculate Duration
-        const totalScrollDistance = container.scrollWidth / 2;
-        let duration = totalScrollDistance / pixelsPerSecond;
+        // Lock width to exact pixels
+        const finalWidth = container.scrollWidth;
+        container.style.width = finalWidth + 'px';
+        console.log('🔒 Locked width to:', finalWidth + 'px');
 
-        console.log('📊 Final scrollWidth:', container.scrollWidth);
-        console.log('📏 Scroll distance (50%):', totalScrollDistance);
-        console.log('⏱️ Calculated duration:', duration);
+        // Calculate the half-width (reset point)
+        const halfWidth = finalWidth / 2;
+        console.log('📐 Half width (reset point):', halfWidth + 'px');
 
-        // FALLBACK: If duration is invalid, use 20s default
-        if (!duration || duration <= 0 || !isFinite(duration)) {
-            console.warn('⚠️ Invalid duration, using fallback: 20s');
-            duration = 20;
+        // 🎮 ANIMATION STATE
+        let currentPos = 0;
+        let isPaused = false;
+        const pixelsPerFrame = pixelsPerSecond / 60; // 60fps target
+
+        console.log('⚡ Pixels per frame:', pixelsPerFrame.toFixed(2));
+
+        // 🎬 THE ANIMATION LOOP
+        function animate() {
+            if (!isPaused) {
+                // Move left
+                currentPos -= pixelsPerFrame;
+
+                // Reset when we've moved half the width (seamless loop)
+                if (currentPos <= -halfWidth) {
+                    currentPos += halfWidth;
+                }
+
+                // Apply transform (GPU accelerated)
+                container.style.transform = `translate3d(${currentPos}px, 0, 0)`;
+            }
+
+            // Continue the loop
+            requestAnimationFrame(animate);
         }
 
-        // 6. Apply Animation (with reflow trigger)
-        container.offsetHeight; // Trigger reflow (flush CSS changes)
-        container.style.animation = `infiniteScroll ${duration}s linear infinite`;
+        // 🖱️ HOVER PAUSE (Desktop only)
+        container.addEventListener('mouseenter', () => {
+            isPaused = true;
+            console.log('⏸️ Carousel paused');
+        });
 
-        console.log('🎬 Animation started! Speed:', pixelsPerSecond, 'px/s');
-        console.log('✨ Final animation:', container.style.animation);
+        container.addEventListener('mouseleave', () => {
+            isPaused = false;
+            console.log('▶️ Carousel resumed');
+        });
+
+        // 🚀 START THE ANIMATION
+        requestAnimationFrame(animate);
+        console.log('🎬 JS Animation loop started! Speed:', pixelsPerSecond, 'px/s');
     };
 
     // EXECUTION STRATEGY: Wait for images to load
