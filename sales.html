@@ -97,8 +97,23 @@
             currentCategory: null,
             currentProduct: null,
             cart: [],
-            detailQty: 1
+            detailQty: 1,
+            catalogueFile: null
         };
+
+        async function preloadCatalogue() {
+            const catalogueUrl = state.settings.catalogue_image_url;
+            if (!catalogueUrl) return;
+
+            try {
+                const response = await fetch(catalogueUrl);
+                const blob = await response.blob();
+                state.catalogueFile = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
+                console.log('Catalogue pre-loaded successfully');
+            } catch (err) {
+                console.warn('Failed to pre-load catalogue:', err);
+            }
+        }
 
         // GLOBAL SHARE CURRENT PAGE FUNCTION
         window.shareCurrentPage = function () {
@@ -257,6 +272,7 @@
                 ]);
 
                 state.settings = settingsRes.data || {};
+                preloadCatalogue(); // Pre-load after settings
                 // Filter out hidden products
                 state.allProducts = (productsRes.data || []).filter(p => p.is_visible !== false);
                 // Filter out hidden categories
@@ -840,14 +856,19 @@
             }
 
             try {
-                const response = await fetch(catalogueUrl);
-                const blob = await response.blob();
-                const blobUrl = URL.createObjectURL(blob);
+                // Use pre-loaded file if available
+                let file = state.catalogueFile;
+                if (!file) {
+                    const response = await fetch(catalogueUrl);
+                    const blob = await response.blob();
+                    file = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
+                }
+
+                const fileUrl = URL.createObjectURL(file);
 
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 if (isMobile && navigator.share) {
                     try {
-                        const file = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({
                                 title: 'Telugu Delicacies Catalogue',
@@ -863,7 +884,7 @@
 
                 // Desktop Download + Paste
                 const link = document.createElement('a');
-                link.href = blobUrl;
+                link.href = fileUrl;
                 link.download = 'Telugu_Delicacies_Catalogue.jpg';
                 document.body.appendChild(link);
                 link.click();
@@ -872,7 +893,7 @@
                 if (navigator.clipboard && window.ClipboardItem) {
                     try {
                         await navigator.clipboard.write([
-                            new ClipboardItem({ [blob.type]: blob })
+                            new ClipboardItem({ [file.type]: file })
                         ]);
                     } catch (e) { }
                 }

@@ -9,6 +9,23 @@ Author: Telugu Delicacies
 Description: Interactive functionality for responsive Telugu Delicacies website
 */
 
+window.td_catalogueFile = null;
+
+async function preloadCatalogue() {
+    const settings = window.currentSiteSettings || {};
+    const catalogueUrl = settings.catalogue_image_url;
+    if (!catalogueUrl) return;
+
+    try {
+        const response = await fetch(catalogueUrl);
+        const blob = await response.blob();
+        window.td_catalogueFile = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
+        console.log('Catalogue pre-loaded successfully');
+    } catch (err) {
+        console.error('Failed to pre-load catalogue:', err);
+    }
+}
+
 // GLOBAL SHARE FUNCTION
 window.shareCatalogue = async function () {
     const settings = window.currentSiteSettings || {};
@@ -21,15 +38,23 @@ window.shareCatalogue = async function () {
     }
 
     try {
-        const response = await fetch(catalogueUrl);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
+        // Use pre-loaded file if available, otherwise fetch it
+        let file = window.td_catalogueFile;
+        let blob;
+        let blobUrl;
+
+        if (!file) {
+            const response = await fetch(catalogueUrl);
+            blob = await response.blob();
+            file = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
+        }
+
+        blobUrl = URL.createObjectURL(file);
 
         // 1. Mobile Sharing (Direct File Attachment)
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile && navigator.share) {
             try {
-                const file = new File([blob], 'Telugu_Delicacies_Catalogue.jpg', { type: 'image/jpeg' });
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         title: 'Telugu Delicacies Catalogue',
@@ -44,8 +69,6 @@ window.shareCatalogue = async function () {
         }
 
         // 2. Desktop Fallback (Download + Paste approach)
-        // We never show the link to the customer as requested.
-
         // Trigger Download
         const link = document.createElement('a');
         link.href = blobUrl;
@@ -58,7 +81,7 @@ window.shareCatalogue = async function () {
         if (navigator.clipboard && window.ClipboardItem) {
             try {
                 await navigator.clipboard.write([
-                    new ClipboardItem({ [blob.type]: blob })
+                    new ClipboardItem({ [file.type]: file })
                 ]);
             } catch (e) { console.warn('Clipboard copy failed', e); }
         }
@@ -72,7 +95,7 @@ window.shareCatalogue = async function () {
         console.error('Sharing failed:', err);
         alert('Could not prepare the catalogue for sharing. Please try again.');
     }
-};
+}
 
 // GLOBAL SHARE CURRENT PAGE FUNCTION - Context-aware
 window.shareCurrentPage = function () {
@@ -1805,6 +1828,7 @@ async function fetchSiteSettings() {
 
         if (data) {
             window.currentSiteSettings = data; // Cache globally
+            preloadCatalogue(); // Pre-load catalogue after settings are ready
 
             // Title
             if (data.site_title) document.title = data.site_title;
