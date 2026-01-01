@@ -386,16 +386,16 @@
                 (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === slug
             );
 
-            // Use the New CSS Classes
+            // Use the NEW Quick Commerce HTML Structure
             app.innerHTML = `
                 <div class="breadcrumb-section">
                     <a href="/" style="color:var(--text-secondary)">Home</a> / 
                     <span style="color:var(--color-primary-blue); font-weight:600;">${category.title}</span>
                 </div>
 
-                <section class="category-grid-container yellow-theme-full" style="max-width:1300px; margin:0 auto; padding-bottom:50px;">
-                    <!-- Simple Header (No Card) -->
-                    <div class="category-header-simple">
+                <section class="category-grid-container" style="max-width:1300px; margin:0 auto; padding-bottom:50px;">
+                    <!-- Header -->
+                    <div class="category-header-simple" style="margin-bottom: 20px;">
                         <div>
                             <h1>${category.title}</h1>
                             <p>${category.telugu_title || ''}</p>
@@ -403,44 +403,275 @@
                         ${category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : ''}
                     </div>
 
-                    <!-- New Product Grid Class -->
-                    <div class="sales-product-grid">
-                        ${catProducts.map(p => {
-                // Logic to find valid price
-                let price = p.price;
-                let mrp = p.mrp;
-
-                // If no base price, check variants
-                if (!price && p.quantity_variants) {
-                    try {
-                        const variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : p.quantity_variants;
-                        if (variants && variants.length > 0) {
-                            price = variants[0].price;
-                            mrp = variants[0].mrp;
-                        }
-                    } catch (e) { }
-                }
-
-                return `
-                            <div class="sales-product-card" onclick="navigateToProduct('${p.slug || p.id}', 'fade')">
-                                <div class="sp-img-wrapper">
-                                    <img src="${p.showcase_image || state.placeholder}" alt="${p.product_name}" onerror="this.src='${state.placeholder}'">
-                                </div>
-                                <div class="sp-info">
-                                    ${category.sub_brand ? `<span class="sp-sub">${category.sub_brand}</span>` : ''}
-                                    <h3 class="sp-title">${p.product_name}</h3>
-                                    ${p.product_name_telugu ? `<span class="sp-telugu">${p.product_name_telugu}</span>` : ''}
-                                    <div class="sp-price-row">
-                                        <span class="sp-price">₹${price !== undefined && price !== null ? price : 'N/A'}</span>
-                                        ${mrp > price ? `<span class="sp-mrp">₹${mrp}</span>` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        `}).join('')}
+                    <!-- New Grid Container -->
+                    <div class="category-grid">
+                        ${catProducts.map(p => renderProductCard(p, category)).join('')}
                     </div>
                 </section>
             `;
         }
+
+        // --- Helper: Render Individual Card ---
+        function renderProductCard(product, category) {
+            // 1. Parsing Variants & sorting (Smallest First)
+            let variants = [];
+            try {
+                if (typeof product.quantity_variants === 'string') {
+                    variants = JSON.parse(product.quantity_variants);
+                } else if (Array.isArray(product.quantity_variants)) {
+                    variants = product.quantity_variants;
+                }
+            } catch (e) {
+                console.warn('Variant parse error', e);
+            }
+
+            // Fallback for non-variant products
+            if (variants.length === 0) {
+                variants = [{
+                    quantity: product.quantity || 'Standard',
+                    price: product.price,
+                    mrp: product.mrp,
+                    stock: product.total_stock
+                }];
+            }
+
+            // Sort variants by price (proxy for weight/size) ascending
+            // NOTE: Assuming price correlates with size. 
+            // If explicit weight parsing needed, can add here.
+            // For now, we trust the DB or sort by price.
+            // Actually, let's NOT sort if they are manually ordered, but user asked for "Smallest Variant (lowest weight/price) by default".
+            // Let's sort copy to be safe.
+            const sortedVariants = [...variants].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+
+            // Default selected variant (Index 0 after sort)
+            const defaultVar = sortedVariants[0];
+            const defaultVarIdx = 0; // We will store the original index or just use the sorted one? 
+            // To keep simple, let's treat sortedVariants as THE list for this card.
+
+            // 2. Check Cart State for this specific variant
+            const cartItem = state.cart.find(item => item.id === product.id &&
+                (item.variant ? item.variant.quantity === defaultVar.quantity : true)
+            );
+            const qty = cartItem ? cartItem.qty : 0;
+
+            // 3. Discount Logic
+            let discountTag = '';
+            if (defaultVar.mrp > defaultVar.price) {
+                const off = Math.round(((defaultVar.mrp - defaultVar.price) / defaultVar.mrp) * 100);
+                discountTag = `<span class="discount" id="disc-${product.id}">${off}% OFF</span>`;
+            }
+
+            // 4. Render
+            // We embed the sorted variants as a data attribute to access them in JS helper
+            // Escaping JSON for data attribute is tricky, let's store in a global map instead? 
+            // Better: Just regenerate them in the helper using the same logic.
+
+            return `
+            <article class="product-card" id="card-${product.id}" data-variants='${JSON.stringify(sortedVariants).replace(/'/g, "&apos;")}' data-current-idx="0">
+                
+                 <!-- Image Area -->
+                <div class="card-image-container">
+                    <img src="${product.showcase_image || state.placeholder}" 
+                         alt="${product.product_name}" 
+                         class="product-image" 
+                         loading="lazy"
+                         onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
+                    
+                    ${category.sub_brand ? `<span class="product-tag">${category.sub_brand}</span>` : ''}
+                    
+                    <!-- Floating Action -->
+                    <div class="card-action-container">
+                         <!-- Add Button (Visible if Qty 0) -->
+                        <button class="btn-add" id="btn-add-${product.id}" 
+                                style="${qty > 0 ? 'display:none' : ''}"
+                                onclick="window.gridAddToCart('${product.id}')">
+                            ADD
+                        </button>
+                        
+                        <!-- Qty Counter (Visible if Qty > 0) -->
+                        <div class="qty-counter" id="qty-counter-${product.id}" 
+                             style="${qty > 0 ? 'display:flex' : 'display:none'}">
+                            <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', -1)">-</button>
+                            <span class="qty-val" id="qty-val-${product.id}">${qty}</span>
+                            <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Area -->
+                <div class="card-info">
+                    
+                     <!-- Price Row -->
+                    <div class="price-row">
+                        <span class="price-pill" id="price-${product.id}">₹${defaultVar.price}</span>
+                        ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
+                        ${discountTag}
+                    </div>
+
+                    <!-- Titles -->
+                    <h3 class="product-title" onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
+                        ${product.product_name}
+                    </h3>
+                    <p class="product-subtitle">${product.product_name_telugu || category.telugu_title || ''}</p>
+
+                     <!-- Variant Selector (Dropdown Trigger) -->
+                    ${sortedVariants.length > 0 ? `
+                        <div class="variant-selector" onclick="window.toggleGridVariantDropdown('${product.id}')" tabindex="0">
+                            <span class="current-variant" id="var-label-${product.id}">${defaultVar.quantity || 'Standard'}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <!-- Hidden Dropdown List (Absolute or Appended) -->
+                        <div class="variant-dropdown-list" id="var-list-${product.id}" style="display:none; position:absolute; bottom:40px; left:12px; background:white; border:1px solid #eee; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:20; width:150px; overflow:hidden;">
+                            ${sortedVariants.map((v, idx) => `
+                                <div class="var-option" 
+                                     style="padding:8px 12px; font-size:0.8rem; cursor:pointer; color:#333; border-bottom:1px solid #f0f0f0;" 
+                                     onclick="window.selectGridVariant('${product.id}', ${idx})">
+                                    <div style="font-weight:600;">${v.quantity}</div>
+                                    <div style="font-size:0.75rem; color:#666;">₹${v.price}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                </div>
+            </article>
+            `;
+        }
+
+        // --- Grid Interaction Helpers ---
+        window.getGridCardData = function (productId) {
+            const card = document.getElementById(`card-${productId}`);
+            if (!card) return null;
+            const variants = JSON.parse(card.getAttribute('data-variants') || '[]');
+            const currentIdx = parseInt(card.getAttribute('data-current-idx') || '0');
+            return { card, variants, currentIdx };
+        };
+
+        window.gridAddToCart = function (productId) {
+            const data = window.getGridCardData(productId);
+            if (!data) return;
+            const product = state.allProducts.find(p => p.id == productId);
+            if (!product) return;
+
+            const variant = data.variants[data.currentIdx];
+
+            // Add 1 to cart
+            window.addToCart(product, variant, 1);
+
+            // We don't need to manually update UI here because addToCart triggers saveCart -> updateCartUI?
+            // Wait, updateCartUI() updates the drawer. We SHOULD also update the grid card state.
+            window.refreshGridCardUI(productId);
+        };
+
+        window.gridUpdateQty = function (productId, delta) {
+            const data = window.getGridCardData(productId);
+            if (!data) return;
+            const variant = data.variants[data.currentIdx];
+
+            // Find existing cart item to update
+            const existingIdx = state.cart.findIndex(item =>
+                item.id == productId &&
+                (item.variant ? item.variant.quantity === variant.quantity : true)
+            );
+
+            if (existingIdx > -1) {
+                // Determine logic: directly update cart or use updateCartItemQty
+                // Using updateCartItemQty handles removing if 0
+                window.updateCartItemQty(existingIdx, delta, false);
+            } else if (delta > 0) {
+                // Should have been in cart if using this button, but fallback
+                window.gridAddToCart(productId);
+            }
+
+            window.refreshGridCardUI(productId);
+        };
+
+        window.refreshGridCardUI = function (productId) {
+            const data = window.getGridCardData(productId);
+            if (!data) return;
+            const variant = data.variants[data.currentIdx];
+
+            // Check Cart State
+            const cartItem = state.cart.find(item => item.id == productId &&
+                (item.variant ? item.variant.quantity === variant.quantity : true)
+            );
+            const qty = cartItem ? cartItem.qty : 0;
+
+            const btnAdd = document.getElementById(`btn-add-${productId}`);
+            const qtyCounter = document.getElementById(`qty-counter-${productId}`);
+            const qtyVal = document.getElementById(`qty-val-${productId}`);
+
+            if (qty > 0) {
+                btnAdd.style.display = 'none';
+                qtyCounter.style.display = 'flex';
+                qtyVal.innerText = qty;
+            } else {
+                btnAdd.style.display = 'block';
+                qtyCounter.style.display = 'none';
+            }
+        };
+
+        window.toggleGridVariantDropdown = function (productId) {
+            // Close others
+            document.querySelectorAll('.variant-dropdown-list').forEach(el => {
+                if (el.id !== `var-list-${productId}`) el.style.display = 'none';
+            });
+
+            const list = document.getElementById(`var-list-${productId}`);
+            if (list) {
+                list.style.display = (list.style.display === 'none' || list.style.display === '') ? 'block' : 'none';
+            }
+        };
+
+        window.selectGridVariant = function (productId, idx) {
+            const data = window.getGridCardData(productId);
+            if (!data) return;
+
+            // Update State
+            data.card.setAttribute('data-current-idx', idx);
+            const variant = data.variants[idx];
+
+            // Update UI Labels
+            const label = document.getElementById(`var-label-${productId}`);
+            if (label) label.innerText = variant.quantity;
+
+            const priceEl = document.getElementById(`price-${productId}`);
+            if (priceEl) priceEl.innerText = `₹${variant.price}`;
+
+            const mrpEl = document.getElementById(`mrp-${productId}`);
+            if (mrpEl) {
+                if (variant.mrp > variant.price) {
+                    mrpEl.style.display = 'inline';
+                    mrpEl.innerText = `₹${variant.mrp}`;
+                } else {
+                    mrpEl.style.display = 'none';
+                }
+            }
+
+            const discEl = document.getElementById(`disc-${productId}`);
+            if (discEl) {
+                if (variant.mrp > variant.price) {
+                    const off = Math.round(((variant.mrp - variant.price) / variant.mrp) * 100);
+                    discEl.innerText = `${off}% OFF`;
+                    discEl.style.display = 'inline-block';
+                } else {
+                    discEl.style.display = 'none';
+                }
+            }
+
+            // Hide Dropdown
+            document.getElementById(`var-list-${productId}`).style.display = 'none';
+
+            // Refresh Buttons (ADD vs Qty) for THIS variant
+            window.refreshGridCardUI(productId);
+        };
+
+        // Close dropdowns on clicking outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.variant-selector')) {
+                document.querySelectorAll('.variant-dropdown-list').forEach(el => el.style.display = 'none');
+            }
+        });
 
         // --- View: Product ---
         async function renderProductView(slugOrId, direction = 'fade') {
