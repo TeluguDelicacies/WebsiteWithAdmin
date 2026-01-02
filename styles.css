@@ -3359,6 +3359,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   transition: transform var(--transition-normal);
   margin: 0;
   border: none;
+  border-radius: var(--radius-md);
 }
 
 .quick-product-item:hover img {
