@@ -735,13 +735,13 @@
 
                     <!-- Main Content -->
                     <article class="main-product-area">
-                        <div class="gallery-wrapper" style="position: relative;">
-                            <!-- Mobile Nav - Overlaid on Image -->
-                            <div class="nav-group mobile-only-nav">
-                                ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i></span>'}
-                                ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')"><i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-right"></i></span>'}
-                            </div>
-                            
+                        <!-- Navigation Row - Above Image -->
+                        <div class="nav-row mobile-only-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px;">
+                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> Prev</a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> Prev</span>'}
+                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')">Next <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled">Next <i class="fas fa-arrow-right"></i></span>'}
+                        </div>
+                        
+                        <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
                                 ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                 <div class="gallery-inner">
@@ -1416,10 +1416,10 @@
         };
 
         window.removeItem = function (index) {
-            if (confirm('Remove item from cart?')) {
-                state.cart.splice(index, 1);
-                window.saveCart();
-            }
+            // Direct removal - no confirm popup
+            state.cart.splice(index, 1);
+            window.saveCart();
+            window.showToast('Item removed from cart', 'success');
         };
 
         window.clearCart = function () {
