@@ -990,7 +990,15 @@
                 return `<p style="font-size:0.85rem; line-height:1.8; color:var(--text-secondary); margin:0;">${items.join(' <span style="color:#ccc;">•</span> ')}</p>`;
             };
 
-            if (nutritionData && Object.keys(nutritionData).length >= 3) {
+
+            // Count actual nutrition values (not serving info)
+            const nutritionFieldKeys = ['calories', 'Calories', 'protein', 'Protein', 'total_fat', 'fat', 'Fat', 'carbs', 'Carbs', 'fiber', 'Fiber', 'sugars', 'sugar', 'Sugars', 'sodium', 'Sodium'];
+            const actualNutritionCount = nutritionData ? nutritionFieldKeys.filter(k =>
+                nutritionData[k] !== undefined && nutritionData[k] !== null && nutritionData[k] !== ''
+            ).length : 0;
+
+            // Only show Nutrition button if at least 3 actual nutrition values exist
+            if (nutritionData && actualNutritionCount >= 3) {
                 sections.push({
                     id: 'nut',
                     label: 'Nutrition',
