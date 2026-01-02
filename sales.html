@@ -1098,15 +1098,15 @@
         }
 
         function renderVerticalItems(items) {
-            if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.
-        </p>`;
+            if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.</p>`;
             return items.map(item => `
         <div class="sim-item" onclick="window.location.href='/sales/${item.slug || item.id}'">
             <img src="${item.showcase_image || state.placeholder}" class="sim-img"
                 onerror="this.src='${state.placeholder}'">
             <div class="sim-info">
-                <h4 style="font-size:0.9rem; margin:0;">${item.product_name}</h4>
-                <span style="font-size:0.8rem; color:var(--color-primary-blue)">View Product</span>
+                <h4 style="font-size:0.9rem; margin:0; line-height:1.2;">${item.product_name}</h4>
+                ${item.product_tagline ? `<span style="font-size:0.75rem; color:var(--text-secondary); display:block; margin:2px 0;">${item.product_tagline}</span>` : ''}
+                <span style="font-size:0.85rem; font-weight:700; color:var(--color-primary-blue);">₹${item.price || item.mrp || ''}</span>
             </div>
         </div>
         `).join('');
