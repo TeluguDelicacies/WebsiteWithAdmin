@@ -2366,6 +2366,54 @@ textarea {
     }
 }
 
+/* --- Portal Dropdown Styles (New) --- */
+.sb-portal-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    z-index: 10000;
+    /* Above everything */
+    padding: 8px 0;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.sb-portal-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.sb-portal-item {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.sb-portal-item:hover {
+    background-color: #f0f7ff;
+    color: var(--color-primary-blue);
+}
+
+.sb-portal-item.active {
+    background-color: #e3f2fd;
+    color: var(--color-primary-blue);
+    font-weight: 600;
+}
+
+/* Cleanup Native Select Styles */
+.sb-native-select {
+    display: none;
+}
+
 /* Default Desktop State */
 .sb-mobile-text,
 .sb-mobile-icon {

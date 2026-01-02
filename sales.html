@@ -1764,9 +1764,11 @@
         });
 
         // --- Smart Breadcrumbs Helper (Native Select) ---
-        // --- Smart Breadcrumbs Helper (Native Select) ---
+        // --- Smart Breadcrumbs Helper (Custom Portal) ---
         window.renderSmartBreadcrumbs = function (activeCategorySlug, activeProductName) {
-            // 1. Home Link (Wrapped for hiding on mobile)
+            // 1. Home Link (Desktop & Mobile)
+            // Mobile: Icon only (via CSS classes)
+            // Desktop: Text "Home" (via CSS classes)
             let html = `<div class="smart-breadcrumbs">
                 <span class="sb-desktop-root">
                     <a href="/" class="sb-home-link">
@@ -1781,21 +1783,15 @@
                     <span class="sep">/</span>
                 </span>`;
 
-            // 2. Category Select (Native)
+            // 2. Category Dropdown Trigger
             const categories = state.categories;
             const activeCat = categories.find(c => c.slug === activeCategorySlug);
             const label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'Select Category' : 'Select Category');
 
+            // Pass active slug to the opener to highlight it
             html += `
-                <div class="sb-select-wrapper">
+                <div class="sb-select-wrapper" onclick="event.stopPropagation(); window.openCategoryDropdown(this, '${activeCategorySlug}')">
                     <span class="sb-label">${label} <i class="fas fa-caret-down"></i></span>
-                    <select class="sb-native-select" onchange="window.handleBreadcrumbChange(this)">
-                        <option value="" disabled>Select Category</option>
-                        <option value="all-products" ${activeCategorySlug === 'all-products' ? 'selected' : ''}>All Products</option>
-                        ${categories.map(c => `
-                            <option value="${c.slug}" ${c.slug === activeCategorySlug ? 'selected' : ''}>${c.title}</option>
-                        `).join('')}
-                    </select>
                 </div>
             `;
 
@@ -1806,6 +1802,65 @@
 
             html += `</div>`;
             return html;
+        };
+
+        // --- Portal Dropdown Logic ---
+        window.openCategoryDropdown = function (triggerEl, activeSlug) {
+            // Close existing if any
+            const existing = document.getElementById('sb-portal-dropdown');
+            if (existing) existing.remove();
+
+            // Create Menu
+            const menu = document.createElement('div');
+            menu.id = 'sb-portal-dropdown';
+            menu.className = 'sb-portal-menu';
+
+            // Content
+            let itemsHtml = `
+                <div class="sb-portal-item ${activeSlug === 'all-products' ? 'active' : ''}" 
+                     onclick="window.handlePortalClick('all-products')">
+                     All Products
+                </div>
+            `;
+
+            state.categories.forEach(c => {
+                itemsHtml += `
+                    <div class="sb-portal-item ${c.slug === activeSlug ? 'active' : ''}" 
+                         onclick="window.handlePortalClick('${c.slug}')">
+                         ${c.title}
+                    </div>
+                `;
+            });
+            menu.innerHTML = itemsHtml;
+
+            // Append to Body (Portal)
+            document.body.appendChild(menu);
+
+            // Position
+            const rect = triggerEl.getBoundingClientRect();
+            menu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+            menu.style.left = (rect.left + window.scrollX) + 'px';
+            menu.style.minWidth = Math.max(rect.width, 200) + 'px';
+
+            // Animation
+            requestAnimationFrame(() => menu.classList.add('open'));
+
+            // Click Outside to Close
+            const closeHandler = (e) => {
+                if (!menu.contains(e.target) && !triggerEl.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeHandler);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', closeHandler), 0);
+        };
+
+        window.handlePortalClick = function (slug) {
+            // Navigate
+            window.navigateToCategory(slug);
+            // Close menu
+            const menu = document.getElementById('sb-portal-dropdown');
+            if (menu) menu.remove();
         };
 
         // Scroll Breadcrumbs to ensure active item is visible (Mobile UX)
