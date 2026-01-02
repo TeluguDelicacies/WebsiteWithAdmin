@@ -1139,7 +1139,7 @@
             const addBtn = document.getElementById('sidebar-add-' + index);
             const qtyWrap = document.getElementById('sidebar-qty-wrap-' + index);
             if (addBtn) addBtn.style.display = 'none';
-            if (qtyWrap) qtyWrap.style.display = 'flex';
+            if (qtyWrap) qtyWrap.classList.add('show');
 
             // Add 1 to cart immediately
             updateSidebarQty(index, 0, true);
@@ -1159,7 +1159,7 @@
             // If qty becomes 0, show Add button again
             if (val === 0) {
                 if (addBtn) addBtn.style.display = 'inline-block';
-                if (qtyWrap) qtyWrap.style.display = 'none';
+                if (qtyWrap) qtyWrap.classList.remove('show');
             }
 
             // Get product data and update cart
@@ -1195,6 +1195,27 @@
                 }
             }
         };
+
+        // Reset sidebar qty for a specific product ID
+        function resetSidebarForProduct(productId) {
+            document.querySelectorAll('.sim-item').forEach((simItem, index) => {
+                if (simItem.dataset.productId == productId) {
+                    const addBtn = document.getElementById('sidebar-add-' + index);
+                    const qtyWrap = document.getElementById('sidebar-qty-wrap-' + index);
+                    const qtyEl = document.getElementById('sidebar-qty-' + index);
+                    if (addBtn) addBtn.style.display = 'inline-block';
+                    if (qtyWrap) qtyWrap.classList.remove('show');
+                    if (qtyEl) qtyEl.innerText = '1';
+                }
+            });
+        }
+
+        // Reset ALL sidebar qty selectors (for clearCart)
+        function resetAllSidebarQty() {
+            document.querySelectorAll('.sidebar-add-btn').forEach(btn => btn.style.display = 'inline-block');
+            document.querySelectorAll('.sidebar-qty-controls').forEach(wrap => wrap.classList.remove('show'));
+            document.querySelectorAll('.sidebar-qty-controls .quantity-display').forEach(el => el.innerText = '1');
+        }
 
         function updateHistory(p) {
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }
@@ -1500,10 +1521,16 @@
         };
 
         window.removeItem = function (index) {
+            // Get item before removing to reset sidebar
+            const item = state.cart[index];
+
             // Direct removal - no confirm popup
             state.cart.splice(index, 1);
             window.saveCart();
             window.showToast('Item removed from cart', 'success');
+
+            // Reset sidebar for this product if it exists
+            if (item) resetSidebarForProduct(item.id);
         };
 
         window.clearCart = function () {
@@ -1526,7 +1553,10 @@
             document.querySelectorAll('.btn-add').forEach(el => el.style.display = 'block');
             document.querySelectorAll('.qty-val').forEach(el => el.innerText = '0');
 
-            // 4. Update Cart Drawer UI
+            // 4. Reset ALL sidebar quantity selectors
+            resetAllSidebarQty();
+
+            // 5. Update Cart Drawer UI
             window.updateCartUI();
 
             window.showToast('Cart cleared', 'info');

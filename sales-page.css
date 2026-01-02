@@ -2236,3 +2236,12 @@ textarea {
         transform: scale(0.9);
     }
 }
+
+/* Sidebar Quantity Controls - Initially Hidden */
+.sidebar-qty-controls {
+    display: none !important;
+}
+
+.sidebar-qty-controls.show {
+    display: flex !important;
+}
