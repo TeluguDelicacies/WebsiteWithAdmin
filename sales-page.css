@@ -2541,6 +2541,16 @@ textarea {
     }
 }
 
+/* --- Product Image Rounded Corners (Sales View) --- */
+.card-image-container {
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+}
+
+.card-image-container .product-image {
+    border-radius: 12px;
+}
+
 /* --- Product Title Styling (Reduced font for fit) --- */
 .product-title {
     font-size: clamp(0.75rem, 2.5vw, 0.9rem);
