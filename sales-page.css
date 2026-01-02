@@ -83,7 +83,7 @@ textarea {
 
 .header.sales-header .brand-name {
     font-family: 'Outfit', sans-serif;
-    font-size: clamp(0.9rem, 3.5vw, 1.125rem) !important;
+    font-size: clamp(1rem, 3.5vw, 1.125rem) !important;
     font-weight: 700;
     color: #0077B6 !important;
     margin: 0;
@@ -2469,12 +2469,18 @@ textarea {
         position: absolute;
         top: 0;
         right: 0;
+        width: 80px;
+        height: 80px;
+        max-width: 80px;
+        max-height: 80px;
         opacity: 0;
+        visibility: hidden;
         /* Hidden by default */
     }
 
     .brand-logo-item.active {
         opacity: 1;
+        visibility: visible;
         /* Visible */
     }
 }
