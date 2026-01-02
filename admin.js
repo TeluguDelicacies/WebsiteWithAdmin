@@ -530,6 +530,9 @@ async function fetchSettings() {
             document.getElementById('setShowMrp').checked = data.show_mrp !== false; // Default true
             document.getElementById('setSalesMode').checked = data.sales_mode_enabled || false; // Default false
             document.getElementById('setShowWhyUs').checked = data.show_why_us || false;
+
+            // Sales Page Settings
+            document.getElementById('setAllProductsTagline').value = data.all_products_tagline || 'Featuring our premium brands';
         }
     } catch (e) {
         console.error('Settings fetch error:', e);
@@ -576,7 +579,10 @@ if (siteSettingsForm) {
             show_quick_layout: document.getElementById('setShowQuickLayout').checked,
             show_mrp: document.getElementById('setShowMrp').checked,
             sales_mode_enabled: document.getElementById('setSalesMode').checked,
-            show_why_us: document.getElementById('setShowWhyUs').checked
+            show_why_us: document.getElementById('setShowWhyUs').checked,
+
+            // Sales Page Settings
+            all_products_tagline: document.getElementById('setAllProductsTagline').value
         };
 
         try {

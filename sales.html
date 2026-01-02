@@ -460,21 +460,23 @@
 
             if (brands.length === 0) {
                 // Fallback to simple static header
+                const tagline = state.settings?.all_products_tagline || 'Explore our complete range of authentic delicacies.';
                 return `
                 <div class="category-header-simple" style="margin-bottom: 20px;">
                     <div>
                         <h1>All Products</h1>
-                        <p>Explore our complete range of authentic delicacies.</p>
+                        <p>${tagline}</p>
                     </div>
                 </div>`;
             }
 
             // HTML Structure
+            const tagline = state.settings?.all_products_tagline || 'Featuring our premium brands';
             return `
             <div class="category-header-simple brand-widget-container" style="margin-bottom: 20px;">
                 <div>
                     <h1>All Products</h1>
-                    <p>Featuring our premium brands</p>
+                    <p>${tagline}</p>
                 </div>
                 <!-- Brand Logos Container -->
                 <div class="brand-logos-wrapper">
