@@ -735,13 +735,13 @@
 
                     <!-- Main Content -->
                     <article class="main-product-area">
-                        <!-- Navigation (Mobile Only - Top) -->
-                        <div class="nav-group mobile-only-nav" style="width: 100%; justify-content: space-between; padding: 0 15px; margin-top: 0;">
-                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" style="flex:1; justify-content:center;" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
-                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" style="flex:1; justify-content:center;" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled" style="flex:1; justify-content:center;"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
-                        </div>
-
-                        <div class="gallery-wrapper">
+                        <div class="gallery-wrapper" style="position: relative;">
+                            <!-- Mobile Nav - Overlaid on Image -->
+                            <div class="nav-group mobile-only-nav">
+                                ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i></span>'}
+                                ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')"><i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-right"></i></span>'}
+                            </div>
+                            
                             <div class="product-gallery" id="productFlipper">
                                 ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
                                 <div class="gallery-inner">
@@ -1494,7 +1494,7 @@
                                     <button onclick="window.updateCartItemQty(${index}, 1)">+</button>
                                 </div>
                             </div>
-                            <button class="remove-item-btn" onclick="window.updateCartItemQty(${index}, 0, true)">
+                            <button class="remove-item-btn" onclick="window.removeItem(${index})">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
