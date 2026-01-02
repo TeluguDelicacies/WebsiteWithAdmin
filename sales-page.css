@@ -19,7 +19,8 @@ html {
 }
 
 body {
-    background-color: var(--bg-secondary);
+    /* Premium Light Yellow Gradient Background */
+    background: linear-gradient(180deg, #FFFDE7 0%, #FFF9C4 50%, #FFFDE7 100%);
     min-height: 100vh;
     /* Prevent zoom on double-tap on mobile */
     touch-action: manipulation;
@@ -352,24 +353,25 @@ textarea {
     }
 }
 
+/* ========================================
+   STANDARDIZED BREADCRUMB CONTAINER
+   Universal layout across the site
+======================================== */
 .breadcrumb-section {
     grid-area: bread;
-    padding: 12px 20px;
-    /* Added top/bottom padding */
-    margin-top: 8px;
-    margin-bottom: 8px;
-    background: linear-gradient(180deg, rgba(144, 224, 239, 0.1) 0%, transparent 100%);
-    border-bottom: 1px solid var(--color-accent-blue);
+    height: 50px;
+    /* Fixed height to prevent layout jumps */
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    flex-wrap: wrap;
+    justify-content: flex-start;
     gap: 15px;
-    max-width: 98vw;
-    /* Changed from 1300px to 98vw */
-    margin-left: auto;
-    margin-right: auto;
-    width: 98vw;
+    width: 100%;
+    max-width: 1200px;
+    /* Standard grid width */
+    margin: 8px auto;
+    padding: 0 var(--space-4);
+    background: transparent;
+    /* Let yellow page show through */
     border-radius: var(--radius-lg);
 }
 
@@ -471,14 +473,22 @@ textarea {
     }
 }
 
-/* Main Area */
+/* ========================================
+   PREMIUM PRODUCT CARD
+   Modern, Artisanal Look
+======================================== */
 .main-product-area {
     grid-area: main;
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-light);
+    /* Pure white for contrast with global text colors */
+    background: #FFFFFF;
+    /* Soft, organic rounded corners */
+    border-radius: 24px;
+    /* Soft "Golden Glow" shadow */
+    box-shadow: 0 12px 30px rgba(220, 180, 0, 0.15);
+    border: none;
     overflow: hidden;
-    /* Critical for container health */
+    /* Desktop: Spacious padding */
+    padding: clamp(20px, 4vw, 40px);
 }
 
 /* Component: Gallery (3D Flip) - Responsive Square */
@@ -1872,4 +1882,194 @@ textarea {
 .view-all-link:hover {
     color: #92400e !important;
     transform: translateX(2px);
+}
+
+/* ========================================
+   PREMIUM UI ELEMENTS
+   Modern "Pill" Aesthetics
+======================================== */
+
+/* Quantity Selector - Capsule/Pill Style */
+.qty-selector-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #F5F5F5;
+    /* Light grey to contrast with white card */
+    border-radius: 50px;
+    /* Full capsule shape */
+    padding: 4px;
+    gap: 0;
+    border: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.qty-selector-pill .qty-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    /* Transparent background */
+    border: none;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-primary-blue);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.qty-selector-pill .qty-btn:hover {
+    background: rgba(0, 119, 182, 0.1);
+    color: var(--color-primary-dark);
+}
+
+.qty-selector-pill .qty-btn:active {
+    transform: scale(0.95);
+}
+
+.qty-selector-pill .qty-value {
+    min-width: 50px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: transparent;
+    border: none;
+    padding: 8px 4px;
+}
+
+/* "Add to Cart" Button - Premium Pill Style */
+.add-cart-btn-premium {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px 32px;
+    /* Full Rounded Pill */
+    border-radius: 50px;
+    /* Brand Blue Background */
+    background: linear-gradient(135deg, #0077B6 0%, #005f8a 100%);
+    border: none;
+    /* White text for contrast */
+    color: #FFFFFF;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 20px rgba(0, 119, 182, 0.35);
+}
+
+.add-cart-btn-premium:hover {
+    /* Slight scale up on hover */
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 119, 182, 0.45);
+    background: linear-gradient(135deg, #005f8a 0%, #004d6e 100%);
+}
+
+.add-cart-btn-premium:active {
+    transform: scale(0.98);
+}
+
+.add-cart-btn-premium i {
+    font-size: 1.2rem;
+}
+
+/* Mobile: Compact quantity selector */
+@media (max-width: 767px) {
+    .qty-selector-pill .qty-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .qty-selector-pill .qty-value {
+        min-width: 40px;
+        font-size: 1rem;
+    }
+
+    .add-cart-btn-premium {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   SIDEBAR ENHANCEMENTS
+   Larger thumbnails with rounded corners
+======================================== */
+.sim-item img,
+.sidebar-product-thumb {
+    border-radius: 12px;
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1024px) {
+
+    .sim-item img,
+    .sidebar-product-thumb {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* ========================================
+   TAB SYSTEM ENHANCEMENTS
+   Text-based tabs with yellow underline
+======================================== */
+.info-toggles {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #e5e5e5;
+    margin-bottom: 15px;
+}
+
+.toggle-btn {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.toggle-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: transparent;
+    border-radius: 3px 3px 0 0;
+    transition: background 0.2s ease;
+}
+
+.toggle-btn:hover {
+    color: var(--color-primary-blue);
+}
+
+.toggle-btn.active {
+    color: var(--color-primary-blue);
+}
+
+.toggle-btn.active::after {
+    /* Thick yellow underline for active tab */
+    background: #FBC02D;
+}
+
+/* Mobile: Responsive tabs */
+@media (max-width: 767px) {
+    .toggle-btn {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
 }
