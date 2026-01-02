@@ -2245,3 +2245,124 @@ textarea {
 .sidebar-qty-controls.show {
     display: flex !important;
 }
+
+/* =========================================
+   SMART BREADCRUMBS
+========================================= */
+.smart-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 50px;
+    width: 95vw;
+    max-width: 1600px;
+    margin: 0 auto;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 0 5px;
+    /* Tiny padding for scroll edges */
+    font-size: 0.9rem;
+    color: #666;
+    /* Hide Scrollbar */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+.smart-breadcrumbs::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.smart-breadcrumbs a {
+    color: var(--color-primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.smart-breadcrumbs .sep {
+    color: #ccc;
+    font-size: 0.8rem;
+}
+
+.smart-breadcrumbs .current {
+    color: #333;
+    font-weight: 600;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Category Dropdown Trigger */
+.sb-dropdown-trigger {
+    color: var(--color-primary-blue);
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    position: relative;
+    /* Anchor for absolute dropdown */
+}
+
+.sb-dropdown-trigger:hover {
+    background-color: #f0f0f0;
+}
+
+/* Category Dropdown Menu */
+.sb-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    /* Toggled via JS */
+    padding: 8px 0;
+}
+
+.sb-dropdown-menu.show {
+    display: block;
+}
+
+.sb-dropdown-item {
+    display: block;
+    padding: 8px 16px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.sb-dropdown-item:hover {
+    background-color: #f9f9f9;
+    color: var(--color-primary-blue);
+}
+
+.sb-dropdown-item.active {
+    background-color: #e3f2fd;
+    color: var(--color-primary-blue);
+    font-weight: 600;
+}
+
+/* Mobile Tweaks */
+@media (max-width: 768px) {
+    .smart-breadcrumbs {
+        font-size: 0.85rem;
+    }
+
+    .smart-breadcrumbs .current {
+        max-width: 120px;
+        /* Conserve space */
+    }
+}

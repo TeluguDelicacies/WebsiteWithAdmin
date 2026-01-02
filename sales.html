@@ -400,8 +400,7 @@
 
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
-                    <span style="color:var(--color-primary-blue); font-weight:600;">All Products</span>
+                    ${window.renderSmartBreadcrumbs('all-products', '')}
                 </div>
 
                 <section class="category-grid-container" style="max-width:1300px; margin:0 auto; padding-bottom:50px;">
@@ -455,8 +454,7 @@
             // Use the NEW Quick Commerce HTML Structure
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
-                    <span style="color:var(--color-primary-blue); font-weight:600;">${category.title}</span>
+                    ${window.renderSmartBreadcrumbs(slug, '')}
                 </div>
 
                 <section class="category-grid-container" style="max-width:1300px; margin:0 auto; padding-bottom:50px;">
@@ -780,14 +778,9 @@
 
             app.innerHTML = `
                 <div class="grid-layout slide-container ${animationClass}">
-                    <!-- Breadcrumbs -->
-                    <div class="breadcrumb-section">
-                        <!-- Breadcrumbs (Left) -->
-                        <div class="crumbs">
-                            <a href="/">Home</a> <span>/</span> 
-                            <a href="/sales/${catSlug}" onclick="event.preventDefault(); navigateToCategory('${catSlug}')">${category?.title || 'Back'}</a> <span>/</span> 
-                            <span class="current">${product.product_name}</span>
-                        </div>
+                    <!-- Breadcrumbs + Nav Container -->
+                    <div class="breadcrumb-section" style="display:flex; justify-content:space-between; align-items:center; grid-area:bread;">
+                        ${window.renderSmartBreadcrumbs(catSlug, product.product_name)}
                         
                         <!-- Navigation (Right on Desktop, Hidden on Mobile) -->
                         <div class="nav-group desktop-only-nav">
@@ -1732,6 +1725,53 @@
             window.toggleCartDrawer();
         };
 
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.sb-dropdown-trigger')) {
+                document.querySelectorAll('.sb-dropdown-menu').forEach(el => el.classList.remove('show'));
+            }
+        });
+
+        // --- Smart Breadcrumbs Helper ---
+        window.renderSmartBreadcrumbs = function (activeCategorySlug, activeProductName) {
+            // 1. Home Link
+            let html = `<div class="smart-breadcrumbs">
+                <a href="/">Home</a>
+                <span class="sep">/</span>
+                <a href="/sales/all-products" onclick="event.preventDefault(); window.navigateToCategory('all-products')">All Products</a>`;
+
+            // 2. Category Dropdown
+            const categories = state.categories;
+            const activeCat = categories.find(c => c.slug === activeCategorySlug);
+            const label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'Select Category' : 'Select Category');
+
+            // If we are in "All Products" view, we don't necessarily show a category *link* as current, 
+            // but the dropdown is always useful.
+            // If specific category is active, show it as the trigger label.
+
+            html += `
+                <span class="sep">/</span>
+                <div style="position:relative">
+                    <div class="sb-dropdown-trigger" onclick="event.stopPropagation(); document.querySelectorAll('.sb-dropdown-menu').forEach(el => el.classList.remove('show')); this.nextElementSibling.classList.toggle('show');">
+                        ${label} <i class="fas fa-caret-down"></i>
+                    </div>
+                    <div class="sb-dropdown-menu">
+                        <a href="/sales/all-products" class="sb-dropdown-item ${activeCategorySlug === 'all-products' ? 'active' : ''}" onclick="event.preventDefault(); window.navigateToCategory('all-products')">All Products</a>
+                        ${categories.map(c => `
+                            <a href="/sales/${c.slug}" class="sb-dropdown-item ${c.slug === activeCategorySlug ? 'active' : ''}" onclick="event.preventDefault(); window.navigateToCategory('${c.slug}')">${c.title}</a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            // 3. Product Name (if present)
+            if (activeProductName) {
+                html += `<span class="sep">/</span> <span class="current">${activeProductName}</span>`;
+            }
+
+            html += `</div>`;
+            return html;
+        };
         window.initCart();
 
         init();
