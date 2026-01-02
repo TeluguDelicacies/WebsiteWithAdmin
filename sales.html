@@ -384,6 +384,10 @@
                 return;
             }
 
+            // Update State
+            state.currentCategory = slug;
+            state.currentProduct = null;
+
             // Single Category Grid View
             renderSingleCategoryGrid(slug);
         }
@@ -702,12 +706,13 @@
                 return;
             }
 
-            // Set global current product for cart actions
+            // Set global current product for cart actions & share context
             state.currentProduct = product;
             state.detailQty = 1;
 
-            // Category & Context
+            // Update Category Context (for navigation/breadcrumbs)
             const catSlug = (product.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
+            state.currentCategory = catSlug; // Ensure category context is valid
             const category = state.categories.find(c => c.slug === catSlug);
 
             // Navigation
