@@ -1659,17 +1659,17 @@
             // Initiate stock update in background
             updateStock();
 
-            let message = `🛒 *New Order from Telugu Delicacies*\n\n*Order Details:*`;
+            let message = `👋 Hi Telugu Delicacies! I would like to place an order.\n\n🛒 *ORDER SUMMARY*`;
             let total = 0;
             state.cart.forEach(item => {
                 const sub = item.price * item.qty;
                 total += sub;
-                message += `\n• ${item.name} ${item.variant ? '(' + item.variant.quantity + ')' : ''} × ${item.qty} = ₹${sub}`;
+                // bullet: ▪️, format: item (variant) x qty = price
+                message += `\n▪️ ${item.name} ${item.variant ? '(' + item.variant.quantity + ')' : ''} x ${item.qty} = ₹${sub}`;
             });
 
-            message += `\n\n*Subtotal: ₹${total}*`;
-            message += `\n_* Delivery charges additional_`;
-            message += `\n\nPlease confirm availability and share payment details.`;
+            message += `\n\n💰 *Item Total: ₹${total}* (Shipping calculated later)`;
+            message += `\n\nPlease confirm availability and share payment details! ✅`;
 
             const phone = '919618519191';
             // USE UNIVERSAL API LINK
