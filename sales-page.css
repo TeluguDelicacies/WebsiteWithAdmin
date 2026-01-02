@@ -2414,10 +2414,28 @@ textarea {
     display: none;
 }
 
-
+/* === Breadcrumb Mobile/Desktop Visibility === */
+/* Desktop Default: Hide mobile elements, show desktop text */
+.sb-mobile-icon,
+.sb-mobile-text {
+    display: none !important;
+}
 
 .sb-desktop-text {
-    display: inline;
+    display: inline !important;
+}
+
+/* Mobile: Show mobile elements, hide desktop text */
+@media (max-width: 768px) {
+
+    .sb-mobile-icon,
+    .sb-mobile-text {
+        display: inline !important;
+    }
+
+    .sb-desktop-text {
+        display: none !important;
+    }
 }
 
 /* --- Dynamic Brand Widget Styles --- */
@@ -2461,140 +2479,16 @@ textarea {
     }
 }
 
-/* --- Product Title Marquee (Scroll on Hover) --- */
-/* Note: marquee requires fixed width context which we have in card */
+/* --- Product Title Styling (Reduced font for fit) --- */
 .product-title {
-    /* Existing styles: truncate usually */
-    white-space: nowrap;
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: block;
-    /* Ensure block for width */
-    position: relative;
-}
-
-.product-title:hover {
-    /* 
-       We need to check if it overflows? CSS can't detect overflow easily.
-       But we can just animate text-indent or transform on hover indiscriminately? 
-       Or use a trick. A common trick is: 
-       If text is long, we want it to scroll. 
-       Let's try a safe approach: A slow scroll animation.
-    */
-    /* Simple marquee on hover */
-    overflow: visible;
-    /* Removing overflow:hidden makes it spill out! Not good. */
-    /* We need inner span for marquee? */
-}
-
-/* Better Marquee Implementation:
-   Requires wrapping text in a span if we want true marquee.
-   But current HTML is just <h3>Text</h3>.
-   Let's use a text-indent animation if we can't change HTML structure everywhere easily.
-   Actually, `text-overflow: ellipsis` is key.
-   
-   Let's just widen the container on hover? No, breaks layout.
-   
-   Let's try: On hover, if it's truncated, show full text?
-   User requested "initiate a slow scroll".
-   
-   If we can't wrap effortlessly, let's accept that we might need to modify renderProductCard to wrap title in a span?
-   Let's check renderProductCard. It just puts text inside <h3>.
-   
-   Let's update CSS to support a span if I change HTML.
-   But wait, replace_file_content on CSS won't change HTML.
-   
-   Let's try `transform: translateX` on the element itself?
-   But the parent needs `overflow: hidden`.
-   
-   Actually, the user said "product cards in this section (category grids)".
-   Let's assume I can modify `renderProductCard` again to wrap text?
-   
-   Okay, let's implement the CSS assuming `<h3><span>Title</span></h3>` structure.
-   I will update HTML in next step.
-*/
-
-.product-title span {
-    display: inline-block;
-    padding-right: 20px;
-    /* Space for loop visual */
-}
-
-.product-card:hover .product-title span {
-    /* Only animate if we assume it's long? 
-       Hard to do pure CSS conditional. 
-       But user said "slow scroll".
-    */
-    animation: marquee-scroll 5s linear infinite;
-}
-
-@keyframes marquee-scroll {
-    0% {
-        transform: translateX(0);
-    }
-
-    10% {
-        transform: translateX(0);
-    }
-
-    /* Pause start */
-    100% {
-        transform: translateX(-100%);
-    }
-
-    /* This scrolls it completely off screen. We want back and forth? or reset? */
-}
-
-/* Alternative: "bouncing" scroll */
-@keyframes text-bounce {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    50% {
-        transform: translateX(calc(-100% + 150px));
-        /* Rough estimate */
-    }
-}
-
-/* This is hard to get right generically without knowing width. */
-/* Let's stick to the Marquee:
-   We'll use a `mask-image` fade? Or just simple ellipsis removal + scroll?
-   
-   Let's try the `text-indent` trick for text-only elements?
-   
-   .product-title:hover {
-       text-overflow: clip;
-       animation: text-scroll 8s linear infinite;
-   }
-   @keyframes text-scroll {
-       from { text-indent: 0; }
-       to { text-indent: -100%; } 
-   }
-   
-   Use this for now. It works reasonably well for simple text.
-*/
-.product-title:hover {
-    text-overflow: clip;
-    white-space: nowrap;
-    overflow: hidden;
-    /* Keep hidden */
-    animation: text-indent-scroll 8s linear infinite alternate;
-}
-
-@keyframes text-indent-scroll {
-    0% {
-        text-indent: 0;
-    }
-
-    90% {
-        text-indent: -120%;
-    }
-
-    /* Scroll to reveal end */
-    100% {
-        text-indent: -120%;
-    }
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
+    max-height: 2.6em;
 }
