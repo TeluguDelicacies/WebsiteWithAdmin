@@ -345,6 +345,12 @@
 
             // Check if it's a product or category
             if (pathParts.length >= 2 && pathParts[pathParts.length - 2] === 'sales' && lastPart !== 'sales.html') {
+                // Check if it's 'all-products'
+                if (lastPart === 'all-products') {
+                    renderAllProductsView();
+                    return;
+                }
+
                 // Check if it's a category
                 const isCategory = state.categories.find(c => c.slug === lastPart);
                 if (isCategory) {
@@ -363,15 +369,56 @@
             if (productId) {
                 renderProductView(productId);
             } else if (catSlug) {
-                renderCategoryView(catSlug);
+                if (catSlug === 'all-products') {
+                    renderAllProductsView();
+                } else {
+                    renderCategoryView(catSlug);
+                }
             } else {
-                // If clean URL but matching 'sales.html' exactly (no slug), show first category or home
-                // Actually, if we are just at /sales.html, we might want to default to something?
-                // For now, let's default to the first category if available
+                // Default handling for /sales.html root
                 if (state.categories.length > 0) {
+                    // Check if we want to default to All Products or First Category
+                    // Let's stick to first category for now unless requested otherwise, 
+                    // OR redirect to all-products? 
+                    // User just asked for the view, not to change default.
                     renderCategoryView(state.categories[0].slug);
                 }
             }
+        }
+
+        // --- View: All Products ---
+        function renderAllProductsView() {
+            const app = document.getElementById('app');
+
+            // Update State
+            state.currentCategory = 'all-products';
+            state.currentProduct = null;
+
+            // Use the consistent grid structure
+            // Sort by arbitrary order or ID? "order('display_order')" is already done in fetching
+            const allVisible = state.allProducts;
+
+            app.innerHTML = `
+                <div class="breadcrumb-section">
+                    <a href="/" style="color:var(--text-secondary)">Home</a> / 
+                    <span style="color:var(--color-primary-blue); font-weight:600;">All Products</span>
+                </div>
+
+                <section class="category-grid-container" style="max-width:1300px; margin:0 auto; padding-bottom:50px;">
+                    <!-- Header -->
+                    <div class="category-header-simple" style="margin-bottom: 20px;">
+                        <div>
+                            <h1>All Products</h1>
+                            <p>Explore our complete range of authentic delicacies.</p>
+                        </div>
+                    </div>
+
+                    <!-- New Grid Container -->
+                    <div class="category-grid">
+                        ${allVisible.map(p => renderProductCard(p, { title: 'All Products' })).join('')}
+                    </div>
+                </section>
+            `;
         }
 
         // --- View: Category ---
