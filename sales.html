@@ -1099,18 +1099,46 @@
 
         function renderVerticalItems(items) {
             if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.</p>`;
-            return items.map(item => `
-        <div class="sim-item" onclick="window.location.href='/sales/${item.slug || item.id}'">
+            return items.map((item, index) => {
+                // Get first variant info or use default price
+                let variants = [];
+                try {
+                    variants = typeof item.quantity_variants === 'string' ? JSON.parse(item.quantity_variants) : (item.quantity_variants || []);
+                } catch (e) { }
+                const firstVariant = variants[0] || {};
+                const variantLabel = firstVariant.quantity || '';
+                const displayPrice = firstVariant.price || item.price || item.mrp || '';
+
+                return `
+        <div class="sim-item" data-product-id="${item.id}">
             <img src="${item.showcase_image || state.placeholder}" class="sim-img"
-                onerror="this.src='${state.placeholder}'">
-            <div class="sim-info">
+                onerror="this.src='${state.placeholder}'" onclick="window.location.href='/sales/${item.slug || item.id}'">
+            <div class="sim-info" onclick="window.location.href='/sales/${item.slug || item.id}'">
                 <h4 style="font-size:0.9rem; margin:0; line-height:1.2;">${item.product_name}</h4>
-                ${item.product_tagline ? `<span style="font-size:0.75rem; color:var(--text-secondary); display:block; margin:2px 0;">${item.product_tagline}</span>` : ''}
-                <span style="font-size:0.85rem; font-weight:700; color:var(--color-primary-blue);">₹${item.price || item.mrp || ''}</span>
+                ${item.product_tagline ? `<span style="font-size:0.7rem; color:var(--text-secondary); display:block; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.product_tagline}</span>` : ''}
+                <span style="font-size:0.8rem; font-weight:700; color:var(--color-primary-blue);">${variantLabel ? variantLabel + ' - ' : ''}₹${displayPrice}</span>
+            </div>
+            <!-- Mobile Quantity Pill -->
+            <div class="sim-item-actions mobile-only-action">
+                <div class="quantity-controls" style="min-width:80px; padding:2px 8px;">
+                    <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, -1)">−</button>
+                    <span class="quantity-display" id="sidebar-qty-${index}">0</span>
+                    <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, 1)">+</button>
+                </div>
             </div>
         </div>
-        `).join('');
+        `;
+            }).join('');
         }
+
+        // Sidebar quantity helper
+        window.updateSidebarQty = function (index, delta) {
+            const qtyEl = document.getElementById('sidebar-qty-' + index);
+            if (!qtyEl) return;
+            let val = parseInt(qtyEl.innerText) || 0;
+            val = Math.max(0, val + delta);
+            qtyEl.innerText = val;
+        };
 
         function updateHistory(p) {
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }

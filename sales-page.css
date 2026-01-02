@@ -2200,3 +2200,39 @@ textarea {
     min-width: 24px;
     text-align: center;
 }
+
+/* ========================================
+   SIDEBAR ITEM RESPONSIVE ACTIONS
+======================================== */
+
+/* Sim-item layout adjustment for action buttons */
+.sim-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.sim-info {
+    flex: 1;
+    min-width: 0;
+    /* Allow text truncation */
+}
+
+/* Mobile-only action: Hidden on desktop */
+.mobile-only-action {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .mobile-only-action {
+        display: flex;
+        width: 100%;
+        margin-top: 8px;
+        justify-content: flex-end;
+    }
+
+    .sim-item-actions .quantity-controls {
+        transform: scale(0.9);
+    }
+}
