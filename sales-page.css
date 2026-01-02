@@ -2294,65 +2294,46 @@ textarea {
     text-overflow: ellipsis;
 }
 
-/* Category Dropdown Trigger */
-.sb-dropdown-trigger {
+/* Category Dropdown Wrapper (Native Select) */
+.sb-select-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
     color: var(--color-primary-blue);
     font-weight: 600;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
     border-radius: 4px;
+    padding: 0 4px;
     transition: background 0.2s;
-    position: relative;
-    /* Anchor for absolute dropdown */
 }
 
-.sb-dropdown-trigger:hover {
+.sb-select-wrapper:hover {
     background-color: #f0f0f0;
 }
 
-/* Category Dropdown Menu */
-.sb-dropdown-menu {
+/* The Label (Visual only) */
+.sb-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    /* Let clicks pass to select */
+}
+
+/* The Native Select (Invisible Overlay) */
+.sb-native-select {
     position: absolute;
-    top: 100%;
+    top: 0;
     left: 0;
-    background: white;
-    border: 1px solid #eee;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    min-width: 200px;
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-    /* Toggled via JS */
-    padding: 8px 0;
-}
-
-.sb-dropdown-menu.show {
-    display: block;
-}
-
-.sb-dropdown-item {
-    display: block;
-    padding: 8px 16px;
-    color: #333;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: background 0.2s;
-}
-
-.sb-dropdown-item:hover {
-    background-color: #f9f9f9;
-    color: var(--color-primary-blue);
-}
-
-.sb-dropdown-item.active {
-    background-color: #e3f2fd;
-    color: var(--color-primary-blue);
-    font-weight: 600;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    /* Hidden physically */
+    cursor: pointer;
+    font-size: 16px;
+    /* Avoid zoom on mobile */
+    appearance: none;
+    /* Standard cleanup */
 }
 
 /* Mobile Tweaks */
@@ -2361,8 +2342,40 @@ textarea {
         font-size: 0.85rem;
     }
 
+    .sb-desktop-root {
+        display: inline;
+        /* Always visible but compacted */
+    }
+
+    /* Compact Text Logic */
+    .sb-desktop-root .desktop-text {
+        display: none;
+    }
+
+    .sb-desktop-root .mobile-text {
+        display: inline;
+    }
+
     .smart-breadcrumbs .current {
-        max-width: 120px;
-        /* Conserve space */
+        max-width: none;
+        /* Allow full name to show */
+        overflow: visible;
+        text-overflow: clip;
+        /* Or keep ellipsis if it overflows screen, but requested "not cut off" */
+    }
+}
+
+/* Default Desktop State (implied, but let's be explicit if needed) */
+.mobile-text {
+    display: none;
+}
+
+@media (min-width: 769px) {
+    .mobile-text {
+        display: none;
+    }
+
+    .desktop-text {
+        display: inline;
     }
 }

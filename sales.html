@@ -259,7 +259,12 @@
             window.navigateToCategory = function (slug) {
                 const newUrl = `/sales/${slug}`;
                 history.pushState({ slug, type: 'category' }, '', newUrl);
-                renderCategoryView(slug);
+
+                if (slug === 'all-products') {
+                    renderAllProductsView();
+                } else {
+                    renderCategoryView(slug);
+                }
             };
 
             async function performTransition(slugOrId, direction) {
@@ -394,9 +399,27 @@
             state.currentCategory = 'all-products';
             state.currentProduct = null;
 
-            // Use the consistent grid structure
-            // Sort by arbitrary order or ID? "order('display_order')" is already done in fetching
-            const allVisible = state.allProducts;
+            // Sort by Category Order, then Product Order
+            // 1. Create a map of "Category Slug" -> "Category Index/Order"
+            const catOrderMap = {};
+            state.categories.forEach((c, idx) => {
+                catOrderMap[c.slug] = idx;
+            });
+
+            // 2. Sort products
+            const allVisible = [...state.allProducts].sort((a, b) => {
+                const catSlugA = (a.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
+                const catSlugB = (b.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
+
+                const orderA = catOrderMap[catSlugA] !== undefined ? catOrderMap[catSlugA] : 9999;
+                const orderB = catOrderMap[catSlugB] !== undefined ? catOrderMap[catSlugB] : 9999;
+
+                if (orderA !== orderB) {
+                    return orderA - orderB;
+                }
+                // Secondary sort: Product's own display_order (already handled by initial fetch, but good to be explicit if needed)
+                return (a.display_order || 0) - (b.display_order || 0);
+            });
 
             app.innerHTML = `
                 <div class="breadcrumb-section">
@@ -417,7 +440,11 @@
                         ${allVisible.map(p => renderProductCard(p, { title: 'All Products' })).join('')}
                     </div>
                 </section>
+                </section>
             `;
+
+            // Scroll breadcrumbs
+            window.updateBreadcrumbScroll();
         }
 
         // --- View: Category ---
@@ -473,6 +500,9 @@
                     </div>
                 </section>
             `;
+
+            // Scroll breadcrumbs
+            window.updateBreadcrumbScroll();
         }
 
         // --- Helper: Render Individual Card ---
@@ -1732,35 +1762,40 @@
             }
         });
 
-        // --- Smart Breadcrumbs Helper ---
+        // --- Smart Breadcrumbs Helper (Native Select) ---
+        // --- Smart Breadcrumbs Helper (Native Select) ---
         window.renderSmartBreadcrumbs = function (activeCategorySlug, activeProductName) {
-            // 1. Home Link
+            // 1. Home Link (Wrapped for hiding on mobile)
             let html = `<div class="smart-breadcrumbs">
-                <a href="/">Home</a>
-                <span class="sep">/</span>
-                <a href="/sales/all-products" onclick="event.preventDefault(); window.navigateToCategory('all-products')">All Products</a>`;
+                <span class="sb-desktop-root">
+                    <a href="/" class="sb-home-link"><i class="fas fa-home"></i><span class="desktop-text"> Home</span></a>
+                    <span class="sep">/</span>
+                    <a href="/sales/all-products" class="sb-all-link" onclick="event.preventDefault(); window.navigateToCategory('all-products')"><span class="mobile-text">All</span><span class="desktop-text"> Products</span></a>
+                    <span class="sep">/</span>
+                </span>`;
 
-            // 2. Category Dropdown
+            // 2. Category Select (Native)
             const categories = state.categories;
             const activeCat = categories.find(c => c.slug === activeCategorySlug);
             const label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'Select Category' : 'Select Category');
 
-            // If we are in "All Products" view, we don't necessarily show a category *link* as current, 
-            // but the dropdown is always useful.
-            // If specific category is active, show it as the trigger label.
+            // No leading separator here because it's inside sb-desktop-root if needed, 
+            // OR we need one if we are on mobile? 
+            // On mobile: [Hidden] [Cat Select]
+            // On Desktop: Home / All / [Cat Select]
+            // So the separator after "All Products" is inside sb-desktop-root.
+            // We do NOT need another separator before the select.
 
             html += `
-                <span class="sep">/</span>
-                <div style="position:relative">
-                    <div class="sb-dropdown-trigger" onclick="event.stopPropagation(); document.querySelectorAll('.sb-dropdown-menu').forEach(el => el.classList.remove('show')); this.nextElementSibling.classList.toggle('show');">
-                        ${label} <i class="fas fa-caret-down"></i>
-                    </div>
-                    <div class="sb-dropdown-menu">
-                        <a href="/sales/all-products" class="sb-dropdown-item ${activeCategorySlug === 'all-products' ? 'active' : ''}" onclick="event.preventDefault(); window.navigateToCategory('all-products')">All Products</a>
+                <div class="sb-select-wrapper">
+                    <span class="sb-label">${label} <i class="fas fa-caret-down"></i></span>
+                    <select class="sb-native-select" onchange="window.handleBreadcrumbChange(this)">
+                        <option value="" disabled>Select Category</option>
+                        <option value="all-products" ${activeCategorySlug === 'all-products' ? 'selected' : ''}>All Products</option>
                         ${categories.map(c => `
-                            <a href="/sales/${c.slug}" class="sb-dropdown-item ${c.slug === activeCategorySlug ? 'active' : ''}" onclick="event.preventDefault(); window.navigateToCategory('${c.slug}')">${c.title}</a>
+                            <option value="${c.slug}" ${c.slug === activeCategorySlug ? 'selected' : ''}>${c.title}</option>
                         `).join('')}
-                    </div>
+                    </select>
                 </div>
             `;
 
@@ -1772,6 +1807,33 @@
             html += `</div>`;
             return html;
         };
+
+        // Scroll Breadcrumbs to ensure active item is visible (Mobile UX)
+        window.updateBreadcrumbScroll = function () {
+            setTimeout(() => {
+                const container = document.querySelector('.smart-breadcrumbs');
+                const trigger = document.querySelector('.sb-select-wrapper');
+                const current = document.querySelector('.smart-breadcrumbs .current');
+
+                if (container && (trigger || current)) {
+                    // Scroll to show the Category Select or Product Name
+                    // Prefer Product Name if exists, else Category
+                    const target = current || trigger;
+                    const offset = target.offsetLeft;
+
+                    // Center it or scroll to ensure visibility? 
+                    // Let's scroll so the target is slightly from the left edge (e.g. 50px context)
+                    // But if it's the category dropdown, we probably want to see a bit of "Home" / "All" if possible?
+                    // No, let's prioritize showing the current context.
+
+                    container.scrollTo({
+                        left: offset - 40, // Leave 40px left padding to see separator/context
+                        behavior: 'smooth'
+                    });
+                }
+            }, 50); // Small delay for rendering
+        };
+
         window.initCart();
 
         init();
