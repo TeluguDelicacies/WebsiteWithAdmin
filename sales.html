@@ -146,7 +146,16 @@
                 shareText = `Check out ${product.product_name}${tagline} at Telugu Delicacies! 😋`;
             } else if (state.currentCategory) {
                 const cat = state.categories.find(c => c.slug === state.currentCategory);
-                if (cat) shareText = `Check out our ${cat.title} collection at Telugu Delicacies!`;
+                if (cat) {
+                    // Fetch top 2 products for this category
+                    const catProducts = state.allProducts.filter(p =>
+                        (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === state.currentCategory
+                    );
+                    const topProducts = catProducts.slice(0, 2).map(p => p.product_name).join(', ');
+                    const productText = topProducts ? ` featuring ${topProducts} and more` : '';
+
+                    shareText = `Check out our ${cat.title} collection${productText} at Telugu Delicacies!`;
+                }
             }
 
             const fullMessage = `${shareText}\n${currentUrl}`;
