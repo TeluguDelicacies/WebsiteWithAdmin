@@ -764,15 +764,18 @@ Persistent header with hamburger menu and WhatsApp integration
    Last button: anchor tooltip to right edge
 */
 @media (max-width: 768px) {
+
   /* First button in mobile-actions - anchor tooltip to LEFT */
   .mobile-actions .nav-btn:first-child::before {
     left: 0;
     right: auto;
     transform: translateX(0) translateY(-10px);
   }
+
   .mobile-actions .nav-btn:first-child:hover::before {
     transform: translateX(0) translateY(0);
   }
+
   /* Arrow for first button - shift to align with button */
   .mobile-actions .nav-btn:first-child::after {
     left: 15px;
@@ -785,9 +788,11 @@ Persistent header with hamburger menu and WhatsApp integration
     right: 0;
     transform: translateX(0) translateY(-10px);
   }
+
   .mobile-actions .nav-btn:last-child:hover::before {
     transform: translateX(0) translateY(0);
   }
+
   /* Arrow for last button - shift to align with button */
   .mobile-actions .nav-btn:last-child::after {
     left: auto;
@@ -801,9 +806,11 @@ Persistent header with hamburger menu and WhatsApp integration
     right: auto;
     transform: translateX(0) translateY(-10px);
   }
+
   .desktop-nav .nav-btn:first-child:hover::before {
     transform: translateX(0) translateY(0);
   }
+
   .desktop-nav .nav-btn:first-child::after {
     left: 15px;
     transform: translateX(0);
@@ -814,9 +821,11 @@ Persistent header with hamburger menu and WhatsApp integration
     right: 0;
     transform: translateX(0) translateY(-10px);
   }
+
   .desktop-nav .nav-btn:last-child:hover::before {
     transform: translateX(0) translateY(0);
   }
+
   .desktop-nav .nav-btn:last-child::after {
     left: auto;
     right: 15px;
@@ -1043,16 +1052,34 @@ Enhanced visual appeal with modern design
   max-width: 800px;
 }
 
-.hero-title {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 1rem;
-  color: var(--color-white);
-  letter-spacing: -0.03em;
-  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8);
+/* Container to center and constrain text */
+.hero-text-container {
+  width: 100%;
+  max-width: 95%;
+  /* Keep off the absolute edges */
+  text-align: center;
+  padding: 0 10px;
 }
 
+/* 1. English Title ("Modern Yet Traditional") - Fluid Scaling, Single Line */
+.hero-title {
+  white-space: nowrap !important;
+  /* Force single line */
+  overflow: visible;
+
+  /* Logic: Font size is 5.5% of screen width, capped at 40px max, 16px min */
+  font-size: clamp(16px, 5.5vw, 40px);
+
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  /* Ensure high contrast */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  /* Make it pop against background */
+}
+
+/* 2. Hero Subtitle (description text) - Normal wrapping allowed */
 .hero-subtitle {
   font-size: clamp(1.1rem, 2.5vw, 1.4rem);
   font-weight: 500;
@@ -1065,13 +1092,19 @@ Enhanced visual appeal with modern design
   margin-right: auto;
 }
 
+/* 3. Telugu Subtitle ("సాంప్రదాయ రుచులు, ఆధునిక శైలి") - Fluid Scaling, Single Line */
 .telugu-subtitle {
   display: block;
+  white-space: nowrap !important;
+  /* Force single line */
   font-family: var(--font-telugu);
-  font-size: 0.75em;
-  /* Reduced from 0.85em */
+
+  /* Logic: Font size is 4.5% of screen width, capped at 32px max, 14px min */
+  font-size: clamp(14px, 4.5vw, 32px);
+
   font-weight: 500;
-  color: var(--color-primary-yellow);
+  color: #FFD700;
+  /* Gold/Yellow accent */
   margin-top: 0.5rem;
   line-height: 1.2;
   text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
