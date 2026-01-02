@@ -937,23 +937,7 @@
                 const servingSize = getVal(['serving_size', 'servingSize']);
                 const totalServings = getVal(['total_servings', 'totalServings']);
 
-                // Calculate Servings
-                let displayedServings = totalServings; // fallback
-                if (currentVariant && servingSize) {
-                    const packWeight = parseWeight(currentVariant.quantity);
-                    const sSize = parseWeight(servingSize);
-                    if (packWeight > 0 && sSize > 0) {
-                        displayedServings = Math.round(packWeight / sSize);
-                    }
-                }
-
-                // Build inline text with separators
-                const items = [];
-
-                if (servingSize) items.push(`<strong>Serving:</strong> ${servingSize}`);
-                if (displayedServings) items.push(`<strong>~${displayedServings} servings</strong>`);
-
-                // Field Mapping
+                // Field Mapping for actual nutrition data
                 const fields = [
                     { k: ['calories', 'Calories'], label: 'Calories' },
                     { k: ['protein', 'Protein'], label: 'Protein' },
@@ -964,12 +948,43 @@
                     { k: ['sodium', 'Sodium'], label: 'Sodium' }
                 ];
 
+                // 1. Check if ACTUAL nutrition data exists (not just serving info)
+                const hasActualNutritionData = fields.some(f => getVal(f.k) !== null);
+
+                // Build inline text with separators
+                const items = [];
+
+                // 2. Only calculate/show servings if actual nutrition data exists
+                if (hasActualNutritionData) {
+                    if (servingSize) items.push(`<strong>Serving:</strong> ${servingSize}`);
+
+                    // Calculate Servings per pack from variant
+                    let displayedServings = null;
+                    if (currentVariant && servingSize) {
+                        const packWeight = parseWeight(currentVariant.quantity);
+                        const sSize = parseWeight(servingSize);
+                        if (packWeight > 0 && sSize > 0) {
+                            displayedServings = Math.round(packWeight / sSize);
+                        }
+                    }
+                    // Fallback to totalServings if calculation failed
+                    if (!displayedServings && totalServings) {
+                        displayedServings = totalServings;
+                    }
+
+                    if (displayedServings) items.push(`<strong>~${displayedServings} servings</strong>`);
+                }
+
+                // Add nutrition fields
                 fields.forEach(f => {
                     const val = getVal(f.k);
                     if (val !== null) {
                         items.push(`<strong>${f.label}:</strong> ${val}`);
                     }
                 });
+
+                // 3. If no items to show, return empty
+                if (items.length === 0) return '';
 
                 // Return as inline wrapped text with bullet separators
                 return `<p style="font-size:0.85rem; line-height:1.8; color:var(--text-secondary); margin:0;">${items.join(' <span style="color:#ccc;">•</span> ')}</p>`;
