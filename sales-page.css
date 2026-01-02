@@ -2466,6 +2466,14 @@ textarea {
 }
 
 @media (max-width: 768px) {
+    .category-grid-container {
+        width: 95%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
     .category-header-simple {
         padding: 10px 15px;
     }
@@ -2499,9 +2507,9 @@ textarea {
        Actually, let's make the wrapper relative and items absolute for cross-fade. */
     .brand-logos-wrapper {
         position: relative;
-        width: 80px;
+        width: 50px;
         /* Fixed width for logo area */
-        height: 80px;
+        height: 50px;
         margin-left: auto;
         /* Push to right */
     }
@@ -2510,10 +2518,10 @@ textarea {
         position: absolute;
         top: 0;
         right: 0;
-        width: 80px;
-        height: 80px;
-        max-width: 80px;
-        max-height: 80px;
+        width: 50px;
+        height: 50px;
+        max-width: 50px;
+        max-height: 50px;
         opacity: 0;
         visibility: hidden;
         /* Hidden by default */
@@ -2523,6 +2531,13 @@ textarea {
         opacity: 1;
         visibility: visible;
         /* Visible */
+    }
+
+    /* Category header images - same size as brand logos */
+    .category-header-simple>img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
     }
 }
 
