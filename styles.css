@@ -1262,6 +1262,7 @@ Enhanced product cards and modern styling
   transition: transform var(--transition-normal);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
   /* Subtle depth for image */
+  border-radius: var(--radius-lg);
 }
 
 .product-item:hover img {
@@ -2178,6 +2179,7 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   height: 100%;
   object-fit: contain;
   transition: transform 0.3s ease;
+  border-radius: var(--radius-lg);
 }
 
 .product-card:hover .product-image {
