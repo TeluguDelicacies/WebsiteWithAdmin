@@ -197,6 +197,45 @@ textarea {
     visibility: visible;
 }
 
+/* ===== SALES HEADER - MOBILE TOOLTIP EDGE FIX =====
+   Prevents tooltip cutoff for buttons near screen edges.
+*/
+@media (max-width: 768px) {
+
+    /* First button in sales-nav - anchor tooltip to LEFT */
+    .sales-nav .nav-btn:first-child::before {
+        left: 0;
+        right: auto;
+        transform: translateX(0) translateY(-10px);
+    }
+
+    .sales-nav .nav-btn:first-child:hover::before {
+        transform: translateX(0) translateY(0);
+    }
+
+    .sales-nav .nav-btn:first-child::after {
+        left: 15px;
+        transform: translateX(0);
+    }
+
+    /* Last button in sales-nav - anchor tooltip to RIGHT */
+    .sales-nav .nav-btn:last-child::before {
+        left: auto;
+        right: 0;
+        transform: translateX(0) translateY(-10px);
+    }
+
+    .sales-nav .nav-btn:last-child:hover::before {
+        transform: translateX(0) translateY(0);
+    }
+
+    .sales-nav .nav-btn:last-child::after {
+        left: auto;
+        right: 15px;
+        transform: translateX(0);
+    }
+}
+
 /* Brand block inherits from styles.css - NO OVERRIDES */
 /* .brand-name, .telugu-brand, nav use global styles */
 

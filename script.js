@@ -34,6 +34,9 @@ async function preloadCatalogue() {
     }
 }
 
+// Cache for the generated share file (avoids regenerating on subsequent clicks)
+window.td_generatedShareFile = null;
+
 // GLOBAL SHARE FUNCTION
 window.shareCatalogue = async function () {
     const settings = window.currentSiteSettings || {};
@@ -46,39 +49,53 @@ window.shareCatalogue = async function () {
     }
 
     try {
-        // --- STEP 1: LOAD & RE-BAKE IMAGE (Fixes "Red Exclamation Mark") ---
-        let sourceBlob;
+        let fileToShare;
 
-        // Use preloaded file if available, otherwise fetch
-        if (window.td_catalogueFile) {
-            sourceBlob = window.td_catalogueFile;
+        // --- STEP 1: CHECK CACHE OR GENERATE NEW FILE ---
+        if (window.td_generatedShareFile) {
+            // Use cached file for instant sharing on subsequent clicks
+            fileToShare = window.td_generatedShareFile;
+            console.log('Using cached share file');
         } else {
-            // Fetch fresh if needed
-            const cleanUrl = catalogueUrl + (catalogueUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
-            const response = await fetch(cleanUrl, { mode: 'cors' });
-            sourceBlob = await response.blob();
+            // Show "Generating..." toast immediately for first-time generation
+            window.showToast('Generating catalogue...', 'info');
+
+            // Load source blob (preloaded or fresh fetch)
+            let sourceBlob;
+            if (window.td_catalogueFile) {
+                sourceBlob = window.td_catalogueFile;
+            } else {
+                // Fetch fresh if needed
+                const cleanUrl = catalogueUrl + (catalogueUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+                const response = await fetch(cleanUrl, { mode: 'cors' });
+                sourceBlob = await response.blob();
+            }
+
+            // Draw to Canvas to create a fresh, clean JPEG file
+            const imageBitmap = await createImageBitmap(sourceBlob);
+            const canvas = document.createElement('canvas');
+            canvas.width = imageBitmap.width;
+            canvas.height = imageBitmap.height;
+            const ctx = canvas.getContext('2d');
+
+            // White background handles transparent PNGs safely
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(imageBitmap, 0, 0);
+
+            // Convert to JPEG (High Quality) - AWAIT the blob creation fully
+            const jpegBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+
+            // Create the File object with a timestamp (Crucial for Android)
+            fileToShare = new File([jpegBlob], 'Telugu_Delicacies_Menu.jpg', {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+            });
+
+            // Cache for future clicks
+            window.td_generatedShareFile = fileToShare;
+            console.log('Generated and cached share file');
         }
-
-        // Draw to Canvas to create a fresh, clean JPEG file
-        const imageBitmap = await createImageBitmap(sourceBlob);
-        const canvas = document.createElement('canvas');
-        canvas.width = imageBitmap.width;
-        canvas.height = imageBitmap.height;
-        const ctx = canvas.getContext('2d');
-
-        // White background handles transparent PNGs safely
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(imageBitmap, 0, 0);
-
-        // Convert to JPEG (High Quality)
-        const jpegBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
-
-        // Create the File object with a timestamp (Crucial for Android)
-        const fileToShare = new File([jpegBlob], 'Telugu_Delicacies_Menu.jpg', {
-            type: 'image/jpeg',
-            lastModified: Date.now()
-        });
 
         // --- STEP 2: SHARE (Rules: Mobile=Native, Desktop=Download+Web) ---
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -97,6 +114,7 @@ window.shareCatalogue = async function () {
                 try { await navigator.clipboard.writeText(shareMessage); } catch (e) { }
             }
 
+            // Ensure file is ready before sharing
             await navigator.share(shareData);
         } else {
             // Force Desktop flow even if navigator.share exists (e.g. Chrome on Windows)
@@ -126,11 +144,12 @@ window.shareCatalogue = async function () {
             // --- DESKTOP FALLBACK ---
             // 1. Download the image first
             // We use the blob we already created (or the URL) to force a download
-            if (window.td_catalogueFile || catalogueUrl) {
+            if (window.td_generatedShareFile || window.td_catalogueFile || catalogueUrl) {
                 const link = document.createElement('a');
-                // Use the created file blob if we have it, otherwise the raw URL
-                const blobUrl = window.td_catalogueFile
-                    ? URL.createObjectURL(window.td_catalogueFile)
+                // Use the generated file, preloaded file, or raw URL
+                const fileForDownload = window.td_generatedShareFile || window.td_catalogueFile;
+                const blobUrl = fileForDownload
+                    ? URL.createObjectURL(fileForDownload)
                     : catalogueUrl;
 
                 link.href = blobUrl;
@@ -140,7 +159,7 @@ window.shareCatalogue = async function () {
                 document.body.removeChild(link);
 
                 // Clean up the blob URL to free memory
-                if (window.td_catalogueFile) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                if (fileForDownload) setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
             }
 
             // 2. OPEN WHATSAPP WEB

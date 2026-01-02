@@ -758,6 +758,73 @@ Persistent header with hamburger menu and WhatsApp integration
   visibility: visible;
 }
 
+/* ===== MOBILE TOOLTIP EDGE FIX =====
+   Prevents tooltip cutoff for buttons near screen edges.
+   First button: anchor tooltip to left edge
+   Last button: anchor tooltip to right edge
+*/
+@media (max-width: 768px) {
+  /* First button in mobile-actions - anchor tooltip to LEFT */
+  .mobile-actions .nav-btn:first-child::before {
+    left: 0;
+    right: auto;
+    transform: translateX(0) translateY(-10px);
+  }
+  .mobile-actions .nav-btn:first-child:hover::before {
+    transform: translateX(0) translateY(0);
+  }
+  /* Arrow for first button - shift to align with button */
+  .mobile-actions .nav-btn:first-child::after {
+    left: 15px;
+    transform: translateX(0);
+  }
+
+  /* Last button in mobile-actions - anchor tooltip to RIGHT */
+  .mobile-actions .nav-btn:last-child::before {
+    left: auto;
+    right: 0;
+    transform: translateX(0) translateY(-10px);
+  }
+  .mobile-actions .nav-btn:last-child:hover::before {
+    transform: translateX(0) translateY(0);
+  }
+  /* Arrow for last button - shift to align with button */
+  .mobile-actions .nav-btn:last-child::after {
+    left: auto;
+    right: 15px;
+    transform: translateX(0);
+  }
+
+  /* Desktop nav on tablet - same logic */
+  .desktop-nav .nav-btn:first-child::before {
+    left: 0;
+    right: auto;
+    transform: translateX(0) translateY(-10px);
+  }
+  .desktop-nav .nav-btn:first-child:hover::before {
+    transform: translateX(0) translateY(0);
+  }
+  .desktop-nav .nav-btn:first-child::after {
+    left: 15px;
+    transform: translateX(0);
+  }
+
+  .desktop-nav .nav-btn:last-child::before {
+    left: auto;
+    right: 0;
+    transform: translateX(0) translateY(-10px);
+  }
+  .desktop-nav .nav-btn:last-child:hover::before {
+    transform: translateX(0) translateY(0);
+  }
+  .desktop-nav .nav-btn:last-child::after {
+    left: auto;
+    right: 15px;
+    transform: translateX(0);
+  }
+}
+
+
 /* Hamburger Menu Button */
 .hamburger-btn {
   display: flex;
