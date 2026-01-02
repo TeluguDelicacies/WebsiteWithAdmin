@@ -357,7 +357,7 @@ textarea {
             "bread bread"
             "main  side"
             "recent recent";
-        grid-template-columns: 78% 20%;
+        grid-template-columns: 72% 25%;
         grid-template-rows: auto 1fr auto;
         gap: 15px 2%;
         width: 95vw;
