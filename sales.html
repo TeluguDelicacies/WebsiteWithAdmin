@@ -530,17 +530,11 @@
             }
 
             // Sort variants by price (proxy for weight/size) ascending
-            // NOTE: Assuming price correlates with size. 
-            // If explicit weight parsing needed, can add here.
-            // For now, we trust the DB or sort by price.
-            // Actually, let's NOT sort if they are manually ordered, but user asked for "Smallest Variant (lowest weight/price) by default".
-            // Let's sort copy to be safe.
             const sortedVariants = [...variants].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
 
             // Default selected variant (Index 0 after sort)
             const defaultVar = sortedVariants[0];
-            const defaultVarIdx = 0; // We will store the original index or just use the sorted one? 
-            // To keep simple, let's treat sortedVariants as THE list for this card.
+            const defaultVarIdx = 0;
 
             // 2. Check Cart State for this specific variant
             const cartItem = state.cart.find(item => item.id === product.id &&
@@ -555,11 +549,18 @@
                 discountTag = `<span class="discount" id="disc-${product.id}">${off}% OFF</span>`;
             }
 
-            // 4. Render
-            // We embed the sorted variants as a data attribute to access them in JS helper
-            // Escaping JSON for data attribute is tricky, let's store in a global map instead? 
-            // Better: Just regenerate them in the helper using the same logic.
+            // 4. Resolve Category / Sub-brand
+            let dispCategory = category;
+            if (!dispCategory.sub_brand) {
+                // Try to find the actual category for this product
+                const catSlug = (product.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
+                const realCat = state.categories.find(c => c.slug === catSlug);
+                if (realCat) {
+                    dispCategory = realCat;
+                }
+            }
 
+            // 5. Render
             return `
             <article class="product-card" id="card-${product.id}" data-variants='${JSON.stringify(sortedVariants).replace(/'/g, "&apos;")}' data-current-idx="0">
                 
@@ -593,7 +594,7 @@
                 <!-- Info Area -->
                 <div class="card-info">
                      <!-- 1. Sub-Brand (Top) -->
-                     ${category.sub_brand ? `<span class="card-sub-brand">${category.sub_brand}</span>` : ''}
+                     ${dispCategory.sub_brand ? `<span class="card-sub-brand">${dispCategory.sub_brand}</span>` : ''}
 
                      <!-- 2. English Title -->
                     <h3 class="product-title" onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
@@ -1768,9 +1769,15 @@
             // 1. Home Link (Wrapped for hiding on mobile)
             let html = `<div class="smart-breadcrumbs">
                 <span class="sb-desktop-root">
-                    <a href="/" class="sb-home-link"><i class="fas fa-home"></i><span class="desktop-text"> Home</span></a>
+                    <a href="/" class="sb-home-link">
+                        <i class="fas fa-home sb-mobile-icon"></i>
+                        <span class="sb-desktop-text">Home</span>
+                    </a>
                     <span class="sep">/</span>
-                    <a href="/sales/all-products" class="sb-all-link" onclick="event.preventDefault(); window.navigateToCategory('all-products')"><span class="mobile-text">All</span><span class="desktop-text"> Products</span></a>
+                    <a href="/sales/all-products" class="sb-all-link" onclick="event.preventDefault(); window.navigateToCategory('all-products')">
+                        <span class="sb-mobile-text">All</span>
+                        <span class="sb-desktop-text">All Products</span>
+                    </a>
                     <span class="sep">/</span>
                 </span>`;
 
@@ -1778,13 +1785,6 @@
             const categories = state.categories;
             const activeCat = categories.find(c => c.slug === activeCategorySlug);
             const label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'Select Category' : 'Select Category');
-
-            // No leading separator here because it's inside sb-desktop-root if needed, 
-            // OR we need one if we are on mobile? 
-            // On mobile: [Hidden] [Cat Select]
-            // On Desktop: Home / All / [Cat Select]
-            // So the separator after "All Products" is inside sb-desktop-root.
-            // We do NOT need another separator before the select.
 
             html += `
                 <div class="sb-select-wrapper">

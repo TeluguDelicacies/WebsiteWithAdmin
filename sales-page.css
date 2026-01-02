@@ -2344,38 +2344,42 @@ textarea {
 
     .sb-desktop-root {
         display: inline;
-        /* Always visible but compacted */
     }
 
     /* Compact Text Logic */
-    .sb-desktop-root .desktop-text {
+    .sb-desktop-text {
         display: none;
     }
 
-    .sb-desktop-root .mobile-text {
+    .sb-mobile-text {
         display: inline;
+    }
+
+    .sb-mobile-icon {
+        display: inline-block;
     }
 
     .smart-breadcrumbs .current {
         max-width: none;
-        /* Allow full name to show */
         overflow: visible;
         text-overflow: clip;
-        /* Or keep ellipsis if it overflows screen, but requested "not cut off" */
     }
 }
 
-/* Default Desktop State (implied, but let's be explicit if needed) */
-.mobile-text {
+/* Default Desktop State */
+.sb-mobile-text,
+.sb-mobile-icon {
     display: none;
 }
 
 @media (min-width: 769px) {
-    .mobile-text {
+
+    .sb-mobile-text,
+    .sb-mobile-icon {
         display: none;
     }
 
-    .desktop-text {
+    .sb-desktop-text {
         display: inline;
     }
 }
