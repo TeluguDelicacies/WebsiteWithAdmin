@@ -337,58 +337,64 @@ textarea {
 
 /* ========================================
    4. Product View - STRICT LAYOUT RATIOS
+   Using CSS Grid for Desktop, Flexbox for Mobile
 ======================================== */
 
 /* Mobile: Stacked layout (default) */
 .grid-layout {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 95% !important;
-    margin: 0 auto !important;
+    display: flex;
+    flex-direction: column;
+    width: 95%;
+    margin: 0 auto;
     gap: 20px;
 }
 
-/* Desktop: 78% / 20% split */
+/* Desktop: CSS Grid with 78% / 20% split */
 @media (min-width: 1024px) {
     .grid-layout {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        justify-content: space-between !important;
-        width: 95vw !important;
-        max-width: 1600px !important;
-        margin: 0 auto !important;
-        gap: 2%;
+        display: grid !important;
+        grid-template-areas:
+            "bread bread"
+            "main  side"
+            "recent recent";
+        grid-template-columns: 78% 20%;
+        grid-template-rows: auto 1fr auto;
+        gap: 15px 2%;
+        width: 95vw;
+        max-width: 1600px;
+        margin: 0 auto;
     }
 
-    /* Main Product Card (Left) - 78% */
-    .grid-layout>.main-product-area,
-    .grid-layout>article.main-product-area {
-        flex: 0 0 78% !important;
-        max-width: 78% !important;
-        width: 78% !important;
+    /* Breadcrumbs - Full width row */
+    .breadcrumb-section {
+        grid-area: bread;
     }
 
-    /* Sidebar (Right) - 20% */
-    .grid-layout>.sidebar,
-    .grid-layout>aside.sidebar {
-        flex: 0 0 20% !important;
-        max-width: 20% !important;
-        width: 20% !important;
+    /* Main Product Card - Left 78% */
+    .main-product-area {
+        grid-area: main;
+    }
+
+    /* Sidebar - Right 20% */
+    .sidebar {
+        grid-area: side;
+    }
+
+    /* Recent Section - Full width below */
+    .recent-section {
+        grid-area: recent;
     }
 }
 
-/* Mobile: Full width */
+/* Mobile: Full width stacking */
 @media (max-width: 1023px) {
     .grid-layout>.main-product-area {
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100%;
         margin-bottom: 20px;
     }
 
     .grid-layout>.sidebar {
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100%;
     }
 
     /* Mobile Nav Row - ONLY visible on mobile */
@@ -880,21 +886,21 @@ textarea {
     cursor: pointer;
     transition: all 0.2s ease;
 
-    /* Inactive State: Light Beige */
-    background-color: #F5F5DC;
-    color: #333;
-    border: none;
+    /* Inactive State: Light Beige - with !important to override conflicts */
+    background-color: #F5F5DC !important;
+    color: #333 !important;
+    border: none !important;
 }
 
 .info-btn:hover {
-    background-color: #EEE8AA;
-    color: #000;
+    background-color: #EEE8AA !important;
+    color: #000 !important;
 }
 
 .info-btn.active {
     /* Active State: Brand Yellow */
-    background-color: #FFD700;
-    color: #000;
+    background-color: #FFD700 !important;
+    color: #000 !important;
     font-weight: 600;
 }
 
@@ -2153,18 +2159,17 @@ textarea {
    Applies to: Category, Product, Cart
 ======================================== */
 .quantity-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #FFF9C4;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: #FFF9C4 !important;
     /* Light Yellow */
-    border: 1px solid #FBC02D;
+    border: 1px solid #FBC02D !important;
     /* Dark Yellow Border */
-    border-radius: 50px;
+    border-radius: 50px !important;
     /* Pill Shape */
     padding: 4px 12px;
     min-width: 100px;
-    /* Consistent width */
     gap: 10px;
 }
 
