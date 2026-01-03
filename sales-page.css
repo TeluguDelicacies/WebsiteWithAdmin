@@ -1191,6 +1191,11 @@ textarea {
     }
 
     /* Compact the info content for desktop */
+    .info-tabs {
+        min-height: 135px;
+        /* Ensures space is reserved for tabs and content */
+    }
+
     .info-toggles {
         margin-bottom: 8px !important;
     }
@@ -1210,10 +1215,12 @@ textarea {
     }
 
     .info-content-block.active {
-        max-height: 110px;
+        height: 90px;
+        /* Standardized fixed height to prevent vertical jumping */
         padding: 5px 10px;
         margin-bottom: 0 !important;
-        /* Removed 15px margin-bottom */
+        overflow-y: auto;
+        /* Allow internal scroll if content is long */
     }
 }
 
