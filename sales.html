@@ -1653,9 +1653,12 @@
 
             if (newQty <= 0) {
                 // QUICK COMMERCE PATTERN: Immediate removal + Toast (No confirm dialog)
+                const removedId = item.id; // Store ID before removal
                 state.cart.splice(index, 1);
                 window.saveCart();
                 window.showToast('Item removed from cart', 'info');
+                // Refresh grid card to show ADD button
+                window.refreshGridCardUI(removedId);
             } else if (newQty > maxStock) {
                 window.showToast(`Max stock reached (${maxStock})`, 'error');
                 item.qty = maxStock;
@@ -1676,7 +1679,11 @@
             window.showToast('Item removed from cart', 'success');
 
             // Reset sidebar for this product if it exists
-            if (item) resetSidebarForProduct(item.id);
+            if (item) {
+                resetSidebarForProduct(item.id);
+                // Refresh grid card to show ADD button
+                window.refreshGridCardUI(item.id);
+            }
         };
 
         window.clearCart = function () {
