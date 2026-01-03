@@ -479,6 +479,23 @@ Responsive containers and layout components
   padding: var(--space-16) 0;
 }
 
+/* Section Title - Responsive Alignment */
+.section-title {
+  text-align: center;
+  /* Desktop: Centered */
+  margin-bottom: var(--space-6);
+  font-size: var(--font-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    text-align: left;
+    /* Mobile: Left aligned */
+  }
+}
+
 .section-sm {
   padding: var(--space-12) 0;
 }
