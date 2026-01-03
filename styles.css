@@ -2519,9 +2519,9 @@ body {
     /* Reduced for tighter spacing with breadcrumb */
     padding-bottom: 8px;
     /* Space between content and border */
-    min-height: 115px;
-    /* Increased for 110px image */
-    max-height: 115px;
+    min-height: 95px;
+    /* Back to 95px for 90px image */
+    max-height: 95px;
     align-items: center;
     /* Vertically center all items */
     overflow: visible;
@@ -2529,11 +2529,10 @@ body {
   }
 
   .category-header-simple img:not(.brand-logo-item) {
-    height: 110px;
-    /* Increased from 90px */
-    width: 110px;
-    min-width: 110px;
-    min-height: 110px;
+    height: 90px;
+    width: 90px;
+    min-width: 90px;
+    min-height: 90px;
     margin-left: 10px;
     padding: 0px;
     /* Logos fill even more */
@@ -5530,11 +5529,10 @@ UTILITY CLASSES
 @media (max-width: 768px) {
   .brand-logos-wrapper {
     /* Fixed size container */
-    width: 110px;
-    /* Match category logo size */
-    height: 110px;
-    min-width: 110px;
-    min-height: 110px;
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    min-height: 90px;
     margin-left: 10px;
     padding: 0;
     border-radius: 10px;
@@ -5551,9 +5549,9 @@ UTILITY CLASSES
   /* Mobile: Cycling logos - perfectly centered */
   .brand-logo-item {
     position: absolute;
-    width: 108px;
-    /* Fills container almost completely */
-    height: 108px;
+    width: 88px;
+    /* High fill within 90px container */
+    height: 88px;
     top: 0;
     left: 0;
     right: 0;
