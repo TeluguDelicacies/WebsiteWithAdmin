@@ -5523,7 +5523,6 @@ UTILITY CLASSES
 @media (max-width: 768px) {
   .brand-logos-wrapper {
     /* Fixed size container */
-    position: relative;
     width: 70px;
     height: 70px;
     min-width: 70px;
@@ -5533,31 +5532,25 @@ UTILITY CLASSES
     border-radius: 10px;
     top: -6px;
     /* Match category image offset */
+    position: relative;
 
-    /* Flexbox for centering */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
+    /* CSS Grid for stacking and centering */
+    display: grid;
+    place-items: center;
+    /* Centers content both ways */
     overflow: hidden;
   }
 
-  /* Mobile: Cycling logos - stacked and centered */
+  /* Mobile: All logos occupy same grid cell, stacked */
   .brand-logo-item {
-    position: absolute;
-    width: calc(100% - 12px);
-    /* 70px - 6px padding on each side */
-    height: calc(100% - 12px);
-    max-width: 58px;
-    max-height: 58px;
+    grid-row: 1;
+    grid-column: 1;
+    width: 54px;
+    height: 54px;
     object-fit: contain;
     opacity: 0;
     /* Hidden by default */
     transition: opacity 0.5s ease;
-    /* Flexbox centers this absolutely positioned element */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
   }
 
   .brand-logo-item.active {
