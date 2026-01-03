@@ -491,7 +491,7 @@ Responsive containers and layout components
 
 @media (max-width: 768px) {
   .section-title {
-    text-align: left;
+    text-align: left !important;
     /* Mobile: Left aligned */
   }
 }
@@ -3563,7 +3563,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   .quick-commerce-mode #product-categories .section-title {
     font-size: 1.5rem !important;
     padding-left: 0 !important;
-    text-align: center !important;
+    text-align: left !important;
   }
 }
 
