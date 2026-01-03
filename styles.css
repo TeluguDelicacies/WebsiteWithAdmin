@@ -5528,33 +5528,35 @@ UTILITY CLASSES
     min-width: 70px;
     min-height: 70px;
     margin-left: 10px;
-    padding: 6px;
+    padding: 0;
     border-radius: 10px;
-    top: -6px;
-    /* Match category image offset */
+    top: 0;
+    /* Centered relative to header */
     position: relative;
 
-    /* CSS Grid for stacking and centering */
-    display: grid;
-    place-items: center;
-    /* Centers content both ways */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
   }
 
-  /* Mobile: All logos occupy same grid cell, stacked */
+  /* Mobile: Cycling logos - perfectly centered */
   .brand-logo-item {
-    grid-row: 1;
-    grid-column: 1;
-    width: 54px;
-    height: 54px;
+    position: absolute;
+    width: 68px;
+    /* Logo fills container more (1px padding) */
+    height: 68px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
     object-fit: contain;
     opacity: 0;
-    /* Hidden by default */
     transition: opacity 0.5s ease;
   }
 
   .brand-logo-item.active {
     opacity: 1;
-    /* Only active one visible */
   }
 }
