@@ -2057,6 +2057,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch site settings first, then render
     await fetchSiteSettings();
 
+    // Fetch section visibility settings from dedicated table
+    await fetchWebsiteSections();
+
     // Fetch and render products (includes categories)
     fetchAndRenderProducts();
     fetchAndRenderTestimonials();
@@ -2182,16 +2185,39 @@ async function fetchSiteSettings() {
                 if (heroSection) heroSection.style.backgroundImage = `url('${data.hero_background_url}')`;
             }
 
-            // Why Us Section
-            if (data.show_why_us) {
-                const section = document.getElementById('why-us-section');
-                if (section) {
-                    section.style.display = 'block';
-                    fetchAndRenderWhyUs();
+            // Quick Layout from site_settings (kept for backward compatibility with hero styling)
+            // The actual section visibility is handled by fetchWebsiteSections()
+
+            // QUICK COMMERCE HERO STYLING
+            // This only handles the hero visual changes, not section visibility
+            if (data.show_quick_layout) {
+                const heroSection = document.querySelector('.hero');
+                const descContainer = document.getElementById('hero-description-container');
+
+                if (heroSection) {
+                    heroSection.classList.add('hero-quick-commerce');
+                    const bgUrl = data.quick_hero_image_url || './images/quick_commerce_hero.png';
+                    heroSection.style.backgroundImage = `url('${bgUrl}')`;
                 }
+
+                document.body.classList.add('quick-commerce-mode');
+
+                const titleEl = document.getElementById('hero-title');
+                const teluguSubtitleEl = document.getElementById('hero-telugu-subtitle');
+                const subtitleEl = document.getElementById('hero-subtitle');
+
+                if (titleEl) titleEl.innerText = data.quick_hero_title || "Groceries in Minutes";
+                if (teluguSubtitleEl) teluguSubtitleEl.innerText = data.quick_hero_telugu_subtitle || "అవసరమైన సరుకులు, నిమిషాల్లో మీ ఇంటికి";
+                if (subtitleEl) subtitleEl.innerText = data.quick_hero_subtitle || "Freshness delivered at the speed of life.";
+
+                if (descContainer) descContainer.style.display = 'none';
             } else {
-                const section = document.getElementById('why-us-section');
-                if (section) section.style.display = 'none';
+                const heroSection = document.querySelector('.hero');
+                const descContainer = document.getElementById('hero-description-container');
+
+                if (heroSection) heroSection.classList.remove('hero-quick-commerce');
+                document.body.classList.remove('quick-commerce-mode');
+                if (descContainer) descContainer.style.display = 'block';
             }
 
             // Contact Info
@@ -2242,44 +2268,6 @@ async function fetchSiteSettings() {
                 }
             }
 
-            // QUICK COMMERCE HERO LOGIC
-            // Overrides standard hero settings if Quick Layout is enabled
-            if (data.show_quick_layout) {
-                const heroSection = document.querySelector('.hero');
-                const descContainer = document.getElementById('hero-description-container');
-
-                if (heroSection) {
-                    heroSection.classList.add('hero-quick-commerce');
-                    // Use dynamic image from settings or fallback to default
-                    const bgUrl = data.quick_hero_image_url || './images/quick_commerce_hero.png';
-                    heroSection.style.backgroundImage = `url('${bgUrl}')`;
-                }
-
-                // Add global class for scoping other styles
-                document.body.classList.add('quick-commerce-mode');
-
-                // Update Text with Quick Commerce Copy (Dynamic or Default)
-                const titleEl = document.getElementById('hero-title');
-                const teluguSubtitleEl = document.getElementById('hero-telugu-subtitle');
-                const subtitleEl = document.getElementById('hero-subtitle');
-                // descContainer already declared above
-
-                if (titleEl) titleEl.innerText = data.quick_hero_title || "Groceries in Minutes";
-                if (teluguSubtitleEl) teluguSubtitleEl.innerText = data.quick_hero_telugu_subtitle || "అవసరమైన సరుకులు, నిమిషాల్లో మీ ఇంటికి";
-                if (subtitleEl) subtitleEl.innerText = data.quick_hero_subtitle || "Freshness delivered at the speed of life.";
-
-                // Hide the long paragraph description for a cleaner look
-                if (descContainer) descContainer.style.display = 'none';
-            } else {
-                // Ensure class is removed if toggled off (though page reload usually happens on meaningful state change)
-                const heroSection = document.querySelector('.hero');
-                const descContainer = document.getElementById('hero-description-container');
-
-                if (heroSection) heroSection.classList.remove('hero-quick-commerce');
-                document.body.classList.remove('quick-commerce-mode');
-                if (descContainer) descContainer.style.display = 'block';
-            }
-
         }
         // REMOVE PRELOADER
         const preloader = document.getElementById('preloader');
@@ -2299,6 +2287,91 @@ async function fetchSiteSettings() {
             setTimeout(() => preloader.remove(), 500);
         }
         return null;
+    }
+}
+
+/**
+ * Fetches section visibility settings from the dedicated website_sections table
+ * and applies them to show/hide the corresponding sections
+ * ALL DEFAULTS ARE TRUE (ON) - sections only hide when explicitly set to false
+ */
+async function fetchWebsiteSections() {
+    try {
+        const { data, error } = await supabase
+            .from('website_sections')
+            .select('*')
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.warn('Could not fetch website sections:', error);
+            return;
+        }
+
+        if (data) {
+            // Cache the section settings globally
+            window.currentSectionSettings = data;
+            console.log('Website sections fetched:', data);
+
+            // Hero Section
+            const heroSection = document.querySelector('.hero');
+            if (heroSection) {
+                heroSection.style.display = data.show_hero_section === false ? 'none' : '';
+            }
+
+            // Product Carousel
+            const showcaseSection = document.querySelector('.product-showcase');
+            if (showcaseSection) {
+                showcaseSection.style.display = data.show_product_carousel === false ? 'none' : '';
+            }
+
+            // Our Collections (Product Categories)
+            const collectionsSection = document.getElementById('product-categories');
+            if (collectionsSection) {
+                collectionsSection.style.display = data.show_collections === false ? 'none' : '';
+            }
+
+            // Quick Commerce Layout
+            if (data.show_quick_layout === true) {
+                document.body.classList.add('quick-commerce-mode');
+            } else {
+                document.body.classList.remove('quick-commerce-mode');
+            }
+
+            // Testimonials
+            const testimonialsSection = document.querySelector('.testimonials-showcase');
+            if (testimonialsSection) {
+                testimonialsSection.style.display = data.show_testimonials === false ? 'none' : '';
+            }
+
+            // Why Us Section
+            const whyUsSection = document.getElementById('why-us-section');
+            if (whyUsSection) {
+                if (data.show_why_us === false) {
+                    whyUsSection.style.display = 'none';
+                } else {
+                    whyUsSection.style.display = 'block';
+                    fetchAndRenderWhyUs();
+                }
+            }
+
+            // Get In Touch (Contact Form)
+            const contactSection = document.getElementById('contact');
+            if (contactSection) {
+                contactSection.style.display = data.show_contact_form === false ? 'none' : '';
+            }
+
+            // Footer
+            const footerSection = document.querySelector('.footer');
+            if (footerSection) {
+                footerSection.style.display = data.show_footer === false ? 'none' : '';
+            }
+
+            console.log('Website sections applied successfully');
+        } else {
+            console.log('No website_sections data found, using defaults (all visible)');
+        }
+    } catch (err) {
+        console.error('Error fetching website sections:', err);
     }
 }
 

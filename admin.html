@@ -517,6 +517,8 @@
                         <button id="viewTestimonialsBtn" class="admin-btn"
                             onclick="switchView('testimonials')">Testimonials</button>
                         <button id="viewWhyUsBtn" class="admin-btn" onclick="switchView('why-us')">Why Us</button>
+                        <button id="viewSectionsBtn" class="admin-btn"
+                            onclick="switchView('sections')">Website Sections</button>
                         <button id="viewSettingsBtn" class="admin-btn"
                             onclick="switchView('settings')">Settings</button>
                     </div>
@@ -651,6 +653,170 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Website Sections Control Panel -->
+            <div id="sectionsContainer" class="view-container" style="display: none;">
+                <h3
+                    style="margin-bottom: 20px; color: var(--color-primary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+                    <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Website Section Visibility
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 0.9rem;">
+                    Control which sections are visible on your main website. Toggle sections on/off to customize the layout.
+                </p>
+                
+                <div class="sections-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    
+                    <!-- Hero Section -->
+                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-image" style="font-size: 1.5rem; color: var(--color-primary-blue);"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Hero Section</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Main banner with title & description</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" style="margin: 0;">
+                                <input type="checkbox" id="secShowHero" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Carousel -->
+                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #fbbf24;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-stream" style="font-size: 1.5rem; color: #b45309;"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Product Carousel</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Scrolling product showcase ticker</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" style="margin: 0;">
+                                <input type="checkbox" id="secShowTicker" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Our Collections -->
+                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #60a5fa;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-th-large" style="font-size: 1.5rem; color: #1d4ed8;"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Our Collections</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Category cards with products</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" style="margin: 0;">
+                                <input type="checkbox" id="secShowCollections" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <!-- Quick Commerce sub-toggle -->
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #60a5fa;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-bolt" style="font-size: 0.9rem; color: #7c3aed;"></i>
+                                    <span style="font-size: 0.85rem; color: var(--text-primary);">Quick Commerce Layout</span>
+                                </div>
+                                <label class="toggle-switch-sm" style="margin: 0;">
+                                    <input type="checkbox" id="secShowQuickLayout">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <p style="margin: 8px 0 0 22px; font-size: 0.75rem; color: var(--text-secondary);">
+                                Enables grid layout for quick shopping. Changes header and collections display.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Testimonials -->
+                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #f472b6;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-quote-right" style="font-size: 1.5rem; color: #be185d;"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Testimonials Carousel</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Customer reviews showcase</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" style="margin: 0;">
+                                <input type="checkbox" id="secShowTestimonials" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Why Us -->
+                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #34d399;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-award" style="font-size: 1.5rem; color: #059669;"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Why Us</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Trust-building features section</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" style="margin: 0;">
+                                <input type="checkbox" id="secShowWhyUs">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Get In Touch -->
+                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #818cf8;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-envelope-open-text" style="font-size: 1.5rem; color: #4f46e5;"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Get In Touch</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Contact form section</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" style="margin: 0;">
+                                <input type="checkbox" id="secShowContact" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #f1f5f9, #cbd5e1); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #94a3b8;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-shoe-prints" style="font-size: 1.5rem; color: #475569;"></i>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Footer</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Contact info, address & map</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch" style="margin: 0;">
+                                <input type="checkbox" id="secShowFooter" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Save Button -->
+                <div style="margin-top: 30px; text-align: center;">
+                    <button type="button" onclick="saveSectionSettings()" class="submit-btn" style="padding: 12px 40px;">
+                        <i class="fas fa-save" style="margin-right: 8px;"></i>Save Section Settings
+                    </button>
+                </div>
+                
+                <!-- Info Note -->
+                <div style="margin-top: 20px; padding: 15px; background: #fffbeb; border: 1px solid #fbbf24; border-radius: var(--radius-md);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #92400e;">
+                        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                        <strong>Note:</strong> Header is always visible. Quick Commerce Layout changes both the Header and Our Collections display style.
+                    </p>
+                </div>
+            </div>
             <!-- Settings Section -->
             <div id="settingsContainer" class="view-container" style="display: none;">
                 <form id="settingsForm">
@@ -717,23 +883,6 @@
                         <div class="form-group"
                             style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
                             <label class="toggle-switch-sm" style="margin-bottom: 0;">
-                                <input type="checkbox" id="setShowTicker">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <label for="setShowTicker" style="margin: 0; cursor: pointer;">Show Product Carousel</label>
-                        </div>
-                        <div class="form-group"
-                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
-                            <label class="toggle-switch-sm" style="margin-bottom: 0;">
-                                <input type="checkbox" id="setShowQuickLayout">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <label for="setShowQuickLayout" style="margin: 0; cursor: pointer;">Quick Commerce
-                                Layout</label>
-                        </div>
-                        <div class="form-group"
-                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
-                            <label class="toggle-switch-sm" style="margin-bottom: 0;">
                                 <input type="checkbox" id="setShowMrp">
                                 <span class="toggle-slider"></span>
                             </label>
@@ -749,17 +898,11 @@
                                 style="margin: 0; color: #22c55e; font-weight: 600; cursor: pointer;">Enable Sales
                                 Mode</label>
                         </div>
-                        <div class="form-group"
-                            style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
-                            <label class="toggle-switch-sm" style="margin-bottom: 0;">
-                                <input type="checkbox" id="setShowWhyUs">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <label for="setShowWhyUs"
-                                style="margin: 0; color: #0077b6; font-weight: 600; cursor: pointer;">Show "Why
-                                Delicacies"</label>
-                        </div>
                     </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">
+                        <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
+                        Section visibility controls have been moved to the <strong>Website Sections</strong> tab.
+                    </p>
 
                     <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Quick Commerce Settings</h4>
                     <div class="form-row">

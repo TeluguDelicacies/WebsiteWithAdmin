@@ -36,6 +36,8 @@ const featureModal = document.getElementById('featureModal');
 const featureForm = document.getElementById('featureForm');
 const featureModalTitle = document.getElementById('featureModalTitle');
 const addBtnText = document.getElementById('addBtnText');
+const sectionsContainer = document.getElementById('sectionsContainer');
+const viewSectionsBtn = document.getElementById('viewSectionsBtn');
 
 // State
 let currentUser = null;
@@ -189,9 +191,10 @@ window.switchView = (view) => {
     categoriesTableContainer.style.display = 'none';
     whyUsTableContainer.style.display = 'none';
     settingsContainer.style.display = 'none';
+    if (sectionsContainer) sectionsContainer.style.display = 'none';
 
     // Reset buttons
-    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSettingsBtn].forEach(btn => {
+    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
         if (btn) btn.classList.remove('active');
     });
 
@@ -236,6 +239,13 @@ window.switchView = (view) => {
         addBtnText.textContent = 'Add Feature';
         document.getElementById('addBtn').style.display = 'inline-block';
         fetchWhyUsFeatures();
+    } else if (view === 'sections') {
+        if (sectionsContainer) sectionsContainer.style.display = 'block';
+        activeStyle(viewSectionsBtn);
+        const filterRow = document.getElementById('productFilterRow');
+        if (filterRow) filterRow.style.display = 'none';
+        document.getElementById('addBtn').style.display = 'none'; // No add btn for sections
+        fetchSectionSettings();
     } else if (view === 'settings') {
         settingsContainer.style.display = 'block';
         activeStyle(viewSettingsBtn);
@@ -525,11 +535,8 @@ async function fetchSettings() {
             document.getElementById('setQuickHeroSubtitle').value = data.quick_hero_subtitle || '';
             document.getElementById('setQuickHeroTelugu').value = data.quick_hero_telugu_subtitle || '';
             document.getElementById('setQuickHeroBg').value = data.quick_hero_image_url || '';
-            document.getElementById('setShowTicker').checked = data.show_product_ticker !== false; // Default true
-            document.getElementById('setShowQuickLayout').checked = data.show_quick_layout || false; // Default false
             document.getElementById('setShowMrp').checked = data.show_mrp !== false; // Default true
             document.getElementById('setSalesMode').checked = data.sales_mode_enabled || false; // Default false
-            document.getElementById('setShowWhyUs').checked = data.show_why_us || false;
 
             // Sales Page Settings
             document.getElementById('setAllProductsTagline').value = data.all_products_tagline || 'Featuring our premium brands';
@@ -575,11 +582,8 @@ if (siteSettingsForm) {
             quick_hero_telugu_subtitle: document.getElementById('setQuickHeroTelugu').value,
             quick_hero_image_url: document.getElementById('setQuickHeroBg').value,
 
-            show_product_ticker: document.getElementById('setShowTicker').checked,
-            show_quick_layout: document.getElementById('setShowQuickLayout').checked,
             show_mrp: document.getElementById('setShowMrp').checked,
             sales_mode_enabled: document.getElementById('setSalesMode').checked,
-            show_why_us: document.getElementById('setShowWhyUs').checked,
 
             // Sales Page Settings
             all_products_tagline: document.getElementById('setAllProductsTagline').value
@@ -1682,3 +1686,115 @@ if (featureForm) {
         }
     });
 }
+
+// ----------------------------------------------------
+// WEBSITE SECTIONS MANAGEMENT
+// Uses dedicated 'website_sections' table
+// ALL DEFAULTS ARE TRUE (ON)
+// ----------------------------------------------------
+
+async function fetchSectionSettings() {
+    try {
+        const { data, error } = await supabase.from('website_sections').select('*').single();
+        if (error && error.code !== 'PGRST116') throw error;
+
+        if (data) {
+            // Hero Section
+            const heroToggle = document.getElementById('secShowHero');
+            if (heroToggle) heroToggle.checked = data.show_hero_section !== false;
+
+            // Product Carousel
+            const tickerToggle = document.getElementById('secShowTicker');
+            if (tickerToggle) tickerToggle.checked = data.show_product_carousel !== false;
+
+            // Our Collections
+            const collectionsToggle = document.getElementById('secShowCollections');
+            if (collectionsToggle) collectionsToggle.checked = data.show_collections !== false;
+
+            // Quick Commerce Layout
+            const quickLayoutToggle = document.getElementById('secShowQuickLayout');
+            if (quickLayoutToggle) quickLayoutToggle.checked = data.show_quick_layout !== false;
+
+            // Testimonials
+            const testimonialsToggle = document.getElementById('secShowTestimonials');
+            if (testimonialsToggle) testimonialsToggle.checked = data.show_testimonials !== false;
+
+            // Why Us
+            const whyUsToggle = document.getElementById('secShowWhyUs');
+            if (whyUsToggle) whyUsToggle.checked = data.show_why_us !== false;
+
+            // Get In Touch (Contact Form)
+            const contactToggle = document.getElementById('secShowContact');
+            if (contactToggle) contactToggle.checked = data.show_contact_form !== false;
+
+            // Footer
+            const footerToggle = document.getElementById('secShowFooter');
+            if (footerToggle) footerToggle.checked = data.show_footer !== false;
+        } else {
+            // No data found - set all toggles to ON (default) with null checks
+            const heroEl = document.getElementById('secShowHero');
+            const tickerEl = document.getElementById('secShowTicker');
+            const collectionsEl = document.getElementById('secShowCollections');
+            const quickLayoutEl = document.getElementById('secShowQuickLayout');
+            const testimonialsEl = document.getElementById('secShowTestimonials');
+            const whyUsEl = document.getElementById('secShowWhyUs');
+            const contactEl = document.getElementById('secShowContact');
+            const footerEl = document.getElementById('secShowFooter');
+
+            if (heroEl) heroEl.checked = true;
+            if (tickerEl) tickerEl.checked = true;
+            if (collectionsEl) collectionsEl.checked = true;
+            if (quickLayoutEl) quickLayoutEl.checked = true;
+            if (testimonialsEl) testimonialsEl.checked = true;
+            if (whyUsEl) whyUsEl.checked = true;
+            if (contactEl) contactEl.checked = true;
+            if (footerEl) footerEl.checked = true;
+        }
+    } catch (e) {
+        console.error('Section settings fetch error:', e);
+    }
+}
+
+window.saveSectionSettings = async function () {
+    const btn = document.querySelector('#sectionsContainer .submit-btn');
+    const oldHtml = btn ? btn.innerHTML : 'Save Section Settings';
+
+    if (btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Saving...';
+        btn.disabled = true;
+    }
+
+    // All defaults are TRUE
+    const sectionData = {
+        show_hero_section: document.getElementById('secShowHero')?.checked ?? true,
+        show_product_carousel: document.getElementById('secShowTicker')?.checked ?? true,
+        show_collections: document.getElementById('secShowCollections')?.checked ?? true,
+        show_quick_layout: document.getElementById('secShowQuickLayout')?.checked ?? true,
+        show_testimonials: document.getElementById('secShowTestimonials')?.checked ?? true,
+        show_why_us: document.getElementById('secShowWhyUs')?.checked ?? true,
+        show_contact_form: document.getElementById('secShowContact')?.checked ?? true,
+        show_footer: document.getElementById('secShowFooter')?.checked ?? true
+    };
+
+    try {
+        // Check if section settings exist
+        const { data } = await supabase.from('website_sections').select('id').single();
+
+        if (data) {
+            const { error } = await supabase.from('website_sections').update(sectionData).eq('id', data.id);
+            if (error) throw error;
+        } else {
+            const { error } = await supabase.from('website_sections').insert([sectionData]);
+            if (error) throw error;
+        }
+        alert('Section settings saved successfully!');
+    } catch (e) {
+        console.error('Error saving section settings:', e);
+        alert('Error saving section settings: ' + e.message);
+    } finally {
+        if (btn) {
+            btn.innerHTML = oldHtml;
+            btn.disabled = false;
+        }
+    }
+};
