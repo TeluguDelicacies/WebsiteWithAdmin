@@ -5381,9 +5381,9 @@ UTILITY CLASSES
 @media (max-width: 768px) {
   .category-short-desc {
     /* Consistent width in both states */
-    width: 100%;
-    max-width: 100%;
-    min-width: 100%;
+    width: 120%;
+    max-width: 120%;
+    min-width: 120%;
     margin-left: 0;
     position: relative;
     cursor: pointer;
