@@ -1187,9 +1187,14 @@ textarea {
         margin-bottom: 8px !important;
     }
 
-    .toggle-btn {
+    .info-toggles .toggle-btn {
         padding: 8px 15px !important;
         font-size: 0.85rem !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        flex: 0 1 auto !important;
     }
 
     .info-content-block {
@@ -2122,19 +2127,23 @@ textarea {
     margin-bottom: 15px;
 }
 
-.toggle-btn {
+.info-toggles .toggle-btn {
     padding: 12px 20px;
-    background: transparent;
-    border: none;
-    font-size: 0.9rem;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-size: 0.9rem !important;
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
     position: relative;
     transition: color 0.2s ease;
+    flex: 0 1 auto !important;
+    box-shadow: none !important;
+    min-width: 0;
 }
 
-.toggle-btn::after {
+.info-toggles .toggle-btn::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -2146,24 +2155,25 @@ textarea {
     transition: background 0.2s ease;
 }
 
-.toggle-btn:hover {
-    color: var(--color-primary-blue);
+.info-toggles .toggle-btn:hover {
+    color: var(--color-primary-blue) !important;
 }
 
-.toggle-btn.active {
-    color: var(--color-primary-blue);
+.info-toggles .toggle-btn.active {
+    color: var(--color-primary-blue) !important;
+    background: transparent !important;
 }
 
-.toggle-btn.active::after {
+.info-toggles .toggle-btn.active::after {
     /* Thick yellow underline for active tab */
-    background: #FBC02D;
+    background: #FBC02D !important;
 }
 
 /* Mobile: Responsive tabs */
 @media (max-width: 767px) {
-    .toggle-btn {
-        padding: 10px 14px;
-        font-size: 0.85rem;
+    .info-toggles .toggle-btn {
+        padding: 10px 14px !important;
+        font-size: 0.85rem !important;
     }
 }
 
