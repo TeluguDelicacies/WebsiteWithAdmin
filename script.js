@@ -3452,10 +3452,16 @@ window.updateMainCartUI = function () {
     const totalQty = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
 
     const mainCartCount = document.getElementById('mainCartCount');
+    const mainCartBtn = document.getElementById('mainCartBtn');
     const mobileCartCount = document.getElementById('mobileCartCount');
     const mobileCartBtn = document.getElementById('mobileCartBtn');
     const mobileShareCatalogueBtn = document.getElementById('mobileShareCatalogueBtn');
     const clearBtn = document.getElementById('mainClearCartBtn');
+
+    // Desktop: Show cart button only when cart has items
+    if (mainCartBtn) {
+        mainCartBtn.style.display = totalQty > 0 ? 'flex' : 'none';
+    }
 
     if (mainCartCount) {
         mainCartCount.innerText = totalQty;
