@@ -918,7 +918,8 @@ textarea {
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+    transition: none;
+    /* Removed animation for instant switching */
     padding: 0 15px;
     margin-bottom: 0;
 }
@@ -1211,16 +1212,18 @@ textarea {
     }
 
     .info-content-block {
-        font-size: 0.88rem !important;
+        font-size: 0.78rem !important;
+        /* Smaller font to fit container without scroll */
+        line-height: 1.25 !important;
     }
 
     .info-content-block.active {
-        height: 90px;
-        /* Standardized fixed height to prevent vertical jumping */
+        height: 100px;
+        /* Standardized height */
         padding: 5px 10px;
         margin-bottom: 0 !important;
-        overflow-y: auto;
-        /* Allow internal scroll if content is long */
+        overflow: hidden;
+        /* Removed scroll wheel as requested */
     }
 }
 
@@ -1234,12 +1237,18 @@ textarea {
         /* Space for tabs + content on mobile */
     }
 
+    .info-content-block {
+        font-size: 0.78rem !important;
+        line-height: 1.25 !important;
+    }
+
     .info-content-block.active {
-        height: 100px;
-        /* Slightly more room for touch scrolling on mobile */
+        height: 110px;
+        /* Standardized height on mobile */
         padding: 8px;
         margin-bottom: 0 !important;
-        overflow-y: auto;
+        overflow: hidden;
+        /* Removed scroll wheel */
     }
 
     /* Keep prices in a row on mobile too, unless very tight */
