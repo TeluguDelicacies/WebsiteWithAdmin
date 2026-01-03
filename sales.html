@@ -1056,7 +1056,7 @@
             if (p.ingredients) {
                 sections.push({
                     id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `
-        <p>${p.ingredients}</p>`
+        <p style="text-align:justify;">${p.ingredients}</p>`
                 });
             }
 
@@ -1132,8 +1132,8 @@
                 // 3. If no items to show, return empty
                 if (items.length === 0) return '';
 
-                // Return as inline wrapped text with bullet separators
-                return `<p style="color:var(--text-secondary); margin:0;">${items.join(' <span style="color:#ccc;">•</span> ')}</p>`;
+                // Return as inline wrapped text with comma separators
+                return `<p style="color:var(--text-secondary); margin:0; text-align:justify;">${items.join(', ')}</p>`;
             };
 
 
@@ -1158,7 +1158,7 @@
             // Usage
             if (p.serving_suggestion) {
                 sections.push({
-                    id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p>
+                    id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p style="text-align:justify;">
             ${p.serving_suggestion}</p>`
                 });
             }
