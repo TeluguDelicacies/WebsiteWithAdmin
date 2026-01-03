@@ -5277,56 +5277,12 @@ UTILITY CLASSES
 */
 
 /* Single line truncation for short descriptions */
-.category-short-desc {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.9rem;
-  width: 100%;
-  display: block;
-  color: var(--text-secondary);
-  /* Ensure it looks like a description */
-  margin: 0;
-}
+
 
 /* Mobile specific adjustment if needed */
 @media (max-width: 768px) {}
 
-/* Short Description Styling - Deliberate Truncation (Global) */
-.category-short-desc {
-  display: block;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin: 0;
-  /* Optional: Add a subtle indication that there's more */
-  position: relative;
-  padding-right: 1.2em;
-  /* Make room for a potential icon or just spacing */
-}
 
-/* Add a small '...' icon or similar visual cue via pseudo-element to ensure it looks intentional */
-.category-short-desc::after {
-  content: '\f105';
-  /* FontAwesome Chevron Right */
-  font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8em;
-  color: var(--color-primary-blue);
-  opacity: 0.7;
-  display: none;
-}
-
-.category-short-desc.truncated::after {
-  display: block;
-}
 
 /* Mobile specific adjustment */
 @media (max-width: 768px) {
@@ -5405,4 +5361,76 @@ UTILITY CLASSES
 .custom-option:hover {
   background: #f0f9ff;
   color: #0ea5e9;
+}
+
+/* =========================================
+   CATEGORY SHORT DESCRIPTION - TRUNCATION & EXPANSION
+   Desktop: Full text, no truncation
+   Mobile: 1-line truncation with click-to-expand
+   ========================================= */
+
+/* Desktop: Show full text without truncation */
+.category-short-desc {
+  white-space: normal;
+  overflow: visible;
+  cursor: default;
+  transition: all 0.3s ease;
+}
+
+/* Mobile: Truncation with expansion toggle */
+@media (max-width: 768px) {
+  .category-short-desc {
+    /* Consistent width in both states */
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    margin-left: 0;
+    position: relative;
+    cursor: pointer;
+    box-sizing: border-box;
+
+    /* Truncation (Collapsed State - Default) */
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Padding for arrow indicator */
+    padding-right: 20px;
+  }
+
+  /* Arrow Indicator (Down chevron) */
+  .category-short-desc::after {
+    content: '\f107';
+    /* FontAwesome chevron-down */
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', 'FontAwesome';
+    font-weight: 900;
+    font-size: 0.7rem;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-primary-blue);
+    opacity: 0.7;
+    transition: transform 0.3s ease, opacity 0.2s ease;
+  }
+
+  /* Expanded State - Same width, just more lines */
+  .category-short-desc.is-expanded {
+    display: block;
+    /* Switch from -webkit-box to block for multi-line */
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+    white-space: normal;
+    /* Width stays at 80% - no change needed */
+  }
+
+  /* Rotate arrow when expanded */
+  .category-short-desc.is-expanded::after {
+    transform: translateY(-50%) rotate(180deg);
+    opacity: 1;
+  }
 }

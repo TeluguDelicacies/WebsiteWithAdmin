@@ -2553,7 +2553,7 @@ function renderProducts(products, categories) {
                     <div class="card-body">
                         <div style="margin-bottom: 0.5rem;">
                             <h3 class="card-title">${category.title}</h3>
-                            <p class="telugu-subtitle category-short-desc">${category.short_description || ''}</p>
+                            <p class="telugu-subtitle category-short-desc" onclick="this.classList.toggle('is-expanded')">${category.short_description || ''}</p>
                         </div>
                         
                         <p class="card-desc">${category.description || ''}</p>
@@ -2615,9 +2615,6 @@ function renderProducts(products, categories) {
     } else if (categoriesContainer) {
         categoriesContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">No categories found.</p>';
     }
-
-    // Ensure arrows are calculated for Normal Mode
-    setTimeout(updateCategoryTruncation, 100);
 }
 
 // Global Dropdown Toggler
@@ -2911,15 +2908,7 @@ async function fetchAndRenderTestimonials() {
 /**
  * Checks for text truncation in category cards and toggles arrow visibility
  */
-function updateCategoryTruncation() {
-    document.querySelectorAll('.category-short-desc').forEach(el => {
-        if (el.scrollWidth > el.clientWidth) {
-            el.classList.add('truncated');
-        } else {
-            el.classList.remove('truncated');
-        }
-    });
-}
+
 
 function renderQuickLayout(products, categories, container) {
     container.innerHTML = '';
@@ -2967,7 +2956,7 @@ function renderQuickLayout(products, categories, container) {
                     <div class="quick-header-text">
                         <h3>${cat.title}</h3>
                         ${cat.sub_brand ? `<p class="quick-category-tagline">${cat.sub_brand}</p>` : ''}
-                        <p class="quick-subtitle category-short-desc">${cat.short_description || ''}</p>
+                        <p class="quick-subtitle category-short-desc" onclick="this.classList.toggle('is-expanded')">${cat.short_description || ''}</p>
                     </div>
                 </div>
                 <!-- Independent View All Button Positioned via CSS -->
@@ -2994,7 +2983,6 @@ function renderQuickLayout(products, categories, container) {
         document.querySelectorAll('.product-scroll').forEach(el => enableDragScroll(el));
         // Testimonials
         document.querySelectorAll('.testimonial-container').forEach(el => enableDragScroll(el));
-        updateCategoryTruncation();
     }, 500);
 }
 
@@ -3132,10 +3120,7 @@ window.addEventListener('load', updateScrollSpeeds);
 window.addEventListener('resize', () => {
     // Debounce slightly
     clearTimeout(window.resizeTimer);
-    window.resizeTimer = setTimeout(() => {
-        updateScrollSpeeds();
-        updateCategoryTruncation();
-    }, 200);
+    window.resizeTimer = setTimeout(updateScrollSpeeds, 200);
 });
 
 
