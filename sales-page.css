@@ -1212,9 +1212,9 @@ textarea {
     }
 
     .info-content-block {
-        font-size: 0.78rem !important;
-        /* Smaller font to fit container without scroll */
-        line-height: 1.25 !important;
+        font-size: 1.05rem;
+        /* Larger default - JS will shrink to fit */
+        line-height: 1.35;
     }
 
     .info-content-block.active {
@@ -1238,8 +1238,9 @@ textarea {
     }
 
     .info-content-block {
-        font-size: 0.78rem !important;
-        line-height: 1.25 !important;
+        font-size: 1.05rem;
+        /* Larger default - JS will shrink to fit */
+        line-height: 1.35;
     }
 
     .info-content-block.active {
