@@ -428,6 +428,7 @@ async function loadCategoryData(id) {
         document.getElementById('catSubBrandLogo').value = cat.sub_brand_logo_url || '';
         document.getElementById('catSlug').value = cat.slug;
         document.getElementById('catTelugu').value = cat.telugu_title || '';
+        document.getElementById('catShortDesc').value = cat.short_description || '';
         document.getElementById('catDescription').value = cat.description || '';
         document.getElementById('catOrder').value = cat.display_order || 0;
         document.getElementById('catOrder').value = cat.display_order || 0;
@@ -550,6 +551,7 @@ if (categoryForm) {
             sub_brand_logo_url: document.getElementById('catSubBrandLogo').value,
             slug: document.getElementById('catSlug').value,
             telugu_title: document.getElementById('catTelugu').value,
+            short_description: document.getElementById('catShortDesc').value,
             description: document.getElementById('catDescription').value,
             display_order: parseInt(document.getElementById('catOrder').value || 0),
             display_order: parseInt(document.getElementById('catOrder').value || 0),

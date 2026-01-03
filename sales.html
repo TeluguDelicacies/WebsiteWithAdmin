@@ -548,7 +548,7 @@
                     <div class="category-header-simple" style="margin-bottom: 20px;">
                         <div>
                             <h1>${category.title}</h1>
-                            <p>${category.telugu_title || ''}</p>
+                            <p class="category-short-desc">${category.short_description || ''}</p>
                         </div>
                         ${category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : ''}
                     </div>
