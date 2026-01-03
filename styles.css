@@ -4600,9 +4600,28 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     height: 50px;
   }
 
+  /* Absolute Positioning for View All Button on Mobile to prevent layout shift */
   .quick-header-row {
+    position: relative;
+    /* Anchor */
     margin-bottom: 6px;
     gap: 10px;
+  }
+
+  /* Text Container needs to clear space for the button */
+  .quick-header-text {
+    padding-right: 86px;
+    /* 80px for button + 6px gap */
+    min-width: 0;
+    /* Enable truncation */
+  }
+
+  /* Position Action Button Top-Right */
+  .quick-header-action {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 5;
   }
 
   .quick-header-left {
@@ -4621,17 +4640,21 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     margin: 0 0 1px 0;
   }
 
+  /* Description Truncation */
   .quick-card .quick-subtitle {
     font-size: 0.8rem;
     margin: 0;
+    width: 100%;
+    /* Fill available space (respecting padding) */
   }
 
-  /* Compact View All Button for Header Row alignment */
+  /* Compact View All Button */
   .mobile-compact-btn {
     font-size: 0.75rem !important;
-    padding: 4px 8px !important;
+    padding: 6px 10px !important;
     background: rgba(14, 165, 233, 0.1);
     border-radius: 12px;
+    white-space: nowrap;
   }
 }
 
@@ -4764,17 +4787,33 @@ FINAL CONSOLIDATED CATEGORY CARD STYLES
 /* 1. Grid Container - ONLY for normal mode */
 body:not(.quick-commerce-mode) .master-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 380px));
-  /* FIXED width for centering */
-  gap: 2.5rem;
-  margin-top: 2.5rem;
+  /* 3 Columns Desktop */
+  grid-template-columns: repeat(3, 1fr);
+  width: 95%;
+  max-width: 1400px;
+  margin: 2.5rem auto 0;
+  gap: 2rem;
   align-items: start !important;
-  /* CRITICAL: Hug content height, no stretching */
   justify-content: center !important;
-  /* Center cards on page */
   padding-bottom: 4rem;
-  /* Buffer for dropdowns */
   overflow: visible !important;
+}
+
+/* Mobile Stack */
+@media (max-width: 992px) {
+  body:not(.quick-commerce-mode) .master-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  body:not(.quick-commerce-mode) .master-cards-grid {
+    grid-template-columns: 1fr;
+    width: 90%;
+  }
+}
+
+overflow: visible !important;
 }
 
 /* 2. Card Shell - ONLY for normal mode */
