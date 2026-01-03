@@ -3473,14 +3473,25 @@ window.updateMainCartUI = function () {
         mobileCartCount.style.display = totalQty > 0 ? 'flex' : 'none';
     }
 
-    // Mobile: Show cart button and hide share catalogue when cart has items
+    // Mobile: Toggle between cart and share catalogue in header
+    // Also toggle share catalogue in hamburger menu
+    const hamburgerShareCatalogueBtn = document.getElementById('hamburgerShareCatalogueBtn');
+
     if (mobileCartBtn && mobileShareCatalogueBtn) {
         if (totalQty > 0) {
+            // Cart has items: Show cart in header, Share Catalogue in hamburger
             mobileCartBtn.style.display = 'flex';
             mobileShareCatalogueBtn.style.display = 'none';
+            if (hamburgerShareCatalogueBtn) {
+                hamburgerShareCatalogueBtn.style.display = 'flex';
+            }
         } else {
+            // Cart is empty: Show Share Catalogue in header, hide it in hamburger
             mobileCartBtn.style.display = 'none';
             mobileShareCatalogueBtn.style.display = 'flex';
+            if (hamburgerShareCatalogueBtn) {
+                hamburgerShareCatalogueBtn.style.display = 'none';
+            }
         }
     }
 
