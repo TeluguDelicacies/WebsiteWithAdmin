@@ -2615,6 +2615,9 @@ function renderProducts(products, categories) {
     } else if (categoriesContainer) {
         categoriesContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">No categories found.</p>';
     }
+
+    // Ensure arrows are calculated for Normal Mode
+    setTimeout(updateCategoryTruncation, 100);
 }
 
 // Global Dropdown Toggler
@@ -2905,6 +2908,19 @@ async function fetchAndRenderTestimonials() {
 /**
  * Renders the Quick Commerce Layout (Unified Vertical List with Horizontal Scroll)
  */
+/**
+ * Checks for text truncation in category cards and toggles arrow visibility
+ */
+function updateCategoryTruncation() {
+    document.querySelectorAll('.category-short-desc').forEach(el => {
+        if (el.scrollWidth > el.clientWidth) {
+            el.classList.add('truncated');
+        } else {
+            el.classList.remove('truncated');
+        }
+    });
+}
+
 function renderQuickLayout(products, categories, container) {
     container.innerHTML = '';
     const showMrp = window.currentSiteSettings?.show_mrp !== false;
@@ -2978,6 +2994,7 @@ function renderQuickLayout(products, categories, container) {
         document.querySelectorAll('.product-scroll').forEach(el => enableDragScroll(el));
         // Testimonials
         document.querySelectorAll('.testimonial-container').forEach(el => enableDragScroll(el));
+        updateCategoryTruncation();
     }, 500);
 }
 
@@ -3115,7 +3132,10 @@ window.addEventListener('load', updateScrollSpeeds);
 window.addEventListener('resize', () => {
     // Debounce slightly
     clearTimeout(window.resizeTimer);
-    window.resizeTimer = setTimeout(updateScrollSpeeds, 200);
+    window.resizeTimer = setTimeout(() => {
+        updateScrollSpeeds();
+        updateCategoryTruncation();
+    }, 200);
 });
 
 

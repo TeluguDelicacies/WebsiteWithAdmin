@@ -5321,6 +5321,11 @@ UTILITY CLASSES
   font-size: 0.8em;
   color: var(--color-primary-blue);
   opacity: 0.7;
+  display: none;
+}
+
+.category-short-desc.truncated::after {
+  display: block;
 }
 
 /* Mobile specific adjustment */
