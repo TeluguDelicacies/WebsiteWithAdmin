@@ -1229,6 +1229,12 @@
             if (window.initSwipeNavigation) {
                 window.initSwipeNavigation();
             }
+
+            // Auto-activate default tab (preferring Nutrition if it exists)
+            setTimeout(() => {
+                const defaultBtn = document.getElementById('btn-nut') || (btnContainer ? btnContainer.querySelector('.toggle-btn') : null);
+                if (defaultBtn) defaultBtn.click();
+            }, 100);
         }
 
         // --- Logic: Data Helpers ---
