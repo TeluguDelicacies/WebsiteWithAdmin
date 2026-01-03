@@ -4662,27 +4662,27 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
 
   /* Larger, fixed-size sub-brand logo on mobile - consistent across all categories */
   .quick-sub-brand-container {
-    width: 75px;
-    height: 75px;
-    min-width: 75px;
-    min-height: 75px;
-    padding: 8px;
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    min-height: 90px;
+    padding: 2px;
     border-radius: 12px;
     flex-shrink: 0;
-    /* Never shrink */
-
-    /* Translucent white background for better visibility */
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
+    top: -6px;
+    /* Consistency with other category images */
   }
 
   .quick-sub-brand-placeholder {
-    width: 75px;
-    height: 75px;
-    min-width: 75px;
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
   }
 
   /* Reduced spacing - cut by half */
@@ -5536,8 +5536,8 @@ UTILITY CLASSES
     margin-left: 10px;
     padding: 0;
     border-radius: 10px;
-    top: 0;
-    /* Centered relative to header */
+    top: -6px;
+    /* Matching all other category headers */
     position: relative;
 
     display: flex;

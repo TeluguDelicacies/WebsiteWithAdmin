@@ -462,7 +462,7 @@
                 // Fallback to simple static header
                 const tagline = state.settings?.all_products_tagline || 'Explore our complete range of authentic delicacies.';
                 return `
-                <div class="category-header-simple" style="margin-bottom: 20px;">
+                <div class="category-header-simple">
                     <div>
                         <h1>All Products</h1>
                         <p>${tagline}</p>
@@ -473,7 +473,7 @@
             // HTML Structure
             const tagline = state.settings?.all_products_tagline || 'Featuring our premium brands';
             return `
-            <div class="category-header-simple brand-widget-container" style="margin-bottom: 20px;">
+            <div class="category-header-simple brand-widget-container">
                 <div>
                     <h1>All Products</h1>
                     <p>${tagline}</p>
@@ -545,7 +545,7 @@
 
                 <section class="category-grid-container" style="width:95%; max-width:95%; margin:0 auto; padding-bottom:50px;">
                     <!-- Header -->
-                    <div class="category-header-simple" style="margin-bottom: 20px;">
+                    <div class="category-header-simple">
                         <div>
                             <h1>${category.title}</h1>
                             <p class="category-short-desc">${category.short_description || ''}</p>
