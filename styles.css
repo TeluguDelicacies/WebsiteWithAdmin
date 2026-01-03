@@ -2457,15 +2457,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 24px auto;
-  /* Centered with vertical spacing */
+  margin: 8px auto;
+  /* Reduced vertical spacing */
   padding: 0;
   /* Handled by 90vw width logic */
   width: 90vw;
   /* Requirement: 90% Viewport Width */
   max-width: 1200px;
   border-bottom: 1px solid var(--border-light);
-  padding-bottom: 16px;
+  padding-bottom: 8px;
   box-sizing: border-box;
 }
 
@@ -5462,11 +5462,23 @@ UTILITY CLASSES
   transition: all 0.3s ease;
 }
 
-/* Mobile: Text wraps naturally at 60% width */
+/* Mobile: Text wraps naturally */
 @media (max-width: 768px) {
-  .category-short-desc {
+
+  /* Sales Page (inside category-header-simple): 60% width */
+  .category-header-simple .category-short-desc {
     width: 60%;
     max-width: 60%;
+    margin-left: 0;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  /* Main Page - Our Collections (inside quick-card): 130% width */
+  .quick-card .category-short-desc {
+    width: 130%;
+    max-width: 130%;
     margin-left: 0;
     box-sizing: border-box;
     white-space: normal;
@@ -5495,7 +5507,7 @@ UTILITY CLASSES
   border-radius: 12px;
   padding: 1px;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* box-shadow removed to prevent double card appearance */
   box-sizing: border-box;
 }
 
