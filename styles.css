@@ -2531,13 +2531,13 @@ body {
     min-width: 70px;
     min-height: 70px;
     margin-left: 10px;
-    padding: 4px;
+    padding: 1px;
     /* Less padding - logo fills more */
     border-radius: 10px;
     align-self: center;
     /* Stay centered in header */
     position: relative;
-    top: -4px;
+    top: -6px;
     /* Shift up slightly to stay above border */
   }
 
@@ -5441,11 +5441,11 @@ UTILITY CLASSES
   transition: all 0.3s ease;
 }
 
-/* Mobile: Text wraps naturally at 100% width */
+/* Mobile: Text wraps naturally at 60% width */
 @media (max-width: 768px) {
   .category-short-desc {
-    width: 100%;
-    max-width: 100%;
+    width: 60%;
+    max-width: 60%;
     margin-left: 0;
     box-sizing: border-box;
     white-space: normal;
