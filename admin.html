@@ -18,6 +18,78 @@
 
         body {
             background-color: var(--bg-secondary);
+
+            /* Toast Notifications */
+            #toast-container {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                pointer-events: none;
+            }
+
+            .toast {
+                background: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                min-width: 300px;
+                max-width: 400px;
+                transform: translateX(120%);
+                transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                border-left: 5px solid transparent;
+                pointer-events: auto;
+            }
+
+            .toast.show {
+                transform: translateX(0);
+            }
+
+            .toast-success {
+                border-left-color: #10b981;
+            }
+
+            .toast-error {
+                border-left-color: #ef4444;
+            }
+
+            .toast-info {
+                border-left-color: #3b82f6;
+            }
+
+            .toast-icon {
+                font-size: 1.25rem;
+            }
+
+            .toast-success .toast-icon {
+                color: #10b981;
+            }
+
+            .toast-error .toast-icon {
+                color: #ef4444;
+            }
+
+            .toast-info .toast-icon {
+                color: #3b82f6;
+            }
+
+            .toast-top-text {
+                font-weight: 600;
+                font-size: 0.95rem;
+                margin-bottom: 2px;
+            }
+
+            .toast-body {
+                font-size: 0.85rem;
+                color: #64748b;
+            }
+
         }
 
         .admin-container {
@@ -141,8 +213,79 @@
             white-space: nowrap;
             width: auto;
             /* explicit override */
-            height: auto;
+            height: 40px;
+            /* Fixed height for consistency */
             /* explicit override */
+        }
+
+        /* Unified Filter Control Styling */
+        .filter-trigger {
+            height: 40px;
+            /* Match admin-btn height */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            gap: 10px;
+            border-radius: 8px;
+            /* Match admin-btn radius or use 20px for pill */
+            border: 1px solid var(--border-medium);
+            background: white;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            min-width: 160px;
+        }
+
+        .filter-trigger:hover {
+            border-color: var(--color-primary-blue);
+            color: var(--color-primary-blue);
+            background: #f8fafc;
+        }
+
+        .filter-trigger .filter-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            color: var(--color-primary-blue);
+        }
+
+        /* Standardized Header Action Buttons (Match Filter/Trending Style) */
+        .header-action-btn {
+            height: 40px;
+            padding: 0 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: white;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            color: var(--color-primary-blue);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            min-width: 140px;
+            white-space: nowrap;
+        }
+
+        .header-action-btn:hover {
+            border-color: var(--color-primary-blue);
+            color: var(--color-primary-blue);
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        .header-action-btn i {
+            font-size: 1rem;
         }
 
         .admin-btn.active {
@@ -508,8 +651,9 @@
                         Admin Dashboard</h2>
 
                     <!-- CENTER: Navigation Tabs -->
+                    <!-- MODIFIED: flex-wrap: nowrap to force single line, gap reduced, added overflow handling if extremely small -->
                     <div class="view-toggle"
-                        style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; flex: 1; margin: 0 20px;">
+                        style="display: flex; gap: 5px; flex-wrap: nowrap; justify-content: center; flex: 1; margin: 0 10px; overflow-x: auto;">
                         <button id="viewProductsBtn" class="admin-btn active"
                             onclick="switchView('products')">Products</button>
                         <button id="viewCategoriesBtn" class="admin-btn"
@@ -517,26 +661,26 @@
                         <button id="viewTestimonialsBtn" class="admin-btn"
                             onclick="switchView('testimonials')">Testimonials</button>
                         <button id="viewWhyUsBtn" class="admin-btn" onclick="switchView('why-us')">Why Us</button>
-                        <button id="viewSectionsBtn" class="admin-btn"
-                            onclick="switchView('sections')">Website Sections</button>
+                        <button id="viewSectionsBtn" class="admin-btn" onclick="switchView('sections')">Website
+                            Sections</button>
                         <button id="viewSettingsBtn" class="admin-btn"
                             onclick="switchView('settings')">Settings</button>
                     </div>
 
                     <!-- RIGHT: Actions -->
                     <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
-                        <a href="index.html" class="admin-btn" title="Back to Website">
-                            <i class="fas fa-home"></i> Home
+                        <a href="index.html" class="admin-btn" title="Back to Website" style="padding: 8px 12px;">
+                            <i class="fas fa-home" style="font-size: 1.1rem;"></i>
                         </a>
-                        <button onclick="handleLogout()" class="admin-btn btn-danger" title="Logout">
-                            Logout
+                        <button onclick="handleLogout()" class="admin-btn btn-danger" title="Logout"
+                            style="padding: 8px 12px;">
+                            <i class="fas fa-sign-out-alt" style="font-size: 1.1rem;"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- ROW 2: Tab-Specific Actions -->
-                <div id="actionRow"
-                    style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div id="actionRow" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
 
                     <!-- LEFT: Product Filters (only for Products tab) -->
                     <div id="productFilterRow" style="display: none; align-items: center; gap: 10px;">
@@ -557,30 +701,38 @@
                             <input type="hidden" id="categoryFilter" value="all">
                         </div>
 
-                        <!-- Trending Toggle (iOS-Style Switch) -->
-                        <label for="trendingFilter"
-                            style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-weight: 500; color: var(--color-primary-blue); padding: 8px 16px; border-radius: 25px; border: 2px solid var(--color-primary-blue); background: white;">
-                            <label class="toggle-switch" style="margin-bottom: 0;">
-                                <input type="checkbox" id="trendingFilter">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            Trending Only
-                        </label>
+                        <!-- Trending Filter (Button Style) -->
+                        <div class="custom-filter-container">
+                            <button id="trendingTrigger" class="filter-trigger"
+                                onclick="const cb=document.getElementById('trendingFilter'); cb.checked=!cb.checked; renderProductList();"
+                                style="gap: 10px; padding-right: 10px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="filter-icon" style="color: #f59e0b; background: #fffbeb;"><i
+                                            class="fas fa-fire"></i></span>
+                                    <span>Trending Only</span>
+                                </div>
+                                <div class="toggle-switch-sm" style="margin: 0; pointer-events: none;">
+                                    <input type="checkbox" id="trendingFilter"
+                                        onclick="event.stopPropagation(); renderProductList();"
+                                        style="pointer-events: auto;">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- RIGHT: Action Buttons -->
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <!-- Save Order Button (Hidden by default, shown after drag) -->
-                        <button id="saveOrderBtn" class="submit-btn"
-                            style="display: none; width: auto; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; background: var(--color-success);"
+                    <div style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
+                        <!-- Save Order Button (Hidden by default) -->
+                        <button id="saveOrderBtn" class="header-action-btn"
+                            style="display: none; color: #059669; border-color: #059669;"
                             onclick="saveNewOrder('product')">
-                            Save Order
+                            <i class="fas fa-check"></i> Save Order
                         </button>
 
                         <!-- Add Button (Context-Aware) -->
-                        <button id="addBtn" onclick="handleAddClick()" class="submit-btn"
-                            style="width: auto; padding: 8px 20px; border-radius: 20px; display: flex; align-items: center; gap: 8px;">
-                            <span id="addBtnText">Add Product</span>
+                        <button id="addBtn" onclick="handleAddClick()" class="header-action-btn">
+                            <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
                         </button>
                     </div>
                 </div>
@@ -590,89 +742,71 @@
             <div id="productListContainer" class="view-container">
                 <!-- Products injected here -->
             </div>
-            <!-- Categories Table -->
-            <div id="categoriesTableContainer" class="view-container" style="display: none; overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr
-                            style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
-                            <th style="padding: 15px;">Image</th>
-                            <th style="padding: 15px;">Title</th>
-                            <th style="padding: 15px;">Slug</th>
-                            <th style="padding: 15px;">Order</th>
-                            <th style="padding: 15px; text-align: right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="categoryList">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px;">Loading categories...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Categories Container (Card Grid) -->
+            <div id="categoriesTableContainer" class="view-container" style="display: none;">
+                <div id="categoryList"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 30px;">Loading categories...</div>
+                </div>
             </div>
-            <!-- Testimonials Table -->
-            <div id="testimonialsTableContainer" class="view-container" style="display: none; overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr
-                            style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
-                            <th style="padding: 15px;">Name</th>
-                            <th style="padding: 15px;">Message</th>
-                            <th style="padding: 15px;">Location</th>
-                            <th style="padding: 15px;">Rating</th>
-                            <th style="padding: 15px; text-align: right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="testimonialList">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px;">Loading
-                                testimonials...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Testimonials Container (Card Grid) -->
+            <div id="testimonialsTableContainer" class="view-container" style="display: none;">
+                <div id="testimonialList"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 30px;">Loading testimonials...</div>
+                </div>
             </div>
-            <!-- Why Us Features Table -->
-            <div id="whyUsTableContainer" class="view-container" style="display: none; overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr
-                            style="text-align: left; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);">
-                            <th style="padding: 15px;">Icon/Image</th>
-                            <th style="padding: 15px;">Title</th>
-                            <th style="padding: 15px;">Description</th>
-                            <th style="padding: 15px;">Order</th>
-                            <th style="padding: 15px; text-align: right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="whyUsFeatureList">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px;">Loading features...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Why Us Features Container (Card Grid) -->
+            <div id="whyUsTableContainer" class="view-container" style="display: none;">
+                <div id="whyUsFeatureList"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 30px;">Loading features...</div>
+                </div>
             </div>
             <!-- Website Sections Control Panel -->
             <div id="sectionsContainer" class="view-container" style="display: none;">
-                <h3
-                    style="margin-bottom: 20px; color: var(--color-primary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
-                    <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Website Section Visibility
-                </h3>
-                <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 0.9rem;">
-                    Control which sections are visible on your main website. Toggle sections on/off to customize the layout.
-                </p>
-                
-                <div class="sections-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                    
+                <!-- REFACTORED HEADER: Title Left, Actions Right -->
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
+                    <div style="flex: 1; min-width: 300px;">
+                        <h3 style="margin: 0 0 10px 0; color: var(--color-primary-blue);">
+                            <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Website Section Visibility
+                        </h3>
+                        <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">
+                            Control which sections are visible on your main website. Toggle sections on/off to customize
+                            the layout.
+                            <br>
+                            <span style="color: #ef4444; font-weight: 600; display: inline-block; margin-top: 5px;">
+                                <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i>
+                                Note: Quick Commerce Layout changes both Header & Collections.
+                            </span>
+                        </p>
+                    </div>
+
+                    <div
+                        style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                        <button id="saveSettingsBtn" onclick="saveSectionSettings()" class="header-action-btn"
+                            style="min-width: auto; padding: 0 20px;">
+                            <i class="fas fa-save"></i> Save Section Settings
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sections-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+
                     <!-- Hero Section -->
-                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #f8fafc, #e2e8f0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                    <div class="section-toggle-card"
+                        style="background: linear-gradient(135deg, #f8fafc, #e2e8f0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <i class="fas fa-image" style="font-size: 1.5rem; color: var(--color-primary-blue);"></i>
+                                <i class="fas fa-image"
+                                    style="font-size: 1.5rem; color: var(--color-primary-blue);"></i>
                                 <div>
-                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Hero Section</h4>
-                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Main banner with title & description</p>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Hero Section
+                                    </h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Main
+                                        banner with title & description</p>
                                 </div>
                             </div>
                             <label class="toggle-switch" style="margin: 0;">
@@ -681,15 +815,18 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Product Carousel -->
-                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #fbbf24;">
+                    <div class="section-toggle-card"
+                        style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #fbbf24;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <i class="fas fa-stream" style="font-size: 1.5rem; color: #b45309;"></i>
                                 <div>
-                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Product Carousel</h4>
-                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Scrolling product showcase ticker</p>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Product Carousel
+                                    </h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                                        Scrolling product showcase ticker</p>
                                 </div>
                             </div>
                             <label class="toggle-switch" style="margin: 0;">
@@ -698,15 +835,18 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Our Collections -->
-                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #60a5fa;">
+                    <div class="section-toggle-card"
+                        style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #38bdf8;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <i class="fas fa-th-large" style="font-size: 1.5rem; color: #1d4ed8;"></i>
+                                <i class="fas fa-th-large" style="font-size: 1.5rem; color: #0284c7;"></i>
                                 <div>
-                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Our Collections</h4>
-                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Category cards with products</p>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Our Collections
+                                    </h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Main
+                                        product category cards</p>
                                 </div>
                             </div>
                             <label class="toggle-switch" style="margin: 0;">
@@ -714,32 +854,35 @@
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <!-- Quick Commerce sub-toggle -->
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #60a5fa;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <i class="fas fa-bolt" style="font-size: 0.9rem; color: #7c3aed;"></i>
-                                    <span style="font-size: 0.85rem; color: var(--text-primary);">Quick Commerce Layout</span>
+
+                        <!-- NESTED TOGGLE: Quick Commerce Layout -->
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                                <div>
+                                    <h5 style="margin: 0; color: #0369a1; font-size: 0.9rem;">Quick Commerce Layout</h5>
+                                    <p style="margin: 2px 0 0; font-size: 0.75rem; color: var(--text-secondary);">
+                                        Enables grid layout for quick shopping. Changes header and collections display.
+                                    </p>
                                 </div>
-                                <label class="toggle-switch-sm" style="margin: 0;">
+                                <label class="toggle-switch" style="margin: 0;">
                                     <input type="checkbox" id="secShowQuickLayout">
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>
-                            <p style="margin: 8px 0 0 22px; font-size: 0.75rem; color: var(--text-secondary);">
-                                Enables grid layout for quick shopping. Changes header and collections display.
-                            </p>
                         </div>
                     </div>
-                    
+
                     <!-- Testimonials -->
-                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #f472b6;">
+                    <div class="section-toggle-card"
+                        style="background: linear-gradient(135deg, #fce7f3, #fbcfe8); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #f472b6;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <i class="fas fa-quote-right" style="font-size: 1.5rem; color: #be185d;"></i>
                                 <div>
-                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Testimonials Carousel</h4>
-                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Customer reviews showcase</p>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Testimonials
+                                        Carousel</h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                                        Customer reviews showcase</p>
                                 </div>
                             </div>
                             <label class="toggle-switch" style="margin: 0;">
@@ -748,15 +891,17 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Why Us -->
-                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #34d399;">
+                    <div class="section-toggle-card"
+                        style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #34d399;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <i class="fas fa-award" style="font-size: 1.5rem; color: #059669;"></i>
                                 <div>
                                     <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Why Us</h4>
-                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Trust-building features section</p>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                                        Trust-building features section</p>
                                 </div>
                             </div>
                             <label class="toggle-switch" style="margin: 0;">
@@ -765,15 +910,18 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Get In Touch -->
-                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #818cf8;">
+                    <div class="section-toggle-card"
+                        style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #818cf8;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <i class="fas fa-envelope-open-text" style="font-size: 1.5rem; color: #4f46e5;"></i>
                                 <div>
-                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Get In Touch</h4>
-                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Contact form section</p>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Get In Touch
+                                    </h4>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Contact
+                                        form section</p>
                                 </div>
                             </div>
                             <label class="toggle-switch" style="margin: 0;">
@@ -782,15 +930,17 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- Footer -->
-                    <div class="section-toggle-card" style="background: linear-gradient(135deg, #f1f5f9, #cbd5e1); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #94a3b8;">
+                    <div class="section-toggle-card"
+                        style="background: linear-gradient(135deg, #f1f5f9, #cbd5e1); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #94a3b8;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <i class="fas fa-shoe-prints" style="font-size: 1.5rem; color: #475569;"></i>
                                 <div>
                                     <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Footer</h4>
-                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Contact info, address & map</p>
+                                    <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary);">Contact
+                                        info, address & map</p>
                                 </div>
                             </div>
                             <label class="toggle-switch" style="margin: 0;">
@@ -799,22 +949,7 @@
                             </label>
                         </div>
                     </div>
-                    
-                </div>
-                
-                <!-- Save Button -->
-                <div style="margin-top: 30px; text-align: center;">
-                    <button type="button" onclick="saveSectionSettings()" class="submit-btn" style="padding: 12px 40px;">
-                        <i class="fas fa-save" style="margin-right: 8px;"></i>Save Section Settings
-                    </button>
-                </div>
-                
-                <!-- Info Note -->
-                <div style="margin-top: 20px; padding: 15px; background: #fffbeb; border: 1px solid #fbbf24; border-radius: var(--radius-md);">
-                    <p style="margin: 0; font-size: 0.85rem; color: #92400e;">
-                        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
-                        <strong>Note:</strong> Header is always visible. Quick Commerce Layout changes both the Header and Our Collections display style.
-                    </p>
+
                 </div>
             </div>
             <!-- Settings Section -->
@@ -1280,6 +1415,8 @@
                 </form>
             </div>
         </div>
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
 </body>
 
 </html>

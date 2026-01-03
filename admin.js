@@ -43,8 +43,60 @@ const viewSectionsBtn = document.getElementById('viewSectionsBtn');
 let currentUser = null;
 let currentView = 'products'; // 'products' or 'testimonials'
 
+// Helper: Toast Notification
+window.showToast = (message, type = 'success') => {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let icon = 'fa-info-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+
+    toast.innerHTML = `
+        <i class="fas ${icon} toast-icon"></i>
+        <div>
+            <div class="toast-top-text">${type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info'}</div>
+            <div class="toast-body">${message}</div>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+};
+
 // Initialization
 document.addEventListener('DOMContentLoaded', async () => {
+    // Auto Logout Timer (30 mins)
+    let logoutTimer;
+    const resetLogoutTimer = () => {
+        if (logoutTimer) clearTimeout(logoutTimer);
+        // Only set timer if user is potentially logged in (we check dashboard visibility inside timeout for safety)
+        logoutTimer = setTimeout(() => {
+            if (document.getElementById('dashboardSection').style.display !== 'none') {
+                handleLogout();
+                showToast('Session timed out due to inactivity.', 'error');
+            }
+        }, 30 * 60 * 1000);
+    };
+
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt =>
+        document.addEventListener(evt, resetLogoutTimer)
+    );
+    resetLogoutTimer();
+
     // Check active session
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -139,7 +191,7 @@ async function handleLogin(e) {
         // Auth listener will handle UI switch
     } catch (error) {
         console.error('Login catch block:', error); // Debug log
-        alert('Login failed: ' + error.message);
+        showToast('Login failed: ' + error.message, 'error');
     }
 }
 
@@ -185,15 +237,26 @@ function showDashboard() {
 
 window.switchView = (view) => {
     currentView = view;
-    // Hide all first
+
+    // Elements
+    const filterRow = document.getElementById('productFilterRow');
+    const addBtn = document.getElementById('addBtn');
+    const saveOrderBtn = document.getElementById('saveOrderBtn');
+
+    // Hide all Containers
     if (productList) productList.style.display = 'none';
-    testimonialsTableContainer.style.display = 'none';
-    categoriesTableContainer.style.display = 'none';
-    whyUsTableContainer.style.display = 'none';
-    settingsContainer.style.display = 'none';
+    if (testimonialsTableContainer) testimonialsTableContainer.style.display = 'none'; // Name might change in refactor
+    if (categoriesTableContainer) categoriesTableContainer.style.display = 'none'; // Name might change
+    if (whyUsTableContainer) whyUsTableContainer.style.display = 'none'; // Name might change
+    if (settingsContainer) settingsContainer.style.display = 'none';
     if (sectionsContainer) sectionsContainer.style.display = 'none';
 
-    // Reset buttons
+    // Reset Header Actions (Default Hidden)
+    if (filterRow) filterRow.style.display = 'none';
+    if (addBtn) addBtn.style.display = 'none';
+    if (saveOrderBtn) saveOrderBtn.style.display = 'none';
+
+    // Reset buttons active state
     [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
         if (btn) btn.classList.remove('active');
     });
@@ -203,56 +266,58 @@ window.switchView = (view) => {
     }
 
     if (view === 'products') {
-        // Show product list
         if (productList) productList.style.display = 'grid';
         activeStyle(viewProductsBtn);
-        addBtnText.textContent = 'Add Product';
-        document.getElementById('addBtn').style.display = 'inline-block';
-        // Show Filter
-        const filterRow = document.getElementById('productFilterRow');
+
+        // Show Actions
         if (filterRow) filterRow.style.display = 'flex';
-        populateCategoryFilter(); // Populate dropdown options
+        if (addBtn) {
+            addBtn.style.display = 'inline-flex';
+            addBtnText.textContent = 'Add Product';
+        }
+
+        populateCategoryFilter();
         fetchProducts();
+
     } else if (view === 'testimonials') {
-        testimonialsTableContainer.style.display = 'block';
+        // Will update ID in next steps, assuming old ID for now or using variable
+        if (testimonialsTableContainer) testimonialsTableContainer.style.display = 'block';
         activeStyle(viewTestimonialsBtn);
-        // Hide Filter
-        const filterRow = document.getElementById('productFilterRow');
-        if (filterRow) filterRow.style.display = 'none';
-        addBtnText.textContent = 'Add Testimonial';
-        document.getElementById('addBtn').style.display = 'inline-block';
+
+        if (addBtn) {
+            addBtn.style.display = 'inline-flex';
+            addBtnText.textContent = 'Add Testimonial';
+        }
         fetchTestimonials();
+
     } else if (view === 'categories') {
-        categoriesTableContainer.style.display = 'block';
+        if (categoriesTableContainer) categoriesTableContainer.style.display = 'block';
         activeStyle(viewCategoriesBtn);
-        // Hide Filter
-        const filterRow = document.getElementById('productFilterRow');
-        if (filterRow) filterRow.style.display = 'none';
-        addBtnText.textContent = 'Add Category';
-        document.getElementById('addBtn').style.display = 'inline-block';
+
+        if (addBtn) {
+            addBtn.style.display = 'inline-flex';
+            addBtnText.textContent = 'Add Category';
+        }
         fetchCategories();
+
     } else if (view === 'why-us') {
-        whyUsTableContainer.style.display = 'block';
+        if (whyUsTableContainer) whyUsTableContainer.style.display = 'block';
         activeStyle(viewWhyUsBtn);
-        const filterRow = document.getElementById('productFilterRow');
-        if (filterRow) filterRow.style.display = 'none';
-        addBtnText.textContent = 'Add Feature';
-        document.getElementById('addBtn').style.display = 'inline-block';
+
+        if (addBtn) {
+            addBtn.style.display = 'inline-flex';
+            addBtnText.textContent = 'Add Feature';
+        }
         fetchWhyUsFeatures();
+
     } else if (view === 'sections') {
         if (sectionsContainer) sectionsContainer.style.display = 'block';
         activeStyle(viewSectionsBtn);
-        const filterRow = document.getElementById('productFilterRow');
-        if (filterRow) filterRow.style.display = 'none';
-        document.getElementById('addBtn').style.display = 'none'; // No add btn for sections
         fetchSectionSettings();
+
     } else if (view === 'settings') {
         settingsContainer.style.display = 'block';
         activeStyle(viewSettingsBtn);
-        // Hide Filter
-        const filterRow = document.getElementById('productFilterRow');
-        if (filterRow) filterRow.style.display = 'none';
-        document.getElementById('addBtn').style.display = 'none'; // No add btn for settings
         fetchSettings();
     }
 };
@@ -897,17 +962,15 @@ window.handleDrop = (e) => {
         const targetIndex = allItems.indexOf(dropTarget);
 
         if (srcIndex < targetIndex) {
-            dropTarget.after(dragSrcEl);
+            container.insertBefore(dragSrcEl, dropTarget.nextSibling);
         } else {
-            dropTarget.before(dragSrcEl);
+            container.insertBefore(dragSrcEl, dropTarget);
         }
 
-        const type = dragSrcEl.getAttribute('data-type') || (currentView === 'products' ? 'product' : (currentView === 'categories' ? 'category' : 'testimonial'));
-
-        // Update Visual Numbers Only
+        // Re-calculate orders visually
+        const type = dragSrcEl.dataset.type;
         updateVisualOrder(type, container);
 
-        // Show the save button
         const saveOrderBtn = document.getElementById('saveOrderBtn');
         if (saveOrderBtn) saveOrderBtn.style.display = 'inline-block';
     }
@@ -937,13 +1000,16 @@ function updateVisualOrder(type, container) {
         } else if (type === 'category') {
             const cells = item.querySelectorAll('td');
             if (cells[3]) cells[3].textContent = newOrder;
+        } else if (type === 'why-us') {
+            const cells = item.querySelectorAll('td');
+            if (cells[3]) cells[3].textContent = newOrder;
         }
     });
 }
 
 // Global Save Function for Reordering
 window.saveCurrentOrder = async (overrideType = null) => {
-    let container, type, tableName;
+    let container, type, tableName, orderField = 'display_order';
 
     // Determine context based on currentView or overrideType
     const view = overrideType || currentView;
@@ -960,6 +1026,11 @@ window.saveCurrentOrder = async (overrideType = null) => {
         container = document.getElementById('testimonialList');
         type = 'testimonial';
         tableName = 'testimonials';
+    } else if (view === 'why-us') {
+        container = document.getElementById('whyUsFeatureList');
+        type = 'why-us';
+        tableName = 'why_us_features';
+        orderField = 'order_index';
     } else {
         console.error('Unknown view for saving order:', view);
         return;
@@ -984,24 +1055,28 @@ window.saveCurrentOrder = async (overrideType = null) => {
 
         // Batch update in Supabase
         for (const update of updates) {
+            const updatePayload = {};
+            updatePayload[orderField] = update.display_order;
+
             const { error } = await supabase
                 .from(tableName)
-                .update({ display_order: update.display_order })
+                .update(updatePayload)
                 .eq('id', update.id);
             if (error) throw error;
         }
 
-        alert('Order saved successfully!');
-        if (btn) btn.style.display = 'none'; // Hide after success
+        showToast('Order saved successfully!', 'success');
+        if (btn) btn.style.display = 'none';
 
-        // Refresh the view
-        if (view === 'products' || view === 'product') fetchProducts();
-        else if (view === 'categories' || view === 'category') fetchCategories();
+        // Refresh Data
+        if (view === 'categories' || view === 'category') fetchCategories();
         else if (view === 'testimonials' || view === 'testimonial') fetchTestimonials();
+        else if (view === 'why-us') fetchWhyUsFeatures();
+        else if (view === 'products' || view === 'product') fetchProducts();
 
     } catch (e) {
         console.error('Error saving order:', e);
-        alert('Failed to save order: ' + e.message);
+        showToast('Failed to save order: ' + e.message, 'error');
     } finally {
         if (btn) {
             btn.innerHTML = oldHtml;
@@ -1137,7 +1212,7 @@ async function loadTestimonialData(id) {
         }
     } catch (e) {
         console.error('Error loading testimonial:', e);
-        alert('Could not load testimonial data.');
+        showToast('Could not load testimonial data.', 'error');
         closeTestimonialModal();
     }
 }
@@ -1248,7 +1323,7 @@ async function loadProductData(productId) {
 
     } catch (error) {
         console.error('Error loading product:', error);
-        alert('Error loading product data');
+        showToast('Error loading product data', 'error');
         closeProductModal();
     }
 }
@@ -1397,7 +1472,7 @@ productForm.addEventListener('submit', async (e) => {
 
         closeProductModal();
         fetchProducts();
-        alert('Product saved successfully!');
+        showToast('Product saved successfully!', 'success');
 
     } catch (error) {
         console.error('Save error:', error);
@@ -1448,10 +1523,10 @@ if (testimonialForm) {
 
             closeTestimonialModal();
             fetchTestimonials();
-            alert('Testimonial saved!');
+            showToast('Testimonial saved!', 'success');
 
         } catch (error) {
-            alert('Error saving testimonial: ' + error.message);
+            showToast('Error saving testimonial: ' + error.message, 'error');
         } finally {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
@@ -1606,14 +1681,32 @@ function renderWhyUsFeatures(features) {
     }
 
     whyUsFeatureList.innerHTML = features.map(f => `
-        <tr>
-            <td style="padding: 15px;"><img src="${f.image_url || PLACEHOLDER_IMAGE}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
+        <tr draggable="true"
+            data-id="${f.id}"
+            data-type="why-us"
+            class="draggable-row"
+            style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: move;"
+            ondragstart="handleDragStart(event)"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)"
+            ondragenter="handleDragEnter(event)"
+            ondragleave="handleDragEnter(event)">
+            <td style="padding: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>
+                    <img src="${f.image_url || PLACEHOLDER_IMAGE}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                </div>
+            </td>
             <td style="padding: 15px; font-weight: 600;">${f.title}</td>
             <td style="padding: 15px; font-size: 0.9rem;">${f.description || ''}</td>
             <td style="padding: 15px;">${f.order_index}</td>
             <td style="padding: 15px; text-align: right;">
-                <button onclick="editWhyUsFeature('${f.id}')" class="btn-sm" style="background: var(--bg-secondary); border: 1px solid var(--border-medium); margin-right: 5px;"><i class="fas fa-edit"></i></button>
-                <button onclick="deleteWhyUsFeature('${f.id}')" class="btn-sm" style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626;"><i class="fas fa-trash"></i></button>
+                <button onclick="editWhyUsFeature('${f.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem;" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteWhyUsFeature('${f.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem; color: var(--color-error); border-color: var(--color-error);" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
             </td>
         </tr>
     `).join('');
@@ -1645,7 +1738,7 @@ window.editWhyUsFeature = async (id) => {
         if (error) throw error;
         showWhyUsModal(data);
     } catch (e) {
-        alert('Error fetching feature: ' + e.message);
+        showToast('Error fetching feature: ' + e.message, 'error');
     }
 };
 
@@ -1656,7 +1749,7 @@ window.deleteWhyUsFeature = async (id) => {
         if (error) throw error;
         fetchWhyUsFeatures();
     } catch (e) {
-        alert('Error deleting feature: ' + e.message);
+        showToast('Error deleting feature: ' + e.message, 'error');
     }
 };
 
@@ -1682,7 +1775,7 @@ if (featureForm) {
             closeFeatureModal();
             fetchWhyUsFeatures();
         } catch (e) {
-            alert('Error saving feature: ' + e.message);
+            showToast('Error saving feature: ' + e.message, 'error');
         }
     });
 }
@@ -1756,7 +1849,7 @@ async function fetchSectionSettings() {
 }
 
 window.saveSectionSettings = async function () {
-    const btn = document.querySelector('#sectionsContainer .submit-btn');
+    const btn = document.getElementById('saveSettingsBtn');
     const oldHtml = btn ? btn.innerHTML : 'Save Section Settings';
 
     if (btn) {
@@ -1787,10 +1880,10 @@ window.saveSectionSettings = async function () {
             const { error } = await supabase.from('website_sections').insert([sectionData]);
             if (error) throw error;
         }
-        alert('Section settings saved successfully!');
+        showToast('Section settings saved successfully!', 'success');
     } catch (e) {
         console.error('Error saving section settings:', e);
-        alert('Error saving section settings: ' + e.message);
+        showToast('Error saving section settings: ' + e.message, 'error');
     } finally {
         if (btn) {
             btn.innerHTML = oldHtml;
