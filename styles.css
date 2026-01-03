@@ -4625,6 +4625,14 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     font-size: 0.8rem;
     margin: 0;
   }
+
+  /* Compact View All Button for Header Row alignment */
+  .mobile-compact-btn {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+    background: rgba(14, 165, 233, 0.1);
+    border-radius: 12px;
+  }
 }
 
 /* Smart Filter Styles */

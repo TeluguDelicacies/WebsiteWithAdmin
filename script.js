@@ -2916,13 +2916,13 @@ function renderQuickLayout(products, categories, container) {
                 <div class="quick-header-left">
                     ${subBrandLogoHTML}
                     <div class="quick-header-text">
-                        <h3>${cat.title}</h3>
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                             <h3 style="margin: 0;">${cat.title}</h3>
+                             <a href="/sales/${cat.slug}" onclick="handleLinkClick(event, '/sales/${cat.slug}')" class="view-all-link mobile-compact-btn">View All <i class="fas fa-chevron-right"></i></a>
+                        </div>
                         ${cat.sub_brand ? `<p class="quick-category-tagline">${cat.sub_brand}</p>` : ''}
                         <p class="quick-subtitle category-short-desc">${cat.short_description || ''}</p>
                     </div>
-                </div>
-                <div class="quick-header-action">
-                    <a href="/sales/${cat.slug}" onclick="handleLinkClick(event, '/sales/${cat.slug}')" class="view-all-link">View All <i class="fas fa-chevron-right"></i></a>
                 </div>
             </div>
             <div class="quick-product-scroll" id="scroll-${cat.slug}">
