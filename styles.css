@@ -2491,10 +2491,11 @@ body {
 
 /* Category Logo - Square Container Fix (excludes brand widget logos) */
 .category-header-simple img:not(.brand-logo-item) {
-  height: 85px;
-  width: 85px;
-  min-width: 85px;
-  min-height: 85px;
+  height: 105px;
+  /* Increased 20% from 85px */
+  width: 105px;
+  min-width: 105px;
+  min-height: 105px;
   object-fit: contain;
   margin-left: 20px;
   flex-shrink: 0;
@@ -2504,7 +2505,8 @@ body {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border-radius: 12px;
-  padding: 8px;
+  padding: 2px;
+  /* Reduced to fill more space */
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
@@ -2517,9 +2519,9 @@ body {
     /* Reduced for tighter spacing with breadcrumb */
     padding-bottom: 8px;
     /* Space between content and border */
-    min-height: 95px;
-    /* Increased for 90px image */
-    max-height: 95px;
+    min-height: 115px;
+    /* Increased for 110px image */
+    max-height: 115px;
     align-items: center;
     /* Vertically center all items */
     overflow: visible;
@@ -2527,13 +2529,14 @@ body {
   }
 
   .category-header-simple img:not(.brand-logo-item) {
-    height: 90px;
-    width: 90px;
-    min-width: 90px;
-    min-height: 90px;
+    height: 110px;
+    /* Increased from 90px */
+    width: 110px;
+    min-width: 110px;
+    min-height: 110px;
     margin-left: 10px;
-    padding: 1px;
-    /* Less padding - logo fills more */
+    padding: 0px;
+    /* Logos fill even more */
     border-radius: 10px;
     align-self: center;
     /* Stay centered in header */
@@ -5494,16 +5497,19 @@ UTILITY CLASSES
 .brand-logos-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   margin-left: 20px;
   flex-shrink: 0;
+  height: 105px;
+  /* Matches category header image height */
 
   /* White background rectangle styling */
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border-radius: 12px;
-  padding: 8px 12px;
+  padding: 4px 16px;
+  /* Optimized for rectangle look */
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
@@ -5511,8 +5517,9 @@ UTILITY CLASSES
 
 /* Desktop: Individual logos - all visible side-by-side */
 .brand-logo-item {
-  width: 60px;
-  height: 60px;
+  width: 95px;
+  /* Fills height better */
+  height: 95px;
   object-fit: contain;
   opacity: 1;
   /* All visible on desktop */
@@ -5523,10 +5530,11 @@ UTILITY CLASSES
 @media (max-width: 768px) {
   .brand-logos-wrapper {
     /* Fixed size container */
-    width: 90px;
-    height: 90px;
-    min-width: 90px;
-    min-height: 90px;
+    width: 110px;
+    /* Match category logo size */
+    height: 110px;
+    min-width: 110px;
+    min-height: 110px;
     margin-left: 10px;
     padding: 0;
     border-radius: 10px;
@@ -5543,9 +5551,9 @@ UTILITY CLASSES
   /* Mobile: Cycling logos - perfectly centered */
   .brand-logo-item {
     position: absolute;
-    width: 88px;
-    /* Logo fills container more (1px padding) */
-    height: 88px;
+    width: 108px;
+    /* Fills container almost completely */
+    height: 108px;
     top: 0;
     left: 0;
     right: 0;
