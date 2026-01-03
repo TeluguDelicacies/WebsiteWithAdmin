@@ -2457,7 +2457,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 8px auto;
+  margin: 4px auto;
   /* Reduced vertical spacing */
   padding: 0;
   /* Handled by 90vw width logic */
@@ -2489,8 +2489,8 @@ body {
   margin: 0;
 }
 
-/* Category Logo - Square Container Fix */
-.category-header-simple img {
+/* Category Logo - Square Container Fix (excludes brand widget logos) */
+.category-header-simple img:not(.brand-logo-item) {
   height: 85px;
   width: 85px;
   min-width: 85px;
@@ -2526,7 +2526,7 @@ body {
     /* Allow content to show */
   }
 
-  .category-header-simple img {
+  .category-header-simple img:not(.brand-logo-item) {
     height: 70px;
     width: 70px;
     min-width: 70px;
