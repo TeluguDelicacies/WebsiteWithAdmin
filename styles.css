@@ -5522,36 +5522,42 @@ UTILITY CLASSES
 /* Mobile Styles for Brand Widget */
 @media (max-width: 768px) {
   .brand-logos-wrapper {
-    /* Fixed size container for cycling */
+    /* Fixed size container */
     position: relative;
     width: 70px;
     height: 70px;
     min-width: 70px;
     min-height: 70px;
     margin-left: 10px;
-    padding: 8px;
-    /* Match category card padding */
+    padding: 6px;
     border-radius: 10px;
     top: -6px;
     /* Match category image offset */
 
-    /* Reset desktop flex */
-    display: block;
+    /* Flexbox for centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 0;
+    overflow: hidden;
   }
 
-  /* Mobile: Cycling logos with absolute positioning */
+  /* Mobile: Cycling logos - stacked and centered */
   .brand-logo-item {
     position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    width: auto;
-    height: auto;
+    width: calc(100% - 12px);
+    /* 70px - 6px padding on each side */
+    height: calc(100% - 12px);
+    max-width: 58px;
+    max-height: 58px;
+    object-fit: contain;
     opacity: 0;
     /* Hidden by default */
     transition: opacity 0.5s ease;
+    /* Flexbox centers this absolutely positioned element */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .brand-logo-item.active {
