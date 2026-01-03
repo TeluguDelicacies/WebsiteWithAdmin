@@ -3820,51 +3820,63 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 
 .cart-item-price {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
 }
 
-.cart-item-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
-
-.cart-item-actions .qty-controls {
+/* Cart Item Controls - Pill Style */
+.cart-item-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: var(--bg-secondary);
-  border-radius: 20px;
-  padding: 4px 8px;
+  gap: 0.5rem;
+  background: var(--color-gray-50);
+  border-radius: 6px;
+  padding: 2px;
+  border: 1px solid var(--color-gray-200);
+  width: fit-content;
 }
 
-.cart-item-actions .qty-controls button {
-  background: none;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1rem;
+.cart-item-controls button {
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  border: none;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--color-primary-blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: background 0.2s;
 }
 
-.cart-item-actions .qty-controls button:hover {
-  background: var(--color-gray-200);
+.cart-item-controls button:hover {
+  background: var(--color-gray-100);
 }
 
-.cart-item-actions .remove-btn {
+.cart-item-controls span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Remove Item Button */
+.remove-item-btn {
   background: none;
   border: none;
-  color: var(--color-error);
+  color: var(--color-gray-400);
   cursor: pointer;
-  padding: 4px;
-  font-size: 0.85rem;
+  padding: 8px;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.remove-item-btn:hover {
+  color: var(--color-error);
 }
 
 /* Cart Footer */

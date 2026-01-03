@@ -3513,17 +3513,15 @@ window.updateMainCartUI = function () {
                         <h4>${item.name || 'Product'}</h4>
                         ${variantLabel}
                         <div class="cart-item-price">₹${item.price || 0} x ${item.qty || 0} = ₹${itemTotal}</div>
-                    </div>
-                    <div class="cart-item-actions">
-                        <div class="qty-controls">
-                            <button onclick="window.updateMainCartQty(${index}, -1)">-</button>
+                        <div class="cart-item-controls">
+                            <button onclick="window.updateMainCartQty(${index}, -1)">−</button>
                             <span>${item.qty || 0}</span>
                             <button onclick="window.updateMainCartQty(${index}, 1)">+</button>
                         </div>
-                        <button class="remove-btn" onclick="window.removeMainCartItem(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
                     </div>
+                    <button class="remove-item-btn" onclick="window.removeMainCartItem(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             `;
         }).join('');
