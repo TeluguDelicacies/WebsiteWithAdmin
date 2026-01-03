@@ -2553,7 +2553,7 @@ function renderProducts(products, categories) {
                     <div class="card-body">
                         <div style="margin-bottom: 0.5rem;">
                             <h3 class="card-title">${category.title}</h3>
-                            <p class="telugu-subtitle category-short-desc" onclick="this.classList.toggle('is-expanded')">${category.short_description || ''}</p>
+                            <p class="telugu-subtitle category-short-desc">${category.short_description || ''}</p>
                         </div>
                         
                         <p class="card-desc">${category.description || ''}</p>
@@ -2956,7 +2956,7 @@ function renderQuickLayout(products, categories, container) {
                     <div class="quick-header-text">
                         <h3>${cat.title}</h3>
                         ${cat.sub_brand ? `<p class="quick-category-tagline">${cat.sub_brand}</p>` : ''}
-                        <p class="quick-subtitle category-short-desc" onclick="this.classList.toggle('is-expanded')">${cat.short_description || ''}</p>
+                        <p class="quick-subtitle category-short-desc">${cat.short_description || ''}</p>
                     </div>
                 </div>
                 <!-- Independent View All Button Positioned via CSS -->

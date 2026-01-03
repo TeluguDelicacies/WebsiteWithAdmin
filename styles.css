@@ -2491,17 +2491,54 @@ body {
 
 /* Category Logo - Square Container Fix */
 .category-header-simple img {
-  height: 80px;
-  /* Increased presence */
-  width: 80px;
-  /* Clean square */
+  height: 85px;
+  width: 85px;
+  min-width: 85px;
+  min-height: 85px;
   object-fit: contain;
-  /* Maintain aspect ratio inside square */
   margin-left: 20px;
   flex-shrink: 0;
-  /* Optional: background to see container bounds if needed, kept transparency */
+
+  /* Translucent white background for better visibility */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 12px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 
+/* Mobile Styles for Category Header */
+@media (max-width: 768px) {
+  .category-header-simple {
+    margin: 12px auto;
+    /* Reduced from 24px - cut by half */
+    padding-bottom: 10px;
+    /* Reduced spacing */
+  }
+
+  .category-header-simple img {
+    height: 75px;
+    width: 75px;
+    min-width: 75px;
+    min-height: 75px;
+    margin-left: 12px;
+    /* Tighter margin */
+    padding: 6px;
+    border-radius: 10px;
+  }
+
+  .category-header-simple h1 {
+    font-size: 1.4rem;
+    /* Slightly smaller on mobile */
+  }
+
+  .category-header-simple p {
+    font-size: 0.95rem;
+  }
+}
 
 /* --- Task 1: Fix Cart Drawer Item Styling --- */
 .cart-items {
@@ -5393,60 +5430,16 @@ UTILITY CLASSES
   transition: all 0.3s ease;
 }
 
-/* Mobile: Truncation with expansion toggle */
+/* Mobile: Text wraps naturally at 130% width - no truncation needed */
 @media (max-width: 768px) {
   .category-short-desc {
-    /* Consistent width in both states */
     width: 130%;
     max-width: 130%;
     min-width: 130%;
     margin-left: 0;
-    position: relative;
-    cursor: pointer;
     box-sizing: border-box;
-
-    /* Truncation (Collapsed State - Default: 2 lines) */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    /* Padding for arrow indicator */
-    padding-right: 20px;
-  }
-
-  /* Arrow Indicator (Down chevron) */
-  .category-short-desc::after {
-    content: '\f107';
-    /* FontAwesome chevron-down */
-    font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', 'FontAwesome';
-    font-weight: 900;
-    font-size: 0.7rem;
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--color-primary-blue);
-    opacity: 0.7;
-    transition: transform 0.3s ease, opacity 0.2s ease;
-  }
-
-  /* Expanded State - Same width, just more lines */
-  .category-short-desc.is-expanded {
-    display: block;
-    /* Switch from -webkit-box to block for multi-line */
-    -webkit-line-clamp: unset;
-    line-clamp: unset;
-    overflow: visible;
     white-space: normal;
-    /* Width stays at 80% - no change needed */
-  }
-
-  /* Rotate arrow when expanded */
-  .category-short-desc.is-expanded::after {
-    transform: translateY(-50%) rotate(180deg);
-    opacity: 1;
+    overflow: visible;
+    /* No arrow, no truncation, no expand - text just wraps */
   }
 }
