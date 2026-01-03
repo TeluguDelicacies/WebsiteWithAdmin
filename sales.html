@@ -1133,7 +1133,7 @@
                 if (items.length === 0) return '';
 
                 // Return as inline wrapped text with bullet separators
-                return `<p style="font-size:0.85rem; line-height:1.8; color:var(--text-secondary); margin:0;">${items.join(' <span style="color:#ccc;">•</span> ')}</p>`;
+                return `<p style="color:var(--text-secondary); margin:0;">${items.join(' <span style="color:#ccc;">•</span> ')}</p>`;
             };
 
 
@@ -1177,14 +1177,17 @@
                 // Add Toggle Logic
                 const adjustFontSize = (el) => {
                     if (!el) return;
-                    // Start large and shrink to fit
+
+                    // Start large
                     let size = 1.05;
                     el.style.fontSize = size + 'rem';
 
-                    // Simple loop to reduce font size until scrollheight <= offsetheight
-                    // We use a safety limit to prevent infinite loops
+                    // If it already fits, stop
+                    if (el.scrollHeight <= el.offsetHeight) return;
+
+                    // Otherwise shrink
                     let count = 0;
-                    while (el.scrollHeight > el.offsetHeight && size > 0.7 && count < 10) {
+                    while (el.scrollHeight > el.offsetHeight && size > 0.75 && count < 10) {
                         size -= 0.05;
                         el.style.fontSize = size + 'rem';
                         count++;
@@ -1207,8 +1210,11 @@
                     if (!wasActive) {
                         btn.classList.add('active');
                         contentDiv.classList.add('active');
-                        // Adjust font size on open
-                        adjustFontSize(contentDiv);
+                        // Use requestAnimationFrame to ensure the 'active' class (and its height) 
+                        // is fully applied before we measure scrollHeight
+                        requestAnimationFrame(() => {
+                            adjustFontSize(contentDiv);
+                        });
                     }
                 };
             }
@@ -1254,18 +1260,8 @@
                 const nutBtn = document.getElementById('btn-nut');
                 const firstBtn = btnContainer.querySelector('.toggle-btn');
                 const activeBtn = nutBtn || firstBtn;
-                if (activeBtn) {
-                    activeBtn.click();
-                    // Ensure font size is adjusted for the initial tab
-                    const targetId = activeBtn.dataset.target;
-                    const contentDiv = document.getElementById(targetId);
-                    if (contentDiv) {
-                        // The click handler will handle it, but we can call it explicitly too
-                        // after a short delay for rendering
-                        setTimeout(() => adjustFontSize(contentDiv), 50);
-                    }
-                }
-            }, 150);
+                if (activeBtn) activeBtn.click();
+            }, 100);
         }
 
         // --- Logic: Data Helpers ---
