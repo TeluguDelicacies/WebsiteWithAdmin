@@ -347,40 +347,61 @@ async function fetchCategories() {
 
 function renderCategoryList(categories) {
     if (!categories || categories.length === 0) {
-        categoryList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">No categories found.</td></tr>';
+        categoryList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px;">No categories found.</div>';
         return;
     }
 
     categoryList.innerHTML = categories.map(cat => `
-        <tr draggable="true" 
-            data-id="${cat.id}" 
-            data-type="category"
-            class="draggable-row"
-            style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: move;"
-            ondragstart="handleDragStart(event)"
-            ondragover="handleDragOver(event)"
-            ondrop="handleDrop(event)"
-            ondragenter="handleDragEnter(event)"
-            ondragleave="handleDragLeave(event)">
-            <td style="padding: 15px;">
-                 <div style="display: flex; align-items: center; gap: 10px;">
-                     <i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>
-                     <img src="${cat.image_url || PLACEHOLDER_IMAGE}" 
-                         alt="${cat.title}" 
-                         onerror="this.src=PLACEHOLDER_IMAGE"
-                         style="width: 48px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-light);">
+        <div class="admin-product-card draggable-item" 
+             draggable="true" 
+             data-id="${cat.id}" 
+             data-type="category"
+             data-order="${cat.display_order || 0}"
+             style="cursor: move;"
+             ondragstart="handleDragStart(event)"
+             ondragover="handleDragOver(event)"
+             ondrop="handleDrop(event)"
+             ondragenter="handleDragEnter(event)"
+             ondragleave="handleDragLeave(event)">
+
+             <div class="card-row" onclick="toggleCardDetails('${cat.id}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
+                  <!-- Grip -->
+                  <div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>
+                  
+                  <img src="${cat.image_url || PLACEHOLDER_IMAGE}" 
+                       onerror="this.src=PLACEHOLDER_IMAGE"
+                       style="margin-left: 15px;">
+
+                  <div class="row-info">
+                       <h3 ${!cat.is_visible ? 'style="opacity: 0.5;"' : ''}>
+                           ${cat.title} 
+                           ${!cat.is_visible ? '<i class="fas fa-eye-slash" title="Hidden" style="color: #64748b; margin-left: 5px;"></i>' : ''}
+                       </h3>
+                       <div class="tagline">/${cat.slug}</div>
+                       ${cat.sub_brand ? `<span class="category-badge">${cat.sub_brand}</span>` : ''}
+                  </div>
+
+                  <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
+                       ${cat.display_order}
+                  </div>
+
+                  <div class="row-actions" onclick="event.stopPropagation()">
+                      <button onclick="editCategory('${cat.id}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteCategory('${cat.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                  </div>
+
+                  <i class="fas fa-chevron-down" id="chevron-${cat.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+             </div>
+
+             <div class="card-expanded-details" id="details-${cat.id}">
+                 <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                     <div>
+                         <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Description</h4>
+                         <p style="margin: 0; color: var(--text-secondary);">${cat.description || 'No description found.'}</p>
+                     </div>
                  </div>
-            </td>
-            <td style="padding: 15px; font-weight: 600; ${!cat.is_visible ? 'opacity: 0.5;' : ''}">${cat.title} ${!cat.is_visible ? '<i class="fas fa-eye-slash" title="Hidden on Site" style="color: #64748b; margin-left: 5px;"></i>' : ''}</td>
-            <td style="padding: 15px;">${cat.slug}</td>
-            <td style="padding: 15px;">${cat.display_order}</td>
-            <td style="padding: 15px; text-align: right;">
-                <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                    <button onclick="editCategory('${cat.id}')" class="admin-btn" style="padding: 8px;" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button onclick="deleteCategory('${cat.id}')" class="admin-btn" style="padding: 8px; color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
-                </div>
-            </td>
-        </tr>
+             </div>
+        </div>
     `).join('');
 }
 
@@ -986,6 +1007,7 @@ window.handleDrop = (e) => {
     return false;
 };
 
+// Generic Visual Order Update for Cards
 function updateVisualOrder(type, container) {
     if (!container) return;
     const items = Array.from(container.children).filter(el => el.classList.contains('draggable-item') || el.classList.contains('draggable-row'));
@@ -993,16 +1015,28 @@ function updateVisualOrder(type, container) {
     items.forEach((item, index) => {
         const newOrder = index + 1;
 
-        if (type === 'product') {
+        // Generic approach: Find .display-order-cell
+        // Works for Products, Categories, Testimonials, Why Us (if we add the class)
+        const displayCell = item.querySelector('.display-order-cell');
+        if (displayCell) {
+            // Check if it has specific text formatting needs (like "Order: X")
+            // Simplest: Replace the number part if possible, or just replace text content content if it was just number.
+            // But my new cards have "Order: X".
+            // Regex replace or textContent?
+            if (displayCell.textContent.includes('Order:')) {
+                displayCell.textContent = `Order: ${newOrder}`;
+            } else {
+                displayCell.textContent = newOrder;
+            }
+        }
+
+        // Legacy table support (if any left, though we refactored all)
+        if (item.tagName === 'TR') {
+            const cells = item.querySelectorAll('td');
+            // Assume order is in 4th column (index 3) for table based views
+            if (cells[3]) cells[3].textContent = newOrder;
+        } else {
             item.setAttribute('data-order', newOrder);
-            const displayCell = item.querySelector('.display-order-cell');
-            if (displayCell) displayCell.textContent = newOrder;
-        } else if (type === 'category') {
-            const cells = item.querySelectorAll('td');
-            if (cells[3]) cells[3].textContent = newOrder;
-        } else if (type === 'why-us') {
-            const cells = item.querySelectorAll('td');
-            if (cells[3]) cells[3].textContent = newOrder;
         }
     });
 }
@@ -1114,41 +1148,56 @@ async function fetchTestimonials() {
 
 function renderTestimonialList(testimonials) {
     if (!testimonials || testimonials.length === 0) {
-        testimonialList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">No testimonials found.</td></tr>';
+        testimonialList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px;">No testimonials found.</div>';
         return;
     }
 
     testimonialList.innerHTML = testimonials.map(t => `
-        <tr draggable="true"
-            data-id="${t.id}"
-            data-type="testimonial"
-            class="draggable-row"
-            style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: move;"
-            ondragstart="handleDragStart(event)"
-            ondragover="handleDragOver(event)"
-            ondrop="handleDrop(event)"
-            ondragenter="handleDragEnter(event)"
-            ondragleave="handleDragLeave(event)">
-            <td style="padding: 15px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>
-                    <span style="font-weight: 600;">${t.name}</span>
-                </div>
-            </td>
-            <td style="padding: 15px; max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${t.message}</td>
-            <td style="padding: 15px;">${t.location || '-'}</td>
-            <td style="padding: 15px;">${'★'.repeat(t.rating)}</td>
-            <td style="padding: 15px; text-align: right;">
-                <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                    <button onclick="editTestimonial('${t.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem;" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="deleteTestimonial('${t.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem; color: var(--color-error); border-color: var(--color-error);" title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
+        <div class="admin-product-card draggable-item" 
+             draggable="true" 
+             data-id="${t.id}" 
+             data-type="testimonial"
+             data-order="${t.display_order || 0}"
+             style="cursor: move;"
+             ondragstart="handleDragStart(event)"
+             ondragover="handleDragOver(event)"
+             ondrop="handleDrop(event)"
+             ondragenter="handleDragEnter(event)"
+             ondragleave="handleDragLeave(event)">
+
+             <div class="card-row" onclick="toggleCardDetails('${t.id}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
+                  <!-- Grip -->
+                  <div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>
+
+                  <!-- Avatar -->
+                  <div style="margin-left: 15px; width: 60px; height: 60px; background: var(--bg-secondary); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--color-primary-blue); border: 1px solid var(--border-light); font-size: 1.5rem;">
+                        ${t.name.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div class="row-info">
+                       <h3>${t.name} <span style="font-size: 0.8rem; color: #f59e0b; margin-left: 8px;">${'★'.repeat(t.rating)}</span></h3>
+                       <div class="tagline">${t.location || 'No Location'}</div>
+                       <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">"${t.message}"</div>
+                  </div>
+
+                  <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
+                       ${t.display_order}
+                  </div>
+
+                  <div class="row-actions" onclick="event.stopPropagation()">
+                      <button onclick="editTestimonial('${t.id}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteTestimonial('${t.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                  </div>
+
+                  <i class="fas fa-chevron-down" id="chevron-${t.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+             </div>
+
+             <div class="card-expanded-details" id="details-${t.id}">
+                 <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Full Review</h4>
+                 <p style="margin: 0; color: var(--text-secondary); font-style: italic;">"${t.message}"</p>
+                 ${t.product_name ? `<p style="margin: 10px 0 0; font-size: 0.8rem; color: var(--text-tertiary);">Review for: <strong>${t.product_name}</strong></p>` : ''}
+             </div>
+        </div>
     `).join('');
 }
 
@@ -1681,34 +1730,46 @@ function renderWhyUsFeatures(features) {
     }
 
     whyUsFeatureList.innerHTML = features.map(f => `
-        <tr draggable="true"
-            data-id="${f.id}"
-            data-type="why-us"
-            class="draggable-row"
-            style="border-bottom: 1px solid var(--border-light); transition: background 0.2s; cursor: move;"
-            ondragstart="handleDragStart(event)"
-            ondragover="handleDragOver(event)"
-            ondrop="handleDrop(event)"
-            ondragenter="handleDragEnter(event)"
-            ondragleave="handleDragEnter(event)">
-            <td style="padding: 15px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-grip-vertical" style="color: #ccc; cursor: grab;"></i>
-                    <img src="${f.image_url || PLACEHOLDER_IMAGE}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                </div>
-            </td>
-            <td style="padding: 15px; font-weight: 600;">${f.title}</td>
-            <td style="padding: 15px; font-size: 0.9rem;">${f.description || ''}</td>
-            <td style="padding: 15px;">${f.order_index}</td>
-            <td style="padding: 15px; text-align: right;">
-                <button onclick="editWhyUsFeature('${f.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem;" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="deleteWhyUsFeature('${f.id}')" class="nav-btn" style="padding: 8px; font-size: 0.9rem; color: var(--color-error); border-color: var(--color-error);" title="Delete">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
+        <div class="admin-product-card draggable-item" 
+             draggable="true" 
+             data-id="${f.id}" 
+             data-type="why-us"
+             data-order="${f.order_index}"
+             style="cursor: move;"
+             ondragstart="handleDragStart(event)"
+             ondragover="handleDragOver(event)"
+             ondrop="handleDrop(event)"
+             ondragenter="handleDragEnter(event)"
+             ondragleave="handleDragLeave(event)">
+
+             <div class="card-row" onclick="toggleCardDetails('${f.id}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
+                  <!-- Grip -->
+                  <div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>
+
+                  <img src="${f.image_url || PLACEHOLDER_IMAGE}" style="margin-left: 15px;">
+
+                  <div class="row-info">
+                       <h3>${f.title}</h3>
+                       <div class="tagline" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${f.description || 'No description'}</div>
+                  </div>
+
+                  <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
+                       ${f.order_index}
+                  </div>
+
+                  <div class="row-actions" onclick="event.stopPropagation()">
+                      <button onclick="editWhyUsFeature('${f.id}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteWhyUsFeature('${f.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                  </div>
+
+                  <i class="fas fa-chevron-down" id="chevron-${f.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+             </div>
+
+             <div class="card-expanded-details" id="details-${f.id}">
+                 <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Description</h4>
+                 <p style="margin: 0; color: var(--text-secondary);">${f.description || ''}</p>
+             </div>
+        </div>
     `).join('');
 }
 
