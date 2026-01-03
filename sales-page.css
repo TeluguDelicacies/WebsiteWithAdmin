@@ -1229,6 +1229,19 @@ textarea {
         padding: 15px;
     }
 
+    .info-tabs {
+        min-height: 140px;
+        /* Space for tabs + content on mobile */
+    }
+
+    .info-content-block.active {
+        height: 100px;
+        /* Slightly more room for touch scrolling on mobile */
+        padding: 8px;
+        margin-bottom: 0 !important;
+        overflow-y: auto;
+    }
+
     /* Keep prices in a row on mobile too, unless very tight */
     .price-row {
         gap: 10px;

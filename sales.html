@@ -1230,11 +1230,14 @@
                 window.initSwipeNavigation();
             }
 
-            // Auto-activate default tab (preferring Nutrition if it exists)
+            // Auto-activate default tab (Nutrition if available, else first available)
             setTimeout(() => {
-                const defaultBtn = document.getElementById('btn-nut') || (btnContainer ? btnContainer.querySelector('.toggle-btn') : null);
-                if (defaultBtn) defaultBtn.click();
-            }, 100);
+                if (!btnContainer) return;
+                const nutBtn = document.getElementById('btn-nut');
+                const firstBtn = btnContainer.querySelector('.toggle-btn');
+                const activeBtn = nutBtn || firstBtn;
+                if (activeBtn) activeBtn.click();
+            }, 150);
         }
 
         // --- Logic: Data Helpers ---
