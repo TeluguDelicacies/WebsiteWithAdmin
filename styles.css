@@ -4813,8 +4813,7 @@ body:not(.quick-commerce-mode) .master-cards-grid {
   }
 }
 
-overflow: visible !important;
-}
+
 
 /* 2. Card Shell - ONLY for normal mode */
 body:not(.quick-commerce-mode) .master-card {
@@ -5295,4 +5294,75 @@ UTILITY CLASSES
   .category-short-desc {
     font-size: 0.85rem;
   }
+}
+
+/* Custom Dropdown Styles (Category Cards) */
+.custom-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.custom-dropdown-trigger {
+  width: 100%;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.custom-dropdown-trigger:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.custom-dropdown-trigger i {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.custom-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.custom-dropdown-menu.show {
+  display: block;
+  animation: slideDown 0.2s ease forwards;
+}
+
+.custom-option {
+  padding: 10px 16px;
+  cursor: pointer;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.1s;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.custom-option:last-child {
+  border-bottom: none;
+}
+
+.custom-option:hover {
+  background: #f0f9ff;
+  color: #0ea5e9;
 }

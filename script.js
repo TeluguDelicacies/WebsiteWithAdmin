@@ -2558,10 +2558,14 @@ function renderProducts(products, categories) {
                         
                         <p class="card-desc">${category.description || ''}</p>
                         <div class="dropdown-wrapper">
-                            <select class="product-select" id="select-${category.slug}">
-                                <option value="" disabled selected>Select Product</option>
-                            </select>
-                            <i class="fas fa-chevron-down dropdown-icon"></i>
+                            <div class="custom-dropdown-container">
+                                <button class="custom-dropdown-trigger" id="trigger-${category.slug}" onclick="toggleCardDropdown('${category.slug}')">
+                                    <span id="label-${category.slug}">Select Product</span> <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="custom-dropdown-menu" id="dropdown-${category.slug}">
+                                    <!-- Options populated via JS -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2575,38 +2579,61 @@ function renderProducts(products, categories) {
             const selectEl = card.querySelector(`#select-${category.slug}`);
             const viewContainer = card.querySelector(`#view-${category.slug}`);
 
-            if (selectEl) {
+            // Custom Dropdown Population
+            const dropdown = document.getElementById(`dropdown-${category.slug}`);
+            if (dropdown) {
                 catProducts.forEach(product => {
-                    const opt = document.createElement('option');
-                    opt.value = product.id;
-                    const telugu = product.product_name_telugu ? ` (${product.product_name_telugu})` : '';
-                    opt.textContent = `${product.product_name}${telugu}`;
-                    selectEl.appendChild(opt);
-                });
+                    const option = document.createElement('div');
+                    option.className = 'custom-option';
 
-                // Add Change Listener
-                selectEl.addEventListener('change', (e) => {
-                    const selectedId = e.target.value;
-                    const currentIndex = catProducts.findIndex(p => p.id === selectedId);
-                    const product = catProducts[currentIndex];
+                    const telugu = product.product_name_telugu ? ` <span style="font-size:0.85em; opacity:0.8;">(${product.product_name_telugu})</span>` : '';
+                    option.innerHTML = `<span>${product.product_name}</span>${telugu}`;
 
-                    if (product) {
+                    option.onclick = (e) => {
+                        // Close all dropdowns
+                        document.querySelectorAll('.custom-dropdown-menu').forEach(el => el.classList.remove('show'));
+
+                        // Update Trigger Label
+                        const label = document.getElementById(`label-${category.slug}`);
+                        if (label) label.textContent = product.product_name;
+
                         // SALES MODE CHECK
                         if (window.currentSiteSettings?.sales_mode_enabled) {
                             window.location.href = `/sales/${product.slug || product.id}`;
                             return;
                         }
 
-                        renderOverlayProduct(product, viewContainer, selectEl, card, catProducts, currentIndex);
-                    }
+                        // Trigger Render Interaction
+                        const currentIndex = catProducts.findIndex(p => p.id === product.id);
+                        renderOverlayProduct(product, viewContainer, null, card, catProducts, currentIndex);
+                    };
+
+                    dropdown.appendChild(option);
                 });
             }
         });
     } else if (categoriesContainer) {
         categoriesContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">No categories found.</p>';
     }
-
 }
+
+// Global Dropdown Toggler
+window.toggleCardDropdown = function (slug) {
+    // Close others
+    document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
+        if (el.id !== `dropdown-${slug}`) el.classList.remove('show');
+    });
+
+    const target = document.getElementById(`dropdown-${slug}`);
+    if (target) target.classList.toggle('show');
+};
+
+// Close on outside click is handled by document listener elsewhere if needed, or we add one:
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-dropdown-container')) {
+        document.querySelectorAll('.custom-dropdown-menu').forEach(el => el.classList.remove('show'));
+    }
+});
 
 function renderOverlayProduct(product, container, selectEl, cardElement, allProducts = [], currentIndex = -1) {
     const contentIngId = `content-ing-${product.id}`;
@@ -2656,9 +2683,10 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
     }
 
     // HTML Structure for BACK face
+    // HTML Structure for BACK face
     container.innerHTML = `
         <div class="back-btn-wrapper">
-             <button class="back-btn" onclick="closeOverlay('${cardElement.dataset.category}', '${selectEl.id}')">
+             <button class="back-btn" onclick="closeOverlay('${cardElement.dataset.category}')">
                 <i class="fas fa-arrow-left"></i> Back to ${cardElement.querySelector('.card-title').innerText}
             </button>
         </div>
@@ -2719,13 +2747,18 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
 }
 
 // Function to close overlay
-window.closeOverlay = function (category, selectId) {
+window.closeOverlay = function (category) {
+    // Note: 'category' here is actually the slug
+    // We should probably pass the slug directly or ensure dataset.category is the slug
+    // Looking at renderProducts: card.dataset.category = category.slug
+    // So 'category' arg IS the slug. Use it to find ID.
+
     const card = document.querySelector(`.master-card[data-category="${category}"]`);
     if (card) {
         card.classList.remove('show-product');
-        // Reset dropdown
-        const select = document.getElementById(selectId);
-        if (select) select.value = "";
+        // Reset dropdown label
+        const label = document.getElementById(`label-${category}`);
+        if (label) label.textContent = "Select Product";
     }
 };
 
