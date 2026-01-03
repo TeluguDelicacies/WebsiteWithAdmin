@@ -3417,3 +3417,157 @@ window.navigateNeighbor = async function (currentId, categorySlug, direction) {
         }
     }
 };
+
+/*
+========================================
+MAIN PAGE CART FUNCTIONALITY
+Cart drawer for main index page - syncs with sales page cart
+========================================
+*/
+
+// Toggle Main Cart Drawer
+window.toggleMainCartDrawer = function () {
+    const drawer = document.getElementById('mainCartDrawer');
+    const overlay = document.getElementById('mainCartOverlay');
+    if (!drawer || !overlay) return;
+
+    const isOpen = drawer.classList.contains('open');
+    if (isOpen) {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    } else {
+        window.updateMainCartUI(); // Refresh before showing
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+// Update Main Cart UI from localStorage
+window.updateMainCartUI = function () {
+    const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+
+    // Update Badges
+    const totalQty = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+
+    const mainCartCount = document.getElementById('mainCartCount');
+    const mobileCartCount = document.getElementById('mobileCartCount');
+    const mobileCartBtn = document.getElementById('mobileCartBtn');
+    const mobileShareCatalogueBtn = document.getElementById('mobileShareCatalogueBtn');
+    const clearBtn = document.getElementById('mainClearCartBtn');
+
+    if (mainCartCount) {
+        mainCartCount.innerText = totalQty;
+        mainCartCount.style.display = totalQty > 0 ? 'flex' : 'none';
+    }
+
+    if (mobileCartCount) {
+        mobileCartCount.innerText = totalQty;
+        mobileCartCount.style.display = totalQty > 0 ? 'flex' : 'none';
+    }
+
+    // Mobile: Show cart button and hide share catalogue when cart has items
+    if (mobileCartBtn && mobileShareCatalogueBtn) {
+        if (totalQty > 0) {
+            mobileCartBtn.style.display = 'flex';
+            mobileShareCatalogueBtn.style.display = 'none';
+        } else {
+            mobileCartBtn.style.display = 'none';
+            mobileShareCatalogueBtn.style.display = 'flex';
+        }
+    }
+
+    // Show/Hide Clear Button
+    if (clearBtn) {
+        clearBtn.style.display = cart.length > 0 ? 'block' : 'none';
+    }
+
+    // Update Drawer Items
+    const cartItems = document.getElementById('mainCartItems');
+    const cartTotal = document.getElementById('mainCartTotal');
+
+    if (cart.length === 0) {
+        if (cartItems) cartItems.innerHTML = '<div class="empty-cart-msg">Your cart is empty</div>';
+        if (cartTotal) cartTotal.innerText = '0';
+        return;
+    }
+
+    let total = 0;
+    if (cartItems) {
+        cartItems.innerHTML = cart.map((item, index) => {
+            const itemTotal = (item.price || 0) * (item.qty || 0);
+            total += itemTotal;
+            const variantLabel = item.variant ? `<div class="cart-item-variant">${item.variant.quantity}</div>` : '';
+
+            return `
+                <div class="cart-item">
+                    <img src="${item.image || ''}" alt="${item.name || 'Product'}" onerror="this.style.display='none'">
+                    <div class="cart-item-details">
+                        <h4>${item.name || 'Product'}</h4>
+                        ${variantLabel}
+                        <div class="cart-item-price">₹${item.price || 0} x ${item.qty || 0} = ₹${itemTotal}</div>
+                    </div>
+                    <div class="cart-item-actions">
+                        <div class="qty-controls">
+                            <button onclick="window.updateMainCartQty(${index}, -1)">-</button>
+                            <span>${item.qty || 0}</span>
+                            <button onclick="window.updateMainCartQty(${index}, 1)">+</button>
+                        </div>
+                        <button class="remove-btn" onclick="window.removeMainCartItem(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    if (cartTotal) cartTotal.innerText = total;
+};
+
+// Update quantity for an item in main cart
+window.updateMainCartQty = function (index, delta) {
+    const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+    if (!cart[index]) return;
+
+    cart[index].qty = (cart[index].qty || 0) + delta;
+
+    if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+    }
+
+    localStorage.setItem('td_cart', JSON.stringify(cart));
+    window.updateMainCartUI();
+};
+
+// Remove item from main cart
+window.removeMainCartItem = function (index) {
+    const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+    cart.splice(index, 1);
+    localStorage.setItem('td_cart', JSON.stringify(cart));
+    window.updateMainCartUI();
+    window.showToast('Item removed from cart', 'info');
+};
+
+// Clear entire main cart
+window.clearMainCart = function () {
+    localStorage.setItem('td_cart', JSON.stringify([]));
+    window.updateMainCartUI();
+    window.showToast('Cart cleared', 'info');
+};
+
+// Initialize cart UI on page load
+document.addEventListener('DOMContentLoaded', function () {
+    // Wait a bit for other scripts to initialize
+    setTimeout(() => {
+        window.updateMainCartUI();
+    }, 100);
+});
+
+// Listen for storage changes (cross-tab sync)
+window.addEventListener('storage', function (e) {
+    if (e.key === 'td_cart') {
+        window.updateMainCartUI();
+    }
+});
