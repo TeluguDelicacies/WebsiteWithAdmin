@@ -4588,32 +4588,46 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
 }
 
 @media (max-width: 768px) {
+
+  /* Larger, fixed-size sub-brand logo on mobile - consistent across all categories */
   .quick-sub-brand-container {
-    width: 50px;
-    height: 50px;
-    padding: 5px;
-    border-radius: 10px;
+    width: 75px;
+    height: 75px;
+    min-width: 75px;
+    min-height: 75px;
+    padding: 8px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    /* Never shrink */
+
+    /* Translucent white background for better visibility */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .quick-sub-brand-placeholder {
-    width: 50px;
-    height: 50px;
+    width: 75px;
+    height: 75px;
+    min-width: 75px;
   }
 
-  /* Absolute Positioning for View All Button on Mobile to prevent layout shift */
+  /* Reduced spacing - cut by half */
   .quick-header-row {
     position: relative;
-    /* Anchor */
-    margin-bottom: 6px;
-    gap: 10px;
+    margin-bottom: 3px;
+    /* Reduced from 6px */
+    gap: 8px;
+    /* Tighter gap */
   }
 
-  /* Text Container needs to clear space for the button */
+  /* Text Container - adjusted for larger logo */
   .quick-header-text {
     padding-right: 86px;
-    /* 80px for button + 6px gap */
     min-width: 0;
-    /* Enable truncation */
+    flex: 1;
   }
 
   /* Position Action Button Top-Right */
@@ -4624,9 +4638,12 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     z-index: 5;
   }
 
+  /* Adjusted min-height for larger logo */
   .quick-header-left {
     gap: 10px;
-    min-height: 50px;
+    min-height: 75px;
+    align-items: flex-start;
+    /* Align to top for multi-line text */
   }
 
   /* Tighter text spacing on mobile */
@@ -4640,12 +4657,11 @@ QUICK COMMERCE SCROLL IMPROVEMENTS
     margin: 0 0 1px 0;
   }
 
-  /* Description Truncation */
+  /* Description - now 2 lines */
   .quick-card .quick-subtitle {
     font-size: 0.8rem;
     margin: 0;
     width: 100%;
-    /* Fill available space (respecting padding) */
   }
 
   /* Compact View All Button */
@@ -5389,10 +5405,10 @@ UTILITY CLASSES
     cursor: pointer;
     box-sizing: border-box;
 
-    /* Truncation (Collapsed State - Default) */
+    /* Truncation (Collapsed State - Default: 2 lines) */
     display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
