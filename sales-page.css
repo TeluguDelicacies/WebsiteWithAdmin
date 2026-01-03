@@ -357,7 +357,7 @@ textarea {
             "bread bread"
             "main  side"
             "recent recent";
-        grid-template-columns: 72% 25%;
+        grid-template-columns: 75% 23%;
         grid-template-rows: auto 1fr auto;
         gap: 15px 2%;
         width: 95vw;
@@ -550,8 +550,8 @@ textarea {
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.15);
     border: none;
     overflow: hidden;
-    /* Desktop: Spacious padding */
-    padding: clamp(20px, 4vw, 40px);
+    /* Desktop: Spacious padding - Reduced for better viewport usage */
+    padding: clamp(10px, 2vw, 25px);
 }
 
 /* Component: Gallery (3D Flip) - Responsive Square */
@@ -1125,24 +1125,25 @@ textarea {
     .details-body {
         flex: 1;
         overflow-y: auto;
-        padding: 20px 30px;
-        /* Reduced padding */
+        padding: 5px 25px 15px 25px;
+        /* Reduced vertical padding */
     }
 
     /* Compact Typography for Desktop to avoid scroll */
     .product-title {
         font-size: 1.6rem !important;
+        margin-top: 0 !important;
         margin-bottom: 2px !important;
     }
 
     .telugu-title {
         font-size: 1.3rem !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
     }
 
     .product-tagline {
-        font-size: 0.85rem !important;
-        margin-bottom: 10px !important;
+        font-size: 0.82rem !important;
+        margin-bottom: 4px !important;
     }
 
     .current-price {
@@ -1150,11 +1151,11 @@ textarea {
     }
 
     .price-row {
-        margin-bottom: 15px !important;
+        margin-bottom: 8px !important;
     }
 
     .selection-area {
-        margin-bottom: 15px !important;
+        margin-bottom: 8px !important;
     }
 
     /* Fixed bottom part */
@@ -1162,7 +1163,7 @@ textarea {
         position: sticky;
         bottom: 0;
         background: white;
-        padding: 15px 30px;
+        padding: 8px 25px;
         /* Tighter padding */
         border-top: 1px solid var(--border-light);
         box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.03);
@@ -1173,7 +1174,7 @@ textarea {
     /* Force buttons to single line on desktop */
     .info-btns-row {
         flex-wrap: nowrap;
-        margin: 10px 0 10px 0;
+        margin: 2px 0 6px 0;
     }
 
     .info-btn {
@@ -1182,10 +1183,22 @@ textarea {
     }
 
     /* Compact the info content for desktop */
+    .info-toggles {
+        margin-bottom: 8px !important;
+    }
+
+    .toggle-btn {
+        padding: 8px 15px !important;
+        font-size: 0.85rem !important;
+    }
+
+    .info-content-block {
+        font-size: 0.88rem !important;
+    }
+
     .info-content-block.active {
-        max-height: 120px;
-        padding: 10px;
-        font-size: 0.9rem;
+        max-height: 110px;
+        padding: 5px 10px;
     }
 }
 
