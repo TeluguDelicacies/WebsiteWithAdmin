@@ -2460,8 +2460,9 @@ function renderProducts(products, categories) {
 
     // 1. Render to Showcase Ticker
     if (productScroll) {
-        // Toggle visibility based on settings
-        const showTicker = window.currentSiteSettings?.show_product_ticker !== false; // Default true if undefined
+        // Toggle visibility based on newly separated website_sections settings
+        // If currentSectionSettings is undefined, fallback to true (default behavior)
+        const showTicker = window.currentSectionSettings?.show_product_carousel !== false;
         const showcaseSection = productScroll.closest('.product-showcase');
 
         if (showcaseSection) {
@@ -2513,7 +2514,8 @@ function renderProducts(products, categories) {
     // 2. Render Categories
     if (categoriesContainer && categories.length > 0) {
         // QUICK COMMERCE LAYOUT CHECK
-        if (window.currentSiteSettings?.show_quick_layout) {
+        // Use newly separated website_sections settings
+        if (window.currentSectionSettings?.show_quick_layout) {
             renderQuickLayout(products, categories, categoriesContainer);
             return;
         }
@@ -2827,12 +2829,19 @@ async function fetchAndRenderTestimonials() {
         const originalItems = Array.from(testimonialContainer.children);
 
         // Fill base set if too small (e.g. only 1 or 2 reviews)
-        while (currentBaseWidth < minBaseWidth && originalItems.length > 0) {
-            originalItems.forEach(item => {
-                testimonialContainer.appendChild(item.cloneNode(true));
-            });
-            // Re-measure roughly (accumulating width)
-            currentBaseWidth = testimonialContainer.scrollWidth;
+        // Fill base set if too small (e.g. only 1 or 2 reviews)
+        // CRITICAL FIX: If section is hidden, scrollWidth is 0. Check for this to prevent infinite loop.
+        if (currentBaseWidth > 0) {
+            while (currentBaseWidth < minBaseWidth && originalItems.length > 0) {
+                originalItems.forEach(item => {
+                    testimonialContainer.appendChild(item.cloneNode(true));
+                });
+                // Re-measure roughly (accumulating width)
+                currentBaseWidth = testimonialContainer.scrollWidth;
+
+                // Safety break to prevent infinite loop if width doesn't increase
+                if (testimonialContainer.children.length > 50) break;
+            }
         }
 
         // Now Create [A, A] Structure for 50% reset logic
