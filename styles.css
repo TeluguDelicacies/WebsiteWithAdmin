@@ -3879,6 +3879,29 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   color: var(--color-error);
 }
 
+/* Cart Button with Red Badge */
+.cart-btn {
+  position: relative;
+}
+
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--color-error);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Cart Footer */
 .cart-footer {
   padding: 1.5rem;
