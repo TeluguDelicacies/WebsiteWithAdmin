@@ -2694,14 +2694,27 @@ body {
   /* Strict Left Align */
 }
 
-/* Mobile - Reduce spacing between breadcrumb and category header */
+/* Reduce spacing between breadcrumb and category header - all breakpoints */
 @media (max-width: 768px) {
   .breadcrumb-section {
-    margin-bottom: 8px;
-    /* Reduced from section-spacing/2 */
+    margin-bottom: 2px;
+    /* Mobile: reduced from 30px */
   }
 }
 
+@media (min-width: 769px) and (max-width: 1023px) {
+  .breadcrumb-section {
+    margin-bottom: 2px;
+    /* Tablet: reduced from 40px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .breadcrumb-section {
+    margin-bottom: 3px;
+    /* Desktop: reduced from 60px */
+  }
+}
 
 .variant-selector i {
   font-size: 0.65rem;
