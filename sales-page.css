@@ -1559,7 +1559,10 @@ textarea {
     height: 80px;
     opacity: 1;
     object-fit: contain;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    /* Remove artifacts */
+    filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 @media (max-width: 640px) {
@@ -2596,6 +2599,10 @@ textarea {
     gap: 20px;
     align-items: center;
     justify-content: center;
+    /* Artifact Removal */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .desktop-brand-grid .brand-logo-item {
@@ -2606,6 +2613,19 @@ textarea {
     object-fit: contain;
     opacity: 1 !important;
     visibility: visible !important;
+    /* Artifact Removal */
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* Base Wrapper Cleanup */
+.brand-logos-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex;
+    align-items: center;
 }
 
 /* =========================================
@@ -2617,6 +2637,10 @@ textarea {
     height: 80px;
     margin-left: auto;
     flex-shrink: 0;
+    /* Artifact Removal */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .mobile-brand-carousel .brand-logo-item {
@@ -2629,6 +2653,10 @@ textarea {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.5s ease-in-out;
+    /* Artifact Removal */
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
 .mobile-brand-carousel .brand-logo-item.active {
