@@ -1531,11 +1531,12 @@ textarea {
 /* Simple Header (Transparent/Clean) */
 .category-header-simple {
     display: flex !important;
-    align-items: center !important;
-    /* Locks Logo and Text to the same center line */
+    align-items: flex-end !important;
+    /* Anchor all content to the bottom/divider level */
     justify-content: space-between;
     margin-bottom: 30px;
     padding-bottom: 20px;
+    /* Reference Point: 20px offset from the line divider */
     border-bottom: 1px solid rgba(113, 63, 18, 0.1);
     /* Subtle divider */
 }
@@ -2641,10 +2642,8 @@ textarea {
     border: none !important;
     box-shadow: none !important;
     display: flex;
-    align-items: center;
-    /* Optical Nudge: Centering relative to H1, ignoring breadcrumbs */
-    align-self: center !important;
-    margin-top: 15px;
+    align-items: flex-end;
+    /* Align logos to the bottom within the wrapper */
 }
 
 /* =========================================
