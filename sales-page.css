@@ -686,29 +686,34 @@ textarea {
         padding: 5px 10px;
     }
 
-    /* Mobile: English product name - MORE PROMINENT (matches desktop ratio) */
-    .product-title {
-        margin-top: 0;
-        font-size: 2.4rem;
-        font-weight: 700;
-        line-height: 1.1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        width: 100%;
-        max-width: 100%;
-        margin-bottom: 4px;
+    /* Mobile PRODUCT PAGE: English product name - MORE PROMINENT */
+    /* Using specific selector to override grid card styles */
+    .product-details .product-title {
+        margin-top: 0 !important;
+        font-size: 2.4rem !important;
+        font-weight: 700 !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 4px !important;
+        display: block !important;
+        -webkit-line-clamp: unset !important;
+        line-clamp: unset !important;
+        max-height: none !important;
     }
 
     /* Telugu name - smaller, similar ratio to desktop */
-    .telugu-title {
-        font-size: 1.5rem;
-        margin-bottom: 2px;
+    .product-details .telugu-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 2px !important;
     }
 
-    .product-tagline {
-        font-size: 0.85rem;
-        margin-bottom: 5px;
+    .product-details .product-tagline {
+        font-size: 0.85rem !important;
+        margin-bottom: 5px !important;
     }
 }
 
