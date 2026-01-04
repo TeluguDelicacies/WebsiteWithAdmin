@@ -659,8 +659,9 @@ textarea {
     right: 10px;
     left: auto;
     transform: none;
-    max-width: clamp(60px, 20%, 120px);
-    max-height: clamp(60px, 20%, 120px);
+    /* Larger size for readability - especially for wide logos like Akshaya */
+    max-width: clamp(80px, 25%, 150px);
+    max-height: clamp(50px, 20%, 100px);
     width: auto;
     height: auto;
     z-index: 100;
@@ -668,7 +669,7 @@ textarea {
     object-fit: contain;
     /* White background for readability */
     background: rgba(255, 255, 255, 0.9);
-    padding: 8px;
+    padding: 8px 12px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -690,7 +691,8 @@ textarea {
     }
 
     .telugu-title {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
+        /* Bigger Telugu name on mobile */
     }
 
     .product-tagline {
@@ -2596,6 +2598,16 @@ textarea {
     width: auto;
     object-fit: contain;
     transition: opacity 0.5s ease-in-out;
+    /* Default: hidden for mobile cycling */
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* First logo active by default (JS will cycle) */
+.brand-logo-item:first-child,
+.brand-logo-item.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Mobile: Single image cycling carousel */
@@ -2638,8 +2650,14 @@ textarea {
     }
 
     .brand-logo-item.active {
-        opacity: 1;
-        visibility: visible;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Hide non-active logos on mobile */
+    .brand-logo-item:not(.active) {
+        opacity: 0 !important;
+        visibility: hidden !important;
     }
 
     /* Category header images - improved sizing */

@@ -4965,8 +4965,9 @@ body:not(.quick-commerce-mode) .sub-brand-overlay {
 }
 
 body:not(.quick-commerce-mode) .sub-brand-logo-overlay-img {
-  max-height: 80px;
-  max-width: 120px;
+  /* Larger size for wide logos like Akshaya */
+  max-height: 70px;
+  max-width: 140px;
   height: auto;
   width: auto;
   object-fit: contain;
