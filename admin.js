@@ -933,6 +933,9 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
     `}).join('');
 }
 
+// Expose renderProductList globally for onclick handlers
+window.renderProductList = renderProductList;
+
 window.toggleCardDetails = function (id) {
     const details = document.getElementById(`details-${id}`);
     const chevron = document.getElementById(`chevron-${id}`);
