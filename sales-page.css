@@ -681,18 +681,24 @@ textarea {
 
 @media (max-width: 767px) {
     .product-details {
-        padding: 5px 15px;
+        padding: 5px 10px;
     }
 
+    /* Mobile: English product name - MORE PROMINENT */
     .product-title {
         margin-top: 0;
-        font-size: 1.4rem;
-        /* Compact title */
+        font-size: 1.6rem;
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        max-width: 100%;
     }
 
     .telugu-title {
-        font-size: 1.25rem;
-        /* Bigger Telugu name on mobile */
+        font-size: 1.1rem;
     }
 
     .product-tagline {
@@ -2572,8 +2578,10 @@ textarea {
     }
 }
 
+/* =========================================
+   DESKTOP: Brand Logos Side-by-Side
+   ========================================= */
 .brand-logos-wrapper {
-    /* Desktop: Show all logos side by side */
     display: flex;
     gap: 15px;
     align-items: center;
@@ -2582,85 +2590,76 @@ textarea {
     background: transparent;
 }
 
-/* Desktop: All logos visible */
-@media (min-width: 769px) {
-    .brand-logo-item {
-        opacity: 1 !important;
-        visibility: visible !important;
-        position: static !important;
-    }
-}
-
 .brand-logo-item {
     max-height: 80px;
     max-width: 80px;
     height: auto;
     width: auto;
     object-fit: contain;
-    transition: opacity 0.5s ease-in-out;
-    /* Default: hidden for mobile cycling */
-    opacity: 0;
-    visibility: hidden;
 }
 
-/* First logo active by default (JS will cycle) */
-.brand-logo-item:first-child,
-.brand-logo-item.active {
-    opacity: 1;
-    visibility: visible;
+/* Desktop: All logos always visible */
+@media (min-width: 769px) {
+    .brand-logo-item {
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: static !important;
+        transition: none;
+    }
 }
 
-/* Mobile: Single image cycling carousel */
+/* =========================================
+   MOBILE: Single Fading Image Carousel
+   Completely decoupled from desktop
+   ========================================= */
 @media (max-width: 768px) {
 
-    /* Mobile brand logos wrapper - fixed size container for cycling */
+    /* Mobile container - SAME SIZE as category card logos (80x80) */
     .brand-logos-wrapper {
         position: relative;
-        width: 90px;
-        height: 90px;
-        min-width: 90px;
-        min-height: 90px;
+        width: 80px;
+        height: 80px;
+        min-width: 80px;
+        min-height: 80px;
         margin-left: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: block;
+        /* Not flex - stacked children */
         background: transparent;
         border: none;
         box-shadow: none;
-        overflow: visible;
+        overflow: hidden;
         flex-shrink: 0;
-        gap: 0;
-        /* No gap - stacked logos */
     }
 
-    /* Mobile: All logos stacked, only active one visible */
+    /* Mobile: All logos stacked on top of each other */
     .brand-logo-item {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: auto;
-        height: auto;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         max-width: 100%;
         max-height: 100%;
+        object-fit: contain;
+        /* Fade animation */
         opacity: 0;
         visibility: hidden;
-        object-fit: contain;
         transition: opacity 0.5s ease-in-out;
     }
 
+    /* Only active logo visible */
     .brand-logo-item.active {
         opacity: 1 !important;
         visibility: visible !important;
     }
 
-    /* Hide non-active logos on mobile */
-    .brand-logo-item:not(.active) {
-        opacity: 0 !important;
-        visibility: hidden !important;
+    /* First logo visible by default until JS cycles */
+    .brand-logo-item:first-child:not(.brand-logo-item ~ .brand-logo-item.active) {
+        opacity: 1;
+        visibility: visible;
     }
 
-    /* Category header images - improved sizing */
+    /* Category header images - match brand logos size */
     .category-header-simple>img {
         width: 80px;
         height: 80px;
