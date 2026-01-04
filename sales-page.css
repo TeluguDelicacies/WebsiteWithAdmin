@@ -2651,12 +2651,14 @@ textarea {
     .brand-logo-item.active {
         opacity: 1 !important;
         visibility: visible !important;
+        z-index: 2;
     }
 
-    /* First logo visible by default until JS cycles */
-    .brand-logo-item:first-child:not(.brand-logo-item ~ .brand-logo-item.active) {
-        opacity: 1;
-        visibility: visible;
+    /* Hide ALL non-active logos */
+    .brand-logo-item:not(.active) {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        z-index: 1;
     }
 
     /* Category header images - match brand logos size */
