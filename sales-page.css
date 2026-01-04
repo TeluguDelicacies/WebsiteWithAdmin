@@ -639,8 +639,9 @@ textarea {
     padding: 30px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-light);
     overflow-y: auto;
@@ -2765,15 +2766,7 @@ textarea {
     }
 }
 
-/* --- Hide overlay logo when card is flipped to show description --- */
-.gallery-inner.flipped~.overlay-logo,
-.product-gallery:has(.gallery-inner.flipped) .overlay-logo {
-    opacity: 0 !important;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-/* Mobile: Also reduce logo size and move it further right to prevent overlap */
+/* Mobile: Reduce logo size to prevent overlap with left-aligned text */
 @media (max-width: 768px) {
     .overlay-logo {
         max-width: 60px;
