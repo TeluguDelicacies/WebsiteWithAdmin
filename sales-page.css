@@ -2642,6 +2642,9 @@ textarea {
     box-shadow: none !important;
     display: flex;
     align-items: center;
+    /* Optical Nudge: Centering relative to H1, ignoring breadcrumbs */
+    align-self: center !important;
+    margin-top: 15px;
 }
 
 /* =========================================
