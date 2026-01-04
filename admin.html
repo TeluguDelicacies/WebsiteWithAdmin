@@ -12,10 +12,13 @@
     <style>
         /* Admin specific styles */
 
-        /* FIX #5: Hide mobile elements on Desktop */
-        #mobile-admin-header,
-        #mobile-bottom-nav {
-            display: none !important;
+        /* Hide mobile elements on Desktop (min-width > 768px) */
+        @media screen and (min-width: 769px) {
+
+            #mobile-admin-header,
+            #mobile-bottom-nav {
+                display: none !important;
+            }
         }
 
         *,

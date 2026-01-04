@@ -204,12 +204,11 @@ Only loads on screens < 768px
    FIX #2: SINGLE COLUMN CARD LAYOUT
    ==================================== */
 
-/* Container: Single column stack */
+/* Container styling - DON'T override display (JS controls visibility) */
 #productListContainer,
 #categoryList,
 #testimonialList,
 #whyUsFeatureList {
-    display: flex !important;
     flex-direction: column !important;
     gap: 10px !important;
     background: transparent !important;
