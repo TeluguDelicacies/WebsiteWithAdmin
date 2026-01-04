@@ -583,8 +583,9 @@ textarea {
     .overlay-logo {
         width: 60px;
         /* Smaller overlay on mobile */
-        top: 5px;
-        right: 5px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 }
 
@@ -654,8 +655,9 @@ textarea {
 /* Sub-brand overlay logo - Now positioned on product-gallery (outside 3D transform) */
 .overlay-logo {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: clamp(50px, 15%, 80px);
     height: auto;
     z-index: 100;
@@ -1542,16 +1544,16 @@ textarea {
 
     .category-header-simple {
         flex-direction: column-reverse;
-        align-items: flex-start;
+        align-items: center;
         gap: 15px;
         position: relative;
+        text-align: center;
     }
 
     .category-header-simple img {
-        position: absolute;
-        top: 0;
-        right: 0;
+        position: static;
         height: 60px;
+        margin: 0 auto;
     }
 }
 
@@ -2577,16 +2579,20 @@ textarea {
         height: 50px;
         margin-left: auto;
         /* Push to right */
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .brand-logo-item {
         position: absolute;
-        top: 0;
-        right: 0;
-        width: 50px;
-        height: 50px;
-        max-width: 50px;
-        max-height: 50px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
         opacity: 0;
         visibility: hidden;
         /* Hidden by default */
