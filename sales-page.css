@@ -1530,29 +1530,45 @@ textarea {
 
 /* Simple Header (Transparent/Clean) */
 .category-header-simple {
-    display: flex;
+    display: flex !important;
+    align-items: center !important;
+    /* Locks Logo and Text to the same center line */
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 1px solid rgba(113, 63, 18, 0.1);
     /* Subtle divider */
 }
 
+/* Fix the Text Block "Phantom Space" */
+.category-header-simple>div:first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Centers text vertically inside its own box */
+}
+
 .category-header-simple h1 {
     margin: 0;
+    margin-bottom: 5px;
+    /* Keep a tiny gap between title and subtitle */
     color: #422006;
     font-size: clamp(2rem, 5vw, 2.5rem);
     font-family: var(--font-primary);
     letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
 .category-header-simple p {
-    margin: 5px 0 0 0;
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+    /* CRITICAL: Removes the invisible space at the bottom */
+    padding-bottom: 0 !important;
     color: #713f12;
     font-family: var(--font-telugu);
     font-size: 1.1rem;
     font-weight: 500;
+    line-height: 1.2;
 }
 
 .category-header-simple img {
