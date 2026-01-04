@@ -13,7 +13,8 @@ export default defineConfig({
       input: {
         main: 'index.html',
         admin: 'admin.html',
-        sales: 'sales.html'
+        sales: 'sales.html',
+        logochanger: 'logochanger/index.html'
       }
     }
   }
