@@ -39,9 +39,65 @@ const addBtnText = document.getElementById('addBtnText');
 const sectionsContainer = document.getElementById('sectionsContainer');
 const viewSectionsBtn = document.getElementById('viewSectionsBtn');
 
-// State
-let currentUser = null;
-let currentView = 'products'; // 'products' or 'testimonials'
+// Global State
+let allProducts = [];
+let allCategories = [];
+let allTestimonials = [];
+let currentView = 'products';
+let currentUser = null; // Restore missing variable
+let editSnapshot = {}; // Stores original state for diffing
+
+// Helper: Deep Loose Equality Check
+function isLooseEqual(v1, v2) {
+    // Normalize null/undefined/empty string
+    if ((v1 === null || v1 === undefined) && v2 === '') return true;
+    if ((v2 === null || v2 === undefined) && v1 === '') return true;
+    if (v1 === null && v2 === undefined) return true;
+    if (v2 === null && v1 === undefined) return true;
+
+    // Primitives with loose equality (100 == "100")
+    if (v1 == v2) return true;
+
+    // Safe type check
+    if (typeof v1 !== typeof v2 && v1 != v2) return false; // Different types and not loosely equal
+
+    // Objects / Arrays
+    if (typeof v1 === 'object' && v1 !== null && v2 !== null) {
+        // Different constructors (Array vs Object)?
+        if (v1.constructor !== v2.constructor) return false;
+
+        const keys1 = Object.keys(v1);
+        const keys2 = Object.keys(v2);
+
+        // Check if all keys in v1 exist in v2 and match
+        for (const key of keys1) {
+            if (!isLooseEqual(v1[key], v2[key])) return false;
+        }
+
+        // Check if all keys in v2 exist in v1 (to catch extra keys in current)
+        for (const key of keys2) {
+            if (!isLooseEqual(v1[key], v2[key])) return false;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+// Helper: Get Changed Fields
+function getChanges(original, current) {
+    if (!original) return ['Created New Item'];
+    const changes = [];
+    for (const key in current) {
+        if (!isLooseEqual(original[key], current[key])) {
+            // Format key for display
+            const label = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+            changes.push(label);
+        }
+    }
+    return changes.length > 0 ? changes : ['No Changes Detected'];
+}
 
 // Helper: Toast Notification
 window.showToast = (message, type = 'success') => {
@@ -421,6 +477,7 @@ window.openCategoryModal = (id = null) => {
         catModalTitle.textContent = 'Edit Category';
         loadCategoryData(id);
     } else {
+        editSnapshot = null; // New
         catModalTitle.textContent = 'Add Category';
         document.getElementById('catVisible').checked = true; // Default visible
     }
@@ -430,6 +487,7 @@ window.closeCategoryModal = () => { categoryModal.style.display = 'none'; }
 async function loadCategoryData(id) {
     const { data: cat } = await supabase.from('categories').select('*').eq('id', id).single();
     if (cat) {
+        editSnapshot = JSON.parse(JSON.stringify(cat)); // Snapshot
         document.getElementById('catId').value = cat.id;
         document.getElementById('catTitle').value = cat.title;
         document.getElementById('catSubBrand').value = cat.sub_brand || '';
@@ -575,9 +633,17 @@ if (categoryForm) {
             if (error) throw error;
             closeCategoryModal();
             fetchCategories();
-            alert('Category saved.');
+
+            let toastMsg = 'Category saved.';
+            if (id) {
+                const changes = getChanges(editSnapshot, formData);
+                toastMsg = `Updated: ${changes.join(', ')}`;
+            } else {
+                toastMsg = 'Created New Category';
+            }
+            showToast(toastMsg, 'success');
         } catch (err) {
-            alert('Error: ' + err.message);
+            showToast('Error: ' + err.message, 'error');
         } finally {
             btn.textContent = oldText;
             btn.disabled = false;
@@ -605,6 +671,7 @@ async function fetchSettings() {
         if (error && error.code !== 'PGRST116') throw error; // PGRST116 is no rows found
 
         if (data) {
+            editSnapshot = JSON.parse(JSON.stringify(data)); // Snapshot
             document.getElementById('setSiteTitle').value = data.site_title || '';
             document.getElementById('setSiteTitleTelugu').value = data.site_title_telugu || '';
             document.getElementById('setHeroTitle').value = data.hero_title || '';
@@ -692,13 +759,16 @@ if (siteSettingsForm) {
             if (data) {
                 const { error } = await supabase.from('site_settings').update(settingsData).eq('id', data.id);
                 if (error) throw error;
+                const changes = getChanges(editSnapshot, settingsData);
+                showToast(`Updated: ${changes.join(', ')}`, 'success');
             } else {
                 const { error } = await supabase.from('site_settings').insert([settingsData]);
                 if (error) throw error;
+                showToast('Settings initialized!', 'success');
             }
-            alert('Settings saved!');
+            editSnapshot = JSON.parse(JSON.stringify(settingsData)); // Update snapshot
         } catch (e) {
-            alert('Error: ' + e.message);
+            showToast('Error: ' + e.message, 'error');
         } finally {
             btn.textContent = oldText;
             btn.disabled = false;
@@ -715,10 +785,9 @@ window.handleAssetUpload = async (inputElement, targetUrlInputId) => {
     if (!file) return;
 
     const urlInput = document.getElementById(targetUrlInputId);
-    // Simple visual feedback on label if possible, or just use input
-    const label = inputElement.previousElementSibling;
-    const oldIcon = label.innerHTML;
-    label.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    // Toast for Start
+    showToast('Uploading image...', 'info');
 
     try {
         const fileExt = file.name.split('.').pop();
@@ -734,14 +803,17 @@ window.handleAssetUpload = async (inputElement, targetUrlInputId) => {
         const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
         urlInput.value = publicUrl;
-        // alert('Uploaded!'); 
+
+        // Trigger generic change event to update previews if any listener attached (optional)
+        urlInput.dispatchEvent(new Event('change'));
+
+        showToast('Image uploaded successfully!', 'success');
+
     } catch (e) {
         console.error(e);
-        alert('Upload failed: ' + e.message);
-    } finally {
-        label.innerHTML = oldIcon;
+        showToast('Upload failed: ' + e.message, 'error');
     }
-}
+};
 
 // Helper: Populate Product Categories dynamically in Product Modal
 async function populateCategoryOptions() {
@@ -759,7 +831,7 @@ async function populateCategoryOptions() {
 // ... [Existing Product Management Functions: fetchProducts, renderProductList] ...
 
 // Global Products State
-let allProducts = [];
+// Using existing global variable allProducts defined at top
 
 async function fetchProducts() {
     productList.innerHTML = '<p style="text-align: center;">Loading...</p>';
@@ -1112,7 +1184,7 @@ window.saveCurrentOrder = async (overrideType = null) => {
             if (error) throw error;
         }
 
-        showToast('Order saved successfully!', 'success');
+        showToast('Updated Display Order', 'success');
         if (btn) btn.style.display = 'none';
 
         // Refresh Data
@@ -1231,6 +1303,7 @@ window.openProductModal = async (productId = null) => {
         modalTitle.textContent = 'Edit Product';
         loadProductData(productId);
     } else {
+        editSnapshot = null; // New Product
         modalTitle.textContent = 'Add Product';
         addVariantRow(); // Always add one empty variant row
     }
@@ -1251,6 +1324,7 @@ window.openTestimonialModal = (id = null) => {
         testimonialModalTitle.textContent = 'Edit Testimonial';
         loadTestimonialData(id);
     } else {
+        editSnapshot = null; // New
         testimonialModalTitle.textContent = 'Add Testimonial';
     }
 };
@@ -1265,6 +1339,7 @@ async function loadTestimonialData(id) {
         if (error) throw error;
 
         if (data) {
+            editSnapshot = JSON.parse(JSON.stringify(data)); // Snapshot
             document.getElementById('testimonialId').value = data.id;
             document.getElementById('tName').value = data.name;
             document.getElementById('tLocation').value = data.location || '';
@@ -1339,6 +1414,9 @@ async function loadProductData(productId) {
             .single();
 
         if (error) throw error;
+
+        // Capture snapshot for diffing
+        editSnapshot = JSON.parse(JSON.stringify(product));
 
         // Populate form
         document.getElementById('productId').value = product.id;
@@ -1534,7 +1612,15 @@ productForm.addEventListener('submit', async (e) => {
 
         closeProductModal();
         fetchProducts();
-        showToast('Product saved successfully!', 'success');
+
+        let toastMsg = 'Product saved successfully!';
+        if (productId) {
+            const changes = getChanges(editSnapshot, productData);
+            toastMsg = `Updated: ${changes.join(', ')}`;
+        } else {
+            toastMsg = 'Created New Product';
+        }
+        showToast(toastMsg, 'success');
 
     } catch (error) {
         console.error('Save error:', error);
@@ -1585,7 +1671,15 @@ if (testimonialForm) {
 
             closeTestimonialModal();
             fetchTestimonials();
-            showToast('Testimonial saved!', 'success');
+
+            let toastMsg = 'Testimonial saved!';
+            if (tId) {
+                const changes = getChanges(editSnapshot, tData);
+                toastMsg = `Updated: ${changes.join(', ')}`;
+            } else {
+                toastMsg = 'Created New Testimonial';
+            }
+            showToast(toastMsg, 'success');
 
         } catch (error) {
             showToast('Error saving testimonial: ' + error.message, 'error');
@@ -1790,6 +1884,7 @@ window.showWhyUsModal = (feature = null) => {
     featureModal.style.display = 'flex';
     if (feature) {
         featureModalTitle.textContent = 'Edit Feature';
+        editSnapshot = JSON.parse(JSON.stringify(feature)); // Snapshot
         document.getElementById('featureId').value = feature.id;
         document.getElementById('featureTitle').value = feature.title;
         document.getElementById('featureDescription').value = feature.description || '';
@@ -1797,6 +1892,7 @@ window.showWhyUsModal = (feature = null) => {
         document.getElementById('featureOrder').value = feature.order_index;
     } else {
         featureModalTitle.textContent = 'Add Feature';
+        editSnapshot = null; // New
         featureForm.reset();
         document.getElementById('featureId').value = '';
     }
@@ -1848,6 +1944,15 @@ if (featureForm) {
             }
             closeFeatureModal();
             fetchWhyUsFeatures();
+
+            let toastMsg = 'Feature saved!';
+            if (id) {
+                const changes = getChanges(editSnapshot, featureData);
+                toastMsg = `Updated: ${changes.join(', ')}`;
+            } else {
+                toastMsg = 'Created New Feature';
+            }
+            showToast(toastMsg, 'success');
         } catch (e) {
             showToast('Error saving feature: ' + e.message, 'error');
         }
@@ -1867,6 +1972,7 @@ async function fetchSectionSettings() {
 
         if (data) {
             // Hero Section
+            editSnapshot = JSON.parse(JSON.stringify(data)); // Snapshot
             const heroToggle = document.getElementById('secShowHero');
             if (heroToggle) heroToggle.checked = data.show_hero_section !== false;
 
@@ -1950,11 +2056,17 @@ window.saveSectionSettings = async function () {
         if (data) {
             const { error } = await supabase.from('website_sections').update(sectionData).eq('id', data.id);
             if (error) throw error;
+            const changes = getChanges(editSnapshot, sectionData);
+            showToast(`Updated: ${changes.join(', ')}`, 'success');
         } else {
             const { error } = await supabase.from('website_sections').insert([sectionData]);
             if (error) throw error;
+            showToast('Section settings created!', 'success');
         }
-        showToast('Section settings saved successfully!', 'success');
+
+        // Update snapshot for the next comparison
+        editSnapshot = JSON.parse(JSON.stringify(sectionData));
+
     } catch (e) {
         console.error('Error saving section settings:', e);
         showToast('Error saving section settings: ' + e.message, 'error');

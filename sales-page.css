@@ -691,7 +691,7 @@ textarea {
     /* Using specific selector to override grid card styles */
     .product-details .product-title {
         margin-top: 0 !important;
-        font-size: 5rem !important;
+        font-size: 7rem !important;
         font-weight: 700 !important;
         line-height: 1.1 !important;
         white-space: nowrap !important;
