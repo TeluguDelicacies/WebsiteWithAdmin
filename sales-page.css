@@ -581,10 +581,11 @@ textarea {
     }
 
     .overlay-logo {
-        max-width: 50px;
-        max-height: 50px;
+        max-width: clamp(50px, 18%, 80px);
+        max-height: clamp(50px, 18%, 80px);
         top: 8px;
         right: 8px;
+        padding: 6px;
     }
 }
 
@@ -651,21 +652,25 @@ textarea {
     margin-bottom: 20px;
 }
 
-/* Sub-brand overlay logo - Anchored to top-right corner */
+/* Sub-brand overlay logo - Anchored to top-right corner with white background */
 .overlay-logo {
     position: absolute;
     top: 10px;
     right: 10px;
     left: auto;
     transform: none;
-    max-width: clamp(40px, 15%, 80px);
-    max-height: clamp(40px, 15%, 80px);
+    max-width: clamp(60px, 20%, 120px);
+    max-height: clamp(60px, 20%, 120px);
     width: auto;
     height: auto;
     z-index: 100;
     pointer-events: none;
     object-fit: contain;
-    background: transparent;
+    /* White background for readability */
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Component: Details - COMPACT for viewport fit */
@@ -2566,12 +2571,22 @@ textarea {
 }
 
 .brand-logos-wrapper {
+    /* Desktop: Show all logos side by side */
     display: flex;
     gap: 15px;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     background: transparent;
+}
+
+/* Desktop: All logos visible */
+@media (min-width: 769px) {
+    .brand-logo-item {
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: static !important;
+    }
 }
 
 .brand-logo-item {
@@ -2583,9 +2598,10 @@ textarea {
     transition: opacity 0.5s ease-in-out;
 }
 
+/* Mobile: Single image cycling carousel */
 @media (max-width: 768px) {
 
-    /* Mobile brand logos wrapper - larger, no clipping */
+    /* Mobile brand logos wrapper - fixed size container for cycling */
     .brand-logos-wrapper {
         position: relative;
         width: 90px;
@@ -2600,10 +2616,12 @@ textarea {
         border: none;
         box-shadow: none;
         overflow: visible;
-        /* Prevent clipping */
         flex-shrink: 0;
+        gap: 0;
+        /* No gap - stacked logos */
     }
 
+    /* Mobile: All logos stacked, only active one visible */
     .brand-logo-item {
         position: absolute;
         top: 50%;
@@ -2616,6 +2634,7 @@ textarea {
         opacity: 0;
         visibility: hidden;
         object-fit: contain;
+        transition: opacity 0.5s ease-in-out;
     }
 
     .brand-logo-item.active {
