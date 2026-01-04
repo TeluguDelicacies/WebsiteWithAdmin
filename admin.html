@@ -1281,9 +1281,8 @@
                     </div>
 
                     <div style="display: flex; gap: 15px; margin-top: 20px;">
-                        <button type="button" onclick="closeProductModal()" class="submit-btn"
-                            style="margin-top: 0; background: transparent; border: 2px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
                         <button type="submit" class="submit-btn" style="margin-top: 0;">Save Product</button>
+                        <button type="button" onclick="closeProductModal()" class="admin-btn cancel-btn">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -1354,7 +1353,8 @@
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit" class="submit-btn">Save Category</button>
-                        <button type="button" onclick="closeCategoryModal()" class="admin-btn">Cancel</button>
+                        <button type="button" onclick="closeCategoryModal()"
+                            class="admin-btn cancel-btn">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -1398,8 +1398,8 @@
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit" class="submit-btn" style="margin-top: 0;">Save Testimonial</button>
-                        <button type="button" onclick="closeTestimonialModal()" class="admin-btn"
-                            style="border: 1px solid var(--border-medium);">Cancel</button>
+                        <button type="button" onclick="closeTestimonialModal()"
+                            class="admin-btn cancel-btn">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -1433,7 +1433,10 @@
                         <label>Display Order</label>
                         <input type="number" id="featureOrder" value="0" class="form-input">
                     </div>
-                    <button type="submit" class="submit-btn" style="margin-top: 20px;">Save Feature</button>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Feature</button>
+                        <button type="button" onclick="closeFeatureModal()" class="admin-btn cancel-btn">Cancel</button>
+                    </div>
                 </form>
             </div>
         </div>
