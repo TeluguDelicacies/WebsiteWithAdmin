@@ -481,15 +481,6 @@
                             </div>
                         `).join('')}
                     </div>
-
-                    <div class="mobile-brand-carousel">
-                        ${brands.map((b, idx) => `
-                            <img src="${b.sub_brand_logo_url}" 
-                                 class="brand-logo-item ${idx === 0 ? 'active' : ''}" 
-                                 data-idx="${idx}"
-                                 alt="${b.sub_brand}">
-                        `).join('')}
-                    </div>
                 </div>
 
             </div>`;
