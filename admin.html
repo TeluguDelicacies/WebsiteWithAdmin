@@ -11,6 +11,13 @@
     <link rel="stylesheet" href="admin-mobile.css" media="screen and (max-width: 768px)">
     <style>
         /* Admin specific styles */
+
+        /* FIX #5: Hide mobile elements on Desktop */
+        #mobile-admin-header,
+        #mobile-bottom-nav {
+            display: none !important;
+        }
+
         *,
         *::before,
         *::after {
