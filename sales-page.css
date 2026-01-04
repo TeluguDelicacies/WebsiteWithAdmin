@@ -550,8 +550,10 @@ textarea {
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.15);
     border: none;
     overflow: hidden;
-    /* Desktop: Spacious padding - Reduced for better viewport usage */
-    padding: clamp(10px, 2vw, 25px);
+    /* Desktop: Equal padding on all sides */
+    padding: clamp(10px, 2vw, 20px);
+    /* Remove extra bottom space - use same padding on all sides */
+    padding-bottom: clamp(10px, 2vw, 20px);
 }
 
 /* Component: Gallery (3D Flip) - Responsive Square */
@@ -684,25 +686,28 @@ textarea {
         padding: 5px 10px;
     }
 
-    /* Mobile: English product name - MORE PROMINENT */
+    /* Mobile: English product name - MORE PROMINENT (matches desktop ratio) */
     .product-title {
         margin-top: 0;
         font-size: 2.4rem;
         font-weight: 700;
-        line-height: 1.2;
+        line-height: 1.1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         width: 100%;
         max-width: 100%;
+        margin-bottom: 4px;
     }
 
+    /* Telugu name - smaller, similar ratio to desktop */
     .telugu-title {
-        font-size: 1.1rem;
+        font-size: 1.5rem;
+        margin-bottom: 2px;
     }
 
     .product-tagline {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         margin-bottom: 5px;
     }
 }
