@@ -478,31 +478,42 @@
                     <h1>All Products</h1>
                     <p>${tagline}</p>
                 </div>
-                <!-- Brand Logos Container -->
+                
+                <!-- Brand Logos: Separate Desktop and Mobile Containers -->
                 <div class="brand-logos-wrapper">
-                    ${brands.map((b, idx) => `
-                        <img src="${b.sub_brand_logo_url}" 
-                             class="brand-logo-item ${idx === 0 ? 'active' : ''}" 
-                             data-idx="${idx}"
-                             alt="${b.sub_brand}">
-                    `).join('')}
+                    <!-- Desktop: Static grid of all logos -->
+                    <div class="desktop-brand-grid">
+                        ${brands.map(b => `
+                            <img src="${b.sub_brand_logo_url}" class="brand-logo-item" alt="${b.sub_brand}">
+                        `).join('')}
+                    </div>
+
+                    <!-- Mobile: Fading carousel (one at a time) -->
+                    <div class="mobile-brand-carousel">
+                        ${brands.map((b, idx) => `
+                            <img src="${b.sub_brand_logo_url}" 
+                                 class="brand-logo-item ${idx === 0 ? 'active' : ''}" 
+                                 data-idx="${idx}"
+                                 alt="${b.sub_brand}">
+                        `).join('')}
+                    </div>
                 </div>
             </div>`;
         };
 
         window.startBrandWidgetCycle = function () {
-            const logos = document.querySelectorAll('.brand-logo-item');
-            if (logos.length <= 1) return;
+            // ONLY target logos within the mobile carousel
+            const mobileLogos = document.querySelectorAll('.mobile-brand-carousel .brand-logo-item');
+            if (mobileLogos.length <= 1) return;
 
-            // Clear existing
+            // Clear existing interval
             if (window.brandInterval) clearInterval(window.brandInterval);
 
             let current = 0;
             window.brandInterval = setInterval(() => {
-                // Logic handled by CSS media queries mostly, but we toggle active class for Mobile Fade
-                logos.forEach(l => l.classList.remove('active'));
-                current = (current + 1) % logos.length;
-                logos[current].classList.add('active');
+                mobileLogos.forEach(l => l.classList.remove('active'));
+                current = (current + 1) % mobileLogos.length;
+                mobileLogos[current].classList.add('active');
             }, 2000);
         };
 
