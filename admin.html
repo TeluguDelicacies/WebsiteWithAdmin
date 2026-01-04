@@ -1314,6 +1314,24 @@
                                     onchange="handleAssetUpload(this, 'catSubBrandLogo')">
                             </div>
                         </div>
+                        <!-- Draggable Sections List will be rendered here -->
+                        <div id="sectionListContainer" class="draggable-list">
+                            <div style="text-align:center; padding:20px;">
+                                <i class="fas fa-spinner fa-spin"></i> Loading sections...
+                            </div>
+                        </div>
+
+                        <!-- Legacy checkboxes hidden or removed (using JS now) -->
+                        <div style="display:none;">
+                            <input type="checkbox" id="secShowHero">
+                            <input type="checkbox" id="secShowTicker">
+                            <input type="checkbox" id="secShowCollections">
+                            <input type="checkbox" id="secShowTestimonials">
+                            <input type="checkbox" id="secShowWhyUs">
+                            <input type="checkbox" id="secShowContact">
+                            <input type="checkbox" id="secShowQuickLayout">
+                            <input type="checkbox" id="secShowFooter">
+                        </div>
                         <div class="form-group">
                             <label>Slug (Unique ID)</label>
                             <input type="text" id="catSlug" required>

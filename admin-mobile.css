@@ -18,6 +18,38 @@ Only loads on screens < 768px
     display: flex !important;
 }
 
+/* Draggable List Styles for Section Ordering */
+.draggable-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.draggable-item {
+    background: white;
+    padding: 15px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.draggable-item.dragging {
+    opacity: 0.5;
+    background: #f0f9ff;
+    border: 2px dashed var(--color-primary-blue);
+}
+
+.draggable-item .handle {
+    cursor: grab;
+    padding-right: 15px;
+    color: var(--text-secondary);
+}
+
 #mobile-bottom-nav {
     display: flex !important;
 }

@@ -3625,3 +3625,49 @@ window.addEventListener('storage', function (e) {
         window.updateMainCartUI();
     }
 });
+// ========================================
+// WEBSITE SECTION REORDERING LOGIC
+// ========================================
+async function applySectionOrder() {
+    try {
+        const { data: settings, error } = await supabase.from('website_sections').select('section_order').single();
+        if (error || !settings || !settings.section_order) return;
+
+        const order = settings.section_order;
+        if (!Array.isArray(order) || order.length === 0) return;
+
+        const heroSection = document.getElementById('sec-hero'); // Usually fixed at top, but let's allow reorder if requested
+        const parent = heroSection ? heroSection.parentNode : document.body;
+
+        // We only want to reorder specific sections that are siblings in the main flow
+        // The main container in index.html is actually Body -> Header, Hero, Ticker, etc.
+        // So we can reorder children of Body or a Main wrapper if it existed.
+        // In current HTML, sections are direct children of Body (after Header).
+
+        // Identify the reference point (e.g., after Header)
+        const header = document.querySelector('header');
+
+        // Create a fragment to hold ordered elements
+        const fragment = document.createDocumentFragment();
+
+        order.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) fragment.appendChild(el);
+        });
+
+        // Insert after header (or prepend if header missing)
+        if (header && header.nextSibling) {
+            header.parentNode.insertBefore(fragment, header.nextSibling);
+        } else {
+            document.body.prepend(fragment);
+        }
+
+    } catch (e) {
+        console.warn('Section reordering failed:', e);
+    }
+}
+
+// Call efficiently on load (concurrent with other inits)
+// Add to the existing DOMContentLoaded listener or just run it script-end if Supabase is ready
+// Since script is module type, we can run it top-level
+applySectionOrder();

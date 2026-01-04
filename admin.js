@@ -1971,61 +1971,115 @@ async function fetchSectionSettings() {
         if (error && error.code !== 'PGRST116') throw error;
 
         if (data) {
-            // Hero Section
             editSnapshot = JSON.parse(JSON.stringify(data)); // Snapshot
-            const heroToggle = document.getElementById('secShowHero');
-            if (heroToggle) heroToggle.checked = data.show_hero_section !== false;
 
-            // Product Carousel
-            const tickerToggle = document.getElementById('secShowTicker');
-            if (tickerToggle) tickerToggle.checked = data.show_product_carousel !== false;
+            // Map DB fields to Element IDs
+            const mapping = {
+                'secShowHero': 'show_hero_section',
+                'secShowTicker': 'show_product_carousel',
+                'secShowCollections': 'show_collections',
+                'secShowQuickLayout': 'show_quick_layout',
+                'secShowTestimonials': 'show_testimonials',
+                'secShowWhyUs': 'show_why_us',
+                'secShowContact': 'show_contact_form',
+                'secShowFooter': 'show_footer'
+            };
 
-            // Our Collections
-            const collectionsToggle = document.getElementById('secShowCollections');
-            if (collectionsToggle) collectionsToggle.checked = data.show_collections !== false;
+            for (const [elId, dbField] of Object.entries(mapping)) {
+                const el = document.getElementById(elId);
+                if (el) el.checked = data[dbField] !== false;
+            }
 
-            // Quick Commerce Layout
-            const quickLayoutToggle = document.getElementById('secShowQuickLayout');
-            if (quickLayoutToggle) quickLayoutToggle.checked = data.show_quick_layout !== false;
-
-            // Testimonials
-            const testimonialsToggle = document.getElementById('secShowTestimonials');
-            if (testimonialsToggle) testimonialsToggle.checked = data.show_testimonials !== false;
-
-            // Why Us
-            const whyUsToggle = document.getElementById('secShowWhyUs');
-            if (whyUsToggle) whyUsToggle.checked = data.show_why_us !== false;
-
-            // Get In Touch (Contact Form)
-            const contactToggle = document.getElementById('secShowContact');
-            if (contactToggle) contactToggle.checked = data.show_contact_form !== false;
-
-            // Footer
-            const footerToggle = document.getElementById('secShowFooter');
-            if (footerToggle) footerToggle.checked = data.show_footer !== false;
+            // Render Draggable List
+            if (typeof renderSectionList === 'function') renderSectionList(data);
         } else {
-            // No data found - set all toggles to ON (default) with null checks
-            const heroEl = document.getElementById('secShowHero');
-            const tickerEl = document.getElementById('secShowTicker');
-            const collectionsEl = document.getElementById('secShowCollections');
-            const quickLayoutEl = document.getElementById('secShowQuickLayout');
-            const testimonialsEl = document.getElementById('secShowTestimonials');
-            const whyUsEl = document.getElementById('secShowWhyUs');
-            const contactEl = document.getElementById('secShowContact');
-            const footerEl = document.getElementById('secShowFooter');
+            // No data found - set all toggles to ON (default)
+            const toggles = [
+                'secShowHero', 'secShowTicker', 'secShowCollections',
+                'secShowQuickLayout', 'secShowTestimonials', 'secShowWhyUs',
+                'secShowContact', 'secShowFooter'
+            ];
+            toggles.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = true;
+            });
 
-            if (heroEl) heroEl.checked = true;
-            if (tickerEl) tickerEl.checked = true;
-            if (collectionsEl) collectionsEl.checked = true;
-            if (quickLayoutEl) quickLayoutEl.checked = true;
-            if (testimonialsEl) testimonialsEl.checked = true;
-            if (whyUsEl) whyUsEl.checked = true;
-            if (contactEl) contactEl.checked = true;
-            if (footerEl) footerEl.checked = true;
+            // Render default list
+            if (typeof renderSectionList === 'function') renderSectionList({});
         }
     } catch (e) {
         console.error('Section settings fetch error:', e);
+        showToast('Error loading settings: ' + e.message, 'error');
     }
+}
+
+// Render Draggable Section List
+function renderSectionList(data) {
+    const listContainer = document.getElementById('sectionListContainer');
+    if (!listContainer) return;
+
+    // Define Sections Config
+    const sectionsConfig = [
+        { id: 'sec-hero', label: 'Hero Section', toggleId: 'secShowHero', dbField: 'show_hero_section' },
+        { id: 'sec-ticker', label: 'Product Carousel', toggleId: 'secShowTicker', dbField: 'show_product_carousel' },
+        { id: 'sec-collections', label: 'Our Collections', toggleId: 'secShowCollections', dbField: 'show_collections' },
+        { id: 'sec-testimonials', label: 'Testimonials', toggleId: 'secShowTestimonials', dbField: 'show_testimonials' },
+        { id: 'sec-why-us', label: 'Why Us Features', toggleId: 'secShowWhyUs', dbField: 'show_why_us' },
+        { id: 'sec-contact', label: 'Contact Form', toggleId: 'secShowContact', dbField: 'show_contact_form' },
+        { id: 'sec-footer', label: 'Footer', toggleId: 'secShowFooter', dbField: 'show_footer' }
+    ];
+
+    // Get Order from DB or Default
+    let order = data.section_order || sectionsConfig.map(s => s.id);
+
+    // Validate order contains all known sections (append any new ones)
+    sectionsConfig.forEach(s => {
+        if (!order.includes(s.id)) order.push(s.id);
+    });
+
+    listContainer.innerHTML = '';
+
+    order.forEach(sectionId => {
+        const config = sectionsConfig.find(s => s.id === sectionId);
+        if (!config) return;
+
+        const isChecked = data[config.dbField] !== false;
+
+        const item = document.createElement('div');
+        item.className = 'draggable-item';
+        item.setAttribute('draggable', 'true');
+        item.dataset.id = config.id;
+        item.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="handle"><i class="fas fa-grip-vertical"></i></div>
+                <div style="font-weight:500;">${config.label}</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="${config.toggleId}_list" ${isChecked ? 'checked' : ''} onchange="document.getElementById('${config.toggleId}').checked = this.checked">
+                <span class="slider round"></span>
+            </label>
+        `;
+
+        // Sync initial state with hidden legacy checkboxes
+        const hiddenCheckbox = document.getElementById(config.toggleId);
+        if (hiddenCheckbox) hiddenCheckbox.checked = isChecked;
+
+        // Drag Events
+        addDragHandlers(item);
+
+        listContainer.appendChild(item);
+    });
+}
+
+// Re-use existing drag handlers but slightly adapted or new ones?
+// Existing handlers rely on 'draggable-item' class which we used.
+// We need to ensure 'handleDrop' works for this list too.
+function addDragHandlers(item) {
+    item.addEventListener('dragstart', handleDragStart);
+    item.addEventListener('dragover', handleDragOver);
+    item.addEventListener('drop', handleDrop);
+    item.addEventListener('dragenter', handleDragEnter);
+    item.addEventListener('dragleave', handleDragLeave);
 }
 
 window.saveSectionSettings = async function () {
@@ -2038,6 +2092,12 @@ window.saveSectionSettings = async function () {
     }
 
     // All defaults are TRUE
+    // Reconstruct Section Data from Hidden Checkboxes (synced from list)
+
+    // Capture Order from List
+    const listContainer = document.getElementById('sectionListContainer');
+    const order = Array.from(listContainer.children).map(el => el.dataset.id).filter(id => id);
+
     const sectionData = {
         show_hero_section: document.getElementById('secShowHero')?.checked ?? true,
         show_product_carousel: document.getElementById('secShowTicker')?.checked ?? true,
@@ -2046,7 +2106,8 @@ window.saveSectionSettings = async function () {
         show_testimonials: document.getElementById('secShowTestimonials')?.checked ?? true,
         show_why_us: document.getElementById('secShowWhyUs')?.checked ?? true,
         show_contact_form: document.getElementById('secShowContact')?.checked ?? true,
-        show_footer: document.getElementById('secShowFooter')?.checked ?? true
+        show_footer: document.getElementById('secShowFooter')?.checked ?? true,
+        section_order: order // Save the JSON Array
     };
 
     try {
