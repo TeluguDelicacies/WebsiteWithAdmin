@@ -1,0 +1,433 @@
+/* 
+=========================================
+MOBILE ADMIN DASHBOARD CSS
+Only loads on screens < 768px 
+=========================================
+*/
+
+/* --- Hide Desktop Elements --- */
+.dashboard-header .view-toggle,
+.warning-sidebar,
+.dashboard-header>div:first-child>h2 {
+    display: none !important;
+}
+
+/* --- Mobile Header --- */
+#mobile-admin-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#mobile-admin-header .mobile-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-primary-blue);
+}
+
+#mobile-admin-header .mobile-header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+#mobile-admin-header .mobile-header-actions a,
+#mobile-admin-header .mobile-header-actions button {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* --- Mobile Bottom Navigation --- */
+#mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: white;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+    padding: 0 5px;
+}
+
+#mobile-bottom-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    cursor: pointer;
+    padding: 8px 4px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    min-width: 50px;
+}
+
+#mobile-bottom-nav button i {
+    font-size: 1.2rem;
+}
+
+#mobile-bottom-nav button.active {
+    color: var(--color-primary-blue);
+    background: #e0f2fe;
+}
+
+/* --- Body Padding for Fixed Header/Nav --- */
+.admin-container.dashboard {
+    padding-top: 70px !important;
+    padding-bottom: 80px !important;
+}
+
+.admin-content-area {
+    width: 100% !important;
+    padding: 0 10px !important;
+}
+
+/* --- Dashboard Header: Show Action Row --- */
+.dashboard-header {
+    margin-bottom: 10px !important;
+    padding: 10px !important;
+    background: white !important;
+    border-radius: 8px !important;
+}
+
+/* Hide only the title row, keep action row visible */
+.dashboard-header>div:first-child {
+    display: none !important;
+}
+
+/* Make action row visible and full-width */
+#actionRow {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Product filters - visible on Products tab */
+#productFilterRow {
+    display: flex !important;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Action buttons - icon only with consistent sizing */
+#addBtn,
+.header-action-btn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+}
+
+/* Hide button text, show only icon */
+#addBtnText {
+    display: none !important;
+}
+
+/* Filter dropdowns - full width */
+.custom-filter-container {
+    flex: 1;
+    min-width: 140px;
+}
+
+.filter-trigger {
+    width: 100%;
+    height: 44px;
+}
+
+/* ====================================
+   FIX #2: SINGLE COLUMN CARD LAYOUT
+   ==================================== */
+
+/* Container: Single column stack */
+#productListContainer,
+#categoryList,
+#testimonialList,
+#whyUsFeatureList {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Cards: Clean, no overlap, no shadows */
+.admin-product-card {
+    display: block !important;
+    width: 100% !important;
+    background: white !important;
+    border-radius: 12px !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    margin: 0 !important;
+}
+
+/* Card Row: Simple flex layout */
+.card-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px !important;
+    background: white !important;
+    cursor: pointer;
+}
+
+/* Card Image */
+.card-row img {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 8px !important;
+    object-fit: cover !important;
+    flex-shrink: 0;
+}
+
+/* Card Info */
+.row-info {
+    flex: 1;
+    min-width: 0;
+    /* Prevents flex overflow */
+}
+
+.row-info h3 {
+    font-size: 0.95rem !important;
+    margin: 0 0 2px 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.row-info .tagline {
+    font-size: 0.75rem !important;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.row-info .category-badge {
+    display: none !important;
+}
+
+/* Hide desktop columns */
+.row-variants,
+.display-order-cell,
+.card-row>i.fa-chevron-down {
+    display: none !important;
+}
+
+/* Hide drag grip on main view */
+.card-row>div[style*="grip-vertical"] {
+    display: none !important;
+}
+
+/* ====================================
+   FIX #3: EDIT/DELETE BUTTONS
+   ==================================== */
+
+.row-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    flex-shrink: 0;
+}
+
+.row-actions button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem !important;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.row-actions button:hover,
+.row-actions button:active {
+    background: #f3f4f6 !important;
+}
+
+/* Delete button - red icon */
+.row-actions button[style*="color-error"],
+.row-actions button[onclick*="delete"] {
+    color: #ef4444 !important;
+}
+
+/* ====================================
+   FIX #4: MODAL / EDIT PANES
+   ==================================== */
+
+.modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    padding: 16px !important;
+    padding-bottom: 90px !important;
+}
+
+.modal-content h2 {
+    font-size: 1.2rem !important;
+    margin-bottom: 16px !important;
+}
+
+/* Vertical form stacking */
+.modal-content form>div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+    font-size: 16px !important;
+    padding: 12px !important;
+}
+
+/* Fixed bottom Save/Cancel bar */
+.modal-content form {
+    padding-bottom: 80px;
+}
+
+.modal-content button[type="submit"],
+.modal-content .submit-btn {
+    position: fixed !important;
+    bottom: 16px !important;
+    left: 16px !important;
+    right: 16px !important;
+    min-height: 50px !important;
+    font-size: 1rem !important;
+    z-index: 1001;
+}
+
+/* Cancel button styling */
+.modal-content .cancel-btn,
+.modal-content button[onclick*="close"] {
+    position: fixed !important;
+    bottom: 72px !important;
+    left: 16px !important;
+    right: 16px !important;
+    min-height: 44px !important;
+    background: white !important;
+    border: 1px solid var(--border-medium) !important;
+    color: var(--text-secondary) !important;
+    z-index: 1001;
+}
+
+/* --- Variants Section --- */
+.variant-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    background: #f8fafc !important;
+    border-radius: 8px !important;
+}
+
+.variant-row>div:first-child {
+    grid-column: span 2;
+}
+
+.variant-row label {
+    font-size: 0.7rem !important;
+}
+
+.variant-row input {
+    padding: 10px !important;
+    font-size: 14px !important;
+}
+
+.variant-row>button {
+    grid-column: span 2;
+    justify-self: end;
+}
+
+/* ====================================
+   FIX #5: REMOVE VISUAL ARTIFACTS
+   ==================================== */
+
+.view-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* Clean up Settings/Sections views */
+#sectionsContainer,
+#settingsContainer {
+    background: white !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+}
+
+.sections-grid {
+    grid-template-columns: 1fr !important;
+}
+
+.section-toggle-card {
+    padding: 12px !important;
+    box-shadow: none !important;
+}
+
+/* Expanded details - clean */
+.card-expanded-details {
+    padding: 12px !important;
+    background: #f9fafb !important;
+    border-top: 1px solid #e5e7eb !important;
+}
+
+.card-expanded-details>div {
+    grid-template-columns: 1fr !important;
+}
+
+/* Dragging state */
+.draggable-item.dragging {
+    opacity: 0.5;
+}
+
+.draggable-item.over {
+    border: 2px dashed var(--color-primary-blue) !important;
+}

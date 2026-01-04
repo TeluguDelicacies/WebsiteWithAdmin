@@ -320,6 +320,14 @@ window.switchView = (view) => {
         activeStyle(viewSettingsBtn);
         fetchSettings();
     }
+
+    // Update mobile bottom nav active state
+    const mobileNav = document.getElementById('mobile-bottom-nav');
+    if (mobileNav) {
+        mobileNav.querySelectorAll('button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === view);
+        });
+    }
 };
 
 window.handleAddClick = () => {

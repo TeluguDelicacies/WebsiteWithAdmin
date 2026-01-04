@@ -8,6 +8,7 @@
     <title>Admin Portal - Telugu Delicacies</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-mobile.css" media="screen and (max-width: 768px)">
     <style>
         /* Admin specific styles */
         *,
@@ -616,6 +617,15 @@
 </head>
 
 <body>
+    <!-- Mobile Admin Header (Hidden on Desktop) -->
+    <header id="mobile-admin-header">
+        <span class="mobile-title">Admin Dashboard</span>
+        <div class="mobile-header-actions">
+            <a href="index.html" title="Home"><i class="fas fa-home"></i></a>
+            <button onclick="handleLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </header>
+
     <!-- Login Section -->
     <div id="loginSection" class="login-box">
         <h2>Admin Login</h2>
@@ -1420,6 +1430,22 @@
         </div>
         <!-- Toast Container -->
         <div id="toast-container"></div>
+
+        <!-- Mobile Bottom Navigation (Hidden on Desktop) -->
+        <nav id="mobile-bottom-nav">
+            <button onclick="switchView('products')" data-view="products"><i
+                    class="fas fa-box"></i><span>Products</span></button>
+            <button onclick="switchView('categories')" data-view="categories"><i
+                    class="fas fa-tags"></i><span>Categories</span></button>
+            <button onclick="switchView('testimonials')" data-view="testimonials"><i
+                    class="fas fa-quote-right"></i><span>Reviews</span></button>
+            <button onclick="switchView('why-us')" data-view="why-us"><i class="fas fa-star"></i><span>Why
+                    Us</span></button>
+            <button onclick="switchView('sections')" data-view="sections"><i
+                    class="fas fa-layer-group"></i><span>Sections</span></button>
+            <button onclick="switchView('settings')" data-view="settings"><i
+                    class="fas fa-cog"></i><span>Settings</span></button>
+        </nav>
 </body>
 
 </html>
