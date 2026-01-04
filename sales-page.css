@@ -2774,4 +2774,19 @@ textarea {
         right: 5px;
         top: 5px;
     }
+
+    /* Product Detail Title - Allow 2-line wrap with smaller font */
+    .product-details .product-title {
+        font-size: clamp(1.1rem, 4vw, 1.4rem);
+        white-space: normal;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        text-align: left;
+        line-height: 1.3;
+        max-height: 2.6em;
+    }
 }
