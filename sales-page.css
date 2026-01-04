@@ -2764,3 +2764,21 @@ textarea {
         position: relative;
     }
 }
+
+/* --- Hide overlay logo when card is flipped to show description --- */
+.gallery-inner.flipped~.overlay-logo,
+.product-gallery:has(.gallery-inner.flipped) .overlay-logo {
+    opacity: 0 !important;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Mobile: Also reduce logo size and move it further right to prevent overlap */
+@media (max-width: 768px) {
+    .overlay-logo {
+        max-width: 60px;
+        max-height: 60px;
+        right: 5px;
+        top: 5px;
+    }
+}
