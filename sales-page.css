@@ -581,11 +581,10 @@ textarea {
     }
 
     .overlay-logo {
-        width: 60px;
-        /* Smaller overlay on mobile */
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        max-width: 50px;
+        max-height: 50px;
+        top: 8px;
+        right: 8px;
     }
 }
 
@@ -652,14 +651,15 @@ textarea {
     margin-bottom: 20px;
 }
 
-/* Sub-brand overlay logo - Transparent with centered flex positioning */
+/* Sub-brand overlay logo - Anchored to top-right corner */
 .overlay-logo {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: clamp(50px, 20%, 100px);
-    max-height: clamp(50px, 20%, 100px);
+    top: 10px;
+    right: 10px;
+    left: auto;
+    transform: none;
+    max-width: clamp(40px, 15%, 80px);
+    max-height: clamp(40px, 15%, 80px);
     width: auto;
     height: auto;
     z-index: 100;
@@ -2549,12 +2549,19 @@ textarea {
         padding: 10px 15px;
     }
 
+    /* Left-align text on mobile */
+    .category-header-simple>div:first-child {
+        text-align: left;
+    }
+
     .category-header-simple h1 {
         font-size: 1.25rem;
+        text-align: left;
     }
 
     .category-header-simple p {
         font-size: 0.75rem;
+        text-align: left;
     }
 }
 
@@ -2578,11 +2585,13 @@ textarea {
 
 @media (max-width: 768px) {
 
-    /* Mobile brand logos wrapper - larger and transparent */
+    /* Mobile brand logos wrapper - larger, no clipping */
     .brand-logos-wrapper {
         position: relative;
         width: 90px;
         height: 90px;
+        min-width: 90px;
+        min-height: 90px;
         margin-left: auto;
         display: flex;
         align-items: center;
@@ -2590,6 +2599,9 @@ textarea {
         background: transparent;
         border: none;
         box-shadow: none;
+        overflow: visible;
+        /* Prevent clipping */
+        flex-shrink: 0;
     }
 
     .brand-logo-item {
@@ -2599,8 +2611,8 @@ textarea {
         transform: translate(-50%, -50%);
         width: auto;
         height: auto;
-        max-width: 85%;
-        max-height: 85%;
+        max-width: 100%;
+        max-height: 100%;
         opacity: 0;
         visibility: hidden;
         object-fit: contain;
@@ -2617,6 +2629,7 @@ textarea {
         height: 80px;
         object-fit: contain;
         background: transparent;
+        flex-shrink: 0;
     }
 }
 

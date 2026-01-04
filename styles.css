@@ -4949,9 +4949,10 @@ body:not(.quick-commerce-mode) .card-hero-image img {
 
 body:not(.quick-commerce-mode) .sub-brand-overlay {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 10px;
+  right: 10px;
+  left: auto;
+  transform: none;
   background: transparent;
   padding: 0;
   border-radius: 0;
@@ -5527,7 +5528,9 @@ UTILITY CLASSES
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow: visible;
+    /* Prevent clipping */
+    flex-shrink: 0;
   }
 
   /* Mobile: Cycling logos - centered with transform */
