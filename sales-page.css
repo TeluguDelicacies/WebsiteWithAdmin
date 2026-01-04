@@ -652,16 +652,20 @@ textarea {
     margin-bottom: 20px;
 }
 
-/* Sub-brand overlay logo - Now positioned on product-gallery (outside 3D transform) */
+/* Sub-brand overlay logo - Transparent with centered flex positioning */
 .overlay-logo {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: clamp(50px, 15%, 80px);
+    max-width: clamp(50px, 20%, 100px);
+    max-height: clamp(50px, 20%, 100px);
+    width: auto;
     height: auto;
     z-index: 100;
     pointer-events: none;
+    object-fit: contain;
+    background: transparent;
 }
 
 /* Component: Details - COMPACT for viewport fit */
@@ -2558,30 +2562,34 @@ textarea {
     display: flex;
     gap: 15px;
     align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    background: transparent;
 }
 
 .brand-logo-item {
-    height: 80px;
+    max-height: 80px;
+    max-width: 80px;
+    height: auto;
     width: auto;
     object-fit: contain;
-    transition: opacity 1s ease-in-out;
+    transition: opacity 0.5s ease-in-out;
 }
 
 @media (max-width: 768px) {
 
-    /* Square container logic is handled by parent .category-header-simple height? 
-       Actually, let's make the wrapper relative and items absolute for cross-fade. */
+    /* Mobile brand logos wrapper - larger and transparent */
     .brand-logos-wrapper {
         position: relative;
-        width: 50px;
-        /* Fixed width for logo area */
-        height: 50px;
+        width: 90px;
+        height: 90px;
         margin-left: auto;
-        /* Push to right */
         display: flex;
         align-items: center;
         justify-content: center;
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
 
     .brand-logo-item {
@@ -2591,24 +2599,24 @@ textarea {
         transform: translate(-50%, -50%);
         width: auto;
         height: auto;
-        max-width: 100%;
-        max-height: 100%;
+        max-width: 85%;
+        max-height: 85%;
         opacity: 0;
         visibility: hidden;
-        /* Hidden by default */
+        object-fit: contain;
     }
 
     .brand-logo-item.active {
         opacity: 1;
         visibility: visible;
-        /* Visible */
     }
 
-    /* Category header images - same size as brand logos */
+    /* Category header images - improved sizing */
     .category-header-simple>img {
-        width: 50px;
-        height: 50px;
+        width: 80px;
+        height: 80px;
         object-fit: contain;
+        background: transparent;
     }
 }
 
