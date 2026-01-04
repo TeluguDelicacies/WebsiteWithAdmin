@@ -446,11 +446,9 @@
 
         // --- Widget: Dynamic Sub-Brand Header ---
         window.renderBrandWidget = function () {
-            // Get unique sub-brands with logos
+            // 1. Collect your brands (Keep your existing logic here)
             const brands = [];
             const seen = new Set();
-
-            // Collect unique sub-brands
             state.categories.forEach(c => {
                 if (c.sub_brand && c.sub_brand_logo_url && !seen.has(c.sub_brand)) {
                     brands.push(c);
@@ -458,37 +456,32 @@
                 }
             });
 
-            if (brands.length === 0) {
-                // Fallback to simple static header
-                const tagline = state.settings?.all_products_tagline || 'Explore our complete range of authentic delicacies.';
-                return `
-                <div class="category-header-simple">
-                    <div>
-                        <h1>All Products</h1>
-                        <p>${tagline}</p>
-                    </div>
-                </div>`;
-            }
+            if (brands.length === 0) return '';
 
-            // HTML Structure
             const tagline = state.settings?.all_products_tagline || 'Featuring our premium brands';
+
+            // 2. THE CRITICAL CHANGE: 
+            // We create ONE single container (.category-header-simple).
+            // Child 1: The Text Div.
+            // Child 2: The Logo Wrapper (The Carousel).
+
             return `
-            <div class="category-header-simple brand-widget-container">
-                <div>
+            <div class="category-header-simple brand-widget-container" style="display: flex; align-items: center; justify-content: space-between;">
+                
+                <div class="header-text-group">
                     <h1>All Products</h1>
                     <p>${tagline}</p>
                 </div>
                 
-                <!-- Brand Logos: Separate Desktop and Mobile Containers -->
                 <div class="brand-logos-wrapper">
-                    <!-- Desktop: Static grid of all logos -->
                     <div class="desktop-brand-grid">
                         ${brands.map(b => `
-                            <img src="${b.sub_brand_logo_url}" class="brand-logo-item" alt="${b.sub_brand}">
+                            <div class="desktop-logo-wrapper">
+                                <img src="${b.sub_brand_logo_url}" class="brand-logo-item" alt="${b.sub_brand}">
+                            </div>
                         `).join('')}
                     </div>
 
-                    <!-- Mobile: Fading carousel (one at a time) -->
                     <div class="mobile-brand-carousel">
                         ${brands.map((b, idx) => `
                             <img src="${b.sub_brand_logo_url}" 
@@ -498,6 +491,7 @@
                         `).join('')}
                     </div>
                 </div>
+
             </div>`;
         };
 

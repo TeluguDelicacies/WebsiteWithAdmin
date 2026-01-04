@@ -2735,3 +2735,32 @@ textarea {
     line-height: 1.3;
     max-height: 2.6em;
 }
+
+/* --- Brand Widget Alignment Fix --- */
+
+/* Make the wrapper act like the old image on the right */
+.brand-logos-wrapper {
+    margin-left: auto;
+    /* Push to the far right */
+    align-self: center;
+    /* Center vertically */
+    display: flex;
+    /* Keep internal items tidy */
+    justify-content: flex-end;
+
+    /* Ensure it doesn't get crushed */
+    flex-shrink: 0;
+    background: transparent !important;
+}
+
+/* Ensure Mobile Carousel matches the old image size */
+@media (max-width: 768px) {
+    .mobile-brand-carousel {
+        width: 90px;
+        /* Match your old image width */
+        height: 90px;
+        /* Match your old image height */
+        display: block !important;
+        position: relative;
+    }
+}
