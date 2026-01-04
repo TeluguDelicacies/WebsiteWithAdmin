@@ -2621,14 +2621,14 @@ textarea {
         height: 80px;
         min-width: 80px;
         min-height: 80px;
+        /* Flex item positioning - stays on right side of header */
         margin-left: auto;
-        display: block;
-        /* Not flex - stacked children */
+        flex-shrink: 0;
+        /* Internal layout for stacked logos */
         background: transparent;
         border: none;
         box-shadow: none;
         overflow: hidden;
-        flex-shrink: 0;
     }
 
     /* Mobile: All logos stacked on top of each other */
