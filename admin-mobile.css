@@ -222,8 +222,21 @@ Only loads on screens < 768px
     border-color: #f59e0b !important;
 }
 
-/* Save buttons - floppy disk icon only */
-#saveOrderBtn,
+/* Save Order button - matches Add button style (floppy disk instead of +) */
+#saveOrderBtn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    border: 1px solid var(--border-medium) !important;
+    background: white !important;
+    color: #10b981 !important;
+    border-radius: 8px !important;
+    font-size: 1.2rem !important;
+    /* JS controls display - only shows after drag */
+}
+
+/* Save Section Settings - green circle */
 #saveSettingsBtn {
     width: 48px !important;
     height: 48px !important;
@@ -241,7 +254,9 @@ Only loads on screens < 768px
 
 /* Hide all text after the icon */
 #saveOrderBtn i~*,
-#saveSettingsBtn i~* {
+#saveOrderBtn .btn-text,
+#saveSettingsBtn i~*,
+#saveSettingsBtn .btn-text {
     display: none !important;
 }
 

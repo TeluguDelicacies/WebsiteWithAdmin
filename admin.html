@@ -744,10 +744,9 @@
                     <!-- RIGHT: Action Buttons -->
                     <div style="display: flex; gap: 10px; align-items: center; margin-left: auto;">
                         <!-- Save Order Button (Hidden by default) -->
-                        <button id="saveOrderBtn" class="header-action-btn"
-                            style="display: none; color: #059669; border-color: #059669;"
+                        <button id="saveOrderBtn" class="header-action-btn" style="display: none;"
                             onclick="saveNewOrder('product')">
-                            <i class="fas fa-save"></i> Save Order
+                            <i class="fas fa-save"></i><span class="btn-text">Save Order</span>
                         </button>
 
                         <!-- Add Button (Context-Aware) -->
@@ -807,7 +806,7 @@
                         style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
                         <button id="saveSettingsBtn" onclick="saveSectionSettings()" class="header-action-btn"
                             style="min-width: auto; padding: 0 20px;">
-                            <i class="fas fa-save"></i> Save Section Settings
+                            <i class="fas fa-save"></i><span class="btn-text">Save Section Settings</span>
                         </button>
                     </div>
                 </div>
