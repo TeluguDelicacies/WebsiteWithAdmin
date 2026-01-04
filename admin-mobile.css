@@ -133,25 +133,50 @@ Only loads on screens < 768px
     display: none !important;
 }
 
-/* Make action row visible and full-width */
+/* Make action row visible and single-line */
 #actionRow {
     display: flex !important;
-    flex-wrap: wrap;
-    gap: 10px;
-    width: 100%;
-}
-
-/* Product filters - visible on Products tab */
-#productFilterRow {
-    display: flex !important;
-    width: 100%;
-    flex-wrap: wrap;
+    flex-wrap: nowrap !important;
     gap: 8px;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-end;
 }
 
-/* Action buttons - icon only with consistent sizing */
+/* Product filters - DON'T override display (JS controls visibility) */
+#productFilterRow {
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    align-items: center;
+    /* JS sets display: flex when Products section is active */
+}
+
+/* All action buttons on same line - compact icons */
 #addBtn,
-.header-action-btn {
+.header-action-btn,
+#filterTrigger,
+#trendingTrigger {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    flex-shrink: 0;
+}
+
+/* Hide button text, show only icon */
+#addBtnText {
+    display: none !important;
+}
+
+/* Filter controls - icon only on mobile */
+.custom-filter-container {
+    flex: 0 0 auto;
+}
+
+/* Category filter - icon button */
+#filterTrigger {
     width: 48px !important;
     height: 48px !important;
     min-width: 48px !important;
@@ -160,37 +185,63 @@ Only loads on screens < 768px
     border-radius: 8px !important;
 }
 
-/* Hide button text, show only icon */
-#addBtnText {
+/* Hide filter label and chevron on mobile */
+#filterTrigger #filterLabel,
+#filterTrigger .chevron {
     display: none !important;
 }
 
-/* Filter dropdowns - full width */
-.custom-filter-container {
-    flex: 1;
-    min-width: 140px;
+#filterTrigger .filter-icon {
+    margin: 0 !important;
 }
 
-.filter-trigger {
-    width: 100%;
-    height: 44px;
+/* Trending filter - icon button */
+#trendingTrigger {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
 }
 
-/* FIX #4: Save Order button - icon only, no border */
-#saveOrderBtn {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
+/* Hide trending text and toggle, show only flame icon */
+#trendingTrigger>div:first-child span:last-child,
+#trendingTrigger .toggle-switch-sm {
+    display: none !important;
+}
+
+#trendingTrigger>div:first-child {
+    gap: 0 !important;
+}
+
+/* Active state for trending */
+#trendingTrigger.active,
+#trendingFilter:checked~.toggle-slider {
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+}
+
+/* Save buttons - floppy disk icon only */
+#saveOrderBtn,
+#saveSettingsBtn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
     padding: 0 !important;
     border: none !important;
     background: #10b981 !important;
     color: white !important;
     border-radius: 50% !important;
-    font-size: 1.1rem !important;
+    font-size: 1.2rem !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 
-#saveOrderBtn i+*,
-#saveOrderBtn span {
+/* Hide all text after the icon */
+#saveOrderBtn i~*,
+#saveSettingsBtn i~* {
     display: none !important;
 }
 
