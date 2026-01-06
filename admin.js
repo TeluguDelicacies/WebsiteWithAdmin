@@ -1,5 +1,6 @@
 
 import { supabase } from './lib/supabase.js';
+window.supabase = supabase; // Expose globally for other scripts (like csv_manager.js)
 
 // Helper: Generate URL-friendly slug from product name
 function generateSlug(name) {
@@ -2454,3 +2455,38 @@ window.getAppState = () => ({
     allCategories, // Ensure this variable exists in admin.js
     allTestimonials
 });
+
+// ==========================================
+// CSV MANAGER SHIMS (Fallbacks if script fails)
+// ==========================================
+const createShim = (name) => {
+    // Only shim if not already defined (though admin.js loads first so it defines them first)
+    // We define them here. csv_manager.js (loading second) will overwrite them if it uses window.name = ...
+    // OR if we use CsvManager pattern, we rely on these shims to proxy.
+    // Let's implement Proxy Shim Pattern.
+    window[name] = (...args) => {
+        if (window.CsvManager && typeof window.CsvManager[name] === 'function') {
+            return window.CsvManager[name](...args);
+        }
+
+        // Backward compatibility: If csv_manager.js still uses window.openCsvModal (old way)
+        // Then these shims would have been overwritten. 
+        // IF we are here, it means they were NOT overwritten OR we are using CsvManager pattern 
+        // but CsvManager is missing.
+
+        console.warn(`Shim: ${name} called but CSV Manager not ready.`);
+        alert('CSV Manager functionality is not loaded. Please check console for errors or refresh.');
+    };
+};
+
+[
+    'openCsvModal',
+    'closeCsvModal',
+    'switchCsvTab',
+    'exportProductsCsv',
+    'handleCsvUpload',
+    'processCsvImport',
+    'selectAllCsvFields',
+    'clearCsvUpload'
+].forEach(createShim);
+console.log('CSV Shims Initialized from admin.js');
