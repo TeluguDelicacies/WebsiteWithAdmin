@@ -1011,9 +1011,12 @@
             const activeV = variants[0];
             const label = `${activeV.quantity} - ₹${activeV.price}`;
 
+            // Store variants in window for dropdown access
+            window._currentVariants = variants;
+
             return `
             <div class="variant-select-wrapper">
-                <div class="variant-trigger" id="variantTrigger" onclick="event.stopPropagation(); window.openVariantDropdown(this, ${JSON.stringify(variants).replace(/'/g, "\\'")})">
+                <div class="variant-trigger" id="variantTrigger" onclick="event.stopPropagation(); window.openVariantDropdown(this)">
                     <span id="variantLabel">${label}</span>
                     <i class="fas fa-chevron-down" style="font-size:0.8rem; opacity:0.7;"></i>
                 </div>
@@ -1048,7 +1051,10 @@
                 }
             };
 
-            window.openVariantDropdown = function (triggerEl, variants) {
+            window.openVariantDropdown = function (triggerEl) {
+                const variants = window._currentVariants;
+                if (!variants || !variants.length) return;
+
                 const existing = document.getElementById('variant-portal-dropdown');
                 if (existing) {
                     existing.remove();
@@ -1061,7 +1067,7 @@
 
                 menu.innerHTML = variants.map((v, i) => `
                     <div class="variant-portal-item ${i === activeVariantIdx ? 'active' : ''}" 
-                         onclick="window.handleVariantClick(${i}, ${JSON.stringify(variants).replace(/'/g, "\\'")})">
+                         onclick="window.handleVariantClick(${i})">
                         <span>${v.quantity}</span>
                         <span class="var-price">₹${v.price}</span>
                     </div>
@@ -1085,7 +1091,10 @@
                 setTimeout(() => document.addEventListener('click', closeHandler), 0);
             };
 
-            window.handleVariantClick = function (idx, variants) {
+            window.handleVariantClick = function (idx) {
+                const variants = window._currentVariants;
+                if (!variants || !variants[idx]) return;
+
                 activeVariantIdx = idx;
                 const v = variants[idx];
                 const labelEl = document.getElementById('variantLabel');

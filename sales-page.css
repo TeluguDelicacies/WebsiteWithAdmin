@@ -699,7 +699,7 @@ textarea {
     }
 
     .product-header-fields {
-        gap: 9px;
+        gap: 6px;
         /* Uniform spacing mobile */
     }
 
@@ -1180,22 +1180,21 @@ textarea {
 
     /* Compact Typography for Desktop to avoid scroll */
     .product-title {
-        font-size: clamp(2rem, 5vw, 2.4rem) !important;
+        font-size: clamp(1.6rem, 4vw, 2rem) !important;
         margin-top: 0 !important;
         margin-bottom: 2px !important;
     }
 
     .telugu-title {
-        font-size: 1.3rem !important;
+        font-size: 1.2rem !important;
         margin-bottom: 2px !important;
     }
 
     .product-tagline {
-        font-size: clamp(2rem, 5vw, 2.4rem) !important;
-        /* Match English name size as requested */
+        font-size: 1.2rem !important;
+        /* Match Telugu font size */
         font-weight: 400 !important;
-        margin-top: -10px !important;
-        /* Ensure it does not drop down */
+        margin-top: 0 !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
@@ -1979,11 +1978,13 @@ textarea {
 
 .add-cart-btn {
     width: 100%;
-    background: var(--bg-gradient-primary);
-    color: #1E293B;
-    border: none;
+    background: #FFF9C4 !important;
+    /* Yellow pill theme */
+    border: 1px solid #FBC02D !important;
+    color: #333;
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: 50px !important;
+    /* Pill shape */
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
@@ -1995,7 +1996,7 @@ textarea {
 }
 
 .add-cart-btn:hover {
-    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 100%);
+    background: #FBC02D !important;
     transform: translateY(-2px);
 }
 
