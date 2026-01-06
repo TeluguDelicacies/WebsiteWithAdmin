@@ -1212,7 +1212,7 @@
 
             // Use By (Shelf Life)
             if (p.shelf_life && p.shelf_life.toString().trim() !== '') {
-                let shelfText = `<p style="text-align:justify; margin:0;"><strong>Shelf Life:</strong> ${p.shelf_life} Days from the date of packing.</p>`;
+                let shelfText = `<p style="text-align:justify; margin:0;">The product is best consumed within <strong>${p.shelf_life}</strong> days from the date of packing.</p>`;
 
                 // Refrigeration Alert Append (Visual Icon/Box)
                 if (p.is_refrigerated) {
