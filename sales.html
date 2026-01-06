@@ -941,6 +941,7 @@
                 <div id="ingredients-content" class="info-content-block"></div>
                 <div id="nutrition-content" class="info-content-block"></div>
                 <div id="usage-content" class="info-content-block"></div>
+                <div id="shelf-life-content" class="info-content-block"></div>
             </div>
         </div>
 
@@ -1101,6 +1102,30 @@
                 sections.push({
                     id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `
         <p style="text-align:justify;">${p.ingredients}</p>`
+                });
+            }
+
+            // Shelf Life
+            if (p.shelf_life) {
+                // Format: "90" -> "90 Days from the day packaging..."
+                let shelfText = p.shelf_life;
+
+                // Simple heuristic: if it looks like just a number, append the standard text
+                if (/^\d+$/.test(shelfText.trim())) {
+                    const storageInstruction = p.is_refrigerated ? 'store in refrigeration.' : 'store in a dry shaded space.';
+                    shelfText = `${shelfText} Days from the day of packaging, ${storageInstruction}`;
+                }
+
+                // Refrigeration Alert Append (Visual Icon/Box)
+                if (p.is_refrigerated) {
+                    shelfText += `<div style="margin-top:10px; padding:10px; background:#e0f2fe; border-left:4px solid #0284c7; border-radius:4px; color:#0c4a6e; font-size:0.9em;">
+                        <i class="fas fa-snowflake"></i> <strong>Note:</strong> Refrigeration Required.
+                    </div>`;
+                }
+
+                sections.push({
+                    id: 'shelf', label: 'Shelf Life', icon: 'fas fa-hourglass-half', target: 'shelf-life-content', html: `
+        <div style="text-align:justify;">${shelfText}</div>`
                 });
             }
 
@@ -1846,13 +1871,64 @@
             if (window.syncDetailPageCart) window.syncDetailPageCart();
         };
 
-        window.sendToWhatsApp = function () {
+        window.sendToWhatsApp = async function () {
             if (state.cart.length === 0) {
                 window.showToast('Your cart is empty!', 'error');
                 return;
             }
 
-            // --- Background Stock Update ---
+            // Show loading state
+            window.showToast('Validating prices...', 'info');
+
+            // --- 1. Price Validation ---
+            try {
+                const itemIds = [...new Set(state.cart.map(i => i.id))];
+                const { data: dbProducts, error } = await supabase
+                    .from('products')
+                    .select('id, price, quantity_variants')
+                    .in('id', itemIds);
+
+                if (!error && dbProducts) {
+                    let pricesChanged = false;
+                    state.cart.forEach(cartItem => {
+                        const dbProd = dbProducts.find(p => p.id === cartItem.id);
+                        if (dbProd) {
+                            let currentPrice = dbProd.price; // Default base price
+
+                            // If variant, find variant price
+                            if (cartItem.variant) {
+                                let vars = [];
+                                try {
+                                    vars = typeof dbProd.quantity_variants === 'string'
+                                        ? JSON.parse(dbProd.quantity_variants)
+                                        : (dbProd.quantity_variants || []);
+                                } catch (e) { }
+
+                                // Match by quantity label matches
+                                const v = vars.find(x => x.quantity === cartItem.variant.quantity);
+                                if (v) currentPrice = v.price;
+                            }
+
+                            // Update if different
+                            if (cartItem.price !== currentPrice) {
+                                console.log(`Price update for ${cartItem.name}: ${cartItem.price} -> ${currentPrice}`);
+                                cartItem.price = currentPrice;
+                                pricesChanged = true;
+                            }
+                        }
+                    });
+
+                    if (pricesChanged) {
+                        window.saveCart();
+                        window.showToast('Prices updated to latest values.', 'info');
+                    }
+                }
+            } catch (err) {
+                console.error('Price validation error:', err);
+                // Continue with existing cart prices if check fails
+            }
+
+            // --- 2. Background Stock Update (Fire & Forget) ---
             const updateStock = async () => {
                 for (const item of state.cart) {
                     try {
@@ -1867,10 +1943,9 @@
                     }
                 }
             };
-
-            // Initiate stock update in background
             updateStock();
 
+            // --- 3. Construct Message ---
             let message = `👋 Hi Telugu Delicacies! I would like to place an order.\n\n🛒 *ORDER SUMMARY*`;
             let total = 0;
             state.cart.forEach(item => {

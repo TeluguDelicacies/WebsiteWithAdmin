@@ -1444,6 +1444,22 @@
                             <label>Usage Instructions</label>
                             <textarea id="productUsage" rows="3" placeholder="Serving suggestion..."></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>Shelf Life</label>
+                            <input type="text" id="productShelfLife" placeholder="e.g. 90 (Days)" class="form-input">
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 12px; margin-top: 28px;">
+                            <label class="toggle-switch-sm" style="margin-bottom: 0;">
+                                <input type="checkbox" id="productRefrigeration">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <label for="productRefrigeration"
+                                style="margin: 0; font-weight: 600; color: var(--color-primary-blue); cursor: pointer;">
+                                <i class="fas fa-snowflake" style="margin-right:5px; color:#3b82f6;"></i> Refrigeration
+                                Required
+                            </label>
+                        </div>
                     </div>
 
                     <h4

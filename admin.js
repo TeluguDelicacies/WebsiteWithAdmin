@@ -1544,9 +1544,17 @@ async function loadProductData(productId) {
         // New Fields
         document.getElementById('productIngredients').value = product.ingredients || '';
         document.getElementById('productUsage').value = product.serving_suggestion || '';
+        document.getElementById('productShelfLife').value = product.shelf_life || '';
+        document.getElementById('productRefrigeration').checked = product.is_refrigerated || false;
 
         // Nutrition Parsing
-        const nutri = product.nutrition_info || {};
+        let nutri = product.nutrition_info || {};
+        try {
+            if (typeof nutri === 'string') nutri = JSON.parse(nutri);
+        } catch (e) {
+            console.warn('Error parsing nutrition info:', e);
+            nutri = {};
+        }
         // Map JSON snake_case to Form IDs
         document.getElementById('nutriDetails').value = nutri.serving_size || nutri.details || ''; // Backwards compat
         document.getElementById('nutriCalories').value = nutri.calories || '';
@@ -1557,14 +1565,26 @@ async function loadProductData(productId) {
         document.getElementById('nutriFiber').value = nutri.fiber || '';
         document.getElementById('nutriSugars').value = nutri.sugars || '';
         document.getElementById('nutriSodium').value = nutri.sodium || '';
+        // document.getElementById('prodNutrition').value = typeof product.nutrition_info === 'object' ? JSON.stringify(product.nutrition_info, null, 2) : (product.nutrition_info || '');
+
 
         document.getElementById('showcaseImage').value = product.showcase_image || '';
 
         // Handle Variants
+        // Handle Variants
         variantsContainer.innerHTML = ''; // Clear existing
+
+        let variants = [];
+        try {
+            variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+        } catch (e) {
+            console.warn('Error parsing variants:', e);
+            variants = [];
+        }
+
         // Populate variants
-        if (product.quantity_variants && product.quantity_variants.length > 0) {
-            product.quantity_variants.forEach(variant => {
+        if (variants && variants.length > 0) {
+            variants.forEach(variant => {
                 addVariantRow(variant);
             });
         } else {
@@ -1578,7 +1598,8 @@ async function loadProductData(productId) {
 
     } catch (error) {
         console.error('Error loading product:', error);
-        showToast('Error loading product data', 'error');
+        console.error('Error details:', error.message, error.stack); // Added stack trace
+        showToast('Error loading product data: ' + error.message, 'error'); // Show actual error in toast
         closeProductModal();
     }
 }
@@ -1683,6 +1704,8 @@ productForm.addEventListener('submit', async (e) => {
             product_description: document.getElementById('productDescription').value,
             ingredients: document.getElementById('productIngredients').value,
             serving_suggestion: document.getElementById('productUsage').value,
+            shelf_life: document.getElementById('productShelfLife').value,
+            is_refrigerated: document.getElementById('productRefrigeration').checked, // New Field
             nutrition_info: {
                 // Save as snake_case standard
                 serving_size: document.getElementById('nutriDetails').value,
