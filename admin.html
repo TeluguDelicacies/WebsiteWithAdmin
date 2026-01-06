@@ -1850,9 +1850,7 @@
                         </div>
                     </div>
 
-                    <button onclick="exportProductsCsv()" class="submit-btn" style="width: 100%;">
-                        <i class="fas fa-download" style="margin-right: 8px;"></i> Download CSV
-                    </button>
+                    <!-- Button removed from here, moved to footer -->
                 </div>
 
                 <!-- IMPORT SECTION -->
@@ -1899,6 +1897,9 @@
 
                 <!-- Consolidated Modal Actions -->
                 <div class="modal-actions">
+                    <button id="csvExportBtn" onclick="exportProductsCsv()" class="btn-save">
+                        <i class="fas fa-download"></i> Download CSV
+                    </button>
                     <button id="csvApplyBtn" onclick="processCsvImport()" class="btn-save" style="display: none;">
                         <i class="fas fa-check"></i> Apply Changes
                     </button>

@@ -21,6 +21,7 @@ const CsvManager = {
         }
 
         CsvManager.clearCsvUpload();
+        CsvManager.switchCsvTab('export');
     },
 
     closeCsvModal: () => {
@@ -40,12 +41,14 @@ const CsvManager = {
             importTab.classList.remove('active');
             exportSection.style.display = 'block';
             importSection.style.display = 'none';
+            document.getElementById('csvExportBtn').style.display = 'block';
             document.getElementById('csvApplyBtn').style.display = 'none';
         } else {
             exportTab.classList.remove('active');
             importTab.classList.add('active');
             exportSection.style.display = 'none';
             importSection.style.display = 'block';
+            document.getElementById('csvExportBtn').style.display = 'none';
             // Show Apply button only if data exists
             const hasData = csvParsedData && csvParsedData.length > 0;
             document.getElementById('csvApplyBtn').style.display = hasData ? 'block' : 'none';

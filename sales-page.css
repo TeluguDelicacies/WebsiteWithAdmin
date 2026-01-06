@@ -1282,12 +1282,11 @@ textarea {
     }
 
     .info-content-block.active {
-        height: 100px;
-        /* Standardized height */
+        height: 180px;
+        /* Increased from 100px to use vertical room */
         padding: 5px 10px;
         margin-bottom: 0 !important;
         overflow: hidden;
-        /* Removed scroll wheel as requested */
     }
 }
 
