@@ -1098,6 +1098,10 @@
                 return val;
             };
 
+            console.log(`[Use By Final Check] Product: ${p.product_name}`);
+            console.log(`[Use By Final Check] Available Keys:`, Object.keys(p));
+            console.log(`[Use By Final Check] shelf_life prop:`, p.shelf_life);
+
             // Ingredients
             if (p.ingredients) {
                 sections.push({
@@ -1108,7 +1112,6 @@
 
             // Use By (Shelf Life)
             if (p.shelf_life && p.shelf_life.toString().trim() !== '') {
-                console.log(`[Use By Debug] Found data for ${p.product_name}: "${p.shelf_life}"`);
                 // Format: "90" -> "90 Days from the day packaging..."
                 let shelfText = p.shelf_life;
 
@@ -1129,8 +1132,6 @@
                     id: 'shelf', label: 'Use By', icon: 'fas fa-hourglass-half', target: 'shelf-life-content', html: `
         <div style="text-align:justify;">${shelfText}</div>`
                 });
-            } else {
-                console.log(`[Use By Debug] No data for ${p.product_name}. value:`, p.shelf_life);
             }
 
             // Nutrition
@@ -1252,21 +1253,33 @@
                 const adjustFontSize = (el) => {
                     if (!el) return;
 
-                    // Start large
-                    let size = 1.05;
+                    // TARGET HEIGHT: Match CSS .info-content-block.active (100px desktop, 110px mobile)
+                    const isMobile = window.innerWidth < 768;
+                    const targetHeight = isMobile ? 110 : 100;
+
+                    // Start extra large to "fill" (User wants it to fill 3 lines)
+                    let size = 1.4;
                     el.style.fontSize = size + 'rem';
 
-                    // If it already fits, stop
-                    if (el.scrollHeight <= el.offsetHeight) return;
-
-                    // Otherwise shrink
-                    let count = 0;
-                    while (el.scrollHeight > el.offsetHeight && size > 0.75 && count < 10) {
-                        size -= 0.05;
+                    // Use scrollHeight to detect overflow against targetHeight
+                    let iterations = 0;
+                    while (el.scrollHeight > targetHeight && size > 0.7 && iterations < 15) {
+                        size -= 0.03;
                         el.style.fontSize = size + 'rem';
-                        count++;
+                        iterations++;
                     }
+                    console.log(`[Font Ajust] ${el.id} set to ${size}rem in ${iterations} iterations.`);
                 };
+
+                // Pre-adjust ALL tab contents
+                sections.forEach(s => {
+                    const el = document.getElementById(s.target);
+                    if (el) {
+                        el.innerHTML = s.html;
+                        // Run adjustment in background
+                        adjustFontSize(el);
+                    }
+                });
 
                 btnContainer.onclick = (e) => {
                     const btn = e.target.closest('.info-btn');
@@ -1284,8 +1297,7 @@
                     if (!wasActive) {
                         btn.classList.add('active');
                         contentDiv.classList.add('active');
-                        // Use requestAnimationFrame to ensure the 'active' class (and its height) 
-                        // is fully applied before we measure scrollHeight
+                        // Re-run adjustment to be sure (since offsetHeight might change when visible)
                         requestAnimationFrame(() => {
                             adjustFontSize(contentDiv);
                         });
