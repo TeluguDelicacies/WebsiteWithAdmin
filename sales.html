@@ -1038,14 +1038,23 @@
             }
             if (variants[0]) {
                 updatePrice(variants[0]);
-                syncDetailQtyWithCart(variants[0]);
+                window.syncDetailPageCart(variants[0]);
             }
 
-            function syncDetailQtyWithCart(v) {
+            window.syncDetailPageCart = function (v) {
                 const qtyInput = document.getElementById('detailQty');
                 const addBtn = document.querySelector('.add-cart-btn');
 
                 if (!qtyInput) return;
+
+                // If v is not provided, try to get currently selected variant
+                if (!v) {
+                    const select = document.getElementById('variantSelect');
+                    const variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
+                    v = variants[select ? select.value : 0];
+                }
+
+                if (!v) return;
 
                 const cartItem = state.cart.find(c => c.id == p.id &&
                     (c.variant ? c.variant.quantity === v.quantity : true)
@@ -1054,7 +1063,7 @@
                 if (cartItem) {
                     qtyInput.value = cartItem.qty;
                     state.detailQty = cartItem.qty;
-                    if (addBtn) addBtn.innerHTML = '<i class="fas fa-sync"></i> Update Quantity';
+                    if (addBtn) addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
                 } else {
                     qtyInput.value = 1;
                     state.detailQty = 1;
@@ -1757,6 +1766,8 @@
                 resetSidebarForProduct(item.id);
                 // Refresh grid card to show ADD button
                 window.refreshGridCardUI(item.id);
+                // Sync detail page if it's the same product
+                if (window.syncDetailPageCart) window.syncDetailPageCart();
             }
         };
 
@@ -1785,6 +1796,9 @@
 
             // 5. Update Cart Drawer UI
             window.updateCartUI();
+
+            // 6. Sync current detail page
+            if (window.syncDetailPageCart) window.syncDetailPageCart();
 
             window.showToast('Cart cleared', 'info');
         };
@@ -1843,6 +1857,9 @@
                 }).join('');
             }
             if (cartTotal) cartTotal.innerText = total;
+
+            // Sync detail page quantity if on product view
+            if (window.syncDetailPageCart) window.syncDetailPageCart();
         };
 
         window.sendToWhatsApp = function () {
