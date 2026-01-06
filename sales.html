@@ -144,6 +144,9 @@
                 const product = state.currentProduct;
                 const tagline = product.product_tagline ? ` - "${product.product_tagline}"` : '';
                 shareText = `Check out ${product.product_name}${tagline} at Telugu Delicacies! 😋`;
+            } else if (state.currentCategory === 'all-products') {
+                // Special message for All Products page
+                shareText = `🍽️ From Podis to Parotas - explore our complete range at Telugu Delicacies!`;
             } else if (state.currentCategory) {
                 const cat = state.categories.find(c => c.slug === state.currentCategory);
                 if (cat) {
