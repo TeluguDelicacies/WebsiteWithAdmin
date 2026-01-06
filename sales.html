@@ -1123,7 +1123,7 @@
 
                 // Refrigeration Alert Append (Visual Icon/Box)
                 if (p.is_refrigerated) {
-                    shelfText += `<div style="margin-top:10px; padding:10px; background:#e0f2fe; border-left:4px solid #0284c7; border-radius:4px; color:#0c4a6e; font-size:0.9em;">
+                    shelfText += `<div style="margin-top:6px; padding:6px 10px; background:#e0f2fe; border-left:4px solid #0284c7; border-radius:4px; color:#0c4a6e; font-size:0.85em; line-height:1.2;">
                         <i class="fas fa-snowflake"></i> <strong>Note:</strong> Refrigeration Required.
                     </div>`;
                 }
@@ -1250,34 +1250,43 @@
                 });
 
                 // Add Toggle Logic
-                const adjustFontSize = (el) => {
+                const adjustFontSize = (el, force = false) => {
                     if (!el) return;
 
-                    // TARGET HEIGHT: Match CSS .info-content-block.active (100px desktop, 110px mobile)
-                    const isMobile = window.innerWidth < 768;
-                    const targetHeight = isMobile ? 110 : 100;
+                    if (force) delete el.dataset.calculatedSize;
 
-                    // Start extra large to "fill" (User wants it to fill 3 lines)
-                    let size = 1.4;
+                    // IF already sized, just ensure the size is applied and stop
+                    if (el.dataset.calculatedSize) {
+                        el.style.fontSize = el.dataset.calculatedSize + 'rem';
+                        return;
+                    }
+
+                    // TARGET CONTENT HEIGHT
+                    const isMobile = window.innerWidth < 768;
+                    const targetContentHeight = isMobile ? 94 : 90;
+
+                    // Reset to base size before measurement
+                    let size = 1.25;
                     el.style.fontSize = size + 'rem';
 
-                    // Use scrollHeight to detect overflow against targetHeight
                     let iterations = 0;
-                    while (el.scrollHeight > targetHeight && size > 0.7 && iterations < 15) {
-                        size -= 0.03;
+                    while (el.scrollHeight > targetContentHeight && size > 0.72 && iterations < 20) {
+                        size -= 0.02;
                         el.style.fontSize = size + 'rem';
                         iterations++;
                     }
-                    console.log(`[Font Ajust] ${el.id} set to ${size}rem in ${iterations} iterations.`);
+
+                    el.dataset.calculatedSize = size;
                 };
 
-                // Pre-adjust ALL tab contents
+                // Pre-adjust ALL tab contents immediately
                 sections.forEach(s => {
                     const el = document.getElementById(s.target);
                     if (el) {
                         el.innerHTML = s.html;
-                        // Run adjustment in background
-                        adjustFontSize(el);
+                        // Important: el must have its styles (like padding) to measure scrollHeight correctly
+                        // We run it after a tiny delay to ensure DOM is ready
+                        setTimeout(() => adjustFontSize(el), 50);
                     }
                 });
 
@@ -1297,10 +1306,8 @@
                     if (!wasActive) {
                         btn.classList.add('active');
                         contentDiv.classList.add('active');
-                        // Re-run adjustment to be sure (since offsetHeight might change when visible)
-                        requestAnimationFrame(() => {
-                            adjustFontSize(contentDiv);
-                        });
+                        // Just call adjustFontSize - it will use cached value if available
+                        adjustFontSize(contentDiv);
                     }
                 };
             }
@@ -1317,9 +1324,8 @@
                     const nutContent = document.getElementById('nutrition-content');
                     if (nutContent) {
                         nutContent.innerHTML = renderNutrition(nutritionData, selectedVar);
-                        if (nutContent.classList.contains('active')) {
-                            adjustFontSize(nutContent);
-                        }
+                        // FORCE recalculate because content changed
+                        adjustFontSize(nutContent, true);
                     }
                 };
             }
