@@ -550,17 +550,16 @@ textarea {
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.15);
     border: none;
     overflow: hidden;
-    /* Desktop: Equal padding on all sides */
-    padding: clamp(10px, 2vw, 20px);
-    /* Remove extra bottom space - use same padding on all sides */
-    padding-bottom: clamp(10px, 2vw, 20px);
+    padding: clamp(30px, 5vh, 50px) clamp(10px, 2vw, 20px);
+    /* Increased top/bottom padding to use vertical room */
 }
 
 /* Component: Gallery (3D Flip) - Responsive Square */
 .product-gallery {
     position: relative;
     width: 100%;
-    max-width: 450px;
+    max-width: 520px;
+    /* Increased from 450px */
     aspect-ratio: 1 / 1;
     /* Strict square aspect ratio */
     height: auto;
@@ -719,7 +718,8 @@ textarea {
 }
 
 .product-title {
-    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    font-size: clamp(2rem, 5vw, 2.4rem);
+    /* Increased from 1.8rem */
     color: var(--text-brand);
     /* Brand blue for product names */
     margin-bottom: 2px;
@@ -737,7 +737,8 @@ textarea {
 }
 
 .product-tagline {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
+    /* Increased from 0.85rem */
     color: var(--text-secondary);
     font-style: italic;
     margin-bottom: 8px;
@@ -1195,9 +1196,9 @@ textarea {
         bottom: 0;
         background: white;
         padding: 5px 25px;
-        /* Further reduced from 8px */
-        border-top: 1px solid var(--border-light);
-        box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.03);
+        /* Line and shadow removed per user request */
+        border-top: none;
+        box-shadow: none;
         margin-top: 5px !important;
         /* Forcefully reduced margin-top */
         padding-top: 5px !important;
@@ -1282,8 +1283,8 @@ textarea {
     }
 
     .info-content-block.active {
-        height: 180px;
-        /* Increased from 100px to use vertical room */
+        height: 140px;
+        /* Reduced from 180px - user wants image size increased instead */
         padding: 5px 10px;
         margin-bottom: 0 !important;
         overflow: hidden;
