@@ -542,16 +542,19 @@ textarea {
 ======================================== */
 .main-product-area {
     grid-area: main;
-    /* Pure white for contrast with global text colors */
     background: #FFFFFF;
-    /* Soft, organic rounded corners */
     border-radius: 24px;
-    /* Soft "Golden Glow" shadow */
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.15);
     border: none;
     overflow: hidden;
-    padding: clamp(30px, 5vh, 50px) clamp(10px, 2vw, 20px);
-    /* Increased top/bottom padding to use vertical room */
+    padding: 10px;
+    /* Default for mobile */
+}
+
+@media (min-width: 1024px) {
+    .main-product-area {
+        padding: clamp(30px, 5vh, 50px) clamp(10px, 2vw, 20px);
+    }
 }
 
 /* Component: Gallery (3D Flip) - Responsive Square */
@@ -1299,6 +1302,13 @@ textarea {
     .info-tabs {
         min-height: 140px;
         /* Space for tabs + content on mobile */
+        border-bottom: none !important;
+    }
+
+    .add-to-cart-section {
+        border-top: none !important;
+        box-shadow: none !important;
+        padding-top: 0 !important;
     }
 
     .info-content-block {
