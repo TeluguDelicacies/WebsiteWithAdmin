@@ -1146,7 +1146,7 @@
 
                     // Calculate Servings per pack from variant
                     let displayedServings = null;
-                    if (currentVariant && servingSize) {
+                    if (currentVariant && currentVariant.quantity && servingSize) {
                         const packWeight = parseWeight(currentVariant.quantity);
                         const sSize = parseWeight(servingSize);
                         if (packWeight > 0 && sSize > 0) {
@@ -1236,7 +1236,7 @@
                 };
 
                 btnContainer.onclick = (e) => {
-                    const btn = e.target.closest('.toggle-btn');
+                    const btn = e.target.closest('.info-btn');
                     if (!btn) return;
 
                     const targetId = btn.dataset.target;
