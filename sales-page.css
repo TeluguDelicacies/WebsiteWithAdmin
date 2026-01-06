@@ -1216,8 +1216,8 @@ textarea {
         background: white;
         padding: 5px 25px;
         /* Line and shadow removed per user request */
-        border-top: none;
-        box-shadow: none;
+        border-top: none !important;
+        box-shadow: none !important;
         margin-top: 5px !important;
         /* Forcefully reduced margin-top */
         padding-top: 5px !important;
@@ -1278,6 +1278,7 @@ textarea {
     .info-tabs {
         min-height: 135px;
         /* Ensures space is reserved for tabs and content */
+        border-bottom: none !important;
     }
 
     .info-toggles {
@@ -2868,6 +2869,7 @@ textarea {
         max-height: 2.6em !important;
     }
 }
+
 /* Custom Variant Dropdown Styles */
 .variant-select-wrapper {
     width: 100%;
