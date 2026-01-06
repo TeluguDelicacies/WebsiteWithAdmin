@@ -908,8 +908,8 @@ textarea {
 .info-btn {
     flex: 1;
     white-space: nowrap;
-    padding: 10px 5px;
-    font-size: 0.9rem;
+    padding: 8px 4px;
+    font-size: clamp(0.7rem, 2.5vw, 0.85rem);
     font-weight: 500;
     text-align: center;
     cursor: pointer;
@@ -1869,8 +1869,7 @@ textarea {
 
 /* Add to Cart Section in Product View */
 .add-to-cart-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
+    margin-top: 1rem;
     border-top: 1px solid var(--color-gray-200);
 }
 
@@ -1995,24 +1994,18 @@ textarea {
     box-shadow: 0 0 0 3px rgba(238, 220, 41, 0.25);
 }
 
-/* Info Buttons - Yellow Theme */
-.info-btn {
-    background: linear-gradient(135deg, var(--color-brand-yellow-light) 0%, var(--color-brand-yellow) 50%) !important;
-    border: 1px solid var(--color-brand-yellow) !important;
-    color: #92400e !important;
-}
-
+/* Info Buttons - Yellow Theme Removed (Simple Text Preferred) */
 .info-btn:hover {
-    background: var(--bg-button-gradient) !important;
-    border-color: var(--color-brand-yellow-hover) !important;
+    color: var(--color-primary-blue) !important;
     transform: translateY(-1px);
 }
 
 .info-btn.active {
-    background: var(--bg-button-gradient) !important;
-    color: white !important;
-    border-color: var(--color-brand-yellow-hover) !important;
-    box-shadow: 0 4px 12px rgba(238, 220, 41, 0.35);
+    background: transparent !important;
+    color: #FBC02D !important;
+    font-weight: 700;
+    border-bottom: 2px solid #FBC02D !important;
+    box-shadow: none !important;
 }
 
 /* Add to Cart Button - Yellow Gradient (Uses Global Accent) */
