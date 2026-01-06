@@ -1041,11 +1041,7 @@
                     syncDetailQtyWithCart(variants[e.target.value]);
                 };
             }
-            if (variants[0]) {
-                updatePrice(variants[0]);
-                window.syncDetailPageCart(variants[0]);
-            }
-
+            // 1. Define Sync Function (Must be before usage)
             window.syncDetailPageCart = function (v) {
                 const addBtn = document.getElementById('detailAddBtn');
                 const qtyCounter = document.getElementById('detailQtyCounter');
@@ -1058,6 +1054,8 @@
                     const vars = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
                     v = vars[select ? select.value : 0];
                 }
+
+                if (!v) return;
 
                 const cartItem = state.cart.find(c => c.id == p.id &&
                     (c.variant ? c.variant.quantity === v.quantity : true)
@@ -1075,6 +1073,12 @@
                     state.detailQty = 1;
                 }
             };
+
+            // Check Variants and Sync
+            if (variants[0]) {
+                updatePrice(variants[0]);
+                window.syncDetailPageCart(variants[0]);
+            }
 
 
             // 2. Toggles & Content
