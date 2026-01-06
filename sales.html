@@ -1031,9 +1031,36 @@
             };
 
             if (vSelect) {
-                vSelect.onchange = (e) => updatePrice(variants[e.target.value]);
+                vSelect.onchange = (e) => {
+                    updatePrice(variants[e.target.value]);
+                    syncDetailQtyWithCart(variants[e.target.value]);
+                };
             }
-            if (variants[0]) updatePrice(variants[0]);
+            if (variants[0]) {
+                updatePrice(variants[0]);
+                syncDetailQtyWithCart(variants[0]);
+            }
+
+            function syncDetailQtyWithCart(v) {
+                const qtyInput = document.getElementById('detailQty');
+                const addBtn = document.querySelector('.add-cart-btn');
+
+                if (!qtyInput) return;
+
+                const cartItem = state.cart.find(c => c.id == p.id &&
+                    (c.variant ? c.variant.quantity === v.quantity : true)
+                );
+
+                if (cartItem) {
+                    qtyInput.value = cartItem.qty;
+                    state.detailQty = cartItem.qty;
+                    if (addBtn) addBtn.innerHTML = '<i class="fas fa-sync"></i> Update Quantity';
+                } else {
+                    qtyInput.value = 1;
+                    state.detailQty = 1;
+                    if (addBtn) addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+                }
+            }
 
 
             // 2. Toggles & Content
@@ -1287,6 +1314,12 @@
                 const variantLabel = firstVariant.quantity || '';
                 const displayPrice = firstVariant.price || item.price || item.mrp || '';
 
+                // Check Cart State
+                const cartItem = state.cart.find(c => c.id == item.id &&
+                    (c.variant ? c.variant.quantity === firstVariant.quantity : true)
+                );
+                const qty = cartItem ? cartItem.qty : 0;
+
                 return `
         <div class="sim-item" data-product-id="${item.id}" data-product='${JSON.stringify(item).replace(/'/g, "\\'")}' data-variant='${JSON.stringify(firstVariant).replace(/'/g, "\\'")}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
             <img src="${item.showcase_image || state.placeholder}" class="sim-img"
@@ -1297,12 +1330,12 @@
                 <!-- Price + Add Button inline -->
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px;">
                     <span style="font-size:0.8rem; font-weight:700; color:var(--color-primary-blue);">${variantLabel ? variantLabel + ' - ' : ''}₹${displayPrice}</span>
-                    <!-- Add Button (visible initially) -->
-                    <button class="sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="background:#FFF9C4; border:1px solid #FBC02D; border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; color:#333; cursor:pointer;">Add</button>
-                    <!-- Quantity Controls (hidden initially) -->
-                    <div class="quantity-controls sidebar-qty-controls" id="sidebar-qty-wrap-${index}" style="display:none; min-width:70px; padding:2px 6px; transform:scale(0.85);">
+                    <!-- Add Button -->
+                    <button class="sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="${qty > 0 ? 'display:none;' : 'display:block;'} background:#FFF9C4; border:1px solid #FBC02D; border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; color:#333; cursor:pointer;">Add</button>
+                    <!-- Quantity Controls -->
+                    <div class="quantity-controls sidebar-qty-controls ${qty > 0 ? 'show' : ''}" id="sidebar-qty-wrap-${index}" style="${qty > 0 ? 'display:flex;' : 'display:none;'} min-width:70px; padding:2px 6px; transform:scale(0.85);">
                         <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, -1)">−</button>
-                        <span class="quantity-display" id="sidebar-qty-${index}">1</span>
+                        <span class="quantity-display" id="sidebar-qty-${index}">${qty || 1}</span>
                         <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, 1)">+</button>
                     </div>
                 </div>
@@ -1334,12 +1367,6 @@
             val = isInit ? 1 : Math.max(0, val + delta);
             qtyEl.innerText = val;
 
-            // If qty becomes 0, show Add button again
-            if (val === 0) {
-                if (addBtn) addBtn.style.display = 'inline-block';
-                if (qtyWrap) qtyWrap.classList.remove('show');
-            }
-
             // Get product data and update cart
             const simItem = document.querySelector(`#sidebar-qty-${index}`).closest('.sim-item');
             if (simItem) {
@@ -1349,23 +1376,38 @@
 
                     // Find or update cart item
                     const existingIdx = state.cart.findIndex(item =>
-                        item.id === product.id && JSON.stringify(item.variant) === JSON.stringify(variant)
+                        item.id === product.id &&
+                        (item.variant ? item.variant.quantity === variant.quantity : true)
                     );
 
-                    if (val === 0 && existingIdx > -1) {
-                        state.cart.splice(existingIdx, 1);
-                    } else if (existingIdx > -1) {
-                        state.cart[existingIdx].qty = val;
-                    } else if (val > 0) {
-                        state.cart.push({
-                            id: product.id,
-                            name: product.product_name,
-                            telugu_name: product.product_name_telugu,
-                            price: variant.price || product.price || product.mrp,
-                            image: product.showcase_image,
-                            variant: variant,
-                            qty: val
-                        });
+                    if (val === 0) {
+                        if (existingIdx > -1) {
+                            state.cart.splice(existingIdx, 1);
+                        }
+                        if (addBtn) addBtn.style.display = 'block';
+                        if (qtyWrap) {
+                            qtyWrap.style.display = 'none';
+                            qtyWrap.classList.remove('show');
+                        }
+                    } else {
+                        if (existingIdx > -1) {
+                            state.cart[existingIdx].qty = val;
+                        } else {
+                            state.cart.push({
+                                id: product.id,
+                                name: product.product_name,
+                                telugu_name: product.product_name_telugu,
+                                price: variant.price || product.price || product.mrp,
+                                image: product.showcase_image,
+                                variant: variant,
+                                qty: val
+                            });
+                        }
+                        if (addBtn) addBtn.style.display = 'none';
+                        if (qtyWrap) {
+                            qtyWrap.style.display = 'flex';
+                            qtyWrap.classList.add('show');
+                        }
                     }
                     window.saveCart();
                 } catch (e) {

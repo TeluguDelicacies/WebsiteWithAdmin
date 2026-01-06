@@ -5688,7 +5688,8 @@ Uses same card structure as sales page product grid
   background: #FFF9C4;
   /* Solid butter yellow */
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
+  /* Changed from hidden to allow dropdown overflow */
   border: 2px solid var(--color-brand-yellow);
   /* Defined brand border */
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -5752,6 +5753,10 @@ Uses same card structure as sales page product grid
   width: 100%;
   aspect-ratio: 1/1;
   perspective: 1000px;
+  border-radius: 12px 12px 0 0;
+  /* Maintain top rounding with overflow:visible */
+  overflow: hidden;
+  /* Clip contents within the gallery itself */
 }
 
 .quick-preview-gallery-inner {
@@ -5863,12 +5868,17 @@ Uses same card structure as sales page product grid
 
 /* Variant dropdown list */
 .quick-preview-variants-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   background: white;
   border: 1px solid var(--color-gray-200);
   border-radius: 8px;
   margin-top: 4px;
   overflow: hidden;
   box-shadow: var(--shadow-md);
+  z-index: 100;
 }
 
 .quick-preview-variant-option {
