@@ -1,6 +1,7 @@
 // ========================================
 // GENERIC CSV IMPORT / EXPORT MANAGER
 // ========================================
+console.log('CSV Manager Module Loading...');
 
 let csvParsedData = []; // Store parsed data for Preview -> Apply workflow
 
@@ -289,28 +290,49 @@ async function processGenericImport(rows, type) {
                 }
 
                 // Handle Nutrition + Serving Size merge
-                if (payload.nutrition !== undefined || payload.serving_size !== undefined) {
+                if (row.nutrition !== undefined || row.serving_size !== undefined) {
                     const newNutri = {};
 
-                    if (payload.serving_size) {
-                        newNutri.serving_size = payload.serving_size;
-                        delete payload.serving_size;
+                    // Allow independent update of fields if provided
+                    if (row.serving_size !== undefined && row.serving_size !== '') {
+                        newNutri.serving_size = row.serving_size;
                     }
 
-                    if (payload.nutrition) {
-                        const parts = payload.nutrition.split(',');
+                    if (row.nutrition) {
+                        // Split by comma first
+                        const parts = row.nutrition.split(',');
                         parts.forEach(p => {
-                            const [k, v] = p.split(':').map(s => s.trim());
+                            p = p.trim();
+                            if (!p) return;
+
+                            let k, v;
+                            // Try strict colon format first "Key: Value"
+                            if (p.includes(':')) {
+                                [k, v] = p.split(':').map(s => s.trim());
+                            }
+                            // Fallback to "Key Value" format (assuming value starts with number)
+                            // Regex: Captures text before the last numeric-start sequence
+                            else {
+                                const match = p.match(/^(.+?)\s+(\d[\d\.]*[a-zA-Z%]*)$/);
+                                if (match) {
+                                    k = match[1].trim();
+                                    v = match[2].trim();
+                                }
+                            }
+
                             if (k && v) {
-                                newNutri[k.toLowerCase()] = v;
+                                newNutri[k.toLowerCase().replace(/\s+/g, '_')] = v; // Normalize keys to snake_case
                             }
                         });
-                        delete payload.nutrition;
                     }
 
+                    // Only update if we extracted valid data
                     if (Object.keys(newNutri).length > 0) {
                         payload.nutrition_info = newNutri;
                     }
+                    // Clean up temp fields
+                    delete payload.nutrition;
+                    delete payload.serving_size;
                 }
             }
 
