@@ -1013,6 +1013,7 @@
         }
 
         function initProductInteractions(p) {
+            console.log('Product Data for Tabs:', { name: p.product_name, shelf_life: p.shelf_life, is_refrigerated: p.is_refrigerated });
             const vSelect = document.getElementById('variantSelect');
             let variants = [];
             try {
@@ -1106,7 +1107,8 @@
             }
 
             // Shelf Life
-            if (p.shelf_life) {
+            if (p.shelf_life && p.shelf_life.toString().trim() !== '') {
+                console.log('Rendering Shelf Life tab for:', p.product_name);
                 // Format: "90" -> "90 Days from the day packaging..."
                 let shelfText = p.shelf_life;
 
