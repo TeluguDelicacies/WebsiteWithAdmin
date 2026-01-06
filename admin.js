@@ -311,6 +311,8 @@ window.switchView = (view) => {
     if (filterRow) filterRow.style.display = 'none';
     if (addBtn) addBtn.style.display = 'none';
     if (saveOrderBtn) saveOrderBtn.style.display = 'none';
+    const csvBtn = document.getElementById('csvBtn');
+    if (csvBtn) csvBtn.style.display = 'none';
 
     // Reset buttons active state
     [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
@@ -331,6 +333,7 @@ window.switchView = (view) => {
             addBtn.style.display = 'inline-flex';
             addBtnText.textContent = 'Add Product';
         }
+        if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
 
         populateCategoryFilter();
         fetchProducts();
@@ -759,8 +762,66 @@ if (siteSettingsForm) {
             if (data) {
                 const { error } = await supabase.from('site_settings').update(settingsData).eq('id', data.id);
                 if (error) throw error;
-                const changes = getChanges(editSnapshot, settingsData);
-                showToast(`Updated: ${changes.join(', ')}`, 'success');
+
+                // Get changed field keys
+                const changedKeys = [];
+                if (editSnapshot) {
+                    for (const key in settingsData) {
+                        if (!isLooseEqual(editSnapshot[key], settingsData[key])) {
+                            changedKeys.push(key);
+                        }
+                    }
+                }
+
+                // Highlight the changed form inputs
+                const fieldIdMap = {
+                    'site_title': 'setSiteTitle',
+                    'site_title_telugu': 'setSiteTitleTelugu',
+                    'hero_title': 'setHeroTitle',
+                    'hero_subtitle': 'setHeroSubtitle',
+                    'hero_description': 'setHeroDesc',
+                    'hero_telugu_subtitle': 'setHeroTelugu',
+                    'contact_phone_primary': 'setPhonePri',
+                    'contact_phone_secondary': 'setPhoneSec',
+                    'contact_email': 'setEmail',
+                    'map_embed_url': 'setMapUrl',
+                    'fssai_number': 'setFssai',
+                    'logo_url': 'setLogoUrl',
+                    'fav_icon_url': 'setFaviconUrl',
+                    'hero_background_url': 'setHeroBgUrl',
+                    'product_placeholder_url': 'setProductPlaceholder',
+                    'catalogue_image_url': 'setCatalogueUrl',
+                    'catalogue_share_message': 'setCatalogueMsg',
+                    'company_address': 'setAddress',
+                    'quick_hero_title': 'setQuickHeroTitle',
+                    'quick_hero_subtitle': 'setQuickHeroSubtitle',
+                    'quick_hero_telugu_subtitle': 'setQuickHeroTelugu',
+                    'quick_hero_image_url': 'setQuickHeroBg',
+                    'show_mrp': 'setShowMrp',
+                    'sales_mode_enabled': 'setSalesMode',
+                    'all_products_tagline': 'setAllProductsTagline'
+                };
+
+                changedKeys.forEach(key => {
+                    const inputId = fieldIdMap[key];
+                    if (inputId) {
+                        const el = document.getElementById(inputId);
+                        if (el) {
+                            el.classList.add('field-updated');
+                            setTimeout(() => el.classList.remove('field-updated'), 1500);
+                        }
+                    }
+                });
+
+                // Show toast
+                if (changedKeys.length > 0) {
+                    const labels = changedKeys.map(k =>
+                        k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    );
+                    showToast(`Updated: ${labels.join(', ')}`, 'success');
+                } else {
+                    showToast('Data already matches your input', 'info');
+                }
             } else {
                 const { error } = await supabase.from('site_settings').insert([settingsData]);
                 if (error) throw error;
@@ -1793,6 +1854,177 @@ const setupUploadListeners = () => {
 // Initialize listeners when script loads (or call this in your init function)
 setupUploadListeners();
 
+// ========================================
+// NUTRITION QUICK FILL FUNCTIONALITY
+// ========================================
+/**
+ * Parses a nutrition string like:
+ * "Calories: 14.95kcal, Protein: 0.63g, Carbs: 2.47g, Fiber: 0.91g, Sugar: 0.52g, Sodium: 0.11g"
+ * OR without colons:
+ * "Calories 20.88kcal, Protein 0.7g, Total Fat 1.49g, Carbs 1.51g"
+ * And populates the corresponding nutrition input fields.
+ */
+const parseNutritionString = (inputString) => {
+    if (!inputString || typeof inputString !== 'string') return { count: 0, filledServing: false };
+
+    // Clean up the string
+    const str = inputString.trim();
+
+    // Define field mappings: key variations -> form input ID
+    const fieldMappings = {
+        // Calories
+        'calories': 'nutriCalories',
+        'cal': 'nutriCalories',
+        'energy': 'nutriCalories',
+        // Protein
+        'protein': 'nutriProtein',
+        // Carbs
+        'carbs': 'nutriCarbs',
+        'carbohydrates': 'nutriCarbs',
+        'carbohydrate': 'nutriCarbs',
+        // Fiber
+        'fiber': 'nutriFiber',
+        'fibre': 'nutriFiber',
+        'dietary fiber': 'nutriFiber',
+        // Sugar/Sugars
+        'sugar': 'nutriSugars',
+        'sugars': 'nutriSugars',
+        // Sodium
+        'sodium': 'nutriSodium',
+        'salt': 'nutriSodium',
+        // Total Fat
+        'fat': 'nutriFat',
+        'total fat': 'nutriFat',
+        'totalfat': 'nutriFat',
+        // Saturated Fat
+        'saturated fat': 'nutriSatFat',
+        'sat fat': 'nutriSatFat',
+        'satfat': 'nutriSatFat',
+        'saturatedfat': 'nutriSatFat',
+        // Serving Size
+        'serving size': 'nutriDetails',
+        'serving': 'nutriDetails',
+        'per serving': 'nutriDetails'
+    };
+
+    // Split by comma to get individual key-value pairs
+    const parts = str.split(',');
+
+    let matchedCount = 0;
+    let filledServing = false;
+
+    parts.forEach(part => {
+        part = part.trim();
+        if (!part) return;
+
+        let key = '';
+        let value = '';
+
+        // Check if there's a colon separator
+        const colonIndex = part.indexOf(':');
+        if (colonIndex !== -1) {
+            // Format: "Key: Value"
+            key = part.substring(0, colonIndex).trim().toLowerCase();
+            value = part.substring(colonIndex + 1).trim();
+        } else {
+            // Format: "Key Value" (e.g., "Calories 20.88kcal")
+            // Find where the numeric value starts
+            const match = part.match(/^([a-zA-Z\s]+)\s+([\d.]+.*)$/);
+            if (match) {
+                key = match[1].trim().toLowerCase();
+                value = match[2].trim();
+            }
+        }
+
+        if (!key || !value) return;
+
+        // Try to find a matching field
+        const inputId = fieldMappings[key];
+        if (inputId) {
+            const inputEl = document.getElementById(inputId);
+            if (inputEl) {
+                inputEl.value = value;
+                matchedCount++;
+
+                // Track if serving size was filled
+                if (inputId === 'nutriDetails') {
+                    filledServing = true;
+                }
+
+                // Add a brief highlight animation
+                inputEl.classList.add('field-updated');
+                setTimeout(() => {
+                    inputEl.classList.remove('field-updated');
+                }, 800);
+            }
+        }
+    });
+
+    return { count: matchedCount, filledServing };
+};
+
+// Event listener for Quick Fill input
+const setupNutritionQuickFill = () => {
+    const quickFillInput = document.getElementById('nutriQuickFill');
+
+    if (quickFillInput) {
+        // Common handler for both blur and Enter
+        const handleQuickFill = (e) => {
+            const val = e.target.value.trim();
+            if (val) {
+                const result = parseNutritionString(val);
+                if (result.count > 0) {
+                    e.target.value = ''; // Clear once filled
+
+                    // Check if serving size was filled
+                    if (!result.filledServing) {
+                        // Highlight the serving size field to prompt user
+                        const servingInput = document.getElementById('nutriDetails');
+                        if (servingInput) {
+                            servingInput.style.border = '2px solid #f59e0b';
+                            servingInput.style.background = '#fef3c7';
+                            servingInput.setAttribute('placeholder', '⚠️ Please enter serving size (e.g., 5g)');
+
+                            // Focus on serving size field
+                            setTimeout(() => servingInput.focus(), 100);
+
+                            // Reset styling after user interacts
+                            const resetStyle = () => {
+                                servingInput.style.border = '';
+                                servingInput.style.background = '';
+                                servingInput.setAttribute('placeholder', 'e.g. Per 100g');
+                                servingInput.removeEventListener('input', resetStyle);
+                                servingInput.removeEventListener('blur', resetStyle);
+                            };
+                            servingInput.addEventListener('input', resetStyle);
+                            servingInput.addEventListener('blur', resetStyle);
+                        }
+
+                        showToast(`Filled ${result.count} field(s). Please update Serving Size!`, 'info');
+                    } else {
+                        showToast(`Filled ${result.count} nutrition field(s)!`, 'success');
+                    }
+                }
+            }
+        };
+
+        // Parse on blur (when user leaves the field)
+        quickFillInput.addEventListener('blur', handleQuickFill);
+
+        // Also parse on Enter key
+        quickFillInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleQuickFill(e);
+            }
+        });
+    }
+};
+
+// Initialize nutrition quick fill
+setupNutritionQuickFill();
+
+
 // Global Escape Key Listener to Close Modals
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -2037,6 +2269,18 @@ window.saveSectionSettings = async function () {
         btn.disabled = true;
     }
 
+    // Map section data keys to toggle element IDs for highlighting
+    const fieldToToggleMap = {
+        'show_hero_section': 'secShowHero',
+        'show_product_carousel': 'secShowTicker',
+        'show_collections': 'secShowCollections',
+        'show_quick_layout': 'secShowQuickLayout',
+        'show_testimonials': 'secShowTestimonials',
+        'show_why_us': 'secShowWhyUs',
+        'show_contact_form': 'secShowContact',
+        'show_footer': 'secShowFooter'
+    };
+
     // All defaults are TRUE
     const sectionData = {
         show_hero_section: document.getElementById('secShowHero')?.checked ?? true,
@@ -2056,8 +2300,43 @@ window.saveSectionSettings = async function () {
         if (data) {
             const { error } = await supabase.from('website_sections').update(sectionData).eq('id', data.id);
             if (error) throw error;
-            const changes = getChanges(editSnapshot, sectionData);
-            showToast(`Updated: ${changes.join(', ')}`, 'success');
+
+            // Get list of changed fields
+            const changedFields = [];
+            if (editSnapshot) {
+                for (const key in sectionData) {
+                    if (!isLooseEqual(editSnapshot[key], sectionData[key])) {
+                        changedFields.push(key);
+                    }
+                }
+            }
+
+            // Highlight the changed toggle cards
+            changedFields.forEach(field => {
+                const toggleId = fieldToToggleMap[field];
+                if (toggleId) {
+                    const toggleEl = document.getElementById(toggleId);
+                    if (toggleEl) {
+                        // Find the parent section-toggle-card
+                        const card = toggleEl.closest('.section-toggle-card');
+                        if (card) {
+                            card.classList.add('updated');
+                            // Remove the class after animation completes
+                            setTimeout(() => card.classList.remove('updated'), 2000);
+                        }
+                    }
+                }
+            });
+
+            // Show toast with changes
+            if (changedFields.length > 0) {
+                const labels = changedFields.map(f =>
+                    f.replace(/^show_/, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                );
+                showToast(`Updated: ${labels.join(', ')}`, 'success');
+            } else {
+                showToast('Data already matches your input', 'info');
+            }
         } else {
             const { error } = await supabase.from('website_sections').insert([sectionData]);
             if (error) throw error;
@@ -2077,3 +2356,521 @@ window.saveSectionSettings = async function () {
         }
     }
 };
+
+// ========================================
+// CSV IMPORT / EXPORT FUNCTIONALITY
+// ========================================
+
+let csvParsedData = []; // Stores parsed CSV data for import
+
+// Open/Close CSV Modal
+window.openCsvModal = () => {
+    document.getElementById('csvModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    clearCsvUpload(); // Reset import state
+};
+
+window.closeCsvModal = () => {
+    document.getElementById('csvModal').style.display = 'none';
+    document.body.style.overflow = '';
+};
+
+// Tab Switching
+window.switchCsvTab = (tab) => {
+    const exportTab = document.getElementById('csvExportTab');
+    const importTab = document.getElementById('csvImportTab');
+    const exportSection = document.getElementById('csvExportSection');
+    const importSection = document.getElementById('csvImportSection');
+
+    if (tab === 'export') {
+        exportTab.classList.add('active');
+        importTab.classList.remove('active');
+        exportSection.style.display = 'block';
+        importSection.style.display = 'none';
+    } else {
+        exportTab.classList.remove('active');
+        importTab.classList.add('active');
+        exportSection.style.display = 'none';
+        importSection.style.display = 'block';
+    }
+};
+
+// Select All / Deselect All Fields
+window.selectAllCsvFields = (selectAll) => {
+    const checkboxes = document.querySelectorAll('.csv-field-checkbox input[type="checkbox"]:not(:disabled)');
+    checkboxes.forEach(cb => cb.checked = selectAll);
+};
+
+// Export Products CSV
+window.exportProductsCsv = async () => {
+    showToast('Generating CSV...', 'info');
+
+    try {
+        // Build columns based on selection
+        const columns = [];
+        const headers = [];
+
+        // ID is always included
+        columns.push({ key: 'id', header: 'product_id' });
+        headers.push('product_id');
+
+        // Check each field
+        if (document.getElementById('csvFieldName')?.checked) {
+            columns.push({ key: 'product_name', header: 'product_name' });
+            headers.push('product_name');
+        }
+        if (document.getElementById('csvFieldNameTelugu')?.checked) {
+            columns.push({ key: 'product_name_telugu', header: 'product_name_telugu' });
+            headers.push('product_name_telugu');
+        }
+        if (document.getElementById('csvFieldCategory')?.checked) {
+            columns.push({ key: 'product_category', header: 'product_category' });
+            headers.push('product_category');
+        }
+        if (document.getElementById('csvFieldTagline')?.checked) {
+            columns.push({ key: 'product_tagline', header: 'product_tagline' });
+            headers.push('product_tagline');
+        }
+        if (document.getElementById('csvFieldDescription')?.checked) {
+            columns.push({ key: 'product_description', header: 'product_description' });
+            headers.push('product_description');
+        }
+        if (document.getElementById('csvFieldIngredients')?.checked) {
+            columns.push({ key: 'ingredients', header: 'ingredients' });
+            headers.push('ingredients');
+        }
+        if (document.getElementById('csvFieldServing')?.checked) {
+            columns.push({ key: 'serving_suggestion', header: 'serving_suggestion' });
+            headers.push('serving_suggestion');
+        }
+        if (document.getElementById('csvFieldTrending')?.checked) {
+            columns.push({ key: 'is_trending', header: 'is_trending' });
+            headers.push('is_trending');
+        }
+        if (document.getElementById('csvFieldVisible')?.checked) {
+            columns.push({ key: 'is_visible', header: 'is_visible' });
+            headers.push('is_visible');
+        }
+
+        // Check if variant fields are selected
+        const includeVariantQty = document.getElementById('csvFieldVariantQty')?.checked;
+        const includeVariantMrp = document.getElementById('csvFieldVariantMrp')?.checked;
+        const includeVariantPrice = document.getElementById('csvFieldVariantPrice')?.checked;
+        const includeVariantStock = document.getElementById('csvFieldVariantStock')?.checked;
+        const hasVariantFields = includeVariantQty || includeVariantMrp || includeVariantPrice || includeVariantStock;
+
+        if (hasVariantFields) {
+            headers.push('variant_index');
+            if (includeVariantQty) headers.push('variant_quantity');
+            if (includeVariantMrp) headers.push('variant_mrp');
+            if (includeVariantPrice) headers.push('variant_price');
+            if (includeVariantStock) headers.push('variant_stock');
+        }
+
+        // Fetch all products
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('display_order', { ascending: true });
+
+        if (error) throw error;
+
+        // Build CSV rows
+        const rows = [];
+        rows.push(headers.join(',')); // Header row
+
+        products.forEach(product => {
+            const variants = product.quantity_variants || [];
+            const baseRow = [];
+
+            // Add base columns
+            columns.forEach(col => {
+                let val = product[col.key] ?? '';
+                // Escape quotes and wrap in quotes if contains comma or quotes
+                if (typeof val === 'string' && (val.includes(',') || val.includes('"') || val.includes('\n'))) {
+                    val = '"' + val.replace(/"/g, '""') + '"';
+                }
+                baseRow.push(val);
+            });
+
+            if (hasVariantFields && variants.length > 0) {
+                // One row per variant
+                variants.forEach((v, idx) => {
+                    const row = [...baseRow];
+                    row.push(idx); // variant_index
+                    if (includeVariantQty) row.push(v.quantity || '');
+                    if (includeVariantMrp) row.push(v.mrp || '');
+                    if (includeVariantPrice) row.push(v.price || '');
+                    if (includeVariantStock) row.push(v.stock || 0);
+                    rows.push(row.join(','));
+                });
+            } else {
+                // Single row, no variants
+                rows.push(baseRow.join(','));
+            }
+        });
+
+        // Create and download file with UTF-8 BOM for proper encoding of Telugu/Unicode characters
+        const csvContent = rows.join('\n');
+        // UTF-8 BOM (Byte Order Mark) helps Excel recognize UTF-8 encoding
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `products_export_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+
+        showToast(`Exported ${products.length} products!`, 'success');
+
+    } catch (e) {
+        console.error('CSV Export Error:', e);
+        showToast('Error exporting CSV: ' + e.message, 'error');
+    }
+};
+
+// Handle CSV/Excel Upload
+window.handleCsvUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+    const isCsv = fileName.endsWith('.csv');
+
+    if (!isExcel && !isCsv) {
+        showToast('Please upload a .csv, .xlsx, or .xls file', 'error');
+        return;
+    }
+
+    if (isExcel) {
+        // Handle Excel file using SheetJS
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Get the first sheet
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert to JSON (array of objects)
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (jsonData.length === 0) {
+                    showToast('Excel file is empty', 'error');
+                    return;
+                }
+
+                // First row is headers
+                const headers = jsonData[0].map(h => String(h).trim());
+                const rows = [];
+
+                for (let i = 1; i < jsonData.length; i++) {
+                    const rowValues = jsonData[i];
+                    if (!rowValues || rowValues.length === 0) continue;
+
+                    const row = {};
+                    headers.forEach((h, idx) => {
+                        row[h] = rowValues[idx] !== undefined ? String(rowValues[idx]).trim() : '';
+                    });
+                    rows.push(row);
+                }
+
+                csvParsedData = rows;
+
+                // Show preview
+                renderCsvPreview(headers, rows);
+                document.getElementById('csvPreviewArea').style.display = 'block';
+                document.getElementById('csvPreviewCount').textContent = `(${rows.length} rows)`;
+
+                showToast(`Loaded ${rows.length} rows from Excel`, 'success');
+            } catch (err) {
+                console.error('Excel Parse Error:', err);
+                showToast('Error parsing Excel file: ' + err.message, 'error');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    } else {
+        // Handle CSV file
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target.result;
+                const parsed = parseCsv(text);
+                csvParsedData = parsed.data;
+
+                // Show preview
+                renderCsvPreview(parsed.headers, parsed.data);
+                document.getElementById('csvPreviewArea').style.display = 'block';
+                document.getElementById('csvPreviewCount').textContent = `(${parsed.data.length} rows)`;
+
+                showToast(`Loaded ${parsed.data.length} rows`, 'success');
+            } catch (err) {
+                console.error('CSV Parse Error:', err);
+                showToast('Error parsing CSV: ' + err.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+};
+
+// Simple CSV Parser
+function parseCsv(text) {
+    // Normalize line endings (handle Windows CRLF, Mac CR, Unix LF)
+    const normalizedText = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    // Split into lines and filter out empty lines
+    const lines = normalizedText.trim().split('\n').filter(line => line.trim() !== '');
+
+    if (lines.length === 0) {
+        return { headers: [], data: [] };
+    }
+
+    const headers = parseCSVLine(lines[0]);
+    const data = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue; // Skip empty lines
+
+        const values = parseCSVLine(line);
+        const row = {};
+        headers.forEach((h, idx) => {
+            row[h.trim()] = values[idx]?.trim() || '';
+        });
+        data.push(row);
+    }
+
+    return { headers, data };
+}
+
+// Parse a single CSV line (handles quoted fields)
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current);
+    return result;
+}
+
+// Render CSV Preview Table
+function renderCsvPreview(headers, data) {
+    const container = document.getElementById('csvPreviewTable');
+    const previewData = data.slice(0, 10); // Only show first 10 rows
+
+    let html = '<table><thead><tr>';
+    headers.forEach(h => {
+        html += `<th>${h}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    previewData.forEach(row => {
+        html += '<tr>';
+        headers.forEach(h => {
+            html += `<td title="${row[h] || ''}">${row[h] || ''}</td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    if (data.length > 10) {
+        html += `<p style="text-align: center; padding: 10px; color: var(--text-secondary); font-size: 0.85rem;">... and ${data.length - 10} more rows</p>`;
+    }
+
+    container.innerHTML = html;
+}
+
+// Clear CSV Upload
+window.clearCsvUpload = () => {
+    csvParsedData = [];
+    document.getElementById('csvFileInput').value = '';
+    document.getElementById('csvPreviewArea').style.display = 'none';
+    document.getElementById('csvPreviewTable').innerHTML = '';
+};
+
+// Process CSV Import
+window.processCsvImport = async () => {
+    if (csvParsedData.length === 0) {
+        showToast('No data to import', 'error');
+        return;
+    }
+
+    // Check for required product_id column
+    if (!csvParsedData[0].hasOwnProperty('product_id')) {
+        showToast('Missing required "product_id" column', 'error');
+        return;
+    }
+
+    showToast('Processing import...', 'info');
+
+    try {
+        // Group rows by product_id
+        const productUpdates = {};
+
+        csvParsedData.forEach(row => {
+            const productId = row.product_id;
+            if (!productId) return;
+
+            if (!productUpdates[productId]) {
+                productUpdates[productId] = {
+                    product: {},
+                    variants: []
+                };
+            }
+
+            // Extract product-level fields
+            const productFields = ['product_name', 'product_name_telugu', 'product_category',
+                'product_tagline', 'product_description', 'ingredients',
+                'serving_suggestion', 'is_trending', 'is_visible'];
+
+            productFields.forEach(field => {
+                if (row.hasOwnProperty(field) && row[field] !== '') {
+                    let val = row[field];
+                    // Convert boolean strings
+                    if (field === 'is_trending' || field === 'is_visible') {
+                        val = val.toLowerCase() === 'true' || val === '1';
+                    }
+                    productUpdates[productId].product[field] = val;
+                }
+            });
+
+            // Extract variant fields
+            if (row.hasOwnProperty('variant_index')) {
+                const variantIdx = parseInt(row.variant_index);
+                if (!isNaN(variantIdx)) {
+                    const variant = { index: variantIdx };
+                    if (row.hasOwnProperty('variant_quantity') && row.variant_quantity !== '') {
+                        variant.quantity = row.variant_quantity;
+                    }
+                    if (row.hasOwnProperty('variant_mrp') && row.variant_mrp !== '') {
+                        variant.mrp = parseFloat(row.variant_mrp);
+                    }
+                    if (row.hasOwnProperty('variant_price') && row.variant_price !== '') {
+                        variant.price = parseFloat(row.variant_price);
+                    }
+                    if (row.hasOwnProperty('variant_stock') && row.variant_stock !== '') {
+                        variant.stock = parseInt(row.variant_stock);
+                    }
+                    productUpdates[productId].variants.push(variant);
+                }
+            }
+        });
+
+        // Apply updates
+        let updateCount = 0;
+        let errorCount = 0;
+
+        for (const productId of Object.keys(productUpdates)) {
+            const update = productUpdates[productId];
+            const updateData = { ...update.product };
+
+            // Handle variant updates
+            if (update.variants.length > 0) {
+                // Fetch existing product to get current variants
+                const { data: existingProduct, error: fetchError } = await supabase
+                    .from('products')
+                    .select('quantity_variants')
+                    .eq('id', productId)
+                    .single();
+
+                if (fetchError) {
+                    console.error(`Error fetching product ${productId}:`, fetchError);
+                    errorCount++;
+                    continue;
+                }
+
+                const existingVariants = existingProduct.quantity_variants || [];
+
+                // Update variants by index
+                update.variants.forEach(v => {
+                    if (existingVariants[v.index]) {
+                        if (v.quantity !== undefined) existingVariants[v.index].quantity = v.quantity;
+                        if (v.mrp !== undefined) existingVariants[v.index].mrp = v.mrp;
+                        if (v.price !== undefined) existingVariants[v.index].price = v.price;
+                        if (v.stock !== undefined) existingVariants[v.index].stock = v.stock;
+                    }
+                });
+
+                updateData.quantity_variants = existingVariants;
+
+                // Recalculate totals
+                updateData.total_stock = existingVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
+            }
+
+            // Skip if no actual updates
+            if (Object.keys(updateData).length === 0) continue;
+
+            // Apply update
+            const { error: updateError } = await supabase
+                .from('products')
+                .update(updateData)
+                .eq('id', productId);
+
+            if (updateError) {
+                console.error(`Error updating product ${productId}:`, updateError);
+                errorCount++;
+            } else {
+                updateCount++;
+            }
+        }
+
+        if (errorCount > 0) {
+            showToast(`Updated ${updateCount} products, ${errorCount} errors`, 'error');
+        } else {
+            showToast(`Successfully updated ${updateCount} products!`, 'success');
+        }
+
+        // Refresh products list
+        fetchProducts();
+
+        // Clear import state
+        clearCsvUpload();
+
+    } catch (e) {
+        console.error('CSV Import Error:', e);
+        showToast('Error importing CSV: ' + e.message, 'error');
+    }
+};
+
+// Setup drag and drop for upload zone
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadZone = document.getElementById('csvUploadZone');
+    if (uploadZone) {
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                document.getElementById('csvFileInput').files = e.dataTransfer.files;
+                handleCsvUpload({ target: { files: [file] } });
+            }
+        });
+    }
+});

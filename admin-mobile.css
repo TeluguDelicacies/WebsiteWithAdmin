@@ -236,6 +236,19 @@ Only loads on screens < 768px
     /* JS controls display - only shows after drag */
 }
 
+/* CSV Button - Compact on mobile */
+#csvBtn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    border: 1px solid #059669 !important;
+    background: white !important;
+    color: #059669 !important;
+    border-radius: 8px !important;
+    font-size: 1.2rem !important;
+}
+
 /* Save Section Settings - green circle */
 #saveSettingsBtn {
     width: 48px !important;
@@ -255,6 +268,8 @@ Only loads on screens < 768px
 /* Hide all text after the icon */
 #saveOrderBtn i~*,
 #saveOrderBtn .btn-text,
+#csvBtn i~*,
+#csvBtn .btn-text,
 #saveSettingsBtn i~*,
 #saveSettingsBtn .btn-text {
     display: none !important;
@@ -564,4 +579,81 @@ Only loads on screens < 768px
 
 .draggable-item.over {
     border: 2px dashed var(--color-primary-blue) !important;
+}
+
+/* ====================================
+   TOAST NOTIFICATIONS - MOBILE
+   ==================================== */
+
+#toast-container {
+    bottom: 80px !important;
+    /* Above bottom nav */
+    right: 10px !important;
+    left: 10px !important;
+    align-items: stretch !important;
+}
+
+.toast {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 15px !important;
+    font-size: 0.9rem !important;
+}
+
+.toast-top-text {
+    font-size: 0.85rem !important;
+}
+
+.toast-body {
+    font-size: 0.8rem !important;
+}
+
+/* ====================================
+   FIELD UPDATED HIGHLIGHT - MOBILE
+   ==================================== */
+
+.field-updated {
+    animation: field-updated-pulse 0.8s ease-out !important;
+}
+
+.section-toggle-card.updated {
+    animation: field-updated-pulse 0.8s ease-out !important;
+}
+
+/* ====================================
+   CSV MODAL - MOBILE
+   ==================================== */
+
+#csvModal .modal-content {
+    padding: 16px !important;
+}
+
+#csvModal h2 {
+    font-size: 1.1rem !important;
+}
+
+/* CSV Field Checkboxes - 2 columns on mobile */
+#csvModal .csv-field-checkbox {
+    font-size: 0.8rem !important;
+    padding: 6px 10px !important;
+}
+
+/* Upload Zone compact */
+#csvModal .csv-upload-zone {
+    padding: 25px 15px !important;
+}
+
+#csvModal .csv-upload-zone i {
+    font-size: 2rem !important;
+}
+
+/* Preview Table - scrollable */
+#csvModal #csvPreviewTable {
+    max-height: 200px !important;
+}
+
+#csvModal #csvPreviewTable th,
+#csvModal #csvPreviewTable td {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
 }
