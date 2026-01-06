@@ -688,8 +688,8 @@ textarea {
 .product-header-fields {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    /* Uniform spacing */
+    gap: 11px;
+    /* Uniform spacing desktop */
     margin-bottom: 20px;
 }
 
@@ -699,8 +699,8 @@ textarea {
     }
 
     .product-header-fields {
-        gap: 12px;
-        /* Slightly tighter on mobile */
+        gap: 9px;
+        /* Uniform spacing mobile */
     }
 
     /* Mobile PRODUCT PAGE: English product name - MORE PROMINENT */
@@ -1180,7 +1180,7 @@ textarea {
 
     /* Compact Typography for Desktop to avoid scroll */
     .product-title {
-        font-size: 1.6rem !important;
+        font-size: clamp(2rem, 5vw, 2.4rem) !important;
         margin-top: 0 !important;
         margin-bottom: 2px !important;
     }
@@ -1195,6 +1195,10 @@ textarea {
         /* Match English name size as requested */
         font-weight: 400 !important;
         margin-top: -10px !important;
+        /* Ensure it does not drop down */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
     .current-price {
@@ -1228,18 +1232,25 @@ textarea {
     .qty-control-lg {
         display: flex;
         align-items: center;
+        background: #FFF9C4 !important;
+        /* Sidebar yellow style */
+        border: 1px solid #FBC02D !important;
+        border-radius: 50px !important;
+        padding: 5px 15px;
+        width: fit-content;
         gap: 12px;
         margin-bottom: 20px;
     }
 
     .qty-btn-lg {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        /* Increased size */
+        height: 48px;
         border-radius: 50%;
-        border: 1px solid #FBC02D;
-        background: #FFF9C4;
+        border: none !important;
+        background: transparent !important;
         color: #333;
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         font-weight: 700;
         cursor: pointer;
         display: flex;
@@ -1249,8 +1260,7 @@ textarea {
     }
 
     .qty-btn-lg:hover {
-        background: #FBC02D;
-        color: #333;
+        background: rgba(251, 192, 45, 0.3) !important;
     }
 
     .qty-input-lg {
@@ -1303,8 +1313,8 @@ textarea {
     }
 
     .info-content-block.active {
-        height: 140px;
-        /* Reduced from 180px - user wants image size increased instead */
+        height: 112px;
+        /* Reduced by 1/5th from 140px */
         padding: 5px 10px;
         margin-bottom: 0 !important;
         overflow: hidden;
@@ -1929,25 +1939,35 @@ textarea {
 .qty-control-lg {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
+    background: #FFF9C4 !important;
+    /* Yellow theme */
+    border: 1px solid #FBC02D !important;
+    border-radius: 50px !important;
+    padding: 4px 12px;
+    width: fit-content;
+    gap: 0.8rem;
     margin-bottom: 1rem;
 }
 
 .qty-btn-lg {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    border: 1px solid var(--color-gray-300);
-    background: white;
-    font-size: 1.25rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none !important;
+    background: transparent !important;
+    color: #333;
+    font-size: 1.4rem;
+    font-weight: 700;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s;
 }
 
+
 .qty-btn-lg:hover {
-    border-color: var(--color-primary-blue);
-    color: var(--color-primary-blue);
+    background: rgba(251, 192, 45, 0.3) !important;
 }
 
 .qty-val-lg {
@@ -2079,9 +2099,9 @@ textarea {
 
 /* Quantity Controls - Yellow Theme */
 .qty-btn-lg {
-    background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 100%) !important;
-    border: 1px solid var(--color-accent) !important;
-    color: #92400e !important;
+    background: transparent !important;
+    border: none !important;
+    color: #333 !important;
 }
 
 .qty-btn-lg:hover {
