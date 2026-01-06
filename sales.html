@@ -945,14 +945,19 @@
         </div>
 
         <div class="add-to-cart-section">
-            <div class="qty-control-lg">
-                <button class="qty-btn-lg" onclick="updateDetailQty(-1)">−</button>
-                <input type="number" class="qty-input-lg" id="detailQty" value="1" min="1" onchange="window.validateDetailQty(this)">
-                <button class="qty-btn-lg" onclick="updateDetailQty(1)">+</button>
+            <div id="detailActionArea">
+                <!-- Add to Cart Button -->
+                <button class="add-cart-btn" id="detailAddBtn" onclick="window.addToCartFromDetail()">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+                
+                <!-- Qty Counter (Hidden by default) -->
+                <div class="qty-control-lg" id="detailQtyCounter" style="display:none;">
+                    <button class="qty-btn-lg" onclick="window.updateDetailQty(-1)">−</button>
+                    <input type="number" class="qty-input-lg" id="detailQty" value="1" min="1" onchange="window.validateDetailQty(this)">
+                    <button class="qty-btn-lg" onclick="window.updateDetailQty(1)">+</button>
+                </div>
             </div>
-            <button class="add-cart-btn" onclick="addToCartFromDetail()">
-                <i class="fas fa-cart-plus"></i> Add to Cart
-            </button>
         </div>
     </div>
     </article>
@@ -961,8 +966,8 @@
     <aside class="sidebar">
         <section class="sidebar-card">
             <div class="sidebar-tabs">
-                <div class="sidebar-tab active" data-tab="similar">Similar</div>
-                <div class="sidebar-tab" data-tab="trending">Trending</div>
+                <div class="sidebar-tab active" data-tab="similar" onclick="window.switchSidebarTab('similar')">Similar</div>
+                <div class="sidebar-tab" data-tab="trending" onclick="window.switchSidebarTab('trending')">Trending</div>
             </div>
             <div id="side-content">
                 ${renderVerticalItems(getSimilarProducts(product))}
@@ -1042,34 +1047,34 @@
             }
 
             window.syncDetailPageCart = function (v) {
+                const addBtn = document.getElementById('detailAddBtn');
+                const qtyCounter = document.getElementById('detailQtyCounter');
                 const qtyInput = document.getElementById('detailQty');
-                const addBtn = document.querySelector('.add-cart-btn');
 
-                if (!qtyInput) return;
+                if (!addBtn || !qtyCounter || !qtyInput) return;
 
-                // If v is not provided, try to get currently selected variant
                 if (!v) {
                     const select = document.getElementById('variantSelect');
-                    const variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
-                    v = variants[select ? select.value : 0];
+                    const vars = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
+                    v = vars[select ? select.value : 0];
                 }
-
-                if (!v) return;
 
                 const cartItem = state.cart.find(c => c.id == p.id &&
                     (c.variant ? c.variant.quantity === v.quantity : true)
                 );
 
                 if (cartItem) {
+                    addBtn.style.display = 'none';
+                    qtyCounter.style.display = 'flex';
                     qtyInput.value = cartItem.qty;
                     state.detailQty = cartItem.qty;
-                    if (addBtn) addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
                 } else {
+                    addBtn.style.display = 'block';
+                    qtyCounter.style.display = 'none';
                     qtyInput.value = 1;
                     state.detailQty = 1;
-                    if (addBtn) addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
                 }
-            }
+            };
 
 
             // 2. Toggles & Content
@@ -1178,8 +1183,8 @@
                 nutritionData[k] !== undefined && nutritionData[k] !== null && nutritionData[k] !== ''
             ).length : 0;
 
-            // Only show Nutrition button if at least 3 actual nutrition values exist
-            if (nutritionData && actualNutritionCount >= 3) {
+            // Only show Nutrition button if data exists
+            if (nutritionData && Object.keys(nutritionData).length > 0) {
                 sections.push({
                     id: 'nut',
                     label: 'Nutrition',
@@ -1200,13 +1205,14 @@
 
             // Render Buttons & Inject Content
             if (btnContainer) {
+                btnContainer.className = 'info-btns-row'; // Use standard CSS class
                 btnContainer.innerHTML = sections.map(s =>
-                    `<button class="toggle-btn" id="btn-${s.id}" data-target="${s.target}">
-            ${s.label}</button>`
+                    `<button class="info-btn" id="btn-${s.id}" data-target="${s.target}">${s.label}</button>`
                 ).join('');
 
                 sections.forEach(s => {
-                    document.getElementById(s.target).innerHTML = s.html;
+                    const el = document.getElementById(s.target);
+                    if (el) el.innerHTML = s.html;
                 });
 
                 // Add Toggle Logic
@@ -1239,7 +1245,7 @@
                     const wasActive = btn.classList.contains('active');
 
                     // Close ALL
-                    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.info-btn').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.info-content-block').forEach(d => d.classList.remove('active'));
 
                     if (!wasActive) {
@@ -1273,27 +1279,24 @@
                 };
             }
 
-            // Sidebar Tabs
-            document.querySelectorAll('.sidebar-tab').forEach(tab => {
-                tab.onclick = () => {
-                    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    const mode = tab.dataset.tab;
-                    document.getElementById('side-content').innerHTML = renderVerticalItems(mode === 'similar' ?
-                        getSimilarProducts(p) : state.allProducts.filter(x => x.is_trending));
-                };
-            });
+            // Initialize sidebar tab switcher
+            window.switchSidebarTab = function (mode) {
+                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                const activeTab = document.querySelector(`.sidebar-tab[data-tab="${mode}"]`);
+                if (activeTab) activeTab.classList.add('active');
 
-            // Initialize swipe navigation for mobile
-            if (window.initSwipeNavigation) {
-                window.initSwipeNavigation();
-            }
+                const sideContent = document.getElementById('side-content');
+                if (sideContent) {
+                    sideContent.innerHTML = renderVerticalItems(mode === 'similar' ?
+                        getSimilarProducts(p) : state.allProducts.filter(x => x.is_trending));
+                }
+            };
 
             // Auto-activate default tab (Nutrition if available, else first available)
             setTimeout(() => {
                 if (!btnContainer) return;
                 const nutBtn = document.getElementById('btn-nut');
-                const firstBtn = btnContainer.querySelector('.toggle-btn');
+                const firstBtn = btnContainer.querySelector('.info-btn');
                 const activeBtn = nutBtn || firstBtn;
                 if (activeBtn) activeBtn.click();
             }, 100);
@@ -1580,64 +1583,41 @@
         };
 
         window.updateDetailQty = function (delta) {
-            const input = document.getElementById('detailQty');
-            if (!input) return;
-            const currentVal = parseInt(input.value) || 1;
-            let newQty = currentVal + delta;
+            if (!state.currentProduct) return;
 
-            let maxStock = 999;
-            if (state.currentProduct) {
-                const variants = state.currentProduct.quantity_variants || [];
-                if (variants.length > 0) {
-                    const select = document.getElementById('variantSelect');
-                    const v = variants[select ? select.value : 0];
-                    if (v && v.stock !== undefined) maxStock = v.stock;
-                } else if (state.currentProduct.total_stock !== undefined) {
-                    maxStock = state.currentProduct.total_stock;
-                }
-            }
+            // Get selected variant
+            const select = document.getElementById('variantSelect');
+            const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
+            const variant = variants[select ? select.value : 0];
 
-            if (newQty < 1) newQty = 1;
-            if (newQty > maxStock) {
-                if (maxStock <= 0) {
-                    window.showToast('Sorry, this item is Out of Stock', 'error');
-                } else {
-                    window.showToast(`Max ${maxStock} units available`, 'error');
-                }
-                newQty = Math.max(1, maxStock);
-            }
+            // Update cart relative to delta
+            window.addToCart(state.currentProduct, variant, delta);
 
-            state.detailQty = newQty;
-            input.value = state.detailQty;
+            // UI Sync is handled inside updateCartUI() which is called by saveCart()
         };
 
         window.validateDetailQty = function (input) {
+            if (!state.currentProduct) return;
             let val = parseInt(input.value);
             if (isNaN(val) || val < 1) val = 1;
 
-            let maxStock = 999;
-            if (state.currentProduct) {
-                const variants = state.currentProduct.quantity_variants || [];
-                if (variants.length > 0) {
-                    const select = document.getElementById('variantSelect');
-                    const v = variants[select ? select.value : 0];
-                    if (v && v.stock !== undefined) maxStock = v.stock;
-                } else if (state.currentProduct.total_stock !== undefined) {
-                    maxStock = state.currentProduct.total_stock;
-                }
-            }
+            const select = document.getElementById('variantSelect');
+            const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
+            const variant = variants[select ? select.value : 0];
 
-            if (val > maxStock) {
-                if (maxStock <= 0) {
-                    window.showToast('Out of Stock', 'error');
-                    val = 1;
-                } else {
-                    window.showToast(`Max ${maxStock} units available`, 'error');
-                    val = maxStock;
-                }
+            // Update cart to absolute value
+            const existingIdx = state.cart.findIndex(item =>
+                item.id === state.currentProduct.id &&
+                (item.variant ? item.variant.quantity === variant.quantity : true)
+            );
+
+            if (existingIdx > -1) {
+                const currentQty = state.cart[existingIdx].qty;
+                const delta = val - currentQty;
+                window.addToCart(state.currentProduct, variant, delta);
+            } else {
+                window.addToCart(state.currentProduct, variant, val);
             }
-            state.detailQty = val;
-            input.value = val;
         };
 
         // Helper for cart animation
