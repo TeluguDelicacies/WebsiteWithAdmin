@@ -40,11 +40,15 @@ const CsvManager = {
             importTab.classList.remove('active');
             exportSection.style.display = 'block';
             importSection.style.display = 'none';
+            document.getElementById('csvApplyBtn').style.display = 'none';
         } else {
             exportTab.classList.remove('active');
             importTab.classList.add('active');
             exportSection.style.display = 'none';
             importSection.style.display = 'block';
+            // Show Apply button only if data exists
+            const hasData = csvParsedData && csvParsedData.length > 0;
+            document.getElementById('csvApplyBtn').style.display = hasData ? 'block' : 'none';
         }
     },
 
@@ -54,6 +58,7 @@ const CsvManager = {
         if (fileInput) fileInput.value = '';
         document.getElementById('csvPreviewArea').style.display = 'none';
         document.getElementById('csvPreviewTable').innerHTML = '';
+        document.getElementById('csvApplyBtn').style.display = 'none';
     },
 
     /**
@@ -211,6 +216,7 @@ const CsvManager = {
 
                 document.getElementById('csvPreviewArea').style.display = 'block';
                 document.getElementById('csvPreviewCount').textContent = `(${jsonData.length} rows)`;
+                document.getElementById('csvApplyBtn').style.display = 'block';
                 showToast(`Loaded ${jsonData.length} rows`, 'success');
 
             } catch (error) {

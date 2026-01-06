@@ -1870,20 +1870,17 @@
                             style="max-height: 300px; overflow: auto; border: 1px solid var(--border-light); border-radius: 8px;">
                             <!-- Preview table injected here -->
                         </div>
-                        <div style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button onclick="processCsvImport()" class="submit-btn" style="flex: 1;">
-                                <i class="fas fa-check" style="margin-right: 8px;"></i> Apply Changes
-                            </button>
-                            <button onclick="clearCsvUpload()" class="admin-btn cancel-btn" style="flex: 0 0 auto;">
-                                Clear
-                            </button>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Close Button -->
-                <div style="margin-top: 20px; text-align: right;">
-                    <button onclick="closeCsvModal()" class="admin-btn cancel-btn">Close</button>
+                <!-- Consolidated Modal Actions -->
+                <div class="modal-actions">
+                    <button id="csvApplyBtn" onclick="processCsvImport()" class="btn-save" style="display: none;">
+                        <i class="fas fa-check"></i> Apply Changes
+                    </button>
+                    <button onclick="closeCsvModal()" class="btn-cancel">
+                        <i class="fas fa-times"></i> Close
+                    </button>
                 </div>
             </div>
         </div>
