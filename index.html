@@ -414,6 +414,88 @@
         </div>
     </div>
 
+    <!-- Quick Preview Popup for Carousel Products -->
+    <div id="quickPreviewOverlay" class="quick-preview-overlay" onclick="window.closeQuickPreview()"></div>
+    <div id="quickPreviewPopup" class="quick-preview-popup">
+        <button class="quick-preview-close" onclick="window.closeQuickPreview()">&times;</button>
+
+        <!-- Matches .product-card structure from sales grid -->
+        <div class="quick-preview-card">
+            <!-- Image Container with FLIP support -->
+            <div class="quick-preview-gallery">
+                <div id="quickPreviewGalleryInner" class="quick-preview-gallery-inner">
+                    <!-- Front Face - Product Image -->
+                    <div class="quick-preview-front">
+                        <img id="quickPreviewImg" class="product-image" src="" alt="Product">
+                    </div>
+
+                    <!-- Back Face - Product Details -->
+                    <div class="quick-preview-back">
+                        <div class="quick-preview-back-content">
+                            <h4>Product Details</h4>
+                            <p id="quickPreviewDescription"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fixed Controls -->
+                <button id="quickPreviewFlipBtn" class="btn-flip" onclick="window.flipQuickPreview()">
+                    <span class="flip-text-front">INFO</span>
+                    <span class="flip-text-back">BACK</span>
+                </button>
+
+                <div class="card-action-container">
+                    <button id="quickPreviewAddBtn" class="btn-add"
+                        onclick="window.quickPreviewAddToCart()">ADD</button>
+                    <div id="quickPreviewQtyCounter" class="qty-counter" style="display:none;">
+                        <button onclick="window.quickPreviewUpdateQty(-1)">−</button>
+                        <span id="quickPreviewQtyVal">1</span>
+                        <button onclick="window.quickPreviewUpdateQty(1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="card-info">
+                <!-- Sub-brand -->
+                <span id="quickPreviewSubBrand" class="card-sub-brand"></span>
+
+                <!-- Product Title -->
+                <h3 id="quickPreviewName" class="product-title"></h3>
+
+                <!-- Telugu Name -->
+                <p id="quickPreviewTelugu" class="product-subtitle"></p>
+
+                <!-- Tagline -->
+                <p id="quickPreviewTagline" class="quick-preview-tagline"></p>
+
+                <!-- Price Row -->
+                <div class="price-row">
+                    <span id="quickPreviewPrice" class="price-pill"></span>
+                    <span id="quickPreviewMrp" class="mrp"></span>
+                    <span id="quickPreviewDiscount" class="discount"></span>
+                </div>
+
+                <!-- Variant Selector -->
+                <div id="quickPreviewVariantSelector" class="variant-selector"
+                    onclick="window.toggleQuickPreviewVariants()">
+                    <span id="quickPreviewVariantLabel">100gms</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <!-- Variant Dropdown List -->
+                <div id="quickPreviewVariantsList" class="quick-preview-variants-list" style="display:none;">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- View Details Button -->
+                <a id="quickPreviewViewBtn" href="#" class="quick-preview-view-btn">
+                    <i class="fas fa-arrow-right"></i> View Full Details
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- QRCode library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 

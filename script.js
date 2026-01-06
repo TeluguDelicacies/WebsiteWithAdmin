@@ -235,6 +235,388 @@ window.shareCurrentPage = function () {
     }
 };
 
+// QUICK PREVIEW POPUP FUNCTIONS
+// Shows a quick preview popup when clicking on carousel products
+
+// State for quick preview
+window.quickPreviewState = {
+    product: null,
+    variants: [],
+    selectedVariantIndex: 0,
+    qty: 0,
+    variantsOpen: false
+};
+
+window.showQuickPreview = function (product) {
+    const overlay = document.getElementById('quickPreviewOverlay');
+    const popup = document.getElementById('quickPreviewPopup');
+
+    if (!overlay || !popup) return;
+
+    // Store product in state
+    window.quickPreviewState.product = product;
+    window.quickPreviewState.qty = 0;
+    window.quickPreviewState.selectedVariantIndex = 0;
+    window.quickPreviewState.variantsOpen = false;
+
+    // Parse variants
+    let variants = [];
+    try {
+        if (typeof product.quantity_variants === 'string') {
+            variants = JSON.parse(product.quantity_variants);
+        } else if (Array.isArray(product.quantity_variants)) {
+            variants = product.quantity_variants;
+        }
+    } catch (e) {
+        console.warn('Variant parse error', e);
+    }
+
+    // Fallback for non-variant products
+    if (variants.length === 0) {
+        variants = [{
+            quantity: product.quantity || 'Standard',
+            price: product.price,
+            mrp: product.mrp,
+            stock: product.total_stock
+        }];
+    }
+
+    // Sort variants by price (smallest first)
+    variants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+    window.quickPreviewState.variants = variants;
+
+    // Populate UI elements  
+    const imgEl = document.getElementById('quickPreviewImg');
+    const subBrandEl = document.getElementById('quickPreviewSubBrand');
+    const nameEl = document.getElementById('quickPreviewName');
+    const teluguEl = document.getElementById('quickPreviewTelugu');
+    const taglineEl = document.getElementById('quickPreviewTagline');
+    const priceEl = document.getElementById('quickPreviewPrice');
+    const mrpEl = document.getElementById('quickPreviewMrp');
+    const discountEl = document.getElementById('quickPreviewDiscount');
+    const variantSelector = document.getElementById('quickPreviewVariantSelector');
+    const variantLabel = document.getElementById('quickPreviewVariantLabel');
+    const variantsList = document.getElementById('quickPreviewVariantsList');
+    const viewBtn = document.getElementById('quickPreviewViewBtn');
+
+    // Image
+    const imageUrl = product.showcase_image || window.currentSiteSettings?.product_placeholder_url || '';
+    imgEl.src = imageUrl;
+    imgEl.alt = product.product_name;
+
+    // Sub-brand
+    if (subBrandEl) {
+        const subBrand = product.sub_brand || '';
+        subBrandEl.textContent = subBrand;
+        subBrandEl.style.display = subBrand ? 'block' : 'none';
+    }
+
+    // Product name
+    nameEl.textContent = product.product_name;
+
+    // Telugu name
+    if (teluguEl) {
+        const teluguName = product.product_name_telugu || '';
+        teluguEl.textContent = teluguName;
+        teluguEl.style.display = teluguName ? 'block' : 'none';
+    }
+
+    // Tagline
+    const tagline = product.product_tagline || '';
+    if (taglineEl) {
+        taglineEl.textContent = tagline;
+        taglineEl.style.display = tagline ? 'block' : 'none';
+    }
+
+    // Set first variant as selected
+    const selectedVariant = variants[0];
+
+    // Price display
+    if (priceEl) priceEl.textContent = `₹${selectedVariant.price}`;
+
+    // MRP and discount
+    if (mrpEl && discountEl) {
+        if (selectedVariant.mrp && Number(selectedVariant.mrp) > Number(selectedVariant.price)) {
+            mrpEl.textContent = `₹${selectedVariant.mrp}`;
+            mrpEl.style.display = 'inline';
+            const discount = Math.round(((selectedVariant.mrp - selectedVariant.price) / selectedVariant.mrp) * 100);
+            discountEl.textContent = `${discount}% OFF`;
+            discountEl.style.display = 'inline';
+        } else {
+            mrpEl.style.display = 'none';
+            discountEl.style.display = 'none';
+        }
+    }
+
+    // Variant selector
+    if (variantLabel) variantLabel.textContent = selectedVariant.quantity;
+
+    // Populate variants list
+    if (variantsList) {
+        variantsList.innerHTML = variants.map((v, idx) => `
+            <div class="quick-preview-variant-option ${idx === 0 ? 'active' : ''}" onclick="window.selectQuickPreviewVariant(${idx})">
+                <span>${v.quantity}</span>
+                <span class="variant-price">₹${v.price}</span>
+            </div>
+        `).join('');
+        variantsList.style.display = 'none';
+    }
+
+    // Show/hide variant selector based on count
+    if (variantSelector) {
+        variantSelector.style.display = variants.length > 1 ? 'flex' : 'none';
+    }
+
+    // View Details button - link to sales page
+    const productSlug = product.slug || product.id;
+    const defaultVariant = variants[0];
+    viewBtn.href = `/sales/${productSlug}${defaultVariant ? `?variant=${encodeURIComponent(defaultVariant.quantity)}` : ''}`;
+
+    // Reset flip state on parent gallery
+    const gallery = document.querySelector('.quick-preview-gallery');
+    if (gallery) {
+        gallery.classList.remove('flipped');
+    }
+
+    // Populate description for back panel
+    const descEl = document.getElementById('quickPreviewDescription');
+    if (descEl) {
+        const description = product.product_description || product.product_tagline || 'No additional details available.';
+        descEl.textContent = description;
+    }
+
+    // Reset cart UI
+    window.updateQuickPreviewCartUI();
+
+    // Pause carousel animation
+    const productScroll = document.getElementById('productScroll');
+    if (productScroll) {
+        productScroll.style.animationPlayState = 'paused';
+    }
+
+    // Show popup
+    overlay.classList.add('show');
+    popup.classList.add('show');
+
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+};
+
+// Flip the quick preview gallery
+window.flipQuickPreview = function () {
+    const gallery = document.querySelector('.quick-preview-gallery');
+    if (gallery) {
+        gallery.classList.toggle('flipped');
+    }
+};
+
+window.selectQuickPreviewVariant = function (index) {
+    window.quickPreviewState.selectedVariantIndex = index;
+    const variant = window.quickPreviewState.variants[index];
+
+    // Update dropdown options visual state
+    const options = document.querySelectorAll('.quick-preview-variant-option');
+    options.forEach((opt, idx) => {
+        opt.classList.toggle('active', idx === index);
+    });
+
+    // Update variant label in selector
+    const variantLabel = document.getElementById('quickPreviewVariantLabel');
+    if (variantLabel) variantLabel.textContent = variant.quantity;
+
+    // Update price display
+    const priceEl = document.getElementById('quickPreviewPrice');
+    const mrpEl = document.getElementById('quickPreviewMrp');
+    const discountEl = document.getElementById('quickPreviewDiscount');
+
+    if (priceEl) priceEl.textContent = `₹${variant.price}`;
+
+    if (mrpEl && discountEl) {
+        if (variant.mrp && Number(variant.mrp) > Number(variant.price)) {
+            mrpEl.textContent = `₹${variant.mrp}`;
+            mrpEl.style.display = 'inline';
+            const discount = Math.round(((variant.mrp - variant.price) / variant.mrp) * 100);
+            discountEl.textContent = `${discount}% OFF`;
+            discountEl.style.display = 'inline';
+        } else {
+            mrpEl.style.display = 'none';
+            discountEl.style.display = 'none';
+        }
+    }
+
+    // Close variants dropdown
+    const variantsList = document.getElementById('quickPreviewVariantsList');
+    if (variantsList) variantsList.style.display = 'none';
+    window.quickPreviewState.variantsOpen = false;
+
+    // Update View Details link with selected variant
+    const viewBtn = document.getElementById('quickPreviewViewBtn');
+    const product = window.quickPreviewState.product;
+    if (viewBtn && product) {
+        const productSlug = product.slug || product.id;
+        viewBtn.href = `/sales/${productSlug}?variant=${encodeURIComponent(variant.quantity)}`;
+    }
+
+    // Check if this variant is in cart
+    window.updateQuickPreviewCartUI();
+};
+
+// Toggle variant dropdown visibility
+window.toggleQuickPreviewVariants = function () {
+    const variantsList = document.getElementById('quickPreviewVariantsList');
+    if (!variantsList) return;
+
+    window.quickPreviewState.variantsOpen = !window.quickPreviewState.variantsOpen;
+    variantsList.style.display = window.quickPreviewState.variantsOpen ? 'block' : 'none';
+};
+
+window.updateQuickPreviewCartUI = function () {
+    const addBtn = document.getElementById('quickPreviewAddBtn');
+    const qtyCounter = document.getElementById('quickPreviewQtyCounter');
+    const qtyVal = document.getElementById('quickPreviewQtyVal');
+
+    const product = window.quickPreviewState.product;
+    const variant = window.quickPreviewState.variants[window.quickPreviewState.selectedVariantIndex];
+
+    if (!product || !variant) return;
+
+    // Check if in cart (using localStorage cart from main page)
+    let cart = [];
+    try {
+        cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+    } catch (e) { }
+
+    const cartItem = cart.find(item =>
+        item.id == product.id &&
+        (item.variant ? item.variant.quantity === variant.quantity : true)
+    );
+
+    const qty = cartItem ? cartItem.qty : 0;
+    window.quickPreviewState.qty = qty;
+
+    if (qty > 0) {
+        addBtn.style.display = 'none';
+        qtyCounter.style.display = 'inline-flex';
+        qtyVal.textContent = qty;
+    } else {
+        addBtn.style.display = 'inline-flex';
+        qtyCounter.style.display = 'none';
+    }
+};
+
+window.quickPreviewAddToCart = function () {
+    const product = window.quickPreviewState.product;
+    const variant = window.quickPreviewState.variants[window.quickPreviewState.selectedVariantIndex];
+
+    if (!product || !variant) return;
+
+    // Get cart from localStorage
+    let cart = [];
+    try {
+        cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+    } catch (e) { }
+
+    // Check if already exists
+    const existingIdx = cart.findIndex(item =>
+        item.id == product.id &&
+        (item.variant ? item.variant.quantity === variant.quantity : true)
+    );
+
+    if (existingIdx > -1) {
+        cart[existingIdx].qty += 1;
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.product_name,
+            telugu_name: product.product_name_telugu || '',
+            image: product.showcase_image,
+            variant: variant,
+            price: Number(variant.price) || 0,
+            qty: 1
+        });
+    }
+
+    // Save to localStorage
+    localStorage.setItem('td_cart', JSON.stringify(cart));
+
+    // Update UI
+    window.updateQuickPreviewCartUI();
+
+    // Also update main cart count if function exists
+    if (typeof window.updateMainCartUI === 'function') {
+        window.updateMainCartUI();
+    }
+};
+
+window.quickPreviewUpdateQty = function (delta) {
+    const product = window.quickPreviewState.product;
+    const variant = window.quickPreviewState.variants[window.quickPreviewState.selectedVariantIndex];
+
+    if (!product || !variant) return;
+
+    // Get cart from localStorage
+    let cart = [];
+    try {
+        cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+    } catch (e) { }
+
+    const existingIdx = cart.findIndex(item =>
+        item.id == product.id &&
+        (item.variant ? item.variant.quantity === variant.quantity : true)
+    );
+
+    if (existingIdx > -1) {
+        cart[existingIdx].qty += delta;
+
+        if (cart[existingIdx].qty <= 0) {
+            cart.splice(existingIdx, 1);
+        }
+    }
+
+    // Save to localStorage
+    localStorage.setItem('td_cart', JSON.stringify(cart));
+
+    // Update UI
+    window.updateQuickPreviewCartUI();
+
+    // Also update main cart count if function exists
+    if (typeof window.updateMainCartUI === 'function') {
+        window.updateMainCartUI();
+    }
+};
+
+window.closeQuickPreview = function () {
+    const overlay = document.getElementById('quickPreviewOverlay');
+    const popup = document.getElementById('quickPreviewPopup');
+
+    if (overlay) overlay.classList.remove('show');
+    if (popup) popup.classList.remove('show');
+
+    // Resume carousel animation
+    const productScroll = document.getElementById('productScroll');
+    if (productScroll) {
+        productScroll.style.animationPlayState = 'running';
+    }
+
+    // Re-enable body scroll
+    document.body.style.overflow = '';
+
+    // Clear state
+    window.quickPreviewState = {
+        product: null,
+        variants: [],
+        selectedVariantIndex: 0,
+        qty: 0
+    };
+};
+
+// Close on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        window.closeQuickPreview();
+    }
+});
+
 /*
 Features: Smooth scrolling, form handling, animations, enhanced product showcase with rem-based scaling
 Fonts: Montserrat (headers), Roboto (body text), Noto Sans Telugu (Telugu content)
@@ -2487,6 +2869,7 @@ function renderProducts(products, categories) {
             filteredCarouselProducts.forEach(product => {
                 const showcaseItem = document.createElement('div');
                 showcaseItem.className = 'product-item';
+                showcaseItem.dataset.productId = product.id;
 
                 // Allow dynamic placeholder from site settings if needed, but for now specific or default
                 let localImage = product.showcase_image;
@@ -2502,7 +2885,15 @@ function renderProducts(products, categories) {
                         <h3>${product.product_name}</h3>
                         <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
                     </div>
+                    <div class="tap-indicator"><i class="fas fa-plus"></i></div>
                 `;
+
+                // Add click handler for quick preview
+                showcaseItem.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.showQuickPreview(product);
+                });
+
                 productScroll.appendChild(showcaseItem);
             });
 
@@ -3608,6 +3999,10 @@ window.removeMainCartItem = function (index) {
 window.clearMainCart = function () {
     localStorage.setItem('td_cart', JSON.stringify([]));
     window.updateMainCartUI();
+    // Also reset quick preview cart UI if popup is open
+    if (typeof window.updateQuickPreviewCartUI === 'function') {
+        window.updateQuickPreviewCartUI();
+    }
     window.showToast('Cart cleared', 'info');
 };
 
@@ -3623,5 +4018,8 @@ document.addEventListener('DOMContentLoaded', function () {
 window.addEventListener('storage', function (e) {
     if (e.key === 'td_cart') {
         window.updateMainCartUI();
+        if (typeof window.updateQuickPreviewCartUI === 'function') {
+            window.updateQuickPreviewCartUI();
+        }
     }
 });
