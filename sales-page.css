@@ -1329,6 +1329,32 @@ textarea {
 
     .info-btns-row {
         margin: 10px 0;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 4px;
+    }
+
+    .info-btns-row .info-btn {
+        padding: 8px 6px !important;
+        font-size: 0.72rem !important;
+        flex: 1;
+        white-space: nowrap;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (max-width: 380px) {
+        .info-btns-row .info-btn .bt-txt {
+            display: none;
+        }
+
+        .info-btns-row .info-btn i {
+            margin-right: 0 !important;
+            font-size: 1.1rem;
+        }
     }
 }
 

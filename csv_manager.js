@@ -125,6 +125,8 @@ const CsvManager = {
 
                     if (isChecked('csvFieldTrending')) row.is_trending = p.is_trending;
                     if (isChecked('csvFieldVisible')) row.is_visible = p.is_visible;
+                    if (isChecked('csvFieldShelfLife')) row.shelf_life = p.shelf_life || '';
+                    if (isChecked('csvFieldRefrigeration')) row.is_refrigerated = p.is_refrigerated || false;
 
                     const wantVariants = isChecked('csvFieldVariantQty') || isChecked('csvFieldVariantMrp') ||
                         isChecked('csvFieldVariantPrice') || isChecked('csvFieldVariantStock');
@@ -381,6 +383,13 @@ const CsvManager = {
 
                     delete payload.nutrition;
                     delete payload.serving_size;
+
+                    // Rename incoming shelf_life/refrigeration if they match IDs
+                    if (row.shelf_life !== undefined) payload.shelf_life = row.shelf_life;
+                    if (row.is_refrigerated !== undefined) {
+                        const val = row.is_refrigerated.toString().toLowerCase();
+                        payload.is_refrigerated = (val === 'true' || val === '1' || val === 'yes');
+                    }
 
                     // Remove any other common columns that might be in CSV but NOT in DB root
                     // (Like variant columns if expanded)
