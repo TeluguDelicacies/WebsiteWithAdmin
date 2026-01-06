@@ -227,23 +227,39 @@ const CsvManager = {
 
     renderCsvPreview: (data) => {
         const container = document.getElementById('csvPreviewTable');
-        const previewData = data.slice(0, 10);
+        const previewData = data.slice(0, 15); // Show up to 15 rows
         if (previewData.length === 0) return;
 
         const headers = Object.keys(previewData[0]);
-        let html = '<table><thead><tr>';
+        let html = `
+            <div style="padding: 10px; background: #fff; border-bottom: 1px solid #eee; font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-info-circle"></i>
+                Scroll horizontally to see all columns. Showing first ${previewData.length} rows.
+            </div>
+            <table>
+                <thead>
+                    <tr>`;
+
         headers.forEach(h => html += `<th>${h}</th>`);
         html += '</tr></thead><tbody>';
 
         previewData.forEach(row => {
             html += '<tr>';
-            headers.forEach(h => html += `<td>${row[h] || ''}</td>`);
+            headers.forEach(h => {
+                let val = row[h];
+                if (val === undefined || val === null || val === '') {
+                    val = '<span style="color: #cbd5e1; font-style: italic;">-</span>';
+                }
+                html += `<td>${val}</td>`;
+            });
             html += '</tr>';
         });
         html += '</tbody></table>';
 
-        if (data.length > 10) {
-            html += `<p style="text-align: center; color: #666;">...and ${data.length - 10} more</p>`;
+        if (data.length > 15) {
+            html += `<div style="text-align: center; padding: 15px; background: #f8fafc; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 0.85rem;">
+                ... and ${data.length - 15} more rows
+            </div>`;
         }
         container.innerHTML = html;
     },

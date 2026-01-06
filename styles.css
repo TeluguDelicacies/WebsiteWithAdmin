@@ -5554,3 +5554,57 @@ UTILITY CLASSES
     opacity: 1;
   }
 }
+
+/* ========================================
+   CSV PREVIEW TABLE ENHANCEMENTS
+   ======================================== */
+#csvPreviewTable {
+  width: 100%;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+#csvPreviewTable table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+  /* Force scroll on narrow containers */
+}
+
+#csvPreviewTable th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+#csvPreviewTable td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #64748b;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#csvPreviewTable tr:nth-child(even) {
+  background: #fcfcfc;
+}
+
+#csvPreviewTable tr:hover {
+  background: #f8fafc;
+}
+
+#csvPreviewTable td:empty::after,
+#csvPreviewTable td:empty {
+  content: '-';
+  color: #cbd5e1;
+  font-style: italic;
+}
