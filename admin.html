@@ -1805,7 +1805,15 @@
                             </label>
                             <label class="csv-field-checkbox">
                                 <input type="checkbox" id="csvFieldServing">
-                                <span>Serving Suggestion</span>
+                                <span title="How to use/serve">Serving Suggestion</span>
+                            </label>
+                            <label class="csv-field-checkbox" style="background: #eff6ff;">
+                                <input type="checkbox" id="csvFieldServingSize">
+                                <span title="e.g. 100g">Serving Size (Nutri)</span>
+                            </label>
+                            <label class="csv-field-checkbox" style="background: #eff6ff;">
+                                <input type="checkbox" id="csvFieldNutrition">
+                                <span title="Calories, Protein, etc.">Nutrition Info</span>
                             </label>
                             <label class="csv-field-checkbox">
                                 <input type="checkbox" id="csvFieldTrending">
@@ -1898,6 +1906,8 @@
             <button onclick="switchView('settings')" data-view="settings"><i
                     class="fas fa-cog"></i><span>Settings</span></button>
         </nav>
+        <script src="admin.js"></script>
+        <script src="csv_manager.js"></script>
 </body>
 
 </html>
