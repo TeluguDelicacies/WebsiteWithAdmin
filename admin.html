@@ -454,6 +454,103 @@
             border-color: var(--color-error);
         }
 
+        /* Modal Action Button Row - Consistent Save/Cancel Layout */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .modal-actions .btn-save,
+        .modal-actions .btn-cancel {
+            flex: 1;
+            height: 48px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Save Button - Green */
+        .modal-actions .btn-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .modal-actions .btn-save:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Cancel Button - Red */
+        .modal-actions .btn-cancel {
+            background: white;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+
+        .modal-actions .btn-cancel:hover {
+            background: #fef2f2;
+            transform: translateY(-1px);
+        }
+
+        /* Floating Action Buttons for Sections/Settings */
+        .floating-actions {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .floating-actions .fab-save,
+        .floating-actions .fab-cancel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .floating-actions .fab-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+        }
+
+        .floating-actions .fab-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .floating-actions .fab-cancel {
+            background: white;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+
+        .floating-actions .fab-cancel:hover {
+            background: #fef2f2;
+            transform: translateY(-2px);
+        }
+
         /* iOS-Style Toggle Switch */
         .toggle-switch {
             position: relative;
@@ -920,31 +1017,30 @@
             </div>
             <!-- Website Sections Control Panel -->
             <div id="sectionsContainer" class="view-container" style="display: none;">
-                <!-- REFACTORED HEADER: Title Left, Actions Right -->
-                <div
-                    style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
-                    <div style="flex: 1; min-width: 300px;">
-                        <h3 style="margin: 0 0 10px 0; color: var(--color-primary-blue);">
-                            <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Website Section Visibility
-                        </h3>
-                        <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">
-                            Control which sections are visible on your main website. Toggle sections on/off to customize
-                            the layout.
-                            <br>
-                            <span style="color: #ef4444; font-weight: 600; display: inline-block; margin-top: 5px;">
-                                <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i>
-                                Note: Quick Commerce Layout changes both Header & Collections.
-                            </span>
-                        </p>
-                    </div>
+                <!-- Header: Title Only (actions moved to floating bar) -->
+                <div style="border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 25px;">
+                    <h3 style="margin: 0 0 10px 0; color: var(--color-primary-blue);">
+                        <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Website Section Visibility
+                    </h3>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">
+                        Control which sections are visible on your main website. Toggle sections on/off to customize
+                        the layout.
+                        <br>
+                        <span style="color: #ef4444; font-weight: 600; display: inline-block; margin-top: 5px;">
+                            <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i>
+                            Note: Quick Commerce Layout changes both Header & Collections.
+                        </span>
+                    </p>
+                </div>
 
-                    <div
-                        style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-                        <button id="saveSettingsBtn" onclick="saveSectionSettings()" class="header-action-btn"
-                            style="min-width: auto; padding: 0 20px;">
-                            <i class="fas fa-save"></i><span class="btn-text">Save Section Settings</span>
-                        </button>
-                    </div>
+                <!-- Floating Action Buttons (Desktop: bottom-right, Mobile: fixed bottom bar) -->
+                <div id="sectionFloatingActions" class="floating-actions">
+                    <button onclick="cancelSectionChanges()" class="fab-cancel">
+                        <i class="fas fa-times"></i><span>Cancel</span>
+                    </button>
+                    <button onclick="saveSectionSettings()" class="fab-save">
+                        <i class="fas fa-save"></i><span>Save</span>
+                    </button>
                 </div>
 
                 <div class="sections-grid"
@@ -1254,8 +1350,15 @@
                         </div><small style="color: var(--text-secondary);">Used when a
                             product has no image.</small>
                     </div>
-                    <div class="form-group" style="margin-top: 30px;"><button type="submit" class="submit-btn">Save All
-                            Settings</button></div>
+                    <!-- Floating Action Buttons for Settings -->
+                    <div id="settingsFloatingActions" class="floating-actions">
+                        <button type="button" onclick="cancelSettingsChanges()" class="fab-cancel">
+                            <i class="fas fa-times"></i><span>Cancel</span>
+                        </button>
+                        <button type="submit" class="fab-save">
+                            <i class="fas fa-save"></i><span>Save</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div> <!-- Close admin-content-area -->
@@ -1434,9 +1537,13 @@
                             style="margin-top: 10px; font-size: 0.8rem;">+ Add Variant</button>
                     </div>
 
-                    <div style="display: flex; gap: 15px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Product</button>
-                        <button type="button" onclick="closeProductModal()" class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Product
+                        </button>
+                        <button type="button" onclick="closeProductModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1505,10 +1612,13 @@
                                 onchange="handleAssetUpload(this, 'catImageUrl')">
                         </div>
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn">Save Category</button>
-                        <button type="button" onclick="closeCategoryModal()"
-                            class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Category
+                        </button>
+                        <button type="button" onclick="closeCategoryModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1550,10 +1660,13 @@
                             <input type="text" id="tProduct" placeholder="e.g. Kura Karam">
                         </div>
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Testimonial</button>
-                        <button type="button" onclick="closeTestimonialModal()"
-                            class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Testimonial
+                        </button>
+                        <button type="button" onclick="closeTestimonialModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1587,9 +1700,13 @@
                         <label>Display Order</label>
                         <input type="number" id="featureOrder" value="0" class="form-input">
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Feature</button>
-                        <button type="button" onclick="closeFeatureModal()" class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Feature
+                        </button>
+                        <button type="button" onclick="closeFeatureModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>

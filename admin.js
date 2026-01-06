@@ -712,13 +712,61 @@ async function fetchSettings() {
     }
 }
 
+// Cancel settings changes - revert to original values
+window.cancelSettingsChanges = function () {
+    if (!editSnapshot) {
+        showToast('No changes to cancel', 'info');
+        return;
+    }
+
+    const data = editSnapshot;
+
+    // Reset all fields to snapshot values
+    document.getElementById('setSiteTitle').value = data.site_title || '';
+    document.getElementById('setSiteTitleTelugu').value = data.site_title_telugu || '';
+    document.getElementById('setHeroTitle').value = data.hero_title || '';
+    document.getElementById('setHeroSubtitle').value = data.hero_subtitle || '';
+    document.getElementById('setHeroDesc').value = data.hero_description || '';
+    document.getElementById('setHeroTelugu').value = data.hero_telugu_subtitle || '';
+    document.getElementById('setPhonePri').value = data.contact_phone_primary || '';
+    document.getElementById('setPhoneSec').value = data.contact_phone_secondary || '';
+    document.getElementById('setEmail').value = data.contact_email || '';
+    document.getElementById('setMapUrl').value = data.map_embed_url || '';
+    document.getElementById('setFssai').value = data.fssai_number || '';
+    document.getElementById('setLogoUrl').value = data.logo_url || '';
+    document.getElementById('setFaviconUrl').value = data.fav_icon_url || '';
+    document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
+    document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
+
+    // Catalogue & Address Settings
+    document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
+    document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
+    document.getElementById('setAddress').value = data.company_address || '';
+
+    // QC Settings
+    document.getElementById('setQuickHeroTitle').value = data.quick_hero_title || '';
+    document.getElementById('setQuickHeroSubtitle').value = data.quick_hero_subtitle || '';
+    document.getElementById('setQuickHeroTelugu').value = data.quick_hero_telugu_subtitle || '';
+    document.getElementById('setQuickHeroBg').value = data.quick_hero_image_url || '';
+    document.getElementById('setShowMrp').checked = data.show_mrp !== false;
+    document.getElementById('setSalesMode').checked = data.sales_mode_enabled || false;
+
+    // Sales Page Settings
+    document.getElementById('setAllProductsTagline').value = data.all_products_tagline || 'Featuring our premium brands';
+
+    showToast('Settings changes cancelled', 'info');
+};
+
 if (siteSettingsForm) {
     siteSettingsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = siteSettingsForm.querySelector('button[type="submit"]');
-        const oldText = btn.textContent;
-        btn.textContent = 'Saving...';
-        btn.disabled = true;
+        const btn = siteSettingsForm.querySelector('.fab-save');
+        const oldHtml = btn ? btn.innerHTML : '<i class="fas fa-save"></i><span>Save</span>';
+
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+            btn.disabled = true;
+        }
 
         const settingsData = {
             site_title: document.getElementById('setSiteTitle').value,
@@ -831,8 +879,10 @@ if (siteSettingsForm) {
         } catch (e) {
             showToast('Error: ' + e.message, 'error');
         } finally {
-            btn.textContent = oldText;
-            btn.disabled = false;
+            if (btn) {
+                btn.innerHTML = oldHtml;
+                btn.disabled = false;
+            }
         }
     });
 }
@@ -2260,12 +2310,42 @@ async function fetchSectionSettings() {
     }
 }
 
+// Cancel section changes - revert to original values
+window.cancelSectionChanges = function () {
+    if (!editSnapshot) {
+        showToast('No changes to cancel', 'info');
+        return;
+    }
+
+    // Map of toggle IDs to their corresponding data keys
+    const toggleMap = {
+        'secShowHero': 'show_hero_section',
+        'secShowTicker': 'show_product_carousel',
+        'secShowCollections': 'show_collections',
+        'secShowQuickLayout': 'show_quick_layout',
+        'secShowTestimonials': 'show_testimonials',
+        'secShowWhyUs': 'show_why_us',
+        'secShowContact': 'show_contact_form',
+        'secShowFooter': 'show_footer'
+    };
+
+    // Revert each toggle to its original value
+    for (const [toggleId, dataKey] of Object.entries(toggleMap)) {
+        const toggle = document.getElementById(toggleId);
+        if (toggle && editSnapshot.hasOwnProperty(dataKey)) {
+            toggle.checked = editSnapshot[dataKey] !== false;
+        }
+    }
+
+    showToast('Changes cancelled', 'info');
+};
+
 window.saveSectionSettings = async function () {
-    const btn = document.getElementById('saveSettingsBtn');
-    const oldHtml = btn ? btn.innerHTML : 'Save Section Settings';
+    const btn = document.querySelector('.floating-actions .fab-save');
+    const oldHtml = btn ? btn.innerHTML : '<i class="fas fa-save"></i><span>Save</span>';
 
     if (btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Saving...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
         btn.disabled = true;
     }
 
