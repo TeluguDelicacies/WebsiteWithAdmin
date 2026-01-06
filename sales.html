@@ -1640,7 +1640,8 @@
             // Update cart relative to delta
             window.addToCart(state.currentProduct, variant, delta);
 
-            // UI Sync is handled inside updateCartUI() which is called by saveCart()
+            // Sync detail page UI (ADD button vs Qty counter)
+            window.syncDetailPageCart(variant);
         };
 
         window.validateDetailQty = function (input) {
@@ -1686,12 +1687,17 @@
             const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
             const maxStock = variant ? (variant.stock || 0) : (product.total_stock || 0);
 
-            if (qty < 1) {
-                window.showToast('Quantity must be at least 1', 'error');
+            // Calculation check
+            const targetQty = currentCartQty + qty;
+
+            if (targetQty < 0) {
+                // If removing more than we have, just set to 0 (which usually removes it or keeps at min)
+                // But normally delta is -1, so targetQty would be at least 0.
+                window.showToast('Minimum quantity reached', 'error');
                 return;
             }
 
-            if (currentCartQty + qty > maxStock) {
+            if (targetQty > maxStock) {
                 if (maxStock <= 0) {
                     window.showToast('Out of Stock', 'error');
                 } else {
@@ -1701,8 +1707,13 @@
             }
 
             if (existingIdx > -1) {
-                state.cart[existingIdx].qty += qty;
-            } else {
+                state.cart[existingIdx].qty = targetQty;
+                // If 0, handle removal
+                if (state.cart[existingIdx].qty === 0) {
+                    state.cart.splice(existingIdx, 1);
+                    window.showToast('Item removed from cart', 'info');
+                }
+            } else if (qty > 0) {
                 state.cart.push({
                     id: product.id,
                     name: product.product_name,
