@@ -5757,8 +5757,8 @@ Uses same card structure as sales page product grid
 .quick-preview-gallery {
   position: relative;
   width: 100%;
-  aspect-ratio: 1/0.85;
-  /* Slightly shorter to save vertical space */
+  aspect-ratio: 1/1;
+  /* Keep square for product images */
   perspective: 1000px;
   border-radius: 12px 12px 0 0;
   /* Maintain top rounding with overflow:visible */
@@ -5960,11 +5960,6 @@ Uses same card structure as sales page product grid
   .quick-preview-card .card-info {
     padding: 14px;
   }
-
-  .quick-preview-gallery {
-    aspect-ratio: 1/0.9;
-    /* Slightly taller on desktop */
-  }
 }
 
 /* Mobile - 60% of screen width, constrained height */
@@ -5978,11 +5973,6 @@ Uses same card structure as sales page product grid
 
   .quick-preview-card .card-info {
     padding: 10px;
-  }
-
-  .quick-preview-gallery {
-    aspect-ratio: 1/0.8;
-    /* Shorter gallery on mobile to fit more */
   }
 
   .quick-preview-tagline {
