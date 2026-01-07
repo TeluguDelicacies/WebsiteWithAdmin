@@ -3110,7 +3110,7 @@ textarea {
     text-overflow: ellipsis !important;
 }
 
-/* === TAB BUTTONS - ALWAYS ONE LINE === */
+/* === TAB BUTTONS - ALWAYS ONE LINE, COMPACT === */
 .info-btns-row,
 .info-toggles {
     display: flex !important;
@@ -3118,8 +3118,9 @@ textarea {
     overflow-x: auto !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    gap: 4px;
-    padding: 2px 0;
+    gap: 2px;
+    padding: 0;
+    margin: 8px 0 6px 0 !important;
 }
 
 .info-btns-row::-webkit-scrollbar,
@@ -3130,9 +3131,10 @@ textarea {
 .info-btn {
     flex: 0 0 auto !important;
     white-space: nowrap !important;
-    padding: 6px 10px;
-    font-size: 0.75rem;
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
     min-width: 0;
+    margin: 0 !important;
 }
 
 /* === FIXED SIZE TAB CONTENT CONTAINERS === */
