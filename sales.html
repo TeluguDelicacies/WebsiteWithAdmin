@@ -1355,7 +1355,7 @@
                         el.innerHTML = s.html;
                         // Important: el must have its styles (like padding) to measure scrollHeight correctly
                         // We run it after a tiny delay to ensure DOM is ready
-                        setTimeout(() => window.adjustFontSize(el), 50);
+                        // setTimeout(() => window.adjustFontSize(el), 50);
                     }
                 });
 
@@ -1376,7 +1376,7 @@
                         btn.classList.add('active');
                         contentDiv.classList.add('active');
                         // Just call adjustFontSize - it will use cached value if available
-                        window.adjustFontSize(contentDiv);
+                        // window.adjustFontSize(contentDiv);
                     }
                 };
             }
@@ -1394,7 +1394,7 @@
                     if (nutContent) {
                         nutContent.innerHTML = renderNutrition(nutritionData, selectedVar);
                         // FORCE recalculate because content changed
-                        adjustFontSize(nutContent, true);
+                        // adjustFontSize(nutContent, true);
                     }
                 };
             }
