@@ -3179,3 +3179,75 @@ textarea {
     padding: 4px 8px !important;
     font-size: 0.8rem !important;
 }
+
+/* ========================================
+   SIDEBAR REFINEMENTS
+   Match height to main product area & scale contents
+======================================== */
+
+.sim-item {
+    /* Ensure flex container behaviors */
+    min-width: 0;
+}
+
+.sim-info {
+    min-width: 0;
+    /* Allow flex child to shrink */
+    flex: 1;
+}
+
+/* Target the inline-styled price/variant row in sidebar */
+.sim-info>div[style*="display:flex"] {
+    flex-wrap: nowrap !important;
+}
+
+.sim-info>div[style*="display:flex"]>span {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0;
+    flex: 1;
+}
+
+@media (min-width: 1024px) {
+
+    /* Match Main Product Area Constraints */
+    .sidebar {
+        height: 100%;
+        max-height: calc(100vh - 150px);
+        /* Specific to match main layout */
+        overflow: hidden;
+        /* Prevent outer scroll */
+    }
+
+    .sidebar-card {
+        height: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 15px !important;
+        overflow: hidden;
+    }
+
+    .sidebar-tabs {
+        flex-shrink: 0;
+        /* Keep tabs at top */
+    }
+
+    #side-content {
+        flex: 1;
+        overflow-y: auto;
+        /* Scroll INSIDE the card */
+        min-height: 0;
+        padding-right: 4px;
+        /* Space for scrollbar */
+    }
+
+    #side-content::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    #side-content::-webkit-scrollbar-thumb {
+        background-color: #e0e0e0;
+        border-radius: 4px;
+    }
+}
