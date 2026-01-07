@@ -5644,9 +5644,13 @@ Uses same card structure as sales page product grid
   z-index: 9999;
   width: 60%;
   max-width: 280px;
+  max-height: 90vh;
+  /* Constrain to viewport */
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .quick-preview-popup.show {
@@ -5693,6 +5697,8 @@ Uses same card structure as sales page product grid
   border: 2px solid var(--color-brand-yellow);
   /* Defined brand border */
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  /* Constrain card to viewport */
 }
 
 /* Override card-info for popup context */
@@ -5751,12 +5757,15 @@ Uses same card structure as sales page product grid
 .quick-preview-gallery {
   position: relative;
   width: 100%;
-  aspect-ratio: 1/1;
+  aspect-ratio: 1/0.85;
+  /* Slightly shorter to save vertical space */
   perspective: 1000px;
   border-radius: 12px 12px 0 0;
   /* Maintain top rounding with overflow:visible */
   overflow: hidden;
   /* Clip contents within the gallery itself */
+  flex-shrink: 0;
+  /* Don't shrink the gallery */
 }
 
 .quick-preview-gallery-inner {
@@ -5866,19 +5875,24 @@ Uses same card structure as sales page product grid
   display: none;
 }
 
-/* Variant dropdown list */
+/* Variant dropdown list - opens UPWARD to stay in viewport */
 .quick-preview-variants-list {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
+  /* Open upward instead of downward */
   left: 0;
   right: 0;
   background: white;
   border: 1px solid var(--color-gray-200);
   border-radius: 8px;
-  margin-top: 4px;
+  margin-bottom: 4px;
+  /* Space above trigger */
   overflow: hidden;
   box-shadow: var(--shadow-md);
   z-index: 100;
+  max-height: 150px;
+  /* Limit dropdown height */
+  overflow-y: auto;
 }
 
 .quick-preview-variant-option {
@@ -5939,31 +5953,56 @@ Uses same card structure as sales page product grid
   .quick-preview-popup {
     max-width: 320px;
     width: 35%;
+    max-height: 88vh;
+    /* Slightly less on desktop for padding */
   }
 
   .quick-preview-card .card-info {
     padding: 14px;
   }
+
+  .quick-preview-gallery {
+    aspect-ratio: 1/0.9;
+    /* Slightly taller on desktop */
+  }
 }
 
-/* Mobile - 60% of screen width */
+/* Mobile - 60% of screen width, constrained height */
 @media (max-width: 767px) {
   .quick-preview-popup {
-    width: 60%;
-    max-width: 240px;
+    width: 65%;
+    max-width: 260px;
+    max-height: 85vh;
+    /* Account for mobile browser chrome */
   }
 
   .quick-preview-card .card-info {
     padding: 10px;
   }
 
+  .quick-preview-gallery {
+    aspect-ratio: 1/0.8;
+    /* Shorter gallery on mobile to fit more */
+  }
+
   .quick-preview-tagline {
     font-size: 0.7rem;
+    -webkit-line-clamp: 1;
+    /* Single line on mobile */
+    line-clamp: 1;
   }
 
   .quick-preview-view-btn {
     padding: 8px 12px;
     font-size: 0.75rem;
+  }
+
+  .quick-preview-card .product-title {
+    font-size: 0.95rem;
+  }
+
+  .quick-preview-card .product-subtitle {
+    font-size: 0.85rem;
   }
 }
 
