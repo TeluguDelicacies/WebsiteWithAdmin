@@ -2979,3 +2979,216 @@ textarea {
     font-weight: 700;
     color: var(--color-primary-blue);
 }
+
+/* ========================================
+   PRODUCT PAGE LAYOUT REDESIGN
+   Desktop: Side-by-side (40% image | 60% info)
+   Mobile: Fixed bottom action bar
+======================================== */
+
+/* === DESKTOP: Side-by-Side Layout === */
+@media (min-width: 1024px) {
+    .main-product-area {
+        display: grid !important;
+        grid-template-columns: 40% 1fr;
+        grid-template-rows: auto 1fr auto;
+        gap: 25px 35px;
+        align-items: start;
+        padding: 25px 30px;
+        max-height: calc(100vh - 150px);
+        overflow: visible;
+    }
+
+    /* Mobile nav hidden on desktop */
+    .main-product-area .nav-row.mobile-only-nav {
+        display: none !important;
+    }
+
+    /* Gallery wrapper - left column, spans all rows */
+    .main-product-area .gallery-wrapper {
+        grid-column: 1;
+        grid-row: 1 / -1;
+        position: sticky;
+        top: 90px;
+        align-self: start;
+    }
+
+    .main-product-area .product-gallery {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    /* Product details - right column */
+    .main-product-area .product-details {
+        grid-column: 2;
+        grid-row: 1;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Add to cart section - right column bottom */
+    .main-product-area .add-to-cart-section {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: end;
+        margin-top: 10px;
+    }
+
+    /* Tighter header spacing on desktop */
+    .main-product-area .product-header-fields {
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    /* Compact price row */
+    .main-product-area .price-row {
+        margin-bottom: 10px;
+    }
+}
+
+/* === MOBILE: Fixed Bottom Action Bar === */
+@media (max-width: 767px) {
+
+    /* Main area needs bottom padding for fixed footer */
+    .main-product-area {
+        padding-bottom: 85px !important;
+    }
+
+    /* Fixed bottom action bar */
+    .add-to-cart-section {
+        position: fixed !important;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, #FFFFFF 20%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 12px 20px 16px 20px;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Make button full width on mobile */
+    .add-to-cart-section .add-cart-btn {
+        width: 100%;
+    }
+
+    .add-to-cart-section .qty-control-lg {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Compact gallery on mobile */
+    .product-gallery {
+        max-width: 260px;
+    }
+}
+
+/* === SINGLE LINE ENFORCEMENTS === */
+/* Tagline - always single line with ellipsis */
+.product-tagline {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100%;
+}
+
+/* Telugu title - single line */
+.telugu-title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Product title - single line */
+.product-details .product-title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* === TAB BUTTONS - ALWAYS ONE LINE === */
+.info-btns-row,
+.info-toggles {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 4px;
+    padding: 2px 0;
+}
+
+.info-btns-row::-webkit-scrollbar,
+.info-toggles::-webkit-scrollbar {
+    display: none;
+}
+
+.info-btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    min-width: 0;
+}
+
+/* === FIXED SIZE TAB CONTENT CONTAINERS === */
+.info-content-block {
+    /* Fixed height for all tab content */
+    height: 0;
+    min-height: 0;
+    transition: none !important;
+}
+
+.info-content-block.active {
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 120px !important;
+    overflow-y: auto !important;
+    padding: 12px 15px !important;
+    margin-bottom: 10px;
+}
+
+/* Desktop: slightly taller content blocks */
+@media (min-width: 1024px) {
+    .info-content-block.active {
+        height: 140px !important;
+        min-height: 140px !important;
+        max-height: 140px !important;
+    }
+}
+
+/* === CONSISTENT TAB CONTENT FONT SIZING === */
+.info-content-block {
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+}
+
+.info-content-block p,
+.info-content-block span,
+.info-content-block div,
+.info-content-block li {
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+
+.info-content-block h4,
+.info-content-block strong {
+    font-size: 0.9rem !important;
+    font-weight: 600;
+}
+
+/* Nutrition table consistent sizing */
+.info-content-block table {
+    font-size: 0.8rem !important;
+    width: 100%;
+}
+
+.info-content-block td,
+.info-content-block th {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+}
