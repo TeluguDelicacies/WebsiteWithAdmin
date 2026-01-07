@@ -1170,12 +1170,11 @@ textarea {
         border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
     }
 
-    /* Inner scrollable part */
+    /* Inner part - no scroll */
     .details-body {
         flex: 1;
-        overflow-y: auto;
+        overflow: visible !important;
         padding: 5px 25px 5px 25px;
-        /* Reduced bottom padding from 15px to 5px */
     }
 
     /* Compact Typography for Desktop to avoid scroll */
