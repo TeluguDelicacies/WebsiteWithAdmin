@@ -3187,9 +3187,8 @@ textarea {
    ADD TO CART BUTTON REDESIGN
    Match styling of sidebar add buttons (Light Yellow Pill)
 ======================================== */
-/* Specificity boost to override any existing gradients/styles */
-body .add-cart-btn,
-.add-to-cart-section .add-cart-btn {
+/* Specificity boost using ID selector to beat everything */
+#detailAddBtn.add-cart-btn {
     background: #FFF9C4 !important;
     background-image: none !important;
     /* Ensure no gradient */
@@ -3201,15 +3200,13 @@ body .add-cart-btn,
     transition: all 0.2s;
 }
 
-body .add-cart-btn:hover,
-.add-to-cart-section .add-cart-btn:hover {
+#detailAddBtn.add-cart-btn:hover {
     background: #FFF59D !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(251, 192, 45, 0.3) !important;
 }
 
-body .add-cart-btn i,
-.add-to-cart-section .add-cart-btn i {
+#detailAddBtn.add-cart-btn i {
     color: #333 !important;
     margin-right: 8px;
 }
