@@ -573,15 +573,12 @@ async function populateCategoryFilter() {
         const { data: categories, error } = await supabase
             .from('categories')
             .select('*')
-            .eq('is_visible', true) // Only show visible categories? Or all? Usually all for admin.
             .order('display_order', { ascending: true });
 
-        // Admin might want to filter by hidden categories too? Let's show all.
-        // Actually, let's re-fetch WITHOUT .eq('is_visible', true) to be safe for admin.
-        // Re-fetching inside render is wasteful, let's just use what we have, but previous logic showed all.
-        // So removal of .eq check is correct.
-
         if (error) throw error;
+
+        // Store globally for sorting products by category order
+        allCategories = categories || [];
 
         let html = `
             <div class="filter-option selected" data-value="all" onclick="selectCategory('all', 'All Categories')">
@@ -970,7 +967,7 @@ async function fetchProducts() {
 }
 
 function renderProductList() { // No arg needed, uses global allProducts + filter
-    let displayProducts = allProducts;
+    let displayProducts = [...allProducts]; // Clone to avoid mutating original
 
     // Apply Filter
     const categoryFilter = document.getElementById('categoryFilter');
@@ -978,7 +975,9 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
 
     const isCatFiltered = categoryFilter && categoryFilter.value !== 'all';
     const isTrendingFiltered = trendingFilter && trendingFilter.checked;
-    const isFiltered = isCatFiltered || isTrendingFiltered; // General filter state
+
+    // Drag-and-drop is ONLY enabled when filtering by a specific category (not trending, not all)
+    const isDragEnabled = isCatFiltered && !isTrendingFiltered;
 
     if (isCatFiltered) {
         displayProducts = displayProducts.filter(p => p.product_category === categoryFilter.value);
@@ -993,31 +992,46 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
         return;
     }
 
-    // Sort logic for Display (Filtered or Not)
-    if (isFiltered) {
+    // Sort logic:
+    // - If category filtered: sort by display_order within that category
+    // - If "All" or trending: sort by category order first, then display_order within category
+    if (isCatFiltered && !isTrendingFiltered) {
+        // Single category: just sort by display_order
         displayProducts.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    } else {
+        // All categories or trending: sort by category order first, then product display_order
+        // Build a category order map from allCategories
+        const categoryOrderMap = {};
+        allCategories.forEach((cat, index) => {
+            categoryOrderMap[cat.slug] = cat.display_order || index;
+        });
+
+        displayProducts.sort((a, b) => {
+            const catOrderA = categoryOrderMap[a.product_category] ?? 999;
+            const catOrderB = categoryOrderMap[b.product_category] ?? 999;
+            if (catOrderA !== catOrderB) {
+                return catOrderA - catOrderB;
+            }
+            // Same category: sort by display_order
+            return (a.display_order || 0) - (b.display_order || 0);
+        });
     }
 
     const saveOrderBtn = document.getElementById('saveOrderBtn');
     if (saveOrderBtn) {
-        // Always show button but disable if not filtered, OR just hide if not filtered.
-        // User said "Did not get a save button", implies they might expect it always. 
-        // But reordering only makes sense when filtered usually. 
-        // Let's make it visible but disabled if not filtered, with a tooltip? 
-        // Or stick to hiding but ensure it works. 
-        // Let's try: Display always, but disabled if not filtered (with alert if clicked? no, simple disable).
-        // actually existing logic was display: none. 
-        // Let's change to: Show if isFiltered OR if sort is by display_order? 
-        // For simplicity: Show if isFiltered. 
-        saveOrderBtn.style.display = isFiltered ? 'inline-block' : 'none';
-
-        // Debugging: force show to see if it exists
-        // saveOrderBtn.style.display = 'inline-block'; 
+        // Only show save button when drag is enabled (category filtered, not trending)
+        saveOrderBtn.style.display = isDragEnabled ? 'inline-block' : 'none';
     }
 
-    // Drag hint
-    const dndHint = !isFiltered ?
-        '<div style="grid-column: 1/-1; text-align: center; background: #fff3cd; color: #856404; padding: 8px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Please select a specific category from the dropdown to enable reordering.</div>' : '';
+    // Drag hint - show when not in a draggable state
+    let dndHint = '';
+    if (!isDragEnabled) {
+        if (isTrendingFiltered) {
+            dndHint = '<div style="grid-column: 1/-1; text-align: center; background: #e0f2fe; color: #0369a1; padding: 8px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Trending products are sorted by category order. Select a specific category to reorder.</div>';
+        } else if (!isCatFiltered) {
+            dndHint = '<div style="grid-column: 1/-1; text-align: center; background: #fff3cd; color: #856404; padding: 8px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Products are grouped by category order. Select a specific category to enable reordering.</div>';
+        }
+    }
 
     productList.innerHTML = dndHint + displayProducts.map((product, index) => {
         // Variants Grid
@@ -1050,10 +1064,10 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
 
         return `
         <div class="admin-product-card draggable-item" 
-             draggable="${isFiltered}" 
+             draggable="${isDragEnabled}" 
              data-id="${product.id}"
              data-order="${product.display_order || 0}"
-             ${isFiltered ? `
+             ${isDragEnabled ? `
              ondragstart="handleDragStart(event)"
              ondragover="handleDragOver(event)"
              ondrop="handleDrop(event)"
@@ -1062,11 +1076,11 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
             
             <div class="card-row" onclick="toggleCardDetails('${product.id}')">
                 <!-- Grip for Drag -->
-                ${isFiltered ? '<div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>' : ''}
+                ${isDragEnabled ? '<div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>' : ''}
                 
                 <img src="${product.showcase_image || PLACEHOLDER_IMAGE}" 
                      onerror="this.src=PLACEHOLDER_IMAGE"
-                     style="${isFiltered ? 'margin-left: 15px;' : ''}">
+                     style="${isDragEnabled ? 'margin-left: 15px;' : ''}">
                 
                 <div class="row-info">
                     <h3 ${!product.is_visible ? 'style="opacity: 0.5;"' : ''}>
@@ -1729,6 +1743,38 @@ productForm.addEventListener('submit', async (e) => {
             quantity_variants: variants,
             slug: uniqueSlug
         };
+
+        // Determine display_order based on category
+        const newCategory = productData.product_category;
+        let needsNewDisplayOrder = false;
+
+        if (productId) {
+            // Check if category changed
+            const oldCategory = editSnapshot?.product_category;
+            if (oldCategory && oldCategory !== newCategory) {
+                // Category changed - need new display_order in the new category
+                needsNewDisplayOrder = true;
+            }
+        } else {
+            // New product - always needs display_order
+            needsNewDisplayOrder = true;
+        }
+
+        if (needsNewDisplayOrder) {
+            // Get max display_order in the target category
+            const { data: maxOrderData, error: maxError } = await supabase
+                .from('products')
+                .select('display_order')
+                .eq('product_category', newCategory)
+                .order('display_order', { ascending: false })
+                .limit(1);
+
+            if (!maxError && maxOrderData && maxOrderData.length > 0) {
+                productData.display_order = (maxOrderData[0].display_order || 0) + 1;
+            } else {
+                productData.display_order = 1; // First product in this category
+            }
+        }
 
         let error;
         if (productId) {
