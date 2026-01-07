@@ -3048,27 +3048,22 @@ textarea {
     }
 }
 
-/* === MOBILE: Fixed Bottom Action Bar === */
+/* === MOBILE: Compact Layout (No Fixed Footer) === */
 @media (max-width: 767px) {
 
-    /* Main area needs bottom padding for fixed footer */
+    /* Main area - no extra padding since add-to-cart is inline */
     .main-product-area {
-        padding-bottom: 85px !important;
+        padding-bottom: 15px !important;
+        overflow: visible !important;
     }
 
-    /* Fixed bottom action bar */
+    /* Add to cart stays inline, NOT fixed */
     .add-to-cart-section {
-        position: fixed !important;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, #FFFFFF 20%);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 12px 20px 16px 20px;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative !important;
+        background: transparent;
+        padding: 10px 0;
+        box-shadow: none;
+        border-top: none;
     }
 
     /* Make button full width on mobile */
@@ -3087,53 +3082,52 @@ textarea {
     }
 }
 
-/* === SINGLE LINE ENFORCEMENTS === */
-/* Tagline - always single line with ellipsis */
+/* === TEXT SHRINK-TO-FIT (Not Ellipsis) === */
+/* Titles and tagline shrink font to fit container */
 .product-tagline {
     white-space: nowrap !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 100%;
+    min-width: 0;
+    font-size: clamp(0.7rem, 2.5vw, 1.1rem);
 }
 
-/* Telugu title - single line */
 .telugu-title {
     white-space: nowrap !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    min-width: 0;
+    font-size: clamp(0.9rem, 3vw, 1.4rem);
 }
 
-/* Product title - single line */
 .product-details .product-title {
     white-space: nowrap !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    min-width: 0;
+    font-size: clamp(1.2rem, 4vw, 2.4rem);
 }
 
-/* === TAB BUTTONS - ALWAYS ONE LINE, COMPACT === */
+/* === TAB BUTTONS - ALL 4 FIT IN ONE LINE === */
 .info-btns-row,
 .info-toggles {
     display: flex !important;
     flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    gap: 2px;
+    overflow: hidden !important;
+    /* No scroll */
+    gap: 4px;
     padding: 0;
-    margin: 8px 0 6px 0 !important;
-}
-
-.info-btns-row::-webkit-scrollbar,
-.info-toggles::-webkit-scrollbar {
-    display: none;
+    margin: 6px 0 !important;
+    width: 100%;
 }
 
 .info-btn {
-    flex: 0 0 auto !important;
+    flex: 1 1 0 !important;
+    /* Equal width, shrink to fit */
     white-space: nowrap !important;
-    padding: 4px 8px !important;
-    font-size: 0.7rem !important;
-    min-width: 0;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    padding: 5px 2px !important;
+    font-size: clamp(0.55rem, 2vw, 0.75rem) !important;
+    text-align: center !important;
+    min-width: 0 !important;
     margin: 0 !important;
 }
 
