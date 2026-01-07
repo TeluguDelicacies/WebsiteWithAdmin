@@ -3131,30 +3131,22 @@ textarea {
     margin: 0 !important;
 }
 
-/* === FIXED SIZE TAB CONTENT CONTAINERS === */
+/* === TAB CONTENT - AUTO HEIGHT, NO SCROLL === */
 .info-content-block {
-    /* Fixed height for all tab content */
+    /* Hidden by default */
     height: 0;
     min-height: 0;
+    overflow: hidden;
     transition: none !important;
 }
 
 .info-content-block.active {
-    height: 120px !important;
-    min-height: 120px !important;
-    max-height: 120px !important;
-    overflow-y: auto !important;
-    padding: 12px 15px !important;
-    margin-bottom: 10px;
-}
-
-/* Desktop: slightly taller content blocks */
-@media (min-width: 1024px) {
-    .info-content-block.active {
-        height: 140px !important;
-        min-height: 140px !important;
-        max-height: 140px !important;
-    }
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 10px 12px !important;
+    margin-bottom: 8px;
 }
 
 /* === CONSISTENT TAB CONTENT FONT SIZING === */
