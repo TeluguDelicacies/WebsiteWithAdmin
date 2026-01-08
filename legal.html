@@ -318,38 +318,41 @@
         import { supabase } from './lib/supabase.js';
         window.supabase = supabase;
 
-        // Load header branding from Supabase
-        try {
-            const { data } = await supabase.from('site_settings').select('logo_url, site_title_telugu').single();
-            if (data?.logo_url) {
-                const logo = document.getElementById('headerLogo');
-                if (logo) logo.src = data.logo_url;
-            }
-            if (data?.site_title_telugu) {
-                const telugu = document.getElementById('header-telugu-brand');
-                if (telugu) telugu.textContent = data.site_title_telugu;
-            }
-        } catch (e) { console.warn('Failed to load branding:', e); }
+        // Wrap in async IIFE to avoid top-level await (browser compatibility)
+        (async () => {
+            // Load header branding from Supabase
+            try {
+                const { data } = await supabase.from('site_settings').select('logo_url, site_title_telugu').single();
+                if (data?.logo_url) {
+                    const logo = document.getElementById('headerLogo');
+                    if (logo) logo.src = data.logo_url;
+                }
+                if (data?.site_title_telugu) {
+                    const telugu = document.getElementById('header-telugu-brand');
+                    if (telugu) telugu.textContent = data.site_title_telugu;
+                }
+            } catch (e) { console.warn('Failed to load branding:', e); }
 
-        // Check cart from localStorage
-        try {
-            const cart = JSON.parse(localStorage.getItem('teluguDelicaciesCart') || '[]');
-            if (cart.length > 0) {
-                const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-                // Show cart buttons
-                ['legalCartBtn', 'legalMobileCartBtn'].forEach(id => {
-                    const btn = document.getElementById(id);
-                    if (btn) btn.style.display = 'flex';
-                });
-                ['legalCartCount', 'legalMobileCartCount'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.textContent = count;
-                        el.style.display = 'flex';
-                    }
-                });
-            }
-        } catch (e) { console.warn('Cart check failed:', e); }
+            // Check cart from localStorage
+            try {
+                const cart = JSON.parse(localStorage.getItem('teluguDelicaciesCart') || '[]');
+                if (cart.length > 0) {
+                    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                    // Show cart buttons
+                    ['legalCartBtn', 'legalMobileCartBtn'].forEach(id => {
+                        const btn = document.getElementById(id);
+                        if (btn) btn.style.display = 'flex';
+                    });
+                    ['legalCartCount', 'legalMobileCartCount'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.textContent = count;
+                            el.style.display = 'flex';
+                        }
+                    });
+                }
+            } catch (e) { console.warn('Cart check failed:', e); }
+        })();
     </script>
 
     <!-- Main Content -->
