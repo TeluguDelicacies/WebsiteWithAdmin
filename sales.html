@@ -286,11 +286,31 @@
             });
 
             try {
+                console.log('[Sales Init] Starting data fetch...');
                 const [settingsRes, productsRes, categoriesRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
                     supabase.from('products').select('*').order('display_order', { ascending: true }),
                     supabase.from('categories').select('*').order('display_order', { ascending: true })
                 ]);
+
+                // Check for Supabase errors (these don't throw, they return .error)
+                if (settingsRes.error) {
+                    console.error('[Sales Init] Settings Error:', settingsRes.error);
+                }
+                if (productsRes.error) {
+                    console.error('[Sales Init] Products Error:', productsRes.error);
+                    throw new Error('Failed to load products: ' + productsRes.error.message);
+                }
+                if (categoriesRes.error) {
+                    console.error('[Sales Init] Categories Error:', categoriesRes.error);
+                    throw new Error('Failed to load categories: ' + categoriesRes.error.message);
+                }
+
+                console.log('[Sales Init] Data fetched:', {
+                    settings: settingsRes.data ? 'OK' : 'Empty',
+                    products: productsRes.data?.length || 0,
+                    categories: categoriesRes.data?.length || 0
+                });
 
                 state.settings = settingsRes.data || {};
                 preloadCatalogue(); // Pre-load after settings
@@ -303,11 +323,11 @@
                 // Sync Logo & Favicon
                 if (state.settings.logo_url) {
                     const logoImg = document.getElementById('headerLogo');
-                    logoImg.src = state.settings.logo_url;
+                    if (logoImg) logoImg.src = state.settings.logo_url;
 
                     // Also set favicon if available, otherwise use logo
                     const faviconLink = document.getElementById('dynamic-favicon');
-                    faviconLink.href = state.settings.favicon_url || state.settings.logo_url;
+                    if (faviconLink) faviconLink.href = state.settings.favicon_url || state.settings.logo_url;
                 }
 
                 // Populate Telugu Brand Name in Header
@@ -318,6 +338,7 @@
                     }
                 }
 
+                console.log('[Sales Init] Routing...');
                 handleRouting();
             } catch (err) {
                 console.error("Initialization Failed:", err);
