@@ -3447,3 +3447,19 @@ textarea {
         border-radius: 4px;
     }
 }
+/* FIX: Layout Spacing Overrides */
+/* The breadcrumb section was having excessive top margin causing the page to look broken */
+.breadcrumb-section {
+    margin-top: 15px !important;
+}
+
+/* Adjust main container padding to balance with fixed header */
+.sales-page-container {
+    padding-top: 85px !important;
+    padding-bottom: 20px !important;
+}
+
+/* Reduce product area bottom padding */
+.main-product-area {
+    padding-bottom: 10px !important;
+}

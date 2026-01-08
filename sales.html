@@ -139,8 +139,11 @@
             catalogueFile: null
         };
 
+        // Expose state for debugging
+        window.state = state;
+
         // Initialize header cart button visibility
-        function initHeaderCartButton() {
+        window.initHeaderCartButton = function () {
             try {
                 const cart = JSON.parse(localStorage.getItem('teluguDelicaciesCart') || '[]');
                 if (cart.length > 0) {
@@ -160,17 +163,18 @@
                 }
 
                 // Check if we should auto-open cart (from legal page redirect)
+                // Use a slight delay to ensure drawer JS is ready if needed, 
+                // though window.toggleCartDrawer comes from sales.html external script/previous definition
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('cart') === 'open' && window.toggleCartDrawer) {
                     setTimeout(() => window.toggleCartDrawer(), 300);
-                    // Remove the query param
                     const newUrl = window.location.pathname;
                     window.history.replaceState({}, '', newUrl);
                 }
             } catch (e) {
                 console.warn('[Cart Init] Error:', e);
             }
-        }
+        };
 
         async function preloadCatalogue() {
             const catalogueUrl = state.settings.catalogue_image_url;
