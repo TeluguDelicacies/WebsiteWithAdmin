@@ -163,19 +163,15 @@
         }
 
         button.legal-tab {
-            width: 45px;
-            height: 45px;
-            padding: 0;
+            padding: 8px 16px;
             border: 1px solid var(--color-primary-blue);
             color: var(--color-primary-blue);
-            border-radius: 50%;
-            /* Circle */
+            border-radius: 25px;
             background: white;
             cursor: pointer;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
             transition: all 0.2s ease;
         }
 
@@ -362,17 +358,14 @@
             <div class="legal-page-header">
                 <!-- Navigation Tabs -->
                 <nav class="legal-nav">
-                    <button class="legal-tab" data-type="privacy" onclick="switchLegalTab('privacy')"
-                        title="Privacy Policy" aria-label="Privacy Policy">
-                        <i class="fas fa-user-shield"></i>
+                    <button class="legal-tab" data-type="privacy" onclick="switchLegalTab('privacy')">
+                        Privacy Policy
                     </button>
-                    <button class="legal-tab" data-type="cookie" onclick="switchLegalTab('cookie')"
-                        title="Cookie Policy" aria-label="Cookie Policy">
-                        <i class="fas fa-cookie-bite"></i>
+                    <button class="legal-tab" data-type="cookie" onclick="switchLegalTab('cookie')">
+                        Cookie Policy
                     </button>
-                    <button class="legal-tab" data-type="terms" onclick="switchLegalTab('terms')" title="Terms of Use"
-                        aria-label="Terms of Use">
-                        <i class="fas fa-file-contract"></i>
+                    <button class="legal-tab" data-type="terms" onclick="switchLegalTab('terms')">
+                        Terms of Use
                     </button>
                 </nav>
             </div>
