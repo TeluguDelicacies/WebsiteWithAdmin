@@ -2,7 +2,9 @@
 // Header Component - Single Source of Truth
 const HeaderComponent = {
     render: function (pageType) {
+        console.log('[HeaderComponent] render() called with pageType:', pageType);
         const header = document.querySelector('header');
+        console.log('[HeaderComponent] header element found:', !!header);
         if (!header) return;
 
         // Base HTML Structure (Matches index.html "Perfect Header")

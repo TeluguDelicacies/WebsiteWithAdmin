@@ -41,9 +41,14 @@
 
     <script src="components/header.js"></script>
     <script>
+        console.log('[Sales] DOMContentLoaded listener added');
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('[Sales] DOMContentLoaded fired');
+            console.log('[Sales] window.HeaderComponent exists:', !!window.HeaderComponent);
             if (window.HeaderComponent) {
                 window.HeaderComponent.render('sales');
+            } else {
+                console.error('[Sales] HeaderComponent NOT found on window!');
             }
         });
     </script>
