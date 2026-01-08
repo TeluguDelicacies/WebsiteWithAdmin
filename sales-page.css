@@ -52,6 +52,27 @@ textarea {
     box-shadow: var(--shadow-sm);
 }
 
+.header.sales-header .container {
+    width: 100%;
+    max-width: 1200px;
+    /* Matched from styles.css */
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+    /* Matched from styles.css */
+}
+
+@media (min-width: 640px) {
+    .header.sales-header .container {
+        padding: 0 var(--space-6);
+    }
+}
+
+@media (min-width: 1024px) {
+    .header.sales-header .container {
+        padding: 0 var(--space-8);
+    }
+}
+
 /* Override for sales-header: reduce top padding on mobile page container */
 @media (max-width: 767px) {
     .sales-page-container {
@@ -97,17 +118,10 @@ textarea {
     }
 }
 
+/* Inherit from styles.css
 .header.sales-header .telugu-brand {
-    display: block;
-    font-size: clamp(1rem, 3.8vw, 1.2rem) !important;
-    font-family: 'Mallanna', sans-serif;
-    color: #00B4D8 !important;
-    margin-top: 2px;
-    line-height: 1.2;
-    font-weight: 600;
-    opacity: 0.9;
-    white-space: nowrap;
-}
+   ...
+} */
 
 /* Sales Navigation - Always Visible */
 .sales-nav {

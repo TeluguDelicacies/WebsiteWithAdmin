@@ -13,12 +13,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link
-        href="https://fonts.googleapis.com/css2?family=Ramabhadra&family=Sree+Krushnadevaraya&family=Tenali+Ramakrishna&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Mallanna&family=Ramabhadra&family=Sree+Krushnadevaraya&family=Tenali+Ramakrishna&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Reuse main styles for consistency -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=99.9">
 
     <!-- Supabase Logic -->
     <script type="module">
@@ -122,12 +122,12 @@
             }
         }
 
-        .legal-page-header {
+        .legal-page-header.header {
             padding: 0;
-            /* REMOVED all padding */
-            background: var(--color-bg-light);
+            background: #FFFFFF !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             text-align: left;
-            /* Alignment Fix */
+            position: fixed !important;
         }
 
         .legal-nav {
@@ -162,37 +162,41 @@
             /* Chrome/Safari */
         }
 
-        .legal-tab {
-            padding: 8px 16px;
+        button.legal-tab {
+            width: 45px;
+            height: 45px;
+            padding: 0;
             border: 1px solid var(--color-primary-blue);
             color: var(--color-primary-blue);
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-size: 0.9rem;
+            border-radius: 50%;
+            /* Circle */
             background: white;
-            white-space: nowrap;
-            /* Prevent text wrapping inside buttons */
-            flex-shrink: 0;
-            /* Prevent buttons from shrinking */
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
 
-        .legal-tab:hover {
-            background: var(--color-bg-light);
-            color: var(--color-brand-blue-dark);
+        /* INACTIVE HOVER STATE - Force Dark Blue Text */
+        button.legal-tab:not(.active):hover {
+            background-color: #E2E8F0 !important;
+            /* Darker Gray */
+            color: #0C4A6E !important;
+            /* Very Dark Blue */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .legal-tab.active {
-            background: var(--color-primary-blue);
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 119, 182, 0.3);
+        /* ACTIVE STATE */
+        button.legal-tab.active {
+            background-color: var(--color-primary-blue) !important;
+            color: white !important;
+            box-shadow: 0 4px 6px rgba(0, 119, 182, 0.3);
         }
 
-        /* Ensure active tab text stays white on hover */
-        .legal-tab.active:hover {
-            color: white;
+        button.legal-tab.active:hover {
             opacity: 0.9;
         }
 
@@ -259,22 +263,22 @@
 
 <body>
     <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="/" class="logo-section">
-                    <img src="./images/logo.png" alt="Telugu Delicacies Logo" class="logo">
-                    <div class="logo-text-area">
-                        <span class="logo-text-en" id="header-site-title">Telugu Delicacies</span>
-                        <span class="logo-text-te" id="header-site-title-telugu">తెలుగు డెలికాసీస్</span>
-                    </div>
-                </a>
-                <a href="/" class="btn-primary" style="padding: 10px 12px; font-size: 1rem;" aria-label="Back to Home">
-                    <i class="fas fa-home"></i>
-                </a>
-            </div>
-        </div>
+    <header class="header legal-page-header">
+        <!-- Header content injected by components/header.js -->
     </header>
+
+    <script type="module">
+        import { supabase } from './lib/supabase.js';
+        window.supabase = supabase; 
+    </script>
+    <script src="components/header.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.HeaderComponent) {
+                window.HeaderComponent.render('legal');
+            }
+        });
+    </script>
 
     <!-- Main Content -->
     <main>
@@ -282,11 +286,18 @@
             <div class="legal-page-header">
                 <!-- Navigation Tabs -->
                 <nav class="legal-nav">
-                    <button class="legal-tab" data-type="privacy" onclick="switchLegalTab('privacy')">Privacy
-                        Policy</button>
-                    <button class="legal-tab" data-type="cookie" onclick="switchLegalTab('cookie')">Cookie
-                        Policy</button>
-                    <button class="legal-tab" data-type="terms" onclick="switchLegalTab('terms')">Terms of Use</button>
+                    <button class="legal-tab" data-type="privacy" onclick="switchLegalTab('privacy')"
+                        title="Privacy Policy" aria-label="Privacy Policy">
+                        <i class="fas fa-user-shield"></i>
+                    </button>
+                    <button class="legal-tab" data-type="cookie" onclick="switchLegalTab('cookie')"
+                        title="Cookie Policy" aria-label="Cookie Policy">
+                        <i class="fas fa-cookie-bite"></i>
+                    </button>
+                    <button class="legal-tab" data-type="terms" onclick="switchLegalTab('terms')" title="Terms of Use"
+                        aria-label="Terms of Use">
+                        <i class="fas fa-file-contract"></i>
+                    </button>
                 </nav>
             </div>
 

@@ -457,7 +457,8 @@ Responsive containers and layout components
 */
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 95vw;
+  /* Updated to 95vw per user request */
   margin: 0 auto;
   padding: 0 var(--space-4);
 }
@@ -524,7 +525,8 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .header .container {
-  max-width: 100% !important;
+  max-width: 95vw !important;
+  /* Forces 95vw width */
   padding: 0 var(--space-2) !important;
 }
 
