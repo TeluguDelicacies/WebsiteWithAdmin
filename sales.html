@@ -139,6 +139,39 @@
             catalogueFile: null
         };
 
+        // Initialize header cart button visibility
+        function initHeaderCartButton() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('teluguDelicaciesCart') || '[]');
+                if (cart.length > 0) {
+                    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                    // Show all cart buttons
+                    ['cartBtn', 'mobileCartBtn'].forEach(id => {
+                        const btn = document.getElementById(id);
+                        if (btn) btn.style.display = 'flex';
+                    });
+                    ['cartCount', 'mobileCartCount'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.textContent = count;
+                            el.style.display = 'flex';
+                        }
+                    });
+                }
+
+                // Check if we should auto-open cart (from legal page redirect)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('cart') === 'open' && window.toggleCartDrawer) {
+                    setTimeout(() => window.toggleCartDrawer(), 300);
+                    // Remove the query param
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, '', newUrl);
+                }
+            } catch (e) {
+                console.warn('[Cart Init] Error:', e);
+            }
+        }
+
         async function preloadCatalogue() {
             const catalogueUrl = state.settings.catalogue_image_url;
             if (!catalogueUrl) return;
@@ -380,6 +413,9 @@
 
                 console.log('[Sales Init] Routing...');
                 handleRouting();
+
+                // Initialize header cart button visibility
+                initHeaderCartButton();
             } catch (err) {
                 console.error("Initialization Failed:", err);
                 document.getElementById('app').innerHTML = `
