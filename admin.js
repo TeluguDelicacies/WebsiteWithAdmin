@@ -692,6 +692,17 @@ async function fetchSettings() {
             document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
             document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
 
+            // Social Media
+            document.getElementById('setFacebookUrl').value = data.facebook_url || '';
+            document.getElementById('setInstagramUrl').value = data.instagram_url || '';
+            document.getElementById('setWhatsappUrl').value = data.whatsapp_url || '';
+            document.getElementById('setYoutubeUrl').value = data.youtube_url || '';
+
+            // Legal Documents
+            document.getElementById('setPrivacyPolicy').value = data.privacy_policy || '';
+            document.getElementById('setCookiePolicy').value = data.cookie_policy || '';
+            document.getElementById('setTermsConditions').value = data.terms_conditions || '';
+
             // Catalogue & Address Settings
             document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
             document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
@@ -739,7 +750,18 @@ window.cancelSettingsChanges = function () {
     document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
     document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
 
-    // Catalogue & Address Settings
+    // Social Media
+    document.getElementById('setFacebookUrl').value = data.facebook_url || '';
+    document.getElementById('setInstagramUrl').value = data.instagram_url || '';
+    document.getElementById('setWhatsappUrl').value = data.whatsapp_url || '';
+    document.getElementById('setYoutubeUrl').value = data.youtube_url || '';
+
+    // Legal Documents
+    document.getElementById('setPrivacyPolicy').value = data.privacy_policy || '';
+    document.getElementById('setCookiePolicy').value = data.cookie_policy || '';
+    document.getElementById('setTermsConditions').value = data.terms_conditions || '';
+
+    // Catalogue & Address
     document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
     document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
     document.getElementById('setAddress').value = data.company_address || '';
@@ -785,6 +807,12 @@ if (siteSettingsForm) {
             fav_icon_url: document.getElementById('setFaviconUrl').value,
             hero_background_url: document.getElementById('setHeroBgUrl').value,
             product_placeholder_url: document.getElementById('setProductPlaceholder').value,
+
+            // Social Media
+            facebook_url: document.getElementById('setFacebookUrl').value,
+            instagram_url: document.getElementById('setInstagramUrl').value,
+            whatsapp_url: document.getElementById('setWhatsappUrl').value,
+            youtube_url: document.getElementById('setYoutubeUrl').value,
 
             // Catalogue & Address
             catalogue_image_url: document.getElementById('setCatalogueUrl').value,

@@ -6026,3 +6026,106 @@ Uses same card structure as sales page product grid
   opacity: 1;
   transform: scale(1);
 }
+
+/* Social Icons in Footer */
+.footer-social-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.footer-social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #FFFFFF;
+  /* High contrast white background */
+  border-radius: 50%;
+  color: var(--color-brand-blue-primary);
+  /* Brand blue icon */
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for depth */
+}
+
+.footer-social-icons a:hover {
+  background: var(--color-brand-blue-primary);
+  color: #FFFFFF;
+  transform: translateY(-3px);
+  border-color: var(--color-brand-blue-primary);
+  box-shadow: 0 6px 15px rgba(0, 119, 182, 0.3);
+}
+
+/* Footer Bottom Layout */
+.footer-bottom {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column-reverse;
+  /* Mobile: Links (2nd child) appear ABOVE Copyright (1st child) */
+  align-items: center;
+  gap: 15px;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .footer-bottom {
+    flex-direction: row;
+    /* Desktop: Side by side */
+    justify-content: center;
+    gap: 5px;
+    /* Minimal gap, looks like one line */
+  }
+
+  .footer-bottom p {
+    margin: 0;
+  }
+}
+
+/* Legal Links */
+.footer-legal-links {
+  display: flex;
+  flex-direction: row;
+  /* Mobile: Row with icon-like alignment */
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  justify-content: flex-start;
+  /* Align left */
+}
+
+@media (min-width: 768px) {
+  .footer-legal-links {
+    flex-direction: column;
+    /* Desktop: Column */
+    gap: 8px;
+  }
+}
+
+.footer-legal-links a {
+  color: var(--color-brand-blue-primary) !important;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.footer-legal-links a::before {
+  content: '\f05a';
+  /* Info icon */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  margin-right: 6px;
+  font-size: 0.85rem;
+}
+
+.footer-legal-links a:hover {
+  text-decoration: underline;
+  color: var(--color-brand-blue-dark) !important;
+}

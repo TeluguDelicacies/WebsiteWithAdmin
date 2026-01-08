@@ -2650,6 +2650,32 @@ async function fetchSiteSettings() {
                 }
             }
 
+            // Social Media Links
+            const socialMap = [
+                { id: 'footer-facebook-link', url: data.facebook_url },
+                { id: 'footer-instagram-link', url: data.instagram_url },
+                { id: 'footer-whatsapp-link', url: data.whatsapp_url },
+                { id: 'footer-youtube-link', url: data.youtube_url }
+            ];
+
+            socialMap.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (el) {
+                    let url = item.url;
+                    // Auto-format WhatsApp number if user entered just digits
+                    if (url && item.id === 'footer-whatsapp-link' && /^\d+$/.test(url.replace(/[\s\+]/g, ''))) {
+                        url = `https://wa.me/${url.replace(/[\s\+]/g, '')}`;
+                    }
+
+                    if (url) {
+                        el.href = url;
+                        el.style.display = 'flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
+            });
+
         }
         // REMOVE PRELOADER
         const preloader = document.getElementById('preloader');
@@ -4007,7 +4033,12 @@ window.clearMainCart = function () {
 };
 
 // Initialize cart UI on page load
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+    // Initialize Site Data
+    await fetchSiteSettings();
+    await fetchWebsiteSections();
+    await fetchAndRenderProducts();
+
     // Wait a bit for other scripts to initialize
     setTimeout(() => {
         window.updateMainCartUI();
