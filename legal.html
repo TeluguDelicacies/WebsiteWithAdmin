@@ -189,7 +189,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* ACTIVE STATE */
+        /* ACTIVE STATE (Selected Tab) */
         button.legal-tab.active {
             background-color: var(--color-primary-blue) !important;
             color: white !important;
@@ -198,6 +198,19 @@
 
         button.legal-tab.active:hover {
             opacity: 0.9;
+        }
+
+        /* FOCUS/CLICK STATES - Prevent white flash */
+        button.legal-tab:not(.active):focus,
+        button.legal-tab:not(.active):active {
+            background-color: #E2E8F0 !important;
+            color: #0C4A6E !important;
+            outline: none;
+        }
+
+        /* Ensure icon inherits color */
+        button.legal-tab i {
+            color: inherit !important;
         }
 
         .legal-content {
@@ -264,20 +277,83 @@
 <body>
     <!-- Header -->
     <header class="header legal-page-header">
-        <!-- Header content injected by components/header.js -->
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo Section -->
+                <a href="/" class="logo-section">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        id="headerLogo" alt="Telugu Delicacies Logo" class="logo"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-fallback" style="display: none;">TD</div>
+                    <div class="logo-text">
+                        <h1 class="brand-name" id="header-site-title">Telugu Delicacies</h1>
+                        <span id="header-telugu-brand" class="telugu-brand"></span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="/sales" class="nav-btn cart-btn" id="legalCartBtn" data-tooltip="View Cart"
+                        style="display:none;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="legalCartCount" style="display:none;">0</span>
+                    </a>
+                    <a href="/" class="nav-btn home-btn" data-tooltip="Back Home">
+                        <i class="fas fa-home"></i>
+                    </a>
+                </nav>
+
+                <!-- Mobile Actions -->
+                <div class="mobile-actions">
+                    <a href="/sales" class="nav-btn cart-btn" id="legalMobileCartBtn" data-tooltip="View Cart"
+                        style="display:none;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="legalMobileCartCount" style="display:none;">0</span>
+                    </a>
+                    <a href="/" class="nav-btn home-btn" data-tooltip="Back Home">
+                        <i class="fas fa-home"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </header>
 
     <script type="module">
         import { supabase } from './lib/supabase.js';
-        window.supabase = supabase; 
-    </script>
-    <script src="components/header.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.HeaderComponent) {
-                window.HeaderComponent.render('legal');
+        window.supabase = supabase;
+
+        // Load header branding from Supabase
+        try {
+            const { data } = await supabase.from('site_settings').select('logo_url, site_title_telugu').single();
+            if (data?.logo_url) {
+                const logo = document.getElementById('headerLogo');
+                if (logo) logo.src = data.logo_url;
             }
-        });
+            if (data?.site_title_telugu) {
+                const telugu = document.getElementById('header-telugu-brand');
+                if (telugu) telugu.textContent = data.site_title_telugu;
+            }
+        } catch (e) { console.warn('Failed to load branding:', e); }
+
+        // Check cart from localStorage
+        try {
+            const cart = JSON.parse(localStorage.getItem('teluguDelicaciesCart') || '[]');
+            if (cart.length > 0) {
+                const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                // Show cart buttons
+                ['legalCartBtn', 'legalMobileCartBtn'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.style.display = 'flex';
+                });
+                ['legalCartCount', 'legalMobileCartCount'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = count;
+                        el.style.display = 'flex';
+                    }
+                });
+            }
+        } catch (e) { console.warn('Cart check failed:', e); }
     </script>
 
     <!-- Main Content -->
