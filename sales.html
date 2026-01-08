@@ -1178,48 +1178,107 @@
                 return val;
             };
 
-            // --- Feature: Desktop Hover Zoom ---
+            // --- Feature: Image Zoom (Desktop Hover + Mobile Tap Lightbox) ---
             window.initImageZoom = function () {
-                // Only active on desktop/mouse devices
-                // We use a simple width check + functionality check to exclude mobile pinch-zoom interactions
-                const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                if (isTouch && window.innerWidth < 1024) return;
-
                 const container = document.querySelector('.gallery-front');
                 const img = container ? container.querySelector('.main-img') : null;
-
                 if (!container || !img) return;
 
-                container.addEventListener('mousemove', function (e) {
-                    const rect = container.getBoundingClientRect();
+                const isMobile = window.innerWidth < 1024;
 
-                    // Calculate cursor position within the container
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
+                if (isMobile) {
+                    // --- MOBILE: Tap to open fullscreen lightbox ---
+                    container.style.cursor = 'zoom-in';
+                    container.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        window.openImageLightbox(img.src);
+                    });
+                } else {
+                    // --- DESKTOP: Hover to zoom ---
+                    container.style.cursor = 'crosshair';
+                    container.addEventListener('mousemove', function (e) {
+                        const rect = container.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        let xPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                        let yPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
+                        img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                        img.style.transform = 'scale(2.0)';
+                    });
+                    container.addEventListener('mouseleave', function () {
+                        img.style.transform = 'scale(1)';
+                        setTimeout(() => { img.style.transformOrigin = 'center center'; }, 100);
+                    });
+                }
+            };
 
-                    // Calculate percentage (0-100%)
-                    let xPercent = (x / rect.width) * 100;
-                    let yPercent = (y / rect.height) * 100;
+            // --- Lightbox: Fullscreen Image Viewer ---
+            window.openImageLightbox = function (src) {
+                // Create overlay if not exists
+                let overlay = document.getElementById('imageLightbox');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'imageLightbox';
+                    overlay.innerHTML = `
+                        <div class="lightbox-backdrop"></div>
+                        <div class="lightbox-content">
+                            <img src="" alt="Product Image" class="lightbox-img">
+                            <button class="lightbox-close" aria-label="Close">&times;</button>
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
 
-                    // Clamp values to prevent edge jitter
-                    xPercent = Math.max(0, Math.min(100, xPercent));
-                    yPercent = Math.max(0, Math.min(100, yPercent));
+                    // Close handlers
+                    overlay.querySelector('.lightbox-backdrop').addEventListener('click', window.closeImageLightbox);
+                    overlay.querySelector('.lightbox-close').addEventListener('click', window.closeImageLightbox);
 
-                    // Apply transform
-                    // We move the origin to the cursor, then scale
-                    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-                    img.style.transform = 'scale(2.0)';
-                });
+                    // Pinch zoom support using CSS transform
+                    let scale = 1;
+                    let startDistance = 0;
+                    const lightboxImg = overlay.querySelector('.lightbox-img');
 
-                container.addEventListener('mouseleave', function () {
-                    // Reset
-                    img.style.transform = 'scale(1)';
-                    // We wrap origin reset in a timeout to allow the scale-down transition to finish smoothly
-                    // otherwise the image "jumps" position while shrinking
-                    setTimeout(() => {
-                        img.style.transformOrigin = 'center center';
-                    }, 100);
-                });
+                    lightboxImg.addEventListener('touchstart', function (e) {
+                        if (e.touches.length === 2) {
+                            startDistance = Math.hypot(
+                                e.touches[0].pageX - e.touches[1].pageX,
+                                e.touches[0].pageY - e.touches[1].pageY
+                            );
+                        }
+                    }, { passive: true });
+
+                    lightboxImg.addEventListener('touchmove', function (e) {
+                        if (e.touches.length === 2) {
+                            const currentDistance = Math.hypot(
+                                e.touches[0].pageX - e.touches[1].pageX,
+                                e.touches[0].pageY - e.touches[1].pageY
+                            );
+                            scale = Math.min(3, Math.max(1, scale * (currentDistance / startDistance)));
+                            startDistance = currentDistance;
+                            lightboxImg.style.transform = `scale(${scale})`;
+                        }
+                    }, { passive: true });
+
+                    lightboxImg.addEventListener('touchend', function (e) {
+                        if (e.touches.length === 0) {
+                            // Reset scale on release
+                            scale = 1;
+                            lightboxImg.style.transform = 'scale(1)';
+                        }
+                    });
+                }
+
+                // Set image and show
+                overlay.querySelector('.lightbox-img').src = src;
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+            };
+
+            window.closeImageLightbox = function () {
+                const overlay = document.getElementById('imageLightbox');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
             };
 
             console.log(`[Use By Final Check] Product: ${p.product_name}`);
