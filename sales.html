@@ -321,7 +321,26 @@
                 handleRouting();
             } catch (err) {
                 console.error("Initialization Failed:", err);
-                document.getElementById('app').innerHTML = "<h2>Something went wrong. Please try again later.</h2>";
+                document.getElementById('app').innerHTML = `
+                    <div class="error-state">
+                        <div class="error-card">
+                            <div class="error-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h2>Oops! Something went wrong</h2>
+                            <p>We couldn't load the products right now. This might be a temporary issue.</p>
+                            <div class="error-actions">
+                                <button class="action-btn-pill primary" onclick="location.reload()">
+                                    <i class="fas fa-redo"></i> Try Again
+                                </button>
+                                <a href="index.html" class="action-btn-pill outline">
+                                    <i class="fas fa-home"></i> Go Home
+                                </a>
+                            </div>
+                            <p class="error-hint">If the problem persists, please contact us via WhatsApp.</p>
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -815,7 +834,25 @@
                 product = state.allProducts.find(p => p.id == slugOrId);
             }
             if (!product) {
-                document.getElementById('app').innerHTML = "<h2>Product Not Found</h2>";
+                document.getElementById('app').innerHTML = `
+                    <div class="error-state">
+                        <div class="error-card">
+                            <div class="error-icon" style="background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); color: #2563EB;">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h2>Product Not Found</h2>
+                            <p>We couldn't find the product you're looking for. It may have been removed or the link is incorrect.</p>
+                            <div class="error-actions">
+                                <a href="sales.html" class="action-btn-pill primary">
+                                    <i class="fas fa-store"></i> Browse Products
+                                </a>
+                                <a href="index.html" class="action-btn-pill outline">
+                                    <i class="fas fa-home"></i> Go Home
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
