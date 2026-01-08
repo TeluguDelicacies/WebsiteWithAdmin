@@ -990,6 +990,7 @@
 
             initProductInteractions(product);
             window.initSwipeNavigation();
+            window.initImageZoom();
         }
 
         // --- Helpers: Components ---
@@ -1196,6 +1197,50 @@
                 let unit = match[2];
                 if (unit === 'kg') val *= 1000;
                 return val;
+            };
+
+            // --- Feature: Desktop Hover Zoom ---
+            window.initImageZoom = function () {
+                // Only active on desktop/mouse devices
+                // We use a simple width check + functionality check to exclude mobile pinch-zoom interactions
+                const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                if (isTouch && window.innerWidth < 1024) return;
+
+                const container = document.querySelector('.gallery-front');
+                const img = container ? container.querySelector('.main-img') : null;
+
+                if (!container || !img) return;
+
+                container.addEventListener('mousemove', function (e) {
+                    const rect = container.getBoundingClientRect();
+
+                    // Calculate cursor position within the container
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    // Calculate percentage (0-100%)
+                    let xPercent = (x / rect.width) * 100;
+                    let yPercent = (y / rect.height) * 100;
+
+                    // Clamp values to prevent edge jitter
+                    xPercent = Math.max(0, Math.min(100, xPercent));
+                    yPercent = Math.max(0, Math.min(100, yPercent));
+
+                    // Apply transform
+                    // We move the origin to the cursor, then scale
+                    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                    img.style.transform = 'scale(2.0)';
+                });
+
+                container.addEventListener('mouseleave', function () {
+                    // Reset
+                    img.style.transform = 'scale(1)';
+                    // We wrap origin reset in a timeout to allow the scale-down transition to finish smoothly
+                    // otherwise the image "jumps" position while shrinking
+                    setTimeout(() => {
+                        img.style.transformOrigin = 'center center';
+                    }, 100);
+                });
             };
 
             console.log(`[Use By Final Check] Product: ${p.product_name}`);

@@ -627,6 +627,10 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: crosshair;
+    /* Indicates zoom availability */
+    overflow: hidden;
+    /* Key for zoom clipping */
 }
 
 .gallery-front .main-img {
@@ -636,6 +640,10 @@ textarea {
     /* Ensure fill without bars */
     background: transparent;
     /* Remove white/grey bars */
+    transition: transform 0.1s ease-out;
+    /* Fast, engaging response */
+    transform-origin: center center;
+    will-change: transform, transform-origin;
 }
 
 /* Back Face */
