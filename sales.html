@@ -1239,6 +1239,7 @@
             }
 
             let activeVariantIdx = 0;
+            window._detailActiveVariantIdx = 0; // Global state for cart sync
 
             const updatePrice = (v) => {
                 const hasDiscount = v.mrp && v.mrp > v.price;
@@ -1316,6 +1317,7 @@
                 if (!variants || !variants[idx]) return;
 
                 activeVariantIdx = idx;
+                window._detailActiveVariantIdx = idx; // Update global state
                 const v = variants[idx];
                 const labelEl = document.getElementById('variantLabel');
                 if (labelEl) labelEl.innerText = `${v.quantity} - ₹${v.price}`;
@@ -2206,7 +2208,9 @@
                 const select = document.getElementById('variantSelect');
                 let variantIdx = 0;
 
-                if (select) {
+                if (typeof window._detailActiveVariantIdx === 'number') {
+                    variantIdx = window._detailActiveVariantIdx;
+                } else if (select) {
                     variantIdx = parseInt(select.value, 10) || 0;
                 } else if (typeof window._mobileActiveVariantIdx === 'number') {
                     // Use mobile portal dropdown selection
@@ -2263,8 +2267,13 @@
             if (!selectedVariant) {
                 const variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
                 if (variants.length > 0) {
-                    const select = document.getElementById('variantSelect');
-                    const idx = select ? select.value : 0;
+                    let idx = 0;
+                    if (typeof window._detailActiveVariantIdx === 'number') {
+                        idx = window._detailActiveVariantIdx;
+                    } else {
+                        const select = document.getElementById('variantSelect');
+                        idx = select ? select.value : 0;
+                    }
                     selectedVariant = variants[idx];
                 }
             }
