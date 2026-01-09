@@ -3571,6 +3571,8 @@ function renderQuickProductsHTML(products, showMrp) {
         let qtyDisplay = product.net_weight || '';
 
         if (variants && variants.length > 0) {
+            // Sort by price (ascending) to show cheapest
+            variants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
             priceDisplay = variants[0].price; // Sales Price
             qtyDisplay = variants[0].quantity;
         }

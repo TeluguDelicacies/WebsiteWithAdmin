@@ -698,7 +698,8 @@
             }
 
             // Sort variants by MRP (lowest to highest)
-            const sortedVariants = [...variants].sort((a, b) => (Number(a.mrp || a.price) || 0) - (Number(b.mrp || b.price) || 0));
+            // Sort variants by Price (lowest to highest) to show cheapest entry
+            const sortedVariants = [...variants].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
 
             // Default selected variant (Index 0 after sort)
             const defaultVar = sortedVariants[0];
