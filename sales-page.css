@@ -789,19 +789,20 @@ textarea {
         height: 36px;
         padding: 0 30px 0 12px;
         border-radius: 20px;
-        background: var(--bg-button-gradient);
+        background: white;
         border: none;
         font-weight: 600;
         font-size: 0.85rem;
-        color: var(--text-primary);
+        color: var(--color-primary-blue);
         appearance: none;
         -webkit-appearance: none;
         cursor: pointer;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230077B6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
         background-repeat: no-repeat;
         background-position: right 8px center;
         background-size: 14px;
         min-width: 90px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .mobile-variant-select:focus {
@@ -822,6 +823,8 @@ textarea {
     text-align: center;
     transition: transform 0.6s;
     transform-style: preserve-3d;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 /* Flipped State */
