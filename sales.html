@@ -235,42 +235,12 @@
         async function init() {
             // Expose toggleFlip globally
             window.toggleFlip = function () {
-                const gallery = document.querySelector('.product-gallery');
-                const inner = gallery?.querySelector('.gallery-inner');
+                const el = document.querySelector('.gallery-inner');
                 const btn = document.querySelector('.gallery-wrapper > div:last-child .action-btn-pill');
                 const disclaimer = document.querySelector('.product-disclaimer-overlay');
-                const actionOverlay = document.querySelector('.card-action-container');
-                const variantOverlay = document.querySelector('.mobile-variant-overlay');
-
-                if (inner) {
-                    inner.classList.toggle('flipped');
-                    const isFlipped = inner.classList.contains('flipped');
-
-                    // Toggle visibility of overlays
-                    if (actionOverlay) actionOverlay.style.opacity = isFlipped ? '0' : '1';
-                    if (variantOverlay) variantOverlay.style.opacity = isFlipped ? '0' : '1';
-
-                    const backImg = inner.querySelector('.gallery-back-img');
-                    const backText = inner.querySelector('.gallery-back-text');
-
-                    if (isFlipped) {
-                        // Show back image first
-                        if (backImg) backImg.style.display = 'block';
-                        if (backText) backText.style.display = 'none';
-
-                        // After 500ms, swap to text
-                        setTimeout(() => {
-                            if (inner.classList.contains('flipped')) {
-                                if (backImg) backImg.style.display = 'none';
-                                if (backText) {
-                                    backText.style.display = 'flex';
-                                    backText.style.opacity = '0';
-                                    setTimeout(() => backText.style.opacity = '1', 50);
-                                }
-                            }
-                        }, 500);
-                    }
-
+                if (el) {
+                    el.classList.toggle('flipped');
+                    const isFlipped = el.classList.contains('flipped');
                     // Update button text based on state
                     if (btn) {
                         btn.innerHTML = isFlipped
@@ -1038,13 +1008,6 @@
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                         
-                                        <!-- Mobile Variant Overlay Pill -->
-                                        ${variants.length > 1 ? `
-                                        <div class="mobile-variant-overlay" onclick="event.stopPropagation(); window.openVariantDropdown(document.getElementById('variantTrigger'))">
-                                            <i class="fas fa-layer-group"></i> <span>${variants[activeVariantIdx].quantity}</span>
-                                        </div>
-                                        ` : ''}
-
                                         <!-- Overlay Action Bar (Add/Qty) -->
                                         <div class="card-action-container" onclick="event.stopPropagation()">
                                             <button class="btn-add" id="detailAddBtnOverlay" 
@@ -1057,15 +1020,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Back: Description with Image Transition -->
+                                    <!-- Back: Description -->
                                     <div class="gallery-back">
-                                        <div class="gallery-back-img" style="display:none; width:100%; height:100%;">
-                                            <img src="${product.info_image || product.showcase_image || state.placeholder}" style="width:100%; height:100%; object-fit:cover;">
-                                        </div>
-                                        <div class="gallery-back-text" style="display:flex; flex-direction:column; width:100%; height:100%;">
-                                            <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
-                                            <p>${product.product_description || 'No description available.'}</p>
-                                        </div>
+                                        <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
+                                        <p>${product.product_description || 'No description available.'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -1311,12 +1269,6 @@
                 }
 
                 if (!v) return;
-
-                // Update mobile variant overlay text
-                const mobileVarLabel = document.querySelector('.mobile-variant-overlay span');
-                if (mobileVarLabel) {
-                    mobileVarLabel.innerText = v.quantity;
-                }
 
                 const cartItem = state.cart.find(c => c.id == p.id &&
                     (c.variant ? c.variant.quantity === v.quantity : true)
@@ -1704,7 +1656,7 @@
         }
 
         function renderVerticalItems(items) {
-            if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.</p>`;
+            if (!items || !items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.</p>`;
             return items.map((item, index) => {
                 // Get first variant info or use default price
                 let variants = [];
@@ -1716,13 +1668,17 @@
                 const displayPrice = firstVariant.price || item.price || item.mrp || '';
 
                 // Check Cart State
-                const cartItem = state.cart.find(c => c.id == item.id &&
+                const cartList = state.cart || [];
+                const cartItem = cartList.find(c => c.id == item.id &&
                     (c.variant ? c.variant.quantity === firstVariant.quantity : true)
                 );
                 const qty = cartItem ? cartItem.qty : 0;
 
+                const escapedProduct = JSON.stringify(item).replace(/'/g, "&apos;");
+                const escapedVariant = JSON.stringify(firstVariant).replace(/'/g, "&apos;");
+
                 return `
-        <div class="sim-item" data-product-id="${item.id}" data-product='${JSON.stringify(item).replace(/'/g, "\\'")}' data-variant='${JSON.stringify(firstVariant).replace(/'/g, "\\'")}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
+        <div class="sim-item" data-product-id="${item.id}" data-product='${escapedProduct}' data-variant='${escapedVariant}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
             <img src="${item.showcase_image || state.placeholder}" class="sim-img"
                 onerror="this.src='${state.placeholder}'">
             <div class="sim-info">
@@ -1772,8 +1728,9 @@
             const simItem = document.querySelector(`#sidebar-qty-${index}`).closest('.sim-item');
             if (simItem) {
                 try {
-                    const product = JSON.parse(simItem.dataset.product.replace(/\\'/g, "'"));
-                    const variant = JSON.parse(simItem.dataset.variant.replace(/\\'/g, "'"));
+                    // dataset items are already HTML-decoded by the browser
+                    const product = JSON.parse(simItem.dataset.product);
+                    const variant = JSON.parse(simItem.dataset.variant);
 
                     // Find or update cart item
                     const existingIdx = state.cart.findIndex(item =>
@@ -1952,8 +1909,14 @@
         window.initCart = function () {
             try {
                 const saved = localStorage.getItem('td_cart');
-                if (saved) state.cart = JSON.parse(saved);
-            } catch (e) { console.error('Cart load error', e); }
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.cart = Array.isArray(parsed) ? parsed : [];
+                }
+            } catch (e) {
+                console.error('Cart load error', e);
+                state.cart = [];
+            }
             updateCartUI();
         };
 
@@ -2455,7 +2418,21 @@
 
         window.initCart();
 
-        init();
+        init().catch(err => {
+            console.error("Critical Runtime Error:", err);
+            const app = document.getElementById('app');
+            if (app) {
+                app.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-card">
+                            <h2>Something went wrong</h2>
+                            <p>We encountered a technical error while loading the page.</p>
+                            <button onclick="location.reload()" class="action-btn-pill primary">Try Again</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
     </script>
 </body>
 
