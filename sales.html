@@ -690,7 +690,8 @@
             const defaultVarIdx = 0;
 
             // 2. Check Cart State for this specific variant
-            const cartItem = state.cart.find(item => item.id === product.id &&
+            const cartList = state.cart || [];
+            const cartItem = cartList.find(item => item.id === product.id &&
                 (item.variant ? item.variant.quantity === defaultVar.quantity : true)
             );
             const qty = cartItem ? cartItem.qty : 0;
@@ -1101,6 +1102,12 @@
             initProductInteractions(product);
             window.initSwipeNavigation();
             window.initImageZoom();
+
+            // Final Sync (After all components are ready)
+            if (window.syncDetailPageCart) {
+                const vars = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+                window.syncDetailPageCart(vars[0]);
+            }
         }
 
         // --- Helpers: Components ---
