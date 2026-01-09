@@ -684,8 +684,8 @@ textarea {
     }
 
     /* Reduce container top padding on mobile for tighter layout */
-    .sales-page-container {
-        padding-top: 70px !important;
+    main.sales-page-container {
+        padding-top: 65px !important;
     }
 
     /* Reduce grid layout gaps on mobile */

@@ -1183,9 +1183,10 @@
                 const defaultV = variants[0];
                 mobileVariantLabel.innerText = `${defaultV.quantity} (₹${defaultV.price})`;
                 window._mobileActiveVariantIdx = 0;
+                window._currentVariants = variants;
             } else if (mobileVarContainer) {
-                // Single or no variants - hide the dropdown
-                mobileVarContainer.style.display = 'none';
+                // Single or no variants - FORCE hide the dropdown
+                mobileVarContainer.setAttribute('style', 'display: none !important; visibility: hidden !important;');
             }
 
             let activeVariantIdx = 0;
