@@ -1235,7 +1235,7 @@
                 }
             } else if (mobileVarContainer) {
                 // Single or no variants - FORCE hide the dropdown
-                mobileVarContainer.style.display = 'none';
+                mobileVarContainer.style.setProperty('display', 'none', 'important');
             }
 
             let activeVariantIdx = 0;

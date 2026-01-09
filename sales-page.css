@@ -814,12 +814,15 @@ textarea {
         font-weight: 600;
         font-size: 0.95rem;
         cursor: pointer;
-        border-radius: 4px;
-        padding: 4px 8px;
-        /* Slightly more padding for touch */
-        transition: background 0.2s;
-        border: 1px solid transparent;
-        /* Prevent layout shift on border changes if any */
+        border-radius: 6px;
+        /* Rounded edges */
+        padding: 6px 10px;
+        /* Adjusted padding */
+        transition: background 0.2s, border-color 0.2s;
+        border: 1px solid var(--border-medium);
+        /* Rectangular border */
+        background: white;
+        /* Ensure background is white for the border to look good */
     }
 
     .mobile-variant-trigger:hover,
