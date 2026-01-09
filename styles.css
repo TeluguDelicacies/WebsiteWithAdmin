@@ -1242,6 +1242,10 @@ Enhanced product cards and modern styling
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  /* iOS Safari Border Radius Fix */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  transform: translateZ(0);
 }
 
 .product-image-wrapper {
