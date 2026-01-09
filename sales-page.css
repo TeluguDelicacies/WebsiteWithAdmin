@@ -3463,3 +3463,9 @@ textarea {
 .main-product-area {
     padding-bottom: 10px !important;
 }
+
+/* FIX: Left-align Price Row */
+/* User reported prices are centered, but should be left-aligned for better readability in the new layout */
+.price-row {
+    justify-content: flex-start !important;
+}
