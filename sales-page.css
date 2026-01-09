@@ -734,8 +734,8 @@ textarea {
 
 @media (max-width: 767px) {
     .product-gallery {
-        max-width: 300px;
-        /* Compact on Mobile - Aspect ratio is inherited */
+        max-width: min(450px, 95vw);
+        /* Increased to utilize more space while staying 1:1 */
     }
 
     .gallery-front .main-img {
