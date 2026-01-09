@@ -1226,13 +1226,15 @@
                 window._mobileActiveVariantIdx = 0;
                 window._currentVariants = variants;
 
-                // FORCE DISPLAY BLOCK FOR NEW LOCATION
+                // FORCE DISPLAY: RELY ON CSS MEDIA QUERY instead of inline style
+                // This prevents it from showing on desktop
                 if (mobileVarContainer) {
-                    mobileVarContainer.style.display = 'block';
+                    mobileVarContainer.removeAttribute('style'); // Clear inline "display: none" if present
+                    // We DO NOT set display:block here, causing desktop leak. CSS handles it.
                 }
             } else if (mobileVarContainer) {
                 // Single or no variants - FORCE hide the dropdown
-                mobileVarContainer.setAttribute('style', 'display: none !important; visibility: hidden !important;');
+                mobileVarContainer.style.display = 'none';
             }
 
             let activeVariantIdx = 0;
