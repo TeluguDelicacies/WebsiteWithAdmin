@@ -3391,18 +3391,19 @@ textarea {
     flex: 1;
 }
 
-/* Target the inline-styled price/variant row in sidebar */
-.sim-info>div[style*="display:flex"] {
+/* Target the price/variant row in products stack (Trending/Similar) */
+.price-action-row {
     flex-wrap: nowrap !important;
+    white-space: nowrap !important;
 }
 
-.sim-info>div[style*="display:flex"]>span {
+.price-action-row>span {
     white-space: nowrap !important;
-    overflow: hidden !important;
-    font-size: clamp(0.55rem, 1.5vw, 0.8rem) !important;
-    /* Scale to fit */
-    min-width: 0;
-    flex: 1;
+    overflow: visible !important;
+    /* Don't hide the price */
+    flex-shrink: 0 !important;
+    /* Don't let the price get squashed */
+    min-width: fit-content;
 }
 
 @media (min-width: 1024px) {
@@ -3541,15 +3542,16 @@ textarea {
         font-size: 1.1rem !important;
     }
 
-    /* Price and Variant in stack */
-    .sim-info div span {
-        font-size: 1.5rem !important;
-        /* Price: Doubled from 0.8rem */
+    /* Price and Variant in stack (Trending/Similar) */
+    .price-action-row span {
+        font-size: 1.1rem !important;
+        /* Balanced size to prevent wrapping */
     }
 
-    .sim-info div span span {
-        font-size: 1.2rem !important;
-        /* Variant label inside price */
+    .price-action-row span span {
+        font-size: 0.85rem !important;
+        /* Variant label relative to price */
+        margin-left: 2px;
     }
 
     /* Ensure the item itself allows larger text */
