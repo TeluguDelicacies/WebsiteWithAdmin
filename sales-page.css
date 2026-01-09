@@ -3577,3 +3577,83 @@ textarea {
         font-size: 1rem !important;
     }
 }
+
+/* FIX: Mobile Trending Font Sizes (Doubled) */
+@media (max-width: 1023px) {
+    /* Override inline styles in renderVerticalItems */
+    .sim-info h4 {
+        font-size: 1.4rem !important; /* Doubled from 0.85rem approx */
+        margin-bottom: 4px !important;
+    }
+    
+    .sim-info > span { /* Tagline */
+        font-size: 1.1rem !important;
+    }
+
+    /* Price and Variant in stack */
+    .sim-info div span { 
+        font-size: 1.5rem !important; /* Price: Doubled from 0.8rem */
+    }
+
+    .sim-info div span span {
+        font-size: 1.2rem !important; /* Variant label inside price */
+    }
+    
+    /* Ensure the item itself allows larger text */
+    .sim-item {
+        padding: 12px !important;
+        gap: 15px !important;
+    }
+    
+    .sim-img {
+        width: 80px !important;
+        height: 80px !important;
+    }
+}
+
+/* FIX: Desktop Main Product Layout Re-Constraint */
+/* Previous fix caused overflow/breakage. Relaxing constraints. */
+@media (min-width: 1024px) {
+    .grid-layout {
+        min-height: auto; /* Let content dictate, but usually fill screen */
+        padding-bottom: 50px;
+    }
+
+    .main-product-area {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start; /* Do NOT stretch, let them be natural height */
+        justify-content: center;
+        height: auto !important; /* Remove fixed height constraint */
+        min-height: 600px; /* Ensure at least decent size */
+        gap: 40px;
+        padding-bottom: 0 !important;
+        max-height: none !important; /* Remove the breaker */
+    }
+
+    .gallery-wrapper {
+        flex: 1; /* Take available width */
+        height: auto;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* Align top */
+    }
+
+    .product-gallery {
+        /* Constraint to prevent explosion on huge screens */
+        width: 100%;
+        max-width: 600px; /* Sensible max width */
+        aspect-ratio: 1 / 1 !important;
+        height: auto !important; /* Let width drive height via aspect ratio */
+        max-height: 80vh; /* Don't exceed viewport height regardless of width */
+        object-fit: contain;
+    }
+    
+    .product-details {
+        flex: 1; /* Allow to share width equally or 45% */
+        max-width: 500px;
+        height: auto; /* Let it grow naturally */
+        max-height: 85vh; /* Scroll if truly massive */
+        overflow-y: auto;
+    }
+}
