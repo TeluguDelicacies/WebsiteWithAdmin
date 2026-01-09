@@ -842,7 +842,7 @@
             // Find existing cart item to update
             const existingIdx = state.cart.findIndex(item =>
                 item.id == productId &&
-                (item.variant ? item.variant.quantity === variant.quantity : true)
+                (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
             );
 
             if (existingIdx > -1) {
@@ -864,7 +864,7 @@
 
             // Check Cart State
             const cartItem = state.cart.find(item => item.id == productId &&
-                (item.variant ? item.variant.quantity === variant.quantity : true)
+                (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
             );
             const qty = cartItem ? cartItem.qty : 0;
 
@@ -1192,8 +1192,7 @@
 
             // Default to first variant label
             const activeV = variants[0];
-            const pkgType = activeV.packaging_type ? ` <small>(${activeV.packaging_type})</small>` : '';
-            const label = `${activeV.quantity}${pkgType} - ₹${activeV.price}`;
+            const label = `${activeV.quantity} - ₹${activeV.price}`;
 
             // Store variants in window for dropdown access
             window._currentVariants = variants;
@@ -1224,8 +1223,7 @@
             if (variants.length > 1 && mobileVariantLabel) {
                 // Multiple variants - show dropdown with first variant selected
                 const defaultV = variants[0];
-                const pkgType = defaultV.packaging_type ? ` <small>(${defaultV.packaging_type})</small>` : '';
-                mobileVariantLabel.innerHTML = `${defaultV.quantity}${pkgType} (₹${defaultV.price})`;
+                mobileVariantLabel.innerText = `${defaultV.quantity} (₹${defaultV.price})`;
                 window._mobileActiveVariantIdx = 0;
                 window._currentVariants = variants;
 
@@ -1287,15 +1285,13 @@
                 menu.id = 'variant-portal-dropdown';
                 menu.className = 'variant-portal-menu';
 
-                menu.innerHTML = variants.map((v, i) => {
-                    const pkgType = v.packaging_type ? ` <small>(${v.packaging_type})</small>` : '';
-                    return `
+                menu.innerHTML = variants.map((v, i) => `
                     <div class="variant-portal-item ${i === activeVariantIdx ? 'active' : ''}" 
                          onclick="window.handleVariantClick(${i})">
-                        <span>${v.quantity}${pkgType}</span>
+                        <span>${v.quantity}</span>
                         <span class="var-price">₹${v.price}</span>
-                    </div>`;
-                }).join('');
+                    </div>
+                `).join('');
 
                 document.body.appendChild(menu);
 
@@ -1322,10 +1318,7 @@
                 activeVariantIdx = idx;
                 const v = variants[idx];
                 const labelEl = document.getElementById('variantLabel');
-                if (labelEl) {
-                    const pkgType = v.packaging_type ? ` <small>(${v.packaging_type})</small>` : '';
-                    labelEl.innerHTML = `${v.quantity}${pkgType} - ₹${v.price}`;
-                }
+                if (labelEl) labelEl.innerText = `${v.quantity} - ₹${v.price}`;
 
                 updatePrice(v);
                 window.syncDetailPageCart(v);
@@ -1364,15 +1357,13 @@
 
                 const activeIdx = window._mobileActiveVariantIdx || 0;
 
-                menu.innerHTML = variants.map((v, i) => {
-                    const pkgType = v.packaging_type ? ` <small style="font-size: 0.8em; opacity: 0.8;">(${v.packaging_type})</small>` : '';
-                    return `
+                menu.innerHTML = variants.map((v, i) => `
                     <div class="mv-portal-item ${i === activeIdx ? 'active' : ''}" 
                          onclick="window.handleMobileVariantSelect(${i})">
-                        <span>${v.quantity}${pkgType}</span>
+                        <span>${v.quantity}</span>
                         <span class="mv-price">₹${v.price}</span>
-                    </div>`;
-                }).join('');
+                    </div>
+                `).join('');
 
                 document.body.appendChild(menu);
 
@@ -1402,8 +1393,7 @@
 
                 // Update mobile label
                 const label = document.getElementById('mobileVariantLabel');
-                const pkgType = v.packaging_type ? ` <small>(${v.packaging_type})</small>` : '';
-                if (label) label.innerHTML = `${v.quantity}${pkgType} (₹${v.price})`;
+                if (label) label.innerText = `${v.quantity} (₹${v.price})`;
 
                 // Trigger the main variant click handler
                 window.handleVariantClick(idx);
@@ -2151,7 +2141,7 @@
             // Hardened Validation: Check existing cart qty + new qty against stock
             const existingIdx = state.cart.findIndex(item =>
                 item.id === product.id &&
-                JSON.stringify(item.variant) === JSON.stringify(variant)
+                (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
             );
 
             const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
@@ -2262,6 +2252,52 @@
             } else {
                 item.qty = newQty;
                 window.saveCart();
+            }
+        };
+
+        window.syncDetailPageCart = function (selectedVariant = null) {
+            if (!state.currentProduct) return;
+            const product = state.currentProduct;
+
+            // If specific variant not passed, try to get from UI
+            if (!selectedVariant) {
+                const variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+                if (variants.length > 0) {
+                    const select = document.getElementById('variantSelect');
+                    const idx = select ? select.value : 0;
+                    selectedVariant = variants[idx];
+                }
+            }
+
+            // Find in cart
+            const cartItem = state.cart.find(item =>
+                item.id === product.id &&
+                (item.variant && selectedVariant ?
+                    (item.variant.quantity === selectedVariant.quantity && item.variant.packaging_type === selectedVariant.packaging_type) :
+                    true)
+            );
+
+            const qty = cartItem ? cartItem.qty : 0;
+
+            const btnAdd = document.getElementById('btn-add-detail');
+            const qtyCounter = document.getElementById('qty-counter-detail'); // Ensure this ID exists in your HTML
+            const qtyVal = document.getElementById('qty-val-detail');         // Ensure this ID exists in your HTML
+
+            if (btnAdd && qtyCounter && qtyVal) {
+                if (qty > 0) {
+                    btnAdd.style.display = 'none';
+                    qtyCounter.style.display = 'flex';
+                    qtyVal.innerText = qty;
+                    // Also update the input field if you use that for initial add logic? 
+                    // Usually detail page has +/- logic separate or unified. 
+                    // If unified, we show the counter.
+                } else {
+                    btnAdd.style.display = 'block';
+                    qtyCounter.style.display = 'none';
+                    // Reset add input to 1?
+                    const detailQtyInput = document.getElementById('detailQty');
+                    if (detailQtyInput) detailQtyInput.value = 1;
+                }
             }
         };
 
