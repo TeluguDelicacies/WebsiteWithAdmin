@@ -3447,6 +3447,7 @@ textarea {
         border-radius: 4px;
     }
 }
+
 /* FIX: Layout Spacing Overrides */
 /* The breadcrumb section was having excessive top margin causing the page to look broken */
 .breadcrumb-section {
@@ -3470,109 +3471,56 @@ textarea {
     justify-content: flex-start !important;
 }
 
-/* FIX: Desktop Main Product Layout Scaling */
-/* User Request: Scale content to fit area, maintain square image aspect ratio, desktop only */
+/* Desktop layout scaling removed - using original grid layout from line 1308+ */
 
-@media (min-width: 1024px) {
-    /* 1. Force the grid container to fill viewport height minus header */
-    .grid-layout {
-        min-height: calc(100vh - 80px);
-    }
-
-    /* 2. Make Main Product Area fill the grid cell and use Flexbox */
-    .main-product-area {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: flex-start;
-        justify-content: center;
-        height: 100%;
-        max-height: calc(100vh - 120px);
-        gap: 30px;
-        padding-bottom: 0 !important;
-    }
-
-    /* 3. Left Side: Image Gallery Wrapper */
-    .gallery-wrapper {
-        flex: 1;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-width: 0;
-    }
-
-    /* 4. The Product Gallery Card (Flipper) */
-    /* This must be square and scale with height */
-    .product-gallery {
-        height: 100%;
-        width: auto;
-        aspect-ratio: 1 / 1 !important;
-        max-width: 100%;
-        max-height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .gallery-inner {
-        height: 100%;
-    }
-
-    /* 5. Right Side: Product Details */
-    .product-details {
-        flex: 0 0 45%;
-        max-width: 500px;
-        height: 100%;
-        overflow-y: auto;
-        padding-right: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    .details-body {
-        width: 100%;
-    }
-}
 
 /* FIX: Mobile Font Sizes for Price & Variant */
 /* User reported these are too small/unreadable on mobile stack */
 
 @media (max-width: 1023px) {
+
     /* 1. Main View Price */
     .current-price {
-        font-size: 2.2rem !important; /* Ensure big impact */
+        font-size: 2.2rem !important;
+        /* Ensure big impact */
         font-weight: 800;
     }
 
     /* 2. Grid Card Price */
     .price-pill {
-        font-size: 1.3rem !important; /* Readable on small cards */
+        font-size: 1.3rem !important;
+        /* Readable on small cards */
         font-weight: 700;
     }
 
     /* 3. Grid Card Variant Selector */
     .variant-selector {
-        padding: 8px 12px !important; /* Larger touch target */
+        padding: 8px 12px !important;
+        /* Larger touch target */
     }
 
     .current-variant {
-        font-size: 1rem !important; /* Minimum readable size */
+        font-size: 1rem !important;
+        /* Minimum readable size */
         font-weight: 600;
     }
 
     /* 4. Main View Variant Trigger */
     .variant-trigger {
-        padding: 12px 16px !important; /* Easy to tap */
+        padding: 12px 16px !important;
+        /* Easy to tap */
         min-height: 48px;
     }
 
     .variant-trigger span#variantLabel {
-        font-size: 1.1rem !important; /* Clearly readable */
+        font-size: 1.1rem !important;
+        /* Clearly readable */
         font-weight: 600;
     }
 
     /* 5. Dropdown Options (Both) */
-    .var-option, .variant-portal-item {
+    .var-option,
+    .variant-portal-item {
         padding: 12px 16px !important;
         font-size: 1rem !important;
     }
@@ -3580,80 +3528,40 @@ textarea {
 
 /* FIX: Mobile Trending Font Sizes (Doubled) */
 @media (max-width: 1023px) {
+
     /* Override inline styles in renderVerticalItems */
     .sim-info h4 {
-        font-size: 1.4rem !important; /* Doubled from 0.85rem approx */
+        font-size: 1.4rem !important;
+        /* Doubled from 0.85rem approx */
         margin-bottom: 4px !important;
     }
-    
-    .sim-info > span { /* Tagline */
+
+    .sim-info>span {
+        /* Tagline */
         font-size: 1.1rem !important;
     }
 
     /* Price and Variant in stack */
-    .sim-info div span { 
-        font-size: 1.5rem !important; /* Price: Doubled from 0.8rem */
+    .sim-info div span {
+        font-size: 1.5rem !important;
+        /* Price: Doubled from 0.8rem */
     }
 
     .sim-info div span span {
-        font-size: 1.2rem !important; /* Variant label inside price */
+        font-size: 1.2rem !important;
+        /* Variant label inside price */
     }
-    
+
     /* Ensure the item itself allows larger text */
     .sim-item {
         padding: 12px !important;
         gap: 15px !important;
     }
-    
+
     .sim-img {
         width: 80px !important;
         height: 80px !important;
     }
 }
 
-/* FIX: Desktop Main Product Layout Re-Constraint */
-/* Previous fix caused overflow/breakage. Relaxing constraints. */
-@media (min-width: 1024px) {
-    .grid-layout {
-        min-height: auto; /* Let content dictate, but usually fill screen */
-        padding-bottom: 50px;
-    }
-
-    .main-product-area {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: flex-start; /* Do NOT stretch, let them be natural height */
-        justify-content: center;
-        height: auto !important; /* Remove fixed height constraint */
-        min-height: 600px; /* Ensure at least decent size */
-        gap: 40px;
-        padding-bottom: 0 !important;
-        max-height: none !important; /* Remove the breaker */
-    }
-
-    .gallery-wrapper {
-        flex: 1; /* Take available width */
-        height: auto;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start; /* Align top */
-    }
-
-    .product-gallery {
-        /* Constraint to prevent explosion on huge screens */
-        width: 100%;
-        max-width: 600px; /* Sensible max width */
-        aspect-ratio: 1 / 1 !important;
-        height: auto !important; /* Let width drive height via aspect ratio */
-        max-height: 80vh; /* Don't exceed viewport height regardless of width */
-        object-fit: contain;
-    }
-    
-    .product-details {
-        flex: 1; /* Allow to share width equally or 45% */
-        max-width: 500px;
-        height: auto; /* Let it grow naturally */
-        max-height: 85vh; /* Scroll if truly massive */
-        overflow-y: auto;
-    }
-}
+/* Desktop re-constraint removed - using original grid layout */
