@@ -1192,7 +1192,8 @@
 
             // Default to first variant label
             const activeV = variants[0];
-            const label = `${activeV.quantity} - ₹${activeV.price}`;
+            const pkgType = activeV.packaging_type ? ` <small>(${activeV.packaging_type})</small>` : '';
+            const label = `${activeV.quantity}${pkgType} - ₹${activeV.price}`;
 
             // Store variants in window for dropdown access
             window._currentVariants = variants;
@@ -1223,7 +1224,8 @@
             if (variants.length > 1 && mobileVariantLabel) {
                 // Multiple variants - show dropdown with first variant selected
                 const defaultV = variants[0];
-                mobileVariantLabel.innerText = `${defaultV.quantity} (₹${defaultV.price})`;
+                const pkgType = defaultV.packaging_type ? ` <small>(${defaultV.packaging_type})</small>` : '';
+                mobileVariantLabel.innerHTML = `${defaultV.quantity}${pkgType} (₹${defaultV.price})`;
                 window._mobileActiveVariantIdx = 0;
                 window._currentVariants = variants;
 
@@ -1285,13 +1287,15 @@
                 menu.id = 'variant-portal-dropdown';
                 menu.className = 'variant-portal-menu';
 
-                menu.innerHTML = variants.map((v, i) => `
+                menu.innerHTML = variants.map((v, i) => {
+                    const pkgType = v.packaging_type ? ` <small>(${v.packaging_type})</small>` : '';
+                    return `
                     <div class="variant-portal-item ${i === activeVariantIdx ? 'active' : ''}" 
                          onclick="window.handleVariantClick(${i})">
-                        <span>${v.quantity}</span>
+                        <span>${v.quantity}${pkgType}</span>
                         <span class="var-price">₹${v.price}</span>
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
 
                 document.body.appendChild(menu);
 
@@ -1318,7 +1322,10 @@
                 activeVariantIdx = idx;
                 const v = variants[idx];
                 const labelEl = document.getElementById('variantLabel');
-                if (labelEl) labelEl.innerText = `${v.quantity} - ₹${v.price}`;
+                if (labelEl) {
+                    const pkgType = v.packaging_type ? ` <small>(${v.packaging_type})</small>` : '';
+                    labelEl.innerHTML = `${v.quantity}${pkgType} - ₹${v.price}`;
+                }
 
                 updatePrice(v);
                 window.syncDetailPageCart(v);
@@ -1357,13 +1364,15 @@
 
                 const activeIdx = window._mobileActiveVariantIdx || 0;
 
-                menu.innerHTML = variants.map((v, i) => `
+                menu.innerHTML = variants.map((v, i) => {
+                    const pkgType = v.packaging_type ? ` <small style="font-size: 0.8em; opacity: 0.8;">(${v.packaging_type})</small>` : '';
+                    return `
                     <div class="mv-portal-item ${i === activeIdx ? 'active' : ''}" 
                          onclick="window.handleMobileVariantSelect(${i})">
-                        <span>${v.quantity}</span>
+                        <span>${v.quantity}${pkgType}</span>
                         <span class="mv-price">₹${v.price}</span>
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
 
                 document.body.appendChild(menu);
 
@@ -1393,7 +1402,8 @@
 
                 // Update mobile label
                 const label = document.getElementById('mobileVariantLabel');
-                if (label) label.innerText = `${v.quantity} (₹${v.price})`;
+                const pkgType = v.packaging_type ? ` <small>(${v.packaging_type})</small>` : '';
+                if (label) label.innerHTML = `${v.quantity}${pkgType} (₹${v.price})`;
 
                 // Trigger the main variant click handler
                 window.handleVariantClick(idx);
