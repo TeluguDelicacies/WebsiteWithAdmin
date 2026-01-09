@@ -57,7 +57,7 @@
                         <i class="fas fa-arrow-up-from-bracket"></i>
                     </button>
                     <button class="nav-btn cart-btn" id="cartBtn" onclick="window.toggleCartDrawer()"
-                        data-tooltip="View Cart" style="display:none;">
+                        data-tooltip="View Cart">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="cartCount" style="display:none;">0</span>
                     </button>
@@ -73,7 +73,7 @@
                         <i class="fas fa-arrow-up-from-bracket"></i>
                     </button>
                     <button class="nav-btn cart-btn" id="mobileCartBtn" onclick="window.toggleCartDrawer()"
-                        data-tooltip="View Cart" style="display:none;">
+                        data-tooltip="View Cart">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="mobileCartCount" style="display:none;">0</span>
                     </button>
@@ -146,21 +146,17 @@
         window.initHeaderCartButton = function () {
             try {
                 const cart = JSON.parse(localStorage.getItem('teluguDelicaciesCart') || '[]');
-                if (cart.length > 0) {
-                    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-                    // Show all cart buttons
-                    ['cartBtn', 'mobileCartBtn'].forEach(id => {
-                        const btn = document.getElementById(id);
-                        if (btn) btn.style.display = 'flex';
-                    });
-                    ['cartCount', 'mobileCartCount'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) {
-                            el.textContent = count;
-                            el.style.display = 'flex';
-                        }
-                    });
-                }
+
+                // Update Badge Count
+                const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                ['cartCount', 'mobileCartCount'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = count;
+                        // Only show badge if count > 0
+                        el.style.display = count > 0 ? 'flex' : 'none';
+                    }
+                });
 
                 // Check if we should auto-open cart (from legal page redirect)
                 // Use a slight delay to ensure drawer JS is ready if needed, 

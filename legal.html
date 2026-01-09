@@ -289,8 +289,7 @@
 
                 <!-- Desktop Navigation -->
                 <nav class="desktop-nav">
-                    <a href="/sales?cart=open" class="nav-btn cart-btn" id="legalCartBtn" data-tooltip="View Cart"
-                        style="display:none;">
+                    <a href="/sales?cart=open" class="nav-btn cart-btn" id="legalCartBtn" data-tooltip="View Cart">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="legalCartCount" style="display:none;">0</span>
                     </a>
@@ -301,8 +300,8 @@
 
                 <!-- Mobile Actions -->
                 <div class="mobile-actions">
-                    <a href="/sales?cart=open" class="nav-btn cart-btn" id="legalMobileCartBtn" data-tooltip="View Cart"
-                        style="display:none;">
+                    <a href="/sales?cart=open" class="nav-btn cart-btn" id="legalMobileCartBtn"
+                        data-tooltip="View Cart">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="legalMobileCartCount" style="display:none;">0</span>
                     </a>
@@ -336,21 +335,17 @@
             // Check cart from localStorage
             try {
                 const cart = JSON.parse(localStorage.getItem('teluguDelicaciesCart') || '[]');
-                if (cart.length > 0) {
-                    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-                    // Show cart buttons
-                    ['legalCartBtn', 'legalMobileCartBtn'].forEach(id => {
-                        const btn = document.getElementById(id);
-                        if (btn) btn.style.display = 'flex';
-                    });
-                    ['legalCartCount', 'legalMobileCartCount'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) {
-                            el.textContent = count;
-                            el.style.display = 'flex';
-                        }
-                    });
-                }
+
+                // Update badge count
+                const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                ['legalCartCount', 'legalMobileCartCount'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = count;
+                        // Only show badge if count > 0
+                        el.style.display = count > 0 ? 'flex' : 'none';
+                    }
+                });
             } catch (e) { console.warn('Cart check failed:', e); }
         })();
     </script>
