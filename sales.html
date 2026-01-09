@@ -2279,18 +2279,15 @@
 
             const qty = cartItem ? cartItem.qty : 0;
 
-            const btnAdd = document.getElementById('btn-add-detail');
-            const qtyCounter = document.getElementById('qty-counter-detail'); // Ensure this ID exists in your HTML
-            const qtyVal = document.getElementById('qty-val-detail');         // Ensure this ID exists in your HTML
+            const btnAdd = document.getElementById('detailAddBtnOverlay');
+            const qtyCounter = document.getElementById('detailQtyCounterOverlay');
+            const qtyVal = document.getElementById('detailQtyValOverlay');
 
             if (btnAdd && qtyCounter && qtyVal) {
                 if (qty > 0) {
                     btnAdd.style.display = 'none';
                     qtyCounter.style.display = 'flex';
                     qtyVal.innerText = qty;
-                    // Also update the input field if you use that for initial add logic? 
-                    // Usually detail page has +/- logic separate or unified. 
-                    // If unified, we show the counter.
                 } else {
                     btnAdd.style.display = 'block';
                     qtyCounter.style.display = 'none';
