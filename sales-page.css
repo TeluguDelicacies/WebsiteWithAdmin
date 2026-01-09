@@ -674,7 +674,7 @@ textarea {
 .nav-group {
     display: flex;
     gap: 8px;
-    ` flex-shrink: 0;
+    flex-shrink: 0;
     max-width: 200px;
 }
 
