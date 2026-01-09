@@ -291,8 +291,10 @@ textarea {
     justify-content: center;
     background: transparent;
     border: none;
-    width: 42px;
-    height: 42px;
+    width: auto;
+    min-width: 42px;
+    height: auto;
+    min-height: 42px;
     font-size: 1.1rem;
     color: var(--color-primary-blue);
     cursor: pointer;
@@ -587,7 +589,7 @@ textarea {
     align-items: center;
     justify-content: flex-start;
     gap: 15px;
-    height: 40px;
+    min-height: 40px;
     /* Reduced height from 50px */
     /* Force 95% width */
     width: 95vw !important;
@@ -633,8 +635,8 @@ textarea {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 16px;
-    border-radius: 20px;
+    padding: 0.5em 1.2em;
+    border-radius: 2em;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -803,8 +805,8 @@ textarea {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 8px 16px;
-        border-radius: 8px;
+        padding: 0.6em 1.2em;
+        border-radius: 1em;
         background: white;
         color: var(--color-primary-blue);
         font-weight: 600;
@@ -939,7 +941,7 @@ textarea {
 }
 
 .gallery-front .qty-counter {
-    padding: 6px 12px !important;
+    padding: 0.4em 1em !important;
     font-size: 0.95rem !important;
 }
 
@@ -1219,7 +1221,7 @@ textarea {
     background: linear-gradient(135deg, #10B981, #059669);
     /* Elegant Green Gradient */
     color: white;
-    padding: 8px 16px;
+    padding: 0.6em 1.2em;
     /* Bigger padding */
     border-radius: 8px;
     /* Slightly more rounded */
@@ -1682,9 +1684,9 @@ textarea {
     }
 
     .info-content-block.active {
-        height: 110px;
-        /* Standardized height on mobile */
-        padding: 8px;
+        height: auto;
+        min-height: 110px;
+        padding: 1em;
         margin-bottom: 0 !important;
         overflow: hidden;
         /* Removed scroll wheel */
@@ -2286,8 +2288,10 @@ textarea {
 }
 
 .qty-btn-lg {
-    width: 44px;
-    height: 44px;
+    width: auto;
+    min-width: 44px;
+    height: auto;
+    min-height: 44px;
     border-radius: 50%;
     border: none !important;
     background: transparent !important;
@@ -3414,6 +3418,8 @@ textarea {
     overflow: hidden !important;
     min-width: 0;
     font-size: clamp(0.7rem, 2.5vw, 1.1rem);
+    height: auto;
+    min-height: 1.2em;
 }
 
 .telugu-title {
@@ -3470,7 +3476,7 @@ textarea {
     min-height: auto !important;
     max-height: none !important;
     overflow: visible !important;
-    padding: 10px 12px !important;
+    padding: 0.8em 1em !important;
     margin-bottom: 8px;
 }
 
