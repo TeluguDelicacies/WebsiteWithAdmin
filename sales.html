@@ -1113,15 +1113,16 @@
                     </div>
                 </div>
 
-                <!-- Variant Selection / Mobile Variant Selector -->
-                <div class="selection-area">
-                    <!-- Mobile Variant Container Relocated Here -->
-                    <div class="mobile-variant-container" id="mobileVariantContainer" style="display:none; margin-bottom: 12px;">
-                        <div class="mobile-variant-trigger" id="mobileVariantTrigger" onclick="window.openMobileVariantDropdown(this)">
-                            <span class="mv-label" id="mobileVariantLabel">Select Variant</span>
-                            <i class="fas fa-caret-down"></i>
-                        </div>
+                <!-- Mobile Variant Selector (Moved out of selection-area) -->
+                <div class="mobile-variant-container" id="mobileVariantContainer" style="display:none; margin-bottom: 12px;">
+                    <div class="mobile-variant-trigger" id="mobileVariantTrigger" onclick="window.openMobileVariantDropdown(this)">
+                        <span class="mv-label" id="mobileVariantLabel">Select Variant</span>
+                        <i class="fas fa-caret-down"></i>
                     </div>
+                </div>
+
+                <!-- Variant Selection (Desktop) -->
+                <div class="selection-area">
                     ${renderVariants(product)}
                 </div>
             </div>
