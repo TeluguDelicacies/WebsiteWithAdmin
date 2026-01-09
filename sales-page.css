@@ -745,10 +745,10 @@ textarea {
 
 @media (max-width: 767px) {
     .product-gallery {
-        width: 80% !important;
-        height: 55vh !important;
+        width: 80vw !important;
+        height: 80vw !important;
         max-width: none;
-        aspect-ratio: auto;
+        aspect-ratio: 1 / 1;
         margin: 0 auto;
     }
 
@@ -759,11 +759,19 @@ textarea {
     }
 
     .overlay-logo {
-        max-width: clamp(100px, 28%, 180px);
-        max-height: clamp(80px, 25%, 120px);
-        top: 12px;
-        right: 12px;
-        padding: 8px 12px;
+        max-width: 30vw !important;
+        max-height: 20vw !important;
+        top: 15px !important;
+        right: 15px !important;
+        padding: 10px 15px !important;
+    }
+
+    /* Scaling the Add Button / Action Container */
+    .gallery-front .card-action-container {
+        transform: scale(1.2) !important;
+        transform-origin: bottom right;
+        bottom: 40px !important;
+        right: 15px !important;
     }
 }
 
