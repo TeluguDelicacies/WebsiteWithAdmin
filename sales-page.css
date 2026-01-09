@@ -683,6 +683,17 @@ textarea {
         display: none !important;
     }
 
+    /* Reduce container top padding on mobile for tighter layout */
+    .sales-page-container {
+        padding-top: 70px !important;
+    }
+
+    /* Reduce grid layout gaps on mobile */
+    .grid-layout {
+        gap: 5px !important;
+        padding: 0 !important;
+    }
+
     /* Reduce breadcrumb section padding on mobile - COMPACT */
     .breadcrumb-section {
         padding: 0 8px !important;

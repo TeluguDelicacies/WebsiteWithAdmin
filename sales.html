@@ -1179,10 +1179,12 @@
             const mobileVarContainer = document.getElementById('mobileVariantContainer');
 
             if (variants.length > 1 && mobileVariantLabel) {
+                // Multiple variants - show dropdown with first variant selected
                 const defaultV = variants[0];
                 mobileVariantLabel.innerText = `${defaultV.quantity} (₹${defaultV.price})`;
                 window._mobileActiveVariantIdx = 0;
             } else if (mobileVarContainer) {
+                // Single or no variants - hide the dropdown
                 mobileVarContainer.style.display = 'none';
             }
 
