@@ -2118,9 +2118,16 @@
             if (!state.currentProduct) return;
 
             // Get selected variant
-            const select = document.getElementById('variantSelect');
             const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
-            const variant = variants[select ? select.value : 0];
+
+            let idx = 0;
+            if (typeof window._detailActiveVariantIdx === 'number') {
+                idx = window._detailActiveVariantIdx;
+            } else {
+                const select = document.getElementById('variantSelect');
+                idx = select ? select.value : 0;
+            }
+            const variant = variants[idx];
 
             // Update cart relative to delta
             window.addToCart(state.currentProduct, variant, delta);
