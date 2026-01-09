@@ -785,30 +785,77 @@ textarea {
         transform-origin: bottom left;
     }
 
-    .mobile-variant-select {
-        height: 36px;
-        padding: 8px 30px 8px 16px;
+    /* Mobile Variant Trigger - Custom Styled (like smart breadcrumb) */
+    .mobile-variant-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
         border-radius: 8px;
         background: white;
-        border: none;
+        color: var(--color-primary-blue);
         font-weight: 600;
         font-size: 0.9rem;
-        color: var(--color-primary-blue);
-        appearance: none;
-        -webkit-appearance: none;
         cursor: pointer;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230077B6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        background-size: 14px;
-        min-width: 100px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.2s;
     }
 
-    .mobile-variant-select:focus {
-        outline: 2px solid var(--color-primary-blue);
-        outline-offset: 2px;
+    .mobile-variant-trigger:hover,
+    .mobile-variant-trigger:active {
+        background: #f8f9fa;
     }
+
+    .mobile-variant-trigger i {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+}
+
+/* Mobile Variant Portal Dropdown */
+.mv-portal-menu {
+    position: fixed;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s, transform 0.2s;
+    min-width: 160px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.mv-portal-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.mv-portal-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    transition: background 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mv-portal-item:hover {
+    background: #f0f4f8;
+}
+
+.mv-portal-item.active {
+    background: var(--color-primary-blue);
+    color: white;
+}
+
+.mv-portal-item .mv-price {
+    font-weight: 600;
+    color: inherit;
 }
 
 /* Hide mobile variant dropdown on desktop */
@@ -841,6 +888,19 @@ textarea {
     border-radius: var(--radius-lg);
     overflow: hidden;
     background: white;
+    /* iOS Safari fix - explicit z-index stacking */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Front Face - explicit stacking context for iOS */
+.gallery-front {
+    z-index: 2;
+}
+
+/* Back Face - behind front face */
+.gallery-back {
+    z-index: 1;
 }
 
 /* Front Face */

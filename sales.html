@@ -1024,10 +1024,13 @@
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                         
-                                        <!-- Mobile Variant Dropdown (Bottom-Left) -->
+                                        <!-- Mobile Variant Dropdown (Bottom-Left) - Custom Styled -->
                                         <div class="mobile-variant-container" id="mobileVariantContainer" onclick="event.stopPropagation()">
-                                            <select class="mobile-variant-select" id="mobileVariantSelect" onchange="window.handleMobileVariantChange(this)">
-                                            </select>
+                                            <div class="mobile-variant-trigger" id="mobileVariantTrigger" 
+                                                onclick="event.stopPropagation(); window.openMobileVariantDropdown(this)">
+                                                <span class="mv-label" id="mobileVariantLabel">100gms (₹100)</span>
+                                                <i class="fas fa-caret-down"></i>
+                                            </div>
                                         </div>
                                         
                                         <!-- Overlay Action Bar (Add/Qty) - Bottom-Right -->
@@ -1172,18 +1175,15 @@
                     (p.quantity_variants || []);
             } catch (e) { }
 
-            // Populate Mobile Variant Dropdown
-            const mobileSelect = document.getElementById('mobileVariantSelect');
-            if (mobileSelect && variants.length > 0) {
-                mobileSelect.innerHTML = variants.map((v, i) =>
-                    `<option value="${i}">${v.quantity}</option>`
-                ).join('');
-                mobileSelect.style.display = variants.length > 1 ? 'block' : 'none';
-            }
-
-            // Hide mobile variant container if only one variant
+            // Initialize Mobile Variant Trigger (Custom dropdown)
+            const mobileVariantLabel = document.getElementById('mobileVariantLabel');
             const mobileVarContainer = document.getElementById('mobileVariantContainer');
-            if (mobileVarContainer && variants.length <= 1) {
+
+            if (variants.length > 1 && mobileVariantLabel) {
+                const defaultV = variants[0];
+                mobileVariantLabel.innerText = `${defaultV.quantity} (₹${defaultV.price})`;
+                window._mobileActiveVariantIdx = 0;
+            } else if (mobileVarContainer) {
                 mobileVarContainer.style.display = 'none';
             }
 
@@ -1272,12 +1272,69 @@
                 if (menu) menu.remove();
             };
 
-            // Mobile Variant Dropdown Change Handler
-            window.handleMobileVariantChange = function (selectEl) {
-                const idx = parseInt(selectEl.value, 10);
-                if (!isNaN(idx)) {
-                    window.handleVariantClick(idx);
+            // Mobile Variant Portal Dropdown
+            window.openMobileVariantDropdown = function (triggerEl) {
+                const variants = window._currentVariants;
+                if (!variants || variants.length <= 1) return;
+
+                // Close existing if any
+                const existing = document.getElementById('mv-portal-dropdown');
+                if (existing) {
+                    existing.remove();
+                    return;
                 }
+
+                // Create portal menu
+                const menu = document.createElement('div');
+                menu.id = 'mv-portal-dropdown';
+                menu.className = 'mv-portal-menu';
+
+                const activeIdx = window._mobileActiveVariantIdx || 0;
+
+                menu.innerHTML = variants.map((v, i) => `
+                    <div class="mv-portal-item ${i === activeIdx ? 'active' : ''}" 
+                         onclick="window.handleMobileVariantSelect(${i})">
+                        <span>${v.quantity}</span>
+                        <span class="mv-price">₹${v.price}</span>
+                    </div>
+                `).join('');
+
+                document.body.appendChild(menu);
+
+                // Position above the trigger
+                const rect = triggerEl.getBoundingClientRect();
+                menu.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+                menu.style.left = rect.left + 'px';
+
+                requestAnimationFrame(() => menu.classList.add('open'));
+
+                // Close on click outside
+                const closeHandler = (e) => {
+                    if (!menu.contains(e.target) && !triggerEl.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+                setTimeout(() => document.addEventListener('click', closeHandler), 0);
+            };
+
+            window.handleMobileVariantSelect = function (idx) {
+                const variants = window._currentVariants;
+                if (!variants || !variants[idx]) return;
+
+                window._mobileActiveVariantIdx = idx;
+                const v = variants[idx];
+
+                // Update mobile label
+                const label = document.getElementById('mobileVariantLabel');
+                if (label) label.innerText = `${v.quantity} (₹${v.price})`;
+
+                // Trigger the main variant click handler
+                window.handleVariantClick(idx);
+
+                // Close menu
+                const menu = document.getElementById('mv-portal-dropdown');
+                if (menu) menu.remove();
             };
 
             // Define adjustFontSize as window property so it's globally accessible
