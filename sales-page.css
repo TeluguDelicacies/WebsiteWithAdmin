@@ -661,9 +661,19 @@ textarea {
     display: none !important;
 }
 
-/* Desktop: Show desktop nav */
+/* Desktop: Show desktop nav - prevent overflow */
 .desktop-only-nav {
     display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Nav group container - prevent overflow */
+.nav-group {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    max-width: 200px;
 }
 
 @media (max-width: 767px) {
@@ -673,38 +683,28 @@ textarea {
         display: none !important;
     }
 
-    /* Mobile Nav Row - ABOVE image (between breadcrumbs and product card) */
-    .nav-row.mobile-only-nav {
+    /* Mobile Swipe Hint Row */
+    .swipe-hint-row {
         display: flex !important;
-        position: static !important;
-        /* NOT absolute - sits in normal flow */
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 8px 15px;
-        margin-bottom: 10px;
-        background: transparent;
     }
 
-    .mobile-only-nav .nav-btn-pill {
-        background: var(--bg-tertiary);
-        padding: 10px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        color: var(--text-secondary);
-        text-decoration: none;
-        transition: all 0.2s;
+    .swipe-hint-text {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        opacity: 0.7;
+        text-align: center;
     }
 
-    .mobile-only-nav .nav-btn-pill:hover {
-        background: white;
-        color: var(--color-primary-blue);
+    /* Reduce breadcrumb section padding on mobile */
+    .breadcrumb-section {
+        padding: 5px 10px !important;
+        margin-bottom: 5px !important;
     }
+}
 
-    .mobile-only-nav .nav-btn-pill.disabled {
-        opacity: 0.4;
-        cursor: default;
-    }
+/* Hide swipe hint on desktop */
+.swipe-hint-row {
+    display: none !important;
 }
 
 /* ========================================

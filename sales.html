@@ -978,11 +978,11 @@
             state.currentCategory = catSlug; // Ensure category context is valid
             const category = state.categories.find(c => c.slug === catSlug);
 
-            // Navigation
+            // Navigation - CYCLIC (loops through products)
             const siblingProducts = state.allProducts.filter(p => (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === catSlug);
             const idx = siblingProducts.findIndex(p => p.id === product.id);
-            const prev = idx > 0 ? siblingProducts[idx - 1] : null;
-            const next = idx < siblingProducts.length - 1 ? siblingProducts[idx + 1] : null;
+            const prev = siblingProducts[(idx - 1 + siblingProducts.length) % siblingProducts.length];
+            const next = siblingProducts[(idx + 1) % siblingProducts.length];
 
             updateHistory(product);
 
@@ -1002,17 +1002,16 @@
                         
                         <!-- Navigation (Right on Desktop, Hidden on Mobile) -->
                         <div class="nav-group desktop-only-nav">
-                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
-                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
+                            <a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>
+                            <a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')"><span>Next</span> <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
 
                     <!-- Main Content -->
                     <article class="main-product-area">
-                        <!-- Navigation Row - Above Image -->
-                        <div class="nav-row mobile-only-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px;">
-                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> Prev</a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> Prev</span>'}
-                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')">Next <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled">Next <i class="fas fa-arrow-right"></i></span>'}
+                        <!-- Mobile Swipe Hint (replaces prev/next buttons) -->
+                        <div class="swipe-hint-row" style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px; padding: 0 10px;">
+                            <span class="swipe-hint-text">← Swipe left or right to browse →</span>
                         </div>
                         
                         <div class="gallery-wrapper">
