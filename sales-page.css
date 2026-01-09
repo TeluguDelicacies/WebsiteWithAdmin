@@ -791,6 +791,7 @@ textarea {
 @media (max-width: 767px) {
 
     /* Mobile Variant Dropdown - NEW POSITION BELOW PRICE */
+    /* Mobile Variant Dropdown - MATCHING BREADCRUMB STYLE */
     .mobile-variant-container {
         display: block !important;
         position: relative !important;
@@ -799,23 +800,36 @@ textarea {
         margin-bottom: 12px;
         z-index: 10;
         transform: none !important;
-        background: white;
+        /* Removed card styling to match breadcrumb */
+        background: transparent;
+        box-shadow: none;
+        width: fit-content;
+    }
+
+    .mobile-variant-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         color: var(--color-primary-blue);
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        transition: all 0.2s;
+        border-radius: 4px;
+        padding: 4px 8px;
+        /* Slightly more padding for touch */
+        transition: background 0.2s;
+        border: 1px solid transparent;
+        /* Prevent layout shift on border changes if any */
     }
 
     .mobile-variant-trigger:hover,
     .mobile-variant-trigger:active {
-        background: #f8f9fa;
+        background: #f0f0f0;
     }
 
     .mobile-variant-trigger i {
-        font-size: 0.75rem;
-        opacity: 0.8;
+        font-size: 0.8rem;
+        opacity: 0.9;
     }
 
     /* Mobile Variant Portal Dropdown */
