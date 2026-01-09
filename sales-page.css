@@ -3469,3 +3469,67 @@ textarea {
 .price-row {
     justify-content: flex-start !important;
 }
+
+/* FIX: Desktop Main Product Layout Scaling */
+/* User Request: Scale content to fit area, maintain square image aspect ratio, desktop only */
+
+@media (min-width: 1024px) {
+    /* 1. Force the grid container to fill viewport height minus header */
+    .grid-layout {
+        min-height: calc(100vh - 80px);
+    }
+
+    /* 2. Make Main Product Area fill the grid cell and use Flexbox */
+    .main-product-area {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start;
+        justify-content: center;
+        height: 100%;
+        max-height: calc(100vh - 120px);
+        gap: 30px;
+        padding-bottom: 0 !important;
+    }
+
+    /* 3. Left Side: Image Gallery Wrapper */
+    .gallery-wrapper {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 0;
+    }
+
+    /* 4. The Product Gallery Card (Flipper) */
+    /* This must be square and scale with height */
+    .product-gallery {
+        height: 100%;
+        width: auto;
+        aspect-ratio: 1 / 1 !important;
+        max-width: 100%;
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gallery-inner {
+        height: 100%;
+    }
+
+    /* 5. Right Side: Product Details */
+    .product-details {
+        flex: 0 0 45%;
+        max-width: 500px;
+        height: 100%;
+        overflow-y: auto;
+        padding-right: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .details-body {
+        width: 100%;
+    }
+}
