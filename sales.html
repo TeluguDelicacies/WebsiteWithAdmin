@@ -842,7 +842,7 @@
             // Find existing cart item to update
             const existingIdx = state.cart.findIndex(item =>
                 item.id == productId &&
-                (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
+                (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
             );
 
             if (existingIdx > -1) {
@@ -864,7 +864,7 @@
 
             // Check Cart State
             const cartItem = state.cart.find(item => item.id == productId &&
-                (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
+                (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
             );
             const qty = cartItem ? cartItem.qty : 0;
 
@@ -2142,8 +2142,8 @@
         window.addToCart = function (product, variant, qty) {
             // Hardened Validation: Check existing cart qty + new qty against stock
             const existingIdx = state.cart.findIndex(item =>
-                item.id === product.id &&
-                (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
+                item.id == product.id &&
+                (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
             );
 
             const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
@@ -2224,6 +2224,7 @@
             const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
 
             window.addToCart(state.currentProduct, selectedVariant, qty);
+            window.syncDetailPageCart(selectedVariant);
         };
 
         window.updateCartItemQty = function (index, deltaOrVal, isDirect = false) {
@@ -2280,9 +2281,9 @@
 
             // Find in cart
             const cartItem = state.cart.find(item =>
-                item.id === product.id &&
+                item.id == product.id &&
                 (item.variant && selectedVariant ?
-                    (item.variant.quantity === selectedVariant.quantity && item.variant.packaging_type === selectedVariant.packaging_type) :
+                    (item.variant.quantity === selectedVariant.quantity && (item.variant.packaging_type || '') === (selectedVariant.packaging_type || '')) :
                     true)
             );
 

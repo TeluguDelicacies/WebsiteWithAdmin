@@ -488,7 +488,7 @@ window.updateQuickPreviewCartUI = function () {
 
     const cartItem = cart.find(item =>
         item.id == product.id &&
-        (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
+        (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
 
     const qty = cartItem ? cartItem.qty : 0;
@@ -519,7 +519,7 @@ window.quickPreviewAddToCart = function () {
     // Check if already exists
     const existingIdx = cart.findIndex(item =>
         item.id == product.id &&
-        (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
+        (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
 
     if (existingIdx > -1) {
@@ -562,7 +562,7 @@ window.quickPreviewUpdateQty = function (delta) {
 
     const existingIdx = cart.findIndex(item =>
         item.id == product.id &&
-        (item.variant ? (item.variant.quantity === variant.quantity && item.variant.packaging_type === variant.packaging_type) : true)
+        (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
 
     if (existingIdx > -1) {
