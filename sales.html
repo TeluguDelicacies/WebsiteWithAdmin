@@ -1435,39 +1435,8 @@
                 el.dataset.calculatedSize = size;
             };
 
-            // 1. Define Sync Function
-            window.syncDetailPageCart = function (v) {
-                const addBtn = document.getElementById('detailAddBtnOverlay');
-                const qtyCounter = document.getElementById('detailQtyCounterOverlay');
-                const qtyVal = document.getElementById('detailQtyValOverlay');
-
-                if (!addBtn || !qtyCounter || !qtyVal) return;
-
-                if (!v) {
-                    const vars = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
-                    v = vars[activeVariantIdx];
-                }
-
-                if (!v) return;
-
-                const cartItem = state.cart.find(c => c.id == p.id &&
-                    (c.variant ? c.variant.quantity === v.quantity : true)
-                );
-
-                if (cartItem) {
-                    addBtn.style.display = 'none';
-                    qtyCounter.style.display = 'flex';
-                    qtyVal.innerText = cartItem.qty;
-                    state.detailQty = cartItem.qty;
-                } else {
-                    addBtn.style.display = 'block';
-                    qtyCounter.style.display = 'none';
-                    qtyVal.innerText = 1;
-                    state.detailQty = 1;
-                }
-            };
-
-            // Check Variants and Sync
+            // Sync Function is defined globally at window.syncDetailPageCart
+            // calling it here to ensure initial state
             if (variants[0]) {
                 updatePrice(variants[0]);
                 window.syncDetailPageCart(variants[0]);
