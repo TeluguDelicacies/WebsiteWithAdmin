@@ -1094,7 +1094,7 @@
                 ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
 
                 <div class="price-row-container" style="display: flex; flex-direction: column; gap: 4px; margin: 12px 0;">
-                    <div class="price-row" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="price-row" style="display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;">
                         <span class="current-price" id="view-price">₹${defaultV.price}</span>
                         <span class="mrp-strike" id="view-mrp"
                             style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}">₹${defaultV.mrp}</span>
@@ -1103,13 +1103,13 @@
                         
                         <!-- Packaging Type (Conditional: Next to MRP if no discount on Mobile, usually block on Desktop) -->
                         <div class="packaging-type-inline" id="view-pkg-inline" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'none' : 'block'};">
-                            ${defaultV.packaging_type || ''}
+                            (${defaultV.packaging_type || ''})
                         </div>
                     </div>
 
                     <!-- Packaging Type (Conditional: Below MRP if discount exists) -->
                     <div class="packaging-type-block" id="view-pkg-block" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'block' : 'none'};">
-                        ${defaultV.packaging_type || ''}
+                        (${defaultV.packaging_type || ''})
                     </div>
                 </div>
 
@@ -1225,6 +1225,11 @@
                 mobileVariantLabel.innerText = `${defaultV.quantity} (₹${defaultV.price})`;
                 window._mobileActiveVariantIdx = 0;
                 window._currentVariants = variants;
+
+                // FORCE DISPLAY BLOCK FOR NEW LOCATION
+                if (mobileVarContainer) {
+                    mobileVarContainer.style.display = 'block';
+                }
             } else if (mobileVarContainer) {
                 // Single or no variants - FORCE hide the dropdown
                 mobileVarContainer.setAttribute('style', 'display: none !important; visibility: hidden !important;');
@@ -1251,7 +1256,7 @@
                 // Update Packaging Display
                 const pkgInline = document.getElementById('view-pkg-inline');
                 const pkgBlock = document.getElementById('view-pkg-block');
-                const pkgLabel = v.packaging_type || '';
+                const pkgLabel = v.packaging_type ? `(${v.packaging_type})` : '';
 
                 if (pkgInline) {
                     pkgInline.innerText = pkgLabel;
