@@ -790,6 +790,22 @@ textarea {
     /* Key for zoom clipping */
 }
 
+/* Position overlay button higher to avoid covering disclaimer on main product view */
+.gallery-front .card-action-container {
+    bottom: 35px !important;
+    right: 12px !important;
+}
+
+.gallery-front .btn-add {
+    padding: 8px 20px !important;
+    font-size: 0.9rem !important;
+}
+
+.gallery-front .qty-counter {
+    padding: 6px 12px !important;
+    font-size: 0.95rem !important;
+}
+
 .gallery-front .main-img {
     width: 100%;
     height: 100%;
@@ -3348,33 +3364,6 @@ textarea {
     font-size: 0.8rem !important;
 }
 
-/* ========================================
-   ADD TO CART BUTTON REDESIGN
-   Match styling of sidebar add buttons (Light Yellow Pill)
-======================================== */
-/* Specificity boost using ID selector to beat everything */
-#detailAddBtn.add-cart-btn {
-    background: #FFF9C4 !important;
-    background-image: none !important;
-    /* Ensure no gradient */
-    border: 1px solid #FBC02D !important;
-    border-radius: 20px !important;
-    color: #333 !important;
-    font-weight: 600 !important;
-    box-shadow: none !important;
-    transition: all 0.2s;
-}
-
-#detailAddBtn.add-cart-btn:hover {
-    background: #FFF59D !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(251, 192, 45, 0.3) !important;
-}
-
-#detailAddBtn.add-cart-btn i {
-    color: #333 !important;
-    margin-right: 8px;
-}
 
 /* ========================================
    SIDEBAR REFINEMENTS
