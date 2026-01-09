@@ -97,51 +97,77 @@ const CsvManager = {
                 const state = window.getAppState(); // Fresh State
 
                 const isChecked = (id) => document.getElementById(id)?.checked;
+                const expandVariants = isChecked('csvExpandVariants');
 
-                data = (state.allProducts || []).map(p => {
-                    const row = { id: p.id };
-                    row.command = '';
+                const products = state.allProducts || [];
+                const exportRows = [];
+
+                products.forEach(p => {
+                    const baseRow = { id: p.id };
+                    baseRow.command = '';
 
                     // Standard Fields
-                    if (isChecked('csvFieldName')) row.product_name = p.product_name;
-                    if (isChecked('csvFieldNameTelugu')) row.product_name_telugu = p.product_name_telugu || '';
-                    if (isChecked('csvFieldCategory')) row.product_category = p.product_category;
-                    if (isChecked('csvFieldTagline')) row.product_tagline = p.product_tagline || '';
-                    if (isChecked('csvFieldDescription')) row.product_description = p.product_description || '';
-                    if (isChecked('csvFieldIngredients')) row.ingredients = p.ingredients || '';
-                    if (isChecked('csvFieldServing')) row.serving_suggestion = p.serving_suggestion || '';
+                    if (isChecked('csvFieldName')) baseRow.product_name = p.product_name;
+                    if (isChecked('csvFieldNameTelugu')) baseRow.product_name_telugu = p.product_name_telugu || '';
+                    if (isChecked('csvFieldCategory')) baseRow.product_category = p.product_category;
+                    if (isChecked('csvFieldTagline')) baseRow.product_tagline = p.product_tagline || '';
+                    if (isChecked('csvFieldDescription')) baseRow.product_description = p.product_description || '';
+                    if (isChecked('csvFieldIngredients')) baseRow.ingredients = p.ingredients || '';
+                    if (isChecked('csvFieldServing')) baseRow.serving_suggestion = p.serving_suggestion || '';
 
                     // Nutrition Fields
                     const nutri = p.nutrition_info || {};
-                    if (isChecked('csvFieldServingSize')) row.serving_size = nutri.serving_size || nutri.details || '';
+                    if (isChecked('csvFieldServingSize')) baseRow.serving_size = nutri.serving_size || nutri.details || '';
 
                     if (isChecked('csvFieldNutrition')) {
-                        // Format: "Calories: 20kcal, Protein: 1g"
                         const parts = [];
                         for (const [key, val] of Object.entries(nutri)) {
-                            if (key === 'serving_size' || key === 'details') continue; // Skip serving size
+                            if (key === 'serving_size' || key === 'details') continue;
                             const cleanKey = key.charAt(0).toUpperCase() + key.slice(1);
                             parts.push(`${cleanKey}: ${val}`);
                         }
-                        row.nutrition = parts.join(', ');
+                        baseRow.nutrition = parts.join(', ');
                     }
 
-                    if (isChecked('csvFieldTrending')) row.is_trending = p.is_trending;
-                    if (isChecked('csvFieldVisible')) row.is_visible = p.is_visible;
-                    if (isChecked('csvFieldShelfLife')) row.shelf_life = p.shelf_life || '';
-                    if (isChecked('csvFieldRefrigeration')) row.is_refrigerated = p.is_refrigerated || false;
+                    if (isChecked('csvFieldTrending')) baseRow.is_trending = p.is_trending;
+                    if (isChecked('csvFieldVisible')) baseRow.is_visible = p.is_visible;
+                    if (isChecked('csvFieldShelfLife')) baseRow.shelf_life = p.shelf_life || '';
+                    if (isChecked('csvFieldRefrigeration')) baseRow.is_refrigerated = p.is_refrigerated || false;
 
                     const wantVariants = isChecked('csvFieldVariantQty') || isChecked('csvFieldVariantMrp') ||
-                        isChecked('csvFieldVariantPrice') || isChecked('csvFieldVariantStock');
+                        isChecked('csvFieldVariantPrice') || isChecked('csvFieldVariantStock') || isChecked('csvFieldPackagingType');
 
-                    if (wantVariants) {
-                        row.quantity_variants = JSON.stringify(p.quantity_variants || []);
-                        row.base_price = p.mrp;     // Backup
-                        row.total_stock = p.total_stock; // Backup
+                    if (expandVariants && wantVariants) {
+                        const variants = p.quantity_variants || [];
+                        if (variants.length === 0) {
+                            // No variants but we want them? Add one empty variant row or just the base row
+                            exportRows.push({ ...baseRow });
+                        } else {
+                            variants.forEach(v => {
+                                const vRow = { ...baseRow };
+                                if (isChecked('csvFieldVariantQty')) vRow.variant_qty = v.quantity || '';
+                                if (isChecked('csvFieldVariantMrp')) vRow.variant_mrp = v.mrp || '';
+                                if (isChecked('csvFieldVariantPrice')) vRow.variant_price = v.price || '';
+                                if (isChecked('csvFieldVariantStock')) vRow.variant_stock = v.stock || 0;
+                                if (isChecked('csvFieldPackagingType')) vRow.variant_packaging = v.packaging_type || '';
+                                exportRows.push(vRow);
+                            });
+                        }
+                    } else {
+                        // Standard Single Row
+                        const row = { ...baseRow };
+                        if (isChecked('csvFieldPackagingType')) {
+                            const firstVar = p.quantity_variants?.[0] || {};
+                            row.packaging_type = firstVar.packaging_type || '';
+                        }
+                        if (wantVariants) {
+                            row.quantity_variants = JSON.stringify(p.quantity_variants || []);
+                        }
+                        exportRows.push(row);
                     }
-
-                    return row;
                 });
+
+                data = exportRows;
 
             } else if (type === 'categories') {
                 const { data: catData, error } = await supabase.from('categories').select('*').order('display_order');
@@ -307,120 +333,190 @@ const CsvManager = {
 
         let stats = { added: 0, updated: 0, deleted: 0, errors: 0 };
 
-        for (const row of rows) {
+        // Group rows to handle multi-row variants
+        const productGroups = {};
+        const others = [];
+
+        rows.forEach(row => {
+            if (!row || Object.keys(row).length < 2) return;
+            const id = row.id || row.ID || row.product_id || row.category_id || row.testimonial_id || row.ID_COLUMN;
+
+            if (type === 'products') {
+                // Group products by ID (for updates/deletes) or by Name (for new products)
+                // Use Name as key ONLY if ID is missing and it's a product
+                const groupKey = id || (row.product_name ? `NEW_${row.product_name}` : null);
+                if (groupKey) {
+                    if (!productGroups[groupKey]) productGroups[groupKey] = [];
+                    productGroups[groupKey].push(row);
+                } else {
+                    others.push(row);
+                }
+            } else {
+                // Non-products: group by ID if available, else process individually
+                if (id) {
+                    if (!productGroups[id]) productGroups[id] = [];
+                    productGroups[id].push(row);
+                } else {
+                    others.push(row);
+                }
+            }
+        });
+
+        // 1. Process Product Groups (Merged Rows)
+        for (const [id, groupRows] of Object.entries(productGroups)) {
             try {
-                // Skip truly empty rows
-                if (!row || Object.keys(row).length < 2) continue;
+                const firstRow = groupRows[0];
+                const command = (firstRow.command || firstRow.COMMAND || '').toString().toUpperCase().trim();
 
-                // 1. Normalize Command
-                const command = (row.command || row.COMMAND || '').toString().toUpperCase().trim();
+                const payload = {};
+                const variants = [];
 
-                // 2. Normalize ID (Handle product_id, category_id, etc.)
-                let id = row.id || row.ID || row.product_id || row.category_id || row.testimonial_id || row.ID_COLUMN;
-
-                // 3. Prepare Payload (Clean of non-existent DB columns)
-                const payload = { ...row };
-
-                // Remove all possible ID column variations and command from payload
-                const keysToRemove = [
-                    'id', 'ID', 'product_id', 'category_id', 'testimonial_id',
-                    'command', 'COMMAND', 'ID_COLUMN'
+                // Standard product keywords to map from CSV to DB
+                const productFields = [
+                    'product_name', 'product_name_telugu', 'product_category',
+                    'product_tagline', 'product_description', 'ingredients',
+                    'serving_suggestion', 'is_trending', 'is_visible',
+                    'shelf_life', 'is_refrigerated'
                 ];
-                keysToRemove.forEach(key => delete payload[key]);
 
-                if (type === 'products') {
-                    // Handle quantity_variants serialization
-                    if (typeof payload.quantity_variants === 'string') {
-                        try {
-                            payload.quantity_variants = JSON.parse(payload.quantity_variants);
-                        } catch (e) {
-                            // Keep as is
+                // Merge base fields (take from first row or common values)
+                productFields.forEach(field => {
+                    const value = firstRow[field];
+                    if (value !== undefined && value !== '') {
+                        if (field === 'is_refrigerated' || field === 'is_visible' || field === 'is_trending') {
+                            const valStr = value.toString().toLowerCase();
+                            payload[field] = (valStr === 'true' || valStr === '1' || valStr === 'yes');
+                        } else {
+                            payload[field] = value;
                         }
                     }
+                });
 
-                    // 4. Handle Nutrition Logic (Robust merge)
-                    const newNutri = {};
+                // Handle Nutrition Logic (from first row)
+                const nutri = {};
+                if (firstRow.serving_size) nutri.serving_size = firstRow.serving_size;
+                if (firstRow.nutrition) {
+                    firstRow.nutrition.split(',').forEach(p => {
+                        const [k, v] = p.split(':').map(s => s.trim());
+                        if (k && v) nutri[k.toLowerCase().replace(/\s+/g, '_')] = v;
+                    });
+                }
+                const nutritionCols = ['calories', 'protein', 'total_fat', 'saturated_fat', 'carbs', 'fiber', 'sugars', 'sodium'];
+                nutritionCols.forEach(col => {
+                    if (firstRow[col] !== undefined && firstRow[col] !== '') nutri[col] = firstRow[col];
+                });
+                if (Object.keys(nutri).length > 0) payload.nutrition_info = nutri;
 
-                    // Case A: Serving Size
-                    if (row.serving_size !== undefined && row.serving_size !== '') {
-                        newNutri.serving_size = row.serving_size;
-                    }
+                // Handle quantity_variants Recombination
+                const isExpanded = groupRows.some(r => r.variant_qty || r.variant_price || r.variant_mrp || r.variant_packaging);
 
-                    // Case B: Nutrition Info as a single string
-                    if (row.nutrition) {
-                        const parts = row.nutrition.split(',');
-                        parts.forEach(p => {
-                            p = p.trim();
-                            if (!p) return;
-                            let k, v;
-                            if (p.includes(':')) {
-                                [k, v] = p.split(':').map(s => s.trim());
-                            } else {
-                                const match = p.match(/^(.+?)\s+(\d[\d\.]*[a-zA-Z%]*)$/);
-                                if (match) {
-                                    k = match[1].trim();
-                                    v = match[2].trim();
-                                }
-                            }
-                            if (k && v) {
-                                const finalKey = k.toLowerCase().replace(/\s+/g, '_');
-                                newNutri[finalKey] = v;
-                                console.log(`Parsed Nutrition: [${k}] -> [${finalKey}]: ${v}`);
-                            }
-                        });
-                    }
-
-                    // Case C: Individual columns
-                    const nutritionColumns = ['calories', 'protein', 'total_fat', 'saturated_fat', 'carbs', 'fiber', 'sugars', 'sodium'];
-                    nutritionColumns.forEach(col => {
-                        if (row[col] !== undefined && row[col] !== '') {
-                            newNutri[col] = row[col];
-                            delete payload[col]; // Remove from flat payload
+                if (isExpanded) {
+                    groupRows.forEach(row => {
+                        if (row.variant_qty || row.variant_price) {
+                            variants.push({
+                                quantity: row.variant_qty || '',
+                                price: parseFloat(row.variant_price) || 0,
+                                mrp: parseFloat(row.variant_mrp) || parseFloat(row.variant_price) || 0,
+                                stock: parseInt(row.variant_stock) || 0,
+                                packaging_type: row.variant_packaging || ''
+                            });
                         }
                     });
-
-                    if (Object.keys(newNutri).length > 0) {
-                        payload.nutrition_info = newNutri;
-                        console.log('Constructed nutrition_info:', payload.nutrition_info);
-                    }
-
-                    delete payload.nutrition;
-                    delete payload.serving_size;
-
-                    // Rename incoming shelf_life/refrigeration if they match IDs
-                    if (row.shelf_life !== undefined) payload.shelf_life = row.shelf_life;
-                    if (row.is_refrigerated !== undefined) {
-                        const val = row.is_refrigerated.toString().toLowerCase();
-                        payload.is_refrigerated = (val === 'true' || val === '1' || val === 'yes');
-                    }
-
-                    // Remove any other common columns that might be in CSV but NOT in DB root
-                    // (Like variant columns if expanded)
-                    const extraKeys = ['variant_index', 'variant_quantity', 'variant_mrp', 'variant_price', 'variant_stock'];
-                    extraKeys.forEach(k => delete payload[k]);
+                    if (variants.length > 0) payload.quantity_variants = variants;
+                } else if (firstRow.quantity_variants) {
+                    // Fallback to JSON format if expanded columns aren't used
+                    try {
+                        payload.quantity_variants = JSON.parse(firstRow.quantity_variants);
+                    } catch (e) { }
                 }
 
-                // 5. Execute Supabase Query
+                // Execute Logic
                 if (command === 'DELETE') {
-                    if (id) {
-                        const { error } = await supabase.from(tableName).delete().eq('id', id);
-                        if (error) throw error;
-                        stats.deleted++;
+                    if (!id || id.toString().startsWith('NEW_')) {
+                        console.warn('Cannot delete an item without a valid ID');
+                        return;
                     }
-                }
-                else if (id) {
-                    console.log(`Updating ${tableName} ID: ${id}`, payload);
+                    const { error } = await supabase.from(tableName).delete().eq('id', id);
+                    if (error) throw error;
+                    stats.deleted++;
+                } else if (command === 'ADD' || id.toString().startsWith('NEW_')) {
+                    // Insertion - Ensure slug for products
+                    if (type === 'products') {
+                        if (!payload.slug && payload.product_name) {
+                            // Simple slug generation if missing
+                            payload.slug = payload.product_name.toLowerCase().trim()
+                                .replace(/[^a-z0-9\s-]/g, '')
+                                .replace(/\s+/g, '-')
+                                .replace(/-+/g, '-') + '-' + Math.random().toString(36).substring(7);
+                        }
+                    }
+
+                    delete payload.id; // Ensure we don't try to insert 'NEW_...' as ID
+                    console.log(`Inserting new ${type}:`, payload);
+                    const { error } = await supabase.from(tableName).insert([payload]);
+                    if (error) throw error;
+                    stats.added++;
+                } else {
+                    // Update
+                    if (!id || id.toString().startsWith('NEW_')) {
+                        // This case should ideally be ADD if no ID, but just in case
+                        console.warn('Attempted to update without ID, skipping or handling as error');
+                        return;
+                    }
+                    console.log(`Updating ${type} ID: ${id}`, payload);
                     const { error } = await supabase.from(tableName).update(payload).eq('id', id);
                     if (error) throw error;
                     stats.updated++;
                 }
-                else {
-                    console.log(`Inserting into ${tableName}`, payload);
+            } catch (err) {
+                console.error(`Group Import Error (${type}, ID/Key: ${id}):`, err);
+                stats.errors++;
+            }
+        }
+
+        // 2. Process Others (Insertions or non-product items)
+        for (const row of others) {
+            try {
+                const command = (row.command || row.COMMAND || '').toString().toUpperCase().trim();
+                let id = row.id || row.ID || row.product_id || row.category_id || row.testimonial_id || row.ID_COLUMN;
+
+                const payload = { ...row };
+                const keysToRemove = ['id', 'ID', 'product_id', 'category_id', 'testimonial_id', 'command', 'COMMAND', 'ID_COLUMN'];
+                keysToRemove.forEach(key => delete payload[key]);
+
+                if (id) {
+                    if (command === 'DELETE') {
+                        const { error } = await supabase.from(tableName).delete().eq('id', id);
+                        if (error) throw error;
+                        stats.deleted++;
+                    } else {
+                        // Updating non-product or item with ID not found in group logic
+                        const { error } = await supabase.from(tableName).update(payload).eq('id', id);
+                        if (error) throw error;
+                        stats.updated++;
+                    }
+                } else {
+                    // Insertion Logic
+                    if (command === 'DELETE') {
+                        console.warn('Ignoring DELETE command for row without ID');
+                        return;
+                    }
+                    if (type === 'products' && (row.variant_qty || row.variant_price)) {
+                        // Handle insertion with expanded variants (if any)
+                        payload.quantity_variants = [{
+                            quantity: row.variant_qty || '',
+                            price: parseFloat(row.variant_price) || 0,
+                            mrp: parseFloat(row.variant_mrp) || parseFloat(row.variant_price) || 0,
+                            stock: parseInt(row.variant_stock) || 0,
+                            packaging_type: row.variant_packaging || ''
+                        }];
+                        const variantKeys = ['variant_qty', 'variant_price', 'variant_mrp', 'variant_stock', 'variant_packaging'];
+                        variantKeys.forEach(k => delete payload[k]);
+                    }
                     const { error } = await supabase.from(tableName).insert([payload]);
                     if (error) throw error;
                     stats.added++;
                 }
-
             } catch (err) {
                 console.error('Row Import Error:', err, row);
                 stats.errors++;

@@ -1821,6 +1821,10 @@
                                 <span>Product ID <small>(required)</small></span>
                             </label>
                             <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldPackagingType" checked>
+                                <span>Packaging Type</span>
+                            </label>
+                            <label class="csv-field-checkbox">
                                 <input type="checkbox" id="csvFieldName" checked>
                                 <span>Product Name (EN)</span>
                             </label>
@@ -1893,6 +1897,21 @@
                                 <span>Is Visible</span>
                             </label>
                         </div>
+                    </div>
+
+                    <!-- Export Options -->
+                    <div
+                        style="background: #fffbeb; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed #f59e0b;">
+                        <h4 style="margin: 0 0 10px; color: #92400e; font-size: 0.9rem;">
+                            <i class="fas fa-sliders-h" style="margin-right: 8px;"></i>Export Options
+                        </h4>
+                        <label class="csv-field-checkbox" style="background: #fefce8; border: 1px solid #fef08a;">
+                            <input type="checkbox" id="csvExpandVariants">
+                            <span style="font-weight: 600;">Expand Variants into Rows</span>
+                            <small
+                                style="display: block; color: #92400e; margin-left: 24px; font-weight: normal;">(Makes
+                                it easy to edit prices/packaging in Excel)</small>
+                        </label>
                     </div>
 
                     <!-- Button removed from here, moved to footer -->

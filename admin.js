@@ -1515,7 +1515,7 @@ async function loadTestimonialData(id) {
 window.addVariantRow = (data = null) => {
     const div = document.createElement('div');
     div.className = 'variant-row';
-    div.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
+    div.style.cssText = 'display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr 1.2fr 1.5fr auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
 
     div.innerHTML = `
         <div>
@@ -1546,6 +1546,16 @@ window.addVariantRow = (data = null) => {
         <div>
             <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Global</label>
             <input type="number" class="variant-sold-global form-input" value="${data ? data.global_sold || data.total_sold || 0 : 0}" readonly style="padding: 10px; background: #f1f5f9; color: #64748b; font-weight: bold; width: 55px;">
+        </div>
+        <div style="grid-column: span 1;">
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Packaging Type</label>
+            <select class="variant-packaging form-input" style="padding: 10px; width: 100%;">
+                <option value="">Select Type</option>
+                <option value="Pouch" ${data && data.packaging_type === 'Pouch' ? 'selected' : ''}>Pouch</option>
+                <option value="Standup Pouch" ${data && data.packaging_type === 'Standup Pouch' ? 'selected' : ''}>Standup Pouch</option>
+                <option value="Glass Jar" ${data && data.packaging_type === 'Glass Jar' ? 'selected' : ''}>Glass Jar</option>
+                <option value="PET Jar" ${data && data.packaging_type === 'PET Jar' ? 'selected' : ''}>PET Jar</option>
+            </select>
         </div>
         <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: #ef4444; border-color: #ef4444; margin-top: 26px; min-width: auto; padding: 10px;" title="Delete Variant">
             <i class="fas fa-trash"></i>
@@ -1709,7 +1719,8 @@ productForm.addEventListener('submit', async (e) => {
                 mrp: parseFloat(row.querySelector('.variant-mrp').value || 0),
                 stock: stock,
                 current_sold: currentSold,
-                global_sold: globalSold
+                global_sold: globalSold,
+                packaging_type: row.querySelector('.variant-packaging').value
             });
             calculatedTotalStock += stock;
             calculatedTotalSold += globalSold; // Product level tracking uses global total

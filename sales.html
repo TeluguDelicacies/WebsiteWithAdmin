@@ -697,8 +697,8 @@
                 }];
             }
 
-            // Sort variants by price (proxy for weight/size) ascending
-            const sortedVariants = [...variants].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+            // Sort variants by MRP (lowest to highest)
+            const sortedVariants = [...variants].sort((a, b) => (Number(a.mrp || a.price) || 0) - (Number(b.mrp || b.price) || 0));
 
             // Default selected variant (Index 0 after sort)
             const defaultVar = sortedVariants[0];
@@ -773,14 +773,7 @@
                     <!-- 3. Telugu Title -->
                     <p class="product-subtitle">${product.product_name_telugu || category.telugu_title || ''}</p>
 
-                     <!-- 4. Price Row -->
-                    <div class="price-row">
-                        <span class="price-pill" id="price-${product.id}">₹${defaultVar.price}</span>
-                        ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
-                        ${discountTag}
-                    </div>
-
-                     <!-- 5. Variant Selector (Bottom) -->
+                    <!-- 4. Variant Selector (Relocated below tagline) -->
                     ${sortedVariants.length > 0 ? `
                         <div class="variant-selector" onclick="window.toggleGridVariantDropdown('${product.id}')" tabindex="0">
                             <span class="current-variant" id="var-label-${product.id}">${defaultVar.quantity || 'Standard'}</span>
@@ -798,7 +791,19 @@
                             `).join('')}
                         </div>
                     ` : ''}
-                    
+
+                     <!-- 5. Price Row -->
+                    <div class="price-row">
+                        <span class="price-pill" id="price-${product.id}">₹${defaultVar.price}</span>
+                        ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
+                        ${discountTag}
+                    </div>
+
+                    <!-- 6. Packaging Type (New) -->
+                    <div class="packaging-type" id="pkg-${product.id}" style="font-size: 0.75rem; color: #64748b; margin-top: 4px; font-weight: 500;">
+                        ${defaultVar.packaging_type || ''}
+                    </div>
+
                 </div>
             </article>
             `;
@@ -925,6 +930,11 @@
                 }
             }
 
+            const pkgEl = document.getElementById(`pkg-${productId}`);
+            if (pkgEl) {
+                pkgEl.innerText = variant.packaging_type || '';
+            }
+
             // Hide Dropdown
             document.getElementById(`var-list-${productId}`).style.display = 'none';
 
@@ -978,11 +988,29 @@
             state.currentCategory = catSlug; // Ensure category context is valid
             const category = state.categories.find(c => c.slug === catSlug);
 
-            // Navigation - CYCLIC (loops through products)
-            const siblingProducts = state.allProducts.filter(p => (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === catSlug);
-            const idx = siblingProducts.findIndex(p => p.id === product.id);
-            const prev = siblingProducts[(idx - 1 + siblingProducts.length) % siblingProducts.length];
-            const next = siblingProducts[(idx + 1) % siblingProducts.length];
+            // 1. Get Product Data & Sort Variants by MRP lowest to highest
+            // Standardize variants
+            let rawVars = [];
+            try {
+                rawVars = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+            } catch (e) { }
+
+            // SORT: Lowest MRP to Highest
+            const sortedVariants = [...rawVars].sort((a, b) => {
+                const mrpA = Number(a.mrp || a.price) || 0;
+                const mrpB = Number(b.mrp || b.price) || 0;
+                return mrpA - mrpB;
+            });
+
+            // Re-assign sorted variants to a reference if needed
+            product.quantity_variants = sortedVariants;
+            const defaultV = sortedVariants[0] || { price: product.price, mrp: product.mrp, quantity: product.quantity };
+
+            // Find Prev/Next
+            const catProducts = state.allProducts.filter(p => (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === catSlug);
+            const currentIdx = catProducts.findIndex(p => p.id === product.id);
+            const prev = catProducts[currentIdx - 1] || catProducts[catProducts.length - 1];
+            const next = catProducts[currentIdx + 1] || catProducts[0];
 
             updateHistory(product);
 
@@ -1023,14 +1051,7 @@
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                         
-                                        <!-- Mobile Variant Dropdown (Bottom-Left) - Custom Styled -->
-                                        <div class="mobile-variant-container" id="mobileVariantContainer" onclick="event.stopPropagation()">
-                                            <div class="mobile-variant-trigger" id="mobileVariantTrigger" 
-                                                onclick="event.stopPropagation(); window.openMobileVariantDropdown(this)">
-                                                <span class="mv-label" id="mobileVariantLabel">100gms (₹100)</span>
-                                                <i class="fas fa-caret-down"></i>
-                                            </div>
-                                        </div>
+                                        <!-- Mobile Variant Dropdown REMOVED FROM GALLERY per user request -->
                                         
                                         <!-- Overlay Action Bar (Add/Qty) - Bottom-Right -->
                                         <div class="card-action-container" onclick="event.stopPropagation()">
@@ -1072,15 +1093,35 @@
                 <div class="telugu-title">${product.product_name_telugu || ''}</div>
                 ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
 
-                <div class="price-row">
-                    <span class="current-price" id="view-price">₹${product.price}</span>
-                    <span class="mrp-strike" id="view-mrp"
-                        style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
-                    <span class="discount-badge" id="view-discount"
-                        style="${product.mrp > product.price ? '' : 'display:none'}"></span>
+                <div class="price-row-container" style="display: flex; flex-direction: column; gap: 4px; margin: 12px 0;">
+                    <div class="price-row" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <span class="current-price" id="view-price">₹${defaultV.price}</span>
+                        <span class="mrp-strike" id="view-mrp"
+                            style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}">₹${defaultV.mrp}</span>
+                        <span class="discount-badge" id="view-discount"
+                            style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}"></span>
+                        
+                        <!-- Packaging Type (Conditional: Next to MRP if no discount on Mobile, usually block on Desktop) -->
+                        <div class="packaging-type-inline" id="view-pkg-inline" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'none' : 'block'};">
+                            ${defaultV.packaging_type || ''}
+                        </div>
+                    </div>
+
+                    <!-- Packaging Type (Conditional: Below MRP if discount exists) -->
+                    <div class="packaging-type-block" id="view-pkg-block" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'block' : 'none'};">
+                        ${defaultV.packaging_type || ''}
+                    </div>
                 </div>
 
+                <!-- Variant Selection / Mobile Variant Selector -->
                 <div class="selection-area">
+                    <!-- Mobile Variant Container Relocated Here -->
+                    <div class="mobile-variant-container" id="mobileVariantContainer" style="display:none; margin-bottom: 12px;">
+                        <div class="mobile-variant-trigger" id="mobileVariantTrigger" onclick="window.openMobileVariantDropdown(this)">
+                            <span class="mv-label" id="mobileVariantLabel">Select Variant</span>
+                            <i class="fas fa-caret-down"></i>
+                        </div>
+                    </div>
                     ${renderVariants(product)}
                 </div>
             </div>
@@ -1192,10 +1233,11 @@
             let activeVariantIdx = 0;
 
             const updatePrice = (v) => {
+                const hasDiscount = v.mrp && v.mrp > v.price;
                 document.getElementById('view-price').innerText = '₹' + v.price;
                 const mrpEl = document.getElementById('view-mrp');
                 const discEl = document.getElementById('view-discount');
-                if (v.mrp && v.mrp > v.price) {
+                if (hasDiscount) {
                     mrpEl.innerText = '₹' + v.mrp;
                     mrpEl.style.display = 'inline';
                     const off = Math.round(((v.mrp - v.price) / v.mrp) * 100);
@@ -1204,6 +1246,20 @@
                 } else {
                     mrpEl.style.display = 'none';
                     discEl.style.display = 'none';
+                }
+
+                // Update Packaging Display
+                const pkgInline = document.getElementById('view-pkg-inline');
+                const pkgBlock = document.getElementById('view-pkg-block');
+                const pkgLabel = v.packaging_type || '';
+
+                if (pkgInline) {
+                    pkgInline.innerText = pkgLabel;
+                    pkgInline.style.display = hasDiscount ? 'none' : (pkgLabel ? 'block' : 'none');
+                }
+                if (pkgBlock) {
+                    pkgBlock.innerText = pkgLabel;
+                    pkgBlock.style.display = hasDiscount ? (pkgLabel ? 'block' : 'none') : 'none';
                 }
             };
 
