@@ -249,6 +249,13 @@
                         actionContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
                     }
 
+                    // Hide/Show mobile variant container
+                    const mobileVariantContainer = document.getElementById('mobileVariantContainer');
+                    if (mobileVariantContainer) {
+                        mobileVariantContainer.style.opacity = isFlipped ? '0' : '1';
+                        mobileVariantContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
+                    }
+
                     // Update button text based on state
                     if (btn) {
                         btn.innerHTML = isFlipped
@@ -1017,7 +1024,13 @@
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                         
-                                        <!-- Overlay Action Bar (Add/Qty) -->
+                                        <!-- Mobile Variant Dropdown (Bottom-Left) -->
+                                        <div class="mobile-variant-container" id="mobileVariantContainer" onclick="event.stopPropagation()">
+                                            <select class="mobile-variant-select" id="mobileVariantSelect" onchange="window.handleMobileVariantChange(this)">
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Overlay Action Bar (Add/Qty) - Bottom-Right -->
                                         <div class="card-action-container" onclick="event.stopPropagation()">
                                             <button class="btn-add" id="detailAddBtnOverlay" 
                                                 onclick="event.stopPropagation(); window.addToCartFromDetail()">Add</button>
@@ -1159,6 +1172,21 @@
                     (p.quantity_variants || []);
             } catch (e) { }
 
+            // Populate Mobile Variant Dropdown
+            const mobileSelect = document.getElementById('mobileVariantSelect');
+            if (mobileSelect && variants.length > 0) {
+                mobileSelect.innerHTML = variants.map((v, i) =>
+                    `<option value="${i}">${v.quantity}</option>`
+                ).join('');
+                mobileSelect.style.display = variants.length > 1 ? 'block' : 'none';
+            }
+
+            // Hide mobile variant container if only one variant
+            const mobileVarContainer = document.getElementById('mobileVariantContainer');
+            if (mobileVarContainer && variants.length <= 1) {
+                mobileVarContainer.style.display = 'none';
+            }
+
             let activeVariantIdx = 0;
 
             const updatePrice = (v) => {
@@ -1229,6 +1257,10 @@
                 updatePrice(v);
                 window.syncDetailPageCart(v);
 
+                // Sync mobile dropdown
+                const mobileSelect = document.getElementById('mobileVariantSelect');
+                if (mobileSelect) mobileSelect.value = idx;
+
                 // Update Nutrition if toggle logic exists
                 const nutContent = document.getElementById('nutrition-content');
                 if (nutContent && nutritionData) {
@@ -1238,6 +1270,14 @@
 
                 const menu = document.getElementById('variant-portal-dropdown');
                 if (menu) menu.remove();
+            };
+
+            // Mobile Variant Dropdown Change Handler
+            window.handleMobileVariantChange = function (selectEl) {
+                const idx = parseInt(selectEl.value, 10);
+                if (!isNaN(idx)) {
+                    window.handleVariantClick(idx);
+                }
             };
 
             // Define adjustFontSize as window property so it's globally accessible
@@ -2140,16 +2180,19 @@
 
         window.updateCartUI = function () {
             const cartCount = document.getElementById('mainCartCount');
+            const mobileCartCount = document.getElementById('mobileCartCount');
             const cartItems = document.getElementById('cartItems');
             const cartTotal = document.getElementById('cartTotal');
             const clearBtn = document.querySelector('.clear-cart-btn');
 
-            // Update Badge
+            // Update Badge (Desktop + Mobile)
             const totalQty = state.cart.reduce((sum, item) => sum + item.qty, 0);
-            if (cartCount) {
-                cartCount.innerText = totalQty;
-                cartCount.style.display = totalQty > 0 ? 'flex' : 'none';
-            }
+            [cartCount, mobileCartCount].forEach(badge => {
+                if (badge) {
+                    badge.innerText = totalQty;
+                    badge.style.display = totalQty > 0 ? 'flex' : 'none';
+                }
+            });
 
             // Show/Hide Clear Button
             if (clearBtn) {
