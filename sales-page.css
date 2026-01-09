@@ -745,8 +745,11 @@ textarea {
 
 @media (max-width: 767px) {
     .product-gallery {
-        max-width: min(450px, 95vw);
-        /* Increased to utilize more space while staying 1:1 */
+        width: 80% !important;
+        height: 55vh !important;
+        max-width: none;
+        aspect-ratio: auto;
+        margin: 0 auto;
     }
 
     .gallery-front .main-img {
@@ -756,11 +759,11 @@ textarea {
     }
 
     .overlay-logo {
-        max-width: clamp(50px, 18%, 80px);
-        max-height: clamp(50px, 18%, 80px);
-        top: 8px;
-        right: 8px;
-        padding: 6px;
+        max-width: clamp(100px, 28%, 180px);
+        max-height: clamp(80px, 25%, 120px);
+        top: 12px;
+        right: 12px;
+        padding: 8px 12px;
     }
 }
 

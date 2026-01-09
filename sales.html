@@ -241,6 +241,14 @@
                 if (el) {
                     el.classList.toggle('flipped');
                     const isFlipped = el.classList.contains('flipped');
+
+                    // Hide/Show action container (Add/Qty buttons)
+                    const actionContainer = document.querySelector('.gallery-front .card-action-container');
+                    if (actionContainer) {
+                        actionContainer.style.opacity = isFlipped ? '0' : '1';
+                        actionContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
+                    }
+
                     // Update button text based on state
                     if (btn) {
                         btn.innerHTML = isFlipped
