@@ -3280,11 +3280,6 @@ textarea {
         width: 100%;
         justify-content: center;
     }
-
-    /* Compact gallery on mobile */
-    .product-gallery {
-        max-width: 260px;
-    }
 }
 
 /* === TEXT SHRINK-TO-FIT (Not Ellipsis) === */
