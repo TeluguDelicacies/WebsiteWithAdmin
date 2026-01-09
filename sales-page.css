@@ -830,6 +830,61 @@ textarea {
     will-change: transform, transform-origin;
 }
 
+/* Mobile Variant Overlay Pill */
+.mobile-variant-overlay {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: none;
+    /* Mobile only */
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-primary-blue);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 15;
+    cursor: pointer;
+    transition: all 0.2s ease, opacity 0.3s ease;
+    border: 1px solid rgba(0, 119, 182, 0.1);
+}
+
+.mobile-variant-overlay i {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Desktop Scaling for Action Bar */
+@media (min-width: 1024px) {
+    .gallery-front .card-action-container {
+        transform: scale(1.5);
+        transform-origin: bottom right;
+        bottom: 45px !important;
+        right: 20px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .mobile-variant-overlay {
+        display: flex;
+    }
+}
+
+/* Flip Transition Visibility */
+.card-action-container,
+.mobile-variant-overlay,
+.product-disclaimer-overlay {
+    transition: opacity 0.3s ease;
+}
+
+.gallery-back-text {
+    transition: opacity 0.3s ease;
+}
+
 /* Back Face */
 .gallery-back {
     transform: rotateY(180deg);

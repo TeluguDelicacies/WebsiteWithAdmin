@@ -235,12 +235,42 @@
         async function init() {
             // Expose toggleFlip globally
             window.toggleFlip = function () {
-                const el = document.querySelector('.gallery-inner');
+                const gallery = document.querySelector('.product-gallery');
+                const inner = gallery?.querySelector('.gallery-inner');
                 const btn = document.querySelector('.gallery-wrapper > div:last-child .action-btn-pill');
                 const disclaimer = document.querySelector('.product-disclaimer-overlay');
-                if (el) {
-                    el.classList.toggle('flipped');
-                    const isFlipped = el.classList.contains('flipped');
+                const actionOverlay = document.querySelector('.card-action-container');
+                const variantOverlay = document.querySelector('.mobile-variant-overlay');
+
+                if (inner) {
+                    inner.classList.toggle('flipped');
+                    const isFlipped = inner.classList.contains('flipped');
+
+                    // Toggle visibility of overlays
+                    if (actionOverlay) actionOverlay.style.opacity = isFlipped ? '0' : '1';
+                    if (variantOverlay) variantOverlay.style.opacity = isFlipped ? '0' : '1';
+
+                    const backImg = inner.querySelector('.gallery-back-img');
+                    const backText = inner.querySelector('.gallery-back-text');
+
+                    if (isFlipped) {
+                        // Show back image first
+                        if (backImg) backImg.style.display = 'block';
+                        if (backText) backText.style.display = 'none';
+
+                        // After 500ms, swap to text
+                        setTimeout(() => {
+                            if (inner.classList.contains('flipped')) {
+                                if (backImg) backImg.style.display = 'none';
+                                if (backText) {
+                                    backText.style.display = 'flex';
+                                    backText.style.opacity = '0';
+                                    setTimeout(() => backText.style.opacity = '1', 50);
+                                }
+                            }
+                        }, 500);
+                    }
+
                     // Update button text based on state
                     if (btn) {
                         btn.innerHTML = isFlipped
@@ -1008,10 +1038,17 @@
                                         <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                         
+                                        <!-- Mobile Variant Overlay Pill -->
+                                        ${variants.length > 1 ? `
+                                        <div class="mobile-variant-overlay" onclick="event.stopPropagation(); window.openVariantDropdown(document.getElementById('variantTrigger'))">
+                                            <i class="fas fa-layer-group"></i> <span>${variants[activeVariantIdx].quantity}</span>
+                                        </div>
+                                        ` : ''}
+
                                         <!-- Overlay Action Bar (Add/Qty) -->
                                         <div class="card-action-container" onclick="event.stopPropagation()">
                                             <button class="btn-add" id="detailAddBtnOverlay" 
-                                                onclick="event.stopPropagation(); window.addToCartFromDetail()">ADD</button>
+                                                onclick="event.stopPropagation(); window.addToCartFromDetail()">Add</button>
                                             <div class="qty-counter" id="detailQtyCounterOverlay" style="display:none;"
                                                 onclick="event.stopPropagation()">
                                                 <button onclick="event.stopPropagation(); window.updateDetailQty(-1)">-</button>
@@ -1020,10 +1057,15 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Back: Description -->
+                                    <!-- Back: Description with Image Transition -->
                                     <div class="gallery-back">
-                                        <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
-                                        <p>${product.product_description || 'No description available.'}</p>
+                                        <div class="gallery-back-img" style="display:none; width:100%; height:100%;">
+                                            <img src="${product.info_image || product.showcase_image || state.placeholder}" style="width:100%; height:100%; object-fit:cover;">
+                                        </div>
+                                        <div class="gallery-back-text" style="display:flex; flex-direction:column; width:100%; height:100%;">
+                                            <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
+                                            <p>${product.product_description || 'No description available.'}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1269,6 +1311,12 @@
                 }
 
                 if (!v) return;
+
+                // Update mobile variant overlay text
+                const mobileVarLabel = document.querySelector('.mobile-variant-overlay span');
+                if (mobileVarLabel) {
+                    mobileVarLabel.innerText = v.quantity;
+                }
 
                 const cartItem = state.cart.find(c => c.id == p.id &&
                     (c.variant ? c.variant.quantity === v.quantity : true)
