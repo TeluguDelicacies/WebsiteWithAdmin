@@ -140,6 +140,17 @@ html {
     font-weight: 700;
 }
 
+/* Ensure no zoom cursor over buttons */
+.card-action-container {
+    cursor: default !important;
+    pointer-events: auto !important;
+}
+
+.qty-counter button,
+.btn-add {
+    cursor: pointer !important;
+}
+
 .error-card>p {
     color: var(--text-secondary);
     font-size: 1rem;

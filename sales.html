@@ -1328,6 +1328,13 @@
                     // --- DESKTOP: Hover to zoom ---
                     container.style.cursor = 'crosshair';
                     container.addEventListener('mousemove', function (e) {
+                        // Prevent zoom when mouse is over the action buttons
+                        if (e.target.closest('.card-action-container')) {
+                            img.style.transform = 'scale(1)';
+                            img.style.cursor = 'default';
+                            return;
+                        }
+
                         const rect = container.getBoundingClientRect();
                         const x = e.clientX - rect.left;
                         const y = e.clientY - rect.top;
@@ -1677,12 +1684,12 @@
                 <div class="price-action-row" style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px;">
                     <span style="font-size:0.8rem; font-weight:700; color:var(--color-primary-blue);">₹${displayPrice} ${variantLabel ? `<span style="font-size:0.75em; font-weight:500; opacity:0.8;">(${variantLabel})</span>` : ''}</span>
                     <!-- Add Button -->
-                    <button class="sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="${qty > 0 ? 'display:none;' : 'display:block;'} background:#FFF9C4; border:1px solid #FBC02D; border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; color:#333; cursor:pointer;">Add</button>
+                    <button class="btn-add sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="${qty > 0 ? 'display:none;' : 'display:block;'}">Add</button>
                     <!-- Quantity Controls -->
-                    <div class="quantity-controls sidebar-qty-controls ${qty > 0 ? 'show' : ''}" id="sidebar-qty-wrap-${index}" style="${qty > 0 ? 'display:flex;' : 'display:none;'} min-width:70px; padding:2px 6px; transform:scale(0.85);">
-                        <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, -1)">−</button>
-                        <span class="quantity-display" id="sidebar-qty-${index}">${qty || 1}</span>
-                        <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, 1)">+</button>
+                    <div class="qty-counter sidebar-qty-controls ${qty > 0 ? 'show' : ''}" id="sidebar-qty-wrap-${index}" style="${qty > 0 ? 'display:flex;' : 'display:none;'} transform: scale(0.85); transform-origin: right;">
+                        <button onclick="event.stopPropagation(); updateSidebarQty(${index}, -1)">−</button>
+                        <span class="qty-val" id="sidebar-qty-${index}">${qty || 1}</span>
+                        <button onclick="event.stopPropagation(); updateSidebarQty(${index}, 1)">+</button>
                     </div>
                 </div>
             </div>
