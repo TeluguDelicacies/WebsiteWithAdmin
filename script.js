@@ -3182,8 +3182,8 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
     let nutInfo = {};
     try { nutInfo = typeof product.nutrition_info === 'string' ? JSON.parse(product.nutrition_info) : product.nutrition_info; } catch (e) { nutInfo = {}; }
 
-    let variants = [];
-    try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+    // Use sorted variants for consistent display logic
+    const variants = window.getSortedVariants(product);
 
     // Generate quantities text
     let quantitiesText = '';
