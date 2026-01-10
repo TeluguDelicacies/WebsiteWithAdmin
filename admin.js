@@ -2277,7 +2277,185 @@ window.closeBulkImagesModal = function () {
     document.getElementById('bulkImagesModal').style.display = 'none';
     document.body.style.overflow = '';
     pendingBulkImages = [];
+    existingImagesEdits = {};
 };
+
+// Tab switching
+window.switchBulkTab = function (tab) {
+    const uploadTab = document.getElementById('bulkTabUpload');
+    const editTab = document.getElementById('bulkTabEdit');
+    const uploadSection = document.getElementById('bulkUploadSection');
+    const editSection = document.getElementById('bulkEditSection');
+
+    if (tab === 'upload') {
+        uploadTab.classList.add('active');
+        editTab.classList.remove('active');
+        uploadSection.style.display = 'block';
+        editSection.style.display = 'none';
+    } else {
+        uploadTab.classList.remove('active');
+        editTab.classList.add('active');
+        uploadSection.style.display = 'none';
+        editSection.style.display = 'block';
+
+        // Populate product filter and load images
+        populateEditProductFilter();
+        loadExistingImages('all');
+    }
+};
+
+// Track edits to existing images
+let existingImagesEdits = {};
+let existingImagesData = [];
+
+// Populate product filter dropdown
+async function populateEditProductFilter() {
+    const filter = document.getElementById('editImageProductFilter');
+    if (!filter) return;
+
+    // Use cached products
+    filter.innerHTML = '<option value="all">All Products</option>' +
+        allProductsCache.map(p => `<option value="${p.id}">${p.product_name}</option>`).join('');
+}
+
+// Load existing images from database
+window.loadExistingImages = async function (productFilter) {
+    const grid = document.getElementById('existingImagesGrid');
+    grid.innerHTML = '<p style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+
+    try {
+        let query = supabase.from('product_images').select('*, products(product_name)');
+
+        if (productFilter && productFilter !== 'all') {
+            query = query.eq('product_id', productFilter);
+        }
+
+        const { data: images, error } = await query.order('created_at', { ascending: false }).limit(100);
+
+        if (error) throw error;
+
+        if (!images || images.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; padding:30px; color:var(--text-secondary);">No images found. Upload some first!</p>';
+            return;
+        }
+
+        existingImagesData = images;
+        existingImagesEdits = {};
+
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Front View', 'Back View', 'Lifestyle'];
+
+        grid.innerHTML = images.map((img, idx) => `
+            <div class="bulk-preview-item" data-id="${img.id}">
+                <img src="${img.image_url}" alt="Product image" loading="lazy">
+                <div class="file-info">
+                    <div class="file-name">${img.products?.product_name || 'Unknown Product'}</div>
+                    <div class="match-result matched">
+                        <i class="fas fa-link"></i> ${img.is_default ? '⭐ Default Image' : 'Additional Image'}
+                    </div>
+                </div>
+                <div class="bulk-controls">
+                    <select onchange="window.updateExistingImageProduct('${img.id}', this.value)">
+                        ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === img.product_id ? 'selected' : ''}>${p.product_name}</option>`).join('')}
+                    </select>
+                    <div class="bulk-tags-row">
+                        ${bulkTags.map(tag => `
+                            <label class="bulk-tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}">
+                                <input type="checkbox" ${(img.tags || []).includes(tag) ? 'checked' : ''} 
+                                    onchange="window.updateExistingImageTag('${img.id}', '${tag}', this.checked)">
+                                ${tag}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        console.error('Error loading existing images:', e);
+        grid.innerHTML = '<p style="text-align:center; padding:30px; color:#dc2626;">Error loading images. Make sure the product_images table exists.</p>';
+    }
+};
+
+// Track product assignment change
+window.updateExistingImageProduct = function (imageId, newProductId) {
+    if (!existingImagesEdits[imageId]) {
+        existingImagesEdits[imageId] = {};
+    }
+    existingImagesEdits[imageId].product_id = newProductId;
+};
+
+// Track tag change
+window.updateExistingImageTag = function (imageId, tag, isChecked) {
+    const img = existingImagesData.find(i => i.id === imageId);
+    if (!img) return;
+
+    if (!existingImagesEdits[imageId]) {
+        existingImagesEdits[imageId] = { tags: [...(img.tags || [])] };
+    }
+    if (!existingImagesEdits[imageId].tags) {
+        existingImagesEdits[imageId].tags = [...(img.tags || [])];
+    }
+
+    if (isChecked && !existingImagesEdits[imageId].tags.includes(tag)) {
+        existingImagesEdits[imageId].tags.push(tag);
+    } else if (!isChecked) {
+        existingImagesEdits[imageId].tags = existingImagesEdits[imageId].tags.filter(t => t !== tag);
+    }
+
+    // Update chip visual
+    const itemEl = document.querySelector(`.bulk-preview-item[data-id="${imageId}"]`);
+    if (itemEl) {
+        const chips = itemEl.querySelectorAll('.bulk-tag-chip');
+        chips.forEach(chip => {
+            if (chip.textContent.trim() === tag) {
+                chip.classList.toggle('active', isChecked);
+            }
+        });
+    }
+};
+
+// Save all changes to existing images
+window.saveExistingImageChanges = async function () {
+    const editIds = Object.keys(existingImagesEdits);
+    if (editIds.length === 0) {
+        showToast('No changes to save', 'info');
+        return;
+    }
+
+    const btn = document.getElementById('saveExistingImagesBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    let saved = 0;
+    let errors = 0;
+
+    for (const imageId of editIds) {
+        try {
+            const updates = existingImagesEdits[imageId];
+            const { error } = await supabase
+                .from('product_images')
+                .update(updates)
+                .eq('id', imageId);
+
+            if (error) throw error;
+            saved++;
+        } catch (e) {
+            console.error('Error saving image:', e);
+            errors++;
+        }
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+
+    if (saved > 0) {
+        showToast(`Saved ${saved} image(s)${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
+        existingImagesEdits = {};
+    } else {
+        showToast('Failed to save changes', 'error');
+    }
+};
+
 
 // Setup drag-drop handlers
 function setupBulkDragDrop() {
