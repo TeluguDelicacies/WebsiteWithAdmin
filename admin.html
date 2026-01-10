@@ -2371,13 +2371,25 @@
                         Edit tags and product assignments for images already in the system.
                     </p>
 
-                    <!-- Filter by Product -->
+                    <!-- Filter by Product & Tag -->
                     <div
                         style="margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                        <select id="editImageProductFilter" onchange="window.loadExistingImages(this.value)"
-                            style="padding: 10px; border: 1px solid var(--border-medium); border-radius: 8px; width: 100%; max-width: 300px;">
-                            <option value="all">All Products</option>
-                        </select>
+
+                        <div style="display: flex; gap: 10px; flex: 1;">
+                            <select id="editImageProductFilter" onchange="window.loadExistingImages()"
+                                style="padding: 10px; border: 1px solid var(--border-medium); border-radius: 8px; flex: 1; min-width: 150px;">
+                                <option value="all">All Products</option>
+                            </select>
+
+                            <select id="editImageTagFilter" onchange="window.loadExistingImages()"
+                                style="padding: 10px; border: 1px solid var(--border-medium); border-radius: 8px; width: 150px;">
+                                <option value="all">All Types</option>
+                                <option value="Glass Jar">Glass Jar</option>
+                                <option value="PET Jar">PET Jar</option>
+                                <option value="Standup Pouch">Standup Pouch</option>
+                                <option value="Packet">Packet</option>
+                            </select>
+                        </div>
 
                         <!-- Migration Tools -->
                         <div style="display:flex; gap: 8px;">

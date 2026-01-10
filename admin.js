@@ -2006,7 +2006,7 @@ PRODUCT IMAGE GALLERY MANAGEMENT
 */
 
 // Available image tags
-const IMAGE_TAGS = ['PET Jar', 'Glass Jar', 'Standup Pouch', 'Front View', 'Back View', 'Lifestyle'];
+const IMAGE_TAGS = ['PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
 
 // Temp storage for images being edited (before saving to DB)
 let currentProductImages = [];
@@ -2444,15 +2444,22 @@ async function populateEditProductFilter() {
 }
 
 // Load existing images from database
-window.loadExistingImages = async function (productFilter) {
+window.loadExistingImages = async function () {
     const grid = document.getElementById('existingImagesGrid');
+    const productFilterVal = document.getElementById('editImageProductFilter')?.value || 'all';
+    const tagFilterVal = document.getElementById('editImageTagFilter')?.value || 'all';
+
     grid.innerHTML = '<p style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
 
     try {
         let query = supabase.from('product_images').select('*, products(product_name)');
 
-        if (productFilter && productFilter !== 'all') {
-            query = query.eq('product_id', productFilter);
+        if (productFilterVal && productFilterVal !== 'all') {
+            query = query.eq('product_id', productFilterVal);
+        }
+
+        if (tagFilterVal && tagFilterVal !== 'all') {
+            query = query.contains('tags', [tagFilterVal]);
         }
 
         const { data: images, error } = await query.order('created_at', { ascending: false }).limit(100);
@@ -2460,14 +2467,14 @@ window.loadExistingImages = async function (productFilter) {
         if (error) throw error;
 
         if (!images || images.length === 0) {
-            grid.innerHTML = '<p style="text-align:center; padding:30px; color:var(--text-secondary);">No images found. Upload some first!</p>';
+            grid.innerHTML = '<p style="text-align:center; padding:30px; color:var(--text-secondary);">No images found matching criteria.</p>';
             return;
         }
 
         existingImagesData = images;
         existingImagesEdits = {};
 
-        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Front View', 'Back View', 'Lifestyle'];
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
 
         grid.innerHTML = images.map((img, idx) => `
             <div class="bulk-preview-item" data-id="${img.id}">
