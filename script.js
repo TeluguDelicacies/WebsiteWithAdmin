@@ -488,7 +488,7 @@ window.updateQuickPreviewCartUI = function () {
 
     const cartItem = cart.find(item =>
         item.id == product.id &&
-        (item.variant ? item.variant.quantity === variant.quantity : true)
+        (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
 
     const qty = cartItem ? cartItem.qty : 0;
@@ -519,7 +519,7 @@ window.quickPreviewAddToCart = function () {
     // Check if already exists
     const existingIdx = cart.findIndex(item =>
         item.id == product.id &&
-        (item.variant ? item.variant.quantity === variant.quantity : true)
+        (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
 
     if (existingIdx > -1) {
@@ -562,7 +562,7 @@ window.quickPreviewUpdateQty = function (delta) {
 
     const existingIdx = cart.findIndex(item =>
         item.id == product.id &&
-        (item.variant ? item.variant.quantity === variant.quantity : true)
+        (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
 
     if (existingIdx > -1) {
@@ -2650,6 +2650,32 @@ async function fetchSiteSettings() {
                 }
             }
 
+            // Social Media Links
+            const socialMap = [
+                { id: 'footer-facebook-link', url: data.facebook_url },
+                { id: 'footer-instagram-link', url: data.instagram_url },
+                { id: 'footer-whatsapp-link', url: data.whatsapp_url },
+                { id: 'footer-youtube-link', url: data.youtube_url }
+            ];
+
+            socialMap.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (el) {
+                    let url = item.url;
+                    // Auto-format WhatsApp number if user entered just digits
+                    if (url && item.id === 'footer-whatsapp-link' && /^\d+$/.test(url.replace(/[\s\+]/g, ''))) {
+                        url = `https://wa.me/${url.replace(/[\s\+]/g, '')}`;
+                    }
+
+                    if (url) {
+                        el.href = url;
+                        el.style.display = 'flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
+            });
+
         }
         // REMOVE PRELOADER
         const preloader = document.getElementById('preloader');
@@ -3545,6 +3571,8 @@ function renderQuickProductsHTML(products, showMrp) {
         let qtyDisplay = product.net_weight || '';
 
         if (variants && variants.length > 0) {
+            // Sort by price (ascending) to show cheapest
+            variants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
             priceDisplay = variants[0].price; // Sales Price
             qtyDisplay = variants[0].quantity;
         }
@@ -4007,7 +4035,12 @@ window.clearMainCart = function () {
 };
 
 // Initialize cart UI on page load
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+    // Initialize Site Data
+    await fetchSiteSettings();
+    await fetchWebsiteSections();
+    await fetchAndRenderProducts();
+
     // Wait a bit for other scripts to initialize
     setTimeout(() => {
         window.updateMainCartUI();
