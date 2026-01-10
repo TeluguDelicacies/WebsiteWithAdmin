@@ -300,11 +300,17 @@
                     const deltaX = touchEndX - touchStartX;
                     const deltaY = touchEndY - touchStartY;
                     const totalMotion = Math.abs(deltaX) + Math.abs(deltaY);
+                    const swipeDistance = Math.abs(deltaX);
+                    const viewportWidth = window.innerWidth;
 
-                    // Require horizontal motion to be at least 80% of total motion
-                    if (totalMotion === 0 || (Math.abs(deltaX) / totalMotion) < 0.8) return;
+                    // 1. Require horizontal motion to be at least 80% of total motion
+                    if (totalMotion === 0 || (swipeDistance / totalMotion) < 0.8) return;
 
-                    if (Math.abs(deltaX) < minSwipeDistance) return;
+                    // 2. Ignore swipes that are too short (noise)
+                    if (swipeDistance < minSwipeDistance) return;
+
+                    // 3. Ignore swipes that are too long (likely a browser or full-screen gesture)
+                    if (swipeDistance > viewportWidth * 0.9) return;
 
                     // Find navigation links
                     const prevLink = document.querySelector('.nav-btn-pill.prev:not(.disabled)');
