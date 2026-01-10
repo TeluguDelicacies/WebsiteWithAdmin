@@ -2018,23 +2018,6 @@
                 };
             }
 
-            // Hook Nutrition Update into Variant Selection
-            if (vSelect && nutritionData) {
-                const originalChange = vSelect.onchange;
-                vSelect.onchange = (e) => {
-                    // Call original price updater
-                    if (originalChange) originalChange(e);
-
-                    // Update Nutrition HTML
-                    const selectedVar = variants[e.target.value];
-                    const nutContent = document.getElementById('nutrition-content');
-                    if (nutContent) {
-                        nutContent.innerHTML = renderNutrition(nutritionData, selectedVar);
-                        // FORCE recalculate because content changed
-                        // adjustFontSize(nutContent, true);
-                    }
-                };
-            }
 
             // Initialize sidebar tab switcher
             window.switchSidebarTab = function (mode) {

@@ -370,7 +370,7 @@ window.showQuickPreview = function (product) {
 
     // Show/hide variant selector based on count
     if (variantSelector) {
-        variantSelector.style.display = variants.length > 1 ? 'flex' : 'none';
+        variantSelector.style.display = sortedVariants.length > 1 ? 'flex' : 'none';
     }
 
     // View Details button - link to sales page
