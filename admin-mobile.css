@@ -268,6 +268,19 @@ Only loads on screens < 768px
     /* JS controls display - only shows after drag */
 }
 
+/* CSV Button - Compact on mobile */
+#csvBtn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    border: 1px solid #059669 !important;
+    background: white !important;
+    color: #059669 !important;
+    border-radius: 8px !important;
+    font-size: 1.2rem !important;
+}
+
 /* Save Section Settings - green circle */
 #saveSettingsBtn {
     width: 48px !important;
@@ -287,6 +300,8 @@ Only loads on screens < 768px
 /* Hide all text after the icon */
 #saveOrderBtn i~*,
 #saveOrderBtn .btn-text,
+#csvBtn i~*,
+#csvBtn .btn-text,
 #saveSettingsBtn i~*,
 #saveSettingsBtn .btn-text {
     display: none !important;
@@ -461,64 +476,79 @@ Only loads on screens < 768px
     padding-bottom: 90px;
 }
 
-/* Create a fixed footer for modal buttons */
-.modal-content form button[type="submit"],
-.modal-content form .submit-btn {
-    position: fixed !important;
-    bottom: 16px !important;
-    left: 16px !important;
-    /* Save on LEFT */
-    right: auto !important;
-    width: calc(50% - 20px) !important;
-    min-height: 48px !important;
-    font-size: 1rem !important;
-    z-index: 1002;
-    /* Above overlay */
-    border-radius: 8px !important;
-    margin: 0 !important;
-    /* Reset any margin */
-    /* Ensure it breaks out of flex containers */
-    order: 1;
-}
-
-/* Cancel button - right side */
-.modal-content .cancel-btn,
-.modal-content button[onclick*="close"] {
-    position: fixed !important;
-    bottom: 16px !important;
-    right: 16px !important;
-    /* Cancel on RIGHT */
-    left: auto !important;
-    width: calc(50% - 20px) !important;
-    min-height: 48px !important;
-    background: white !important;
-    border: 1px solid var(--border-medium) !important;
-    color: var(--text-secondary) !important;
-    z-index: 1002;
-    /* Above overlay */
-    border-radius: 8px !important;
-    margin: 0 !important;
-    order: 2;
-}
-
-/* Hide the container div that might be holding them to prevent spacing issues */
-.modal-content form>div[style*="display: flex"] {
-    margin-top: 0 !important;
-    padding-bottom: 0 !important;
-}
-
-/* White background overlay for buttons */
-.modal-content::after {
-    content: '' !important;
+/* Modal Actions Container - Fixed at bottom on mobile */
+.modal-content .modal-actions {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    height: 80px !important;
+    display: flex !important;
+    gap: 10px !important;
+    padding: 12px 16px !important;
     background: white !important;
     border-top: 1px solid #e5e7eb !important;
-    z-index: 1001 !important;
-    display: block !important;
+    z-index: 1002 !important;
+    margin: 0 !important;
+}
+
+/* Save Button - Green, Left */
+.modal-content .modal-actions .btn-save {
+    flex: 1 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    font-size: 0.95rem !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Cancel Button - Red, Right */
+.modal-content .modal-actions .btn-cancel {
+    flex: 1 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    font-size: 0.95rem !important;
+    border-radius: 8px !important;
+    background: white !important;
+    color: #ef4444 !important;
+    border: 2px solid #ef4444 !important;
+}
+
+/* Hide the old modal footer overlay since we now use modal-actions */
+.modal-content::after {
+    display: none !important;
+}
+
+/* Floating Actions - Mobile: Fixed bottom bar */
+.floating-actions {
+    position: fixed !important;
+    bottom: 70px !important;
+    /* Above bottom nav */
+    left: 0 !important;
+    right: 0 !important;
+    flex-direction: row !important;
+    padding: 12px 16px !important;
+    background: white !important;
+    border-top: 1px solid #e5e7eb !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+    gap: 10px !important;
+    z-index: 100 !important;
+}
+
+.floating-actions .fab-save,
+.floating-actions .fab-cancel {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem !important;
+    box-shadow: none !important;
+}
+
+.floating-actions .fab-save span,
+.floating-actions .fab-cancel span {
+    display: inline !important;
 }
 
 /* --- Variants Section --- */
@@ -596,4 +626,81 @@ Only loads on screens < 768px
 
 .draggable-item.over {
     border: 2px dashed var(--color-primary-blue) !important;
+}
+
+/* ====================================
+   TOAST NOTIFICATIONS - MOBILE
+   ==================================== */
+
+#toast-container {
+    bottom: 80px !important;
+    /* Above bottom nav */
+    right: 10px !important;
+    left: 10px !important;
+    align-items: stretch !important;
+}
+
+.toast {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 15px !important;
+    font-size: 0.9rem !important;
+}
+
+.toast-top-text {
+    font-size: 0.85rem !important;
+}
+
+.toast-body {
+    font-size: 0.8rem !important;
+}
+
+/* ====================================
+   FIELD UPDATED HIGHLIGHT - MOBILE
+   ==================================== */
+
+.field-updated {
+    animation: field-updated-pulse 0.8s ease-out !important;
+}
+
+.section-toggle-card.updated {
+    animation: field-updated-pulse 0.8s ease-out !important;
+}
+
+/* ====================================
+   CSV MODAL - MOBILE
+   ==================================== */
+
+#csvModal .modal-content {
+    padding: 16px !important;
+}
+
+#csvModal h2 {
+    font-size: 1.1rem !important;
+}
+
+/* CSV Field Checkboxes - 2 columns on mobile */
+#csvModal .csv-field-checkbox {
+    font-size: 0.8rem !important;
+    padding: 6px 10px !important;
+}
+
+/* Upload Zone compact */
+#csvModal .csv-upload-zone {
+    padding: 25px 15px !important;
+}
+
+#csvModal .csv-upload-zone i {
+    font-size: 2rem !important;
+}
+
+/* Preview Table - scrollable */
+#csvModal #csvPreviewTable {
+    max-height: 200px !important;
+}
+
+#csvModal #csvPreviewTable th,
+#csvModal #csvPreviewTable td {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
 }

@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin-mobile.css" media="screen and (max-width: 768px)">
+    <!-- SheetJS for Excel file support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* Admin specific styles */
 
@@ -30,79 +32,206 @@
 
         body {
             background-color: var(--bg-secondary);
-
-            /* Toast Notifications */
-            #toast-container {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 10000;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                pointer-events: none;
-            }
-
-            .toast {
-                background: white;
-                padding: 15px 20px;
-                border-radius: 8px;
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                min-width: 300px;
-                max-width: 400px;
-                transform: translateX(120%);
-                transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-                border-left: 5px solid transparent;
-                pointer-events: auto;
-            }
-
-            .toast.show {
-                transform: translateX(0);
-            }
-
-            .toast-success {
-                border-left-color: #10b981;
-            }
-
-            .toast-error {
-                border-left-color: #ef4444;
-            }
-
-            .toast-info {
-                border-left-color: #3b82f6;
-            }
-
-            .toast-icon {
-                font-size: 1.25rem;
-            }
-
-            .toast-success .toast-icon {
-                color: #10b981;
-            }
-
-            .toast-error .toast-icon {
-                color: #ef4444;
-            }
-
-            .toast-info .toast-icon {
-                color: #3b82f6;
-            }
-
-            .toast-top-text {
-                font-weight: 600;
-                font-size: 0.95rem;
-                margin-bottom: 2px;
-            }
-
-            .toast-body {
-                font-size: 0.85rem;
-                color: #64748b;
-            }
-
         }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 5px solid transparent;
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success {
+            border-left-color: #10b981;
+        }
+
+        .toast-error {
+            border-left-color: #ef4444;
+        }
+
+        .toast-info {
+            border-left-color: #3b82f6;
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast-success .toast-icon {
+            color: #10b981;
+        }
+
+        .toast-error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-info .toast-icon {
+            color: #3b82f6;
+        }
+
+        .toast-top-text {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .toast-body {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        /* Field Updated Animation - Used to highlight updated form fields */
+        @keyframes field-updated-pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+                background-color: #dcfce7;
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+                background-color: transparent;
+            }
+        }
+
+        .field-updated {
+            animation: field-updated-pulse 0.8s ease-out;
+        }
+
+        /* Section Toggle Card Updated State */
+        .section-toggle-card.updated {
+            animation: field-updated-pulse 0.8s ease-out;
+            position: relative;
+        }
+
+        .section-toggle-card.updated::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* CSV Modal Styles */
+        .csv-field-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .csv-field-checkbox:hover {
+            border-color: var(--color-primary-blue);
+            background: #f0f9ff;
+        }
+
+        .csv-field-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--color-primary-blue);
+        }
+
+        .csv-field-checkbox input[type="checkbox"]:disabled {
+            opacity: 0.6;
+        }
+
+        .csv-field-checkbox small {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        .csv-upload-zone {
+            border: 2px dashed var(--border-medium);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        .csv-upload-zone:hover {
+            border-color: var(--color-primary-blue);
+            background: #f0f9ff;
+        }
+
+        .csv-upload-zone.dragover {
+            border-color: #10b981;
+            background: #dcfce7;
+        }
+
+        #csvPreviewTable table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        #csvPreviewTable th {
+            background: var(--color-primary-blue);
+            color: white;
+            padding: 8px 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+
+        #csvPreviewTable td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border-light);
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #csvPreviewTable tr:hover td {
+            background: #f0f9ff;
+        }
+
 
         .admin-container {
             max-width: 100%;
@@ -323,6 +452,103 @@
             background: #fef2f2;
             color: var(--color-error);
             border-color: var(--color-error);
+        }
+
+        /* Modal Action Button Row - Consistent Save/Cancel Layout */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .modal-actions .btn-save,
+        .modal-actions .btn-cancel {
+            flex: 1;
+            height: 48px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Save Button - Green */
+        .modal-actions .btn-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .modal-actions .btn-save:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Cancel Button - Red */
+        .modal-actions .btn-cancel {
+            background: white;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+
+        .modal-actions .btn-cancel:hover {
+            background: #fef2f2;
+            transform: translateY(-1px);
+        }
+
+        /* Floating Action Buttons for Sections/Settings */
+        .floating-actions {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .floating-actions .fab-save,
+        .floating-actions .fab-cancel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .floating-actions .fab-save {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+        }
+
+        .floating-actions .fab-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .floating-actions .fab-cancel {
+            background: white;
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+
+        .floating-actions .fab-cancel:hover {
+            background: #fef2f2;
+            transform: translateY(-2px);
         }
 
         /* iOS-Style Toggle Switch */
@@ -750,6 +976,12 @@
                             <i class="fas fa-save"></i><span class="btn-text">Save Order</span>
                         </button>
 
+                        <!-- CSV Import/Export Button (Products Tab Only) -->
+                        <button id="csvBtn" onclick="openCsvModal()" class="header-action-btn"
+                            style="display: none; color: #059669; border-color: #059669;">
+                            <i class="fas fa-file-csv"></i><span class="btn-text">CSV</span>
+                        </button>
+
                         <!-- Add Button (Context-Aware) -->
                         <button id="addBtn" onclick="handleAddClick()" class="header-action-btn">
                             <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
@@ -785,31 +1017,30 @@
             </div>
             <!-- Website Sections Control Panel -->
             <div id="sectionsContainer" class="view-container" style="display: none;">
-                <!-- REFACTORED HEADER: Title Left, Actions Right -->
-                <div
-                    style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 25px; flex-wrap: wrap; gap: 20px;">
-                    <div style="flex: 1; min-width: 300px;">
-                        <h3 style="margin: 0 0 10px 0; color: var(--color-primary-blue);">
-                            <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Website Section Visibility
-                        </h3>
-                        <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">
-                            Control which sections are visible on your main website. Toggle sections on/off to customize
-                            the layout.
-                            <br>
-                            <span style="color: #ef4444; font-weight: 600; display: inline-block; margin-top: 5px;">
-                                <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i>
-                                Note: Quick Commerce Layout changes both Header & Collections.
-                            </span>
-                        </p>
-                    </div>
+                <!-- Header: Title Only (actions moved to floating bar) -->
+                <div style="border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 25px;">
+                    <h3 style="margin: 0 0 10px 0; color: var(--color-primary-blue);">
+                        <i class="fas fa-layer-group" style="margin-right: 10px;"></i>Website Section Visibility
+                    </h3>
+                    <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">
+                        Control which sections are visible on your main website. Toggle sections on/off to customize
+                        the layout.
+                        <br>
+                        <span style="color: #ef4444; font-weight: 600; display: inline-block; margin-top: 5px;">
+                            <i class="fas fa-exclamation-circle" style="margin-right: 5px;"></i>
+                            Note: Quick Commerce Layout changes both Header & Collections.
+                        </span>
+                    </p>
+                </div>
 
-                    <div
-                        style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-                        <button id="saveSettingsBtn" onclick="saveSectionSettings()" class="header-action-btn"
-                            style="min-width: auto; padding: 0 20px;">
-                            <i class="fas fa-save"></i><span class="btn-text">Save Section Settings</span>
-                        </button>
-                    </div>
+                <!-- Floating Action Buttons (Desktop: bottom-right, Mobile: fixed bottom bar) -->
+                <div id="sectionFloatingActions" class="floating-actions">
+                    <button onclick="saveSectionSettings()" class="fab-save">
+                        <i class="fas fa-save"></i><span>Save</span>
+                    </button>
+                    <button onclick="cancelSectionChanges()" class="fab-cancel">
+                        <i class="fas fa-times"></i><span>Cancel</span>
+                    </button>
                 </div>
 
                 <div class="sections-grid"
@@ -1119,8 +1350,15 @@
                         </div><small style="color: var(--text-secondary);">Used when a
                             product has no image.</small>
                     </div>
-                    <div class="form-group" style="margin-top: 30px;"><button type="submit" class="submit-btn">Save All
-                            Settings</button></div>
+                    <!-- Floating Action Buttons for Settings -->
+                    <div id="settingsFloatingActions" class="floating-actions">
+                        <button type="submit" class="fab-save">
+                            <i class="fas fa-save"></i><span>Save</span>
+                        </button>
+                        <button type="button" onclick="cancelSettingsChanges()" class="fab-cancel">
+                            <i class="fas fa-times"></i><span>Cancel</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div> <!-- Close admin-content-area -->
@@ -1206,12 +1444,46 @@
                             <label>Usage Instructions</label>
                             <textarea id="productUsage" rows="3" placeholder="Serving suggestion..."></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>Shelf Life</label>
+                            <input type="text" id="productShelfLife" placeholder="e.g. 90 (Days)" class="form-input">
+                        </div>
+                        <div class="form-group"
+                            style="flex-direction: row; align-items: center; gap: 12px; margin-top: 28px;">
+                            <label class="toggle-switch-sm" style="margin-bottom: 0;">
+                                <input type="checkbox" id="productRefrigeration">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <label for="productRefrigeration"
+                                style="margin: 0; font-weight: 600; color: var(--color-primary-blue); cursor: pointer;">
+                                <i class="fas fa-snowflake" style="margin-right:5px; color:#3b82f6;"></i> Refrigeration
+                                Required
+                            </label>
+                        </div>
                     </div>
 
                     <h4
                         style="margin: 20px 0 10px; color: var(--color-secondary-blue); border-bottom: 1px solid var(--border-light); padding-bottom: 5px;">
                         Nutrition Facts (Per Serving)
                     </h4>
+
+                    <!-- Quick Fill Nutrition Box -->
+                    <div class="form-group"
+                        style="margin-bottom: 15px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 15px; border-radius: 10px; border: 1px solid #86efac;">
+                        <label
+                            style="font-size: 0.85rem; font-weight: 600; color: #166534; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-magic" style="color: #22c55e;"></i>
+                            Quick Fill Nutrition
+                        </label>
+                        <input type="text" id="nutriQuickFill"
+                            placeholder="Paste: Calories: 14.95kcal, Protein: 0.63g, Carbs: 2.47g, Fiber: 0.91g, Sugar: 0.52g, Sodium: 0.11g"
+                            style="margin-top: 8px; border: 1px solid #86efac; background: white;">
+                        <p
+                            style="font-size: 0.75rem; color: #15803d; margin: 8px 0 0; display: flex; align-items: center; gap: 5px;">
+                            <i class="fas fa-info-circle"></i>
+                            Paste a nutrition string and hit Enter or Tab to auto-fill fields below.
+                        </p>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -1281,9 +1553,13 @@
                             style="margin-top: 10px; font-size: 0.8rem;">+ Add Variant</button>
                     </div>
 
-                    <div style="display: flex; gap: 15px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Product</button>
-                        <button type="button" onclick="closeProductModal()" class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Product
+                        </button>
+                        <button type="button" onclick="closeProductModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1370,10 +1646,13 @@
                                 onchange="handleAssetUpload(this, 'catImageUrl')">
                         </div>
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn">Save Category</button>
-                        <button type="button" onclick="closeCategoryModal()"
-                            class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Category
+                        </button>
+                        <button type="button" onclick="closeCategoryModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1415,10 +1694,13 @@
                             <input type="text" id="tProduct" placeholder="e.g. Kura Karam">
                         </div>
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Testimonial</button>
-                        <button type="button" onclick="closeTestimonialModal()"
-                            class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Testimonial
+                        </button>
+                        <button type="button" onclick="closeTestimonialModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1452,13 +1734,200 @@
                         <label>Display Order</label>
                         <input type="number" id="featureOrder" value="0" class="form-input">
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="submit-btn" style="margin-top: 0;">Save Feature</button>
-                        <button type="button" onclick="closeFeatureModal()" class="admin-btn cancel-btn">Cancel</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Feature
+                        </button>
+                        <button type="button" onclick="closeFeatureModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <!-- CSV Import/Export Modal -->
+        <div id="csvModal" class="modal">
+            <div class="modal-content" style="max-width: 700px;">
+                <h2 style="margin-bottom: 20px; color: var(--color-primary-blue);">
+                    <i class="fas fa-file-csv" style="margin-right: 10px; color: #059669;"></i>
+                    CSV Import / Export
+                </h2>
+
+                <!-- Tab Switcher -->
+                <div
+                    style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border-light); padding-bottom: 15px;">
+                    <button id="csvExportTab" class="admin-btn active" onclick="switchCsvTab('export')">
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                    <button id="csvImportTab" class="admin-btn" onclick="switchCsvTab('import')">
+                        <i class="fas fa-upload"></i> Import CSV
+                    </button>
+                </div>
+
+                <!-- EXPORT SECTION -->
+                <div id="csvExportSection">
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                        Select the fields you want to include in the CSV export. The file will contain one row per
+                        product variant.
+                    </p>
+
+                    <!-- Field Selection -->
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 12px; color: var(--color-secondary-blue); font-size: 0.9rem;">
+                            <i class="fas fa-check-square" style="margin-right: 8px;"></i>Select Fields to Export
+                        </h4>
+
+                        <!-- Quick Select -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button type="button" class="admin-btn btn-sm" onclick="selectAllCsvFields(true)">Select
+                                All</button>
+                            <button type="button" class="admin-btn btn-sm" onclick="selectAllCsvFields(false)">Deselect
+                                All</button>
+                        </div>
+
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
+                            <!-- Core Fields -->
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldId" checked disabled>
+                                <span>Product ID <small>(required)</small></span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldName" checked>
+                                <span>Product Name (EN)</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldNameTelugu" checked>
+                                <span>Product Name (Telugu)</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldCategory" checked>
+                                <span>Category</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldTagline">
+                                <span>Tagline</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldDescription">
+                                <span>Description</span>
+                            </label>
+
+                            <!-- Variant Fields -->
+                            <label class="csv-field-checkbox" style="background: #dcfce7;">
+                                <input type="checkbox" id="csvFieldVariantQty" checked>
+                                <span>Variant Quantity</span>
+                            </label>
+                            <label class="csv-field-checkbox" style="background: #dcfce7;">
+                                <input type="checkbox" id="csvFieldVariantMrp" checked>
+                                <span>Variant MRP</span>
+                            </label>
+                            <label class="csv-field-checkbox" style="background: #dcfce7;">
+                                <input type="checkbox" id="csvFieldVariantPrice" checked>
+                                <span>Variant Price</span>
+                            </label>
+                            <label class="csv-field-checkbox" style="background: #dcfce7;">
+                                <input type="checkbox" id="csvFieldVariantStock" checked>
+                                <span>Variant Stock</span>
+                            </label>
+
+                            <!-- Other Fields -->
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldIngredients">
+                                <span>Ingredients</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldServing">
+                                <span title="How to use/serve">Serving Suggestion</span>
+                            </label>
+                            <label class="csv-field-checkbox" style="background: #eff6ff;">
+                                <input type="checkbox" id="csvFieldServingSize">
+                                <span title="e.g. 100g">Serving Size (Nutri)</span>
+                            </label>
+                            <label class="csv-field-checkbox" style="background: #eff6ff;">
+                                <input type="checkbox" id="csvFieldNutrition">
+                                <span title="Calories, Protein, etc.">Nutrition Info</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldTrending">
+                                <span>Is Trending</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldShelfLife">
+                                <span>Shelf Life</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldRefrigeration">
+                                <span>Refrigerated?</span>
+                            </label>
+                            <label class="csv-field-checkbox">
+                                <input type="checkbox" id="csvFieldVisible">
+                                <span>Is Visible</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Button removed from here, moved to footer -->
+                </div>
+
+                <!-- IMPORT SECTION -->
+                <div id="csvImportSection" style="display: none;">
+                    <div
+                        style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #f59e0b;">
+                        <h4 style="margin: 0 0 8px; color: #92400e; font-size: 0.9rem;">
+                            <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>Important Notes
+                        </h4>
+                        <ul style="margin: 0; padding-left: 20px; color: #78350f; font-size: 0.85rem;">
+                            <li>First export a CSV, edit it in Excel/Sheets, then import here</li>
+                            <li>The <strong>Product ID</strong> column is required to match products</li>
+                            <li>Only include columns you want to update</li>
+                            <li>Leave cells empty to keep existing values</li>
+                        </ul>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="csv-upload-zone" id="csvUploadZone"
+                        onclick="document.getElementById('csvFileInput').click()">
+                        <i class="fas fa-cloud-upload-alt"
+                            style="font-size: 2.5rem; color: #94a3b8; margin-bottom: 10px;"></i>
+                        <p style="margin: 0; color: var(--text-secondary);">Click to upload or drag & drop your file
+                        </p>
+                        <p style="margin: 5px 0 0; font-size: 0.8rem; color: #94a3b8;">Supports .csv, .xlsx, and .xls
+                            files</p>
+                        <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls" style="display: none;"
+                            onchange="handleCsvUpload(event)">
+                    </div>
+
+                    <!-- Preview Area -->
+                    <div id="csvPreviewArea" style="display: none; margin-top: 20px;">
+                        <h4 style="margin: 0 0 10px; color: var(--color-secondary-blue);">
+                            <i class="fas fa-table" style="margin-right: 8px;"></i>Preview
+                            <span id="csvPreviewCount"
+                                style="font-weight: normal; font-size: 0.85rem; color: var(--text-secondary);"></span>
+                        </h4>
+                        <div id="csvPreviewTable"
+                            style="max-height: 300px; overflow: auto; border: 1px solid var(--border-light); border-radius: 8px;">
+                            <!-- Preview table injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consolidated Modal Actions -->
+                <div class="modal-actions">
+                    <button id="csvExportBtn" onclick="exportProductsCsv()" class="btn-save">
+                        <i class="fas fa-download"></i> Download CSV
+                    </button>
+                    <button id="csvApplyBtn" onclick="processCsvImport()" class="btn-save" style="display: none;">
+                        <i class="fas fa-check"></i> Apply Changes
+                    </button>
+                    <button onclick="closeCsvModal()" class="btn-cancel">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast Container -->
         <div id="toast-container"></div>
 
@@ -1477,6 +1946,8 @@
             <button onclick="switchView('settings')" data-view="settings"><i
                     class="fas fa-cog"></i><span>Settings</span></button>
         </nav>
+        <script type="module" src="admin.js"></script>
+        <script type="module" src="csv_manager.js"></script>
 </body>
 
 </html>

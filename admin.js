@@ -1,5 +1,6 @@
 
 import { supabase } from './lib/supabase.js';
+window.supabase = supabase; // Expose globally for other scripts (like csv_manager.js)
 
 // Helper: Generate URL-friendly slug from product name
 function generateSlug(name) {
@@ -23,6 +24,7 @@ const productForm = document.getElementById('productForm');
 
 // Constants
 const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='12' fill='%23999' dominant-baseline='middle' text-anchor='middle'%3EImg%3C/text%3E%3C/svg%3E";
+window.PLACEHOLDER_IMAGE = PLACEHOLDER_IMAGE;
 const testimonialForm = document.getElementById('testimonialForm');
 const variantsContainer = document.getElementById('variantsContainer');
 const modalTitle = document.getElementById('modalTitle');
@@ -311,6 +313,8 @@ window.switchView = (view) => {
     if (filterRow) filterRow.style.display = 'none';
     if (addBtn) addBtn.style.display = 'none';
     if (saveOrderBtn) saveOrderBtn.style.display = 'none';
+    const csvBtn = document.getElementById('csvBtn');
+    if (csvBtn) csvBtn.style.display = 'none';
 
     // Reset buttons active state
     [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
@@ -331,6 +335,7 @@ window.switchView = (view) => {
             addBtn.style.display = 'inline-flex';
             addBtnText.textContent = 'Add Product';
         }
+        if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
 
         populateCategoryFilter();
         fetchProducts();
@@ -344,6 +349,7 @@ window.switchView = (view) => {
             addBtn.style.display = 'inline-flex';
             addBtnText.textContent = 'Add Testimonial';
         }
+        if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
         fetchTestimonials();
 
     } else if (view === 'categories') {
@@ -354,6 +360,7 @@ window.switchView = (view) => {
             addBtn.style.display = 'inline-flex';
             addBtnText.textContent = 'Add Category';
         }
+        if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
         fetchCategories();
 
     } else if (view === 'why-us') {
@@ -555,7 +562,7 @@ if (trendingFilter) {
 }
 
 async function populateCategoryFilter() {
-    console.log('Populating Smart Filter...');
+    // console.log('Populating Smart Filter...');
     const dropdown = document.getElementById('filterDropdown');
     if (!dropdown) {
         console.error('CRITICAL: filterDropdown element NOT found in DOM');
@@ -566,15 +573,12 @@ async function populateCategoryFilter() {
         const { data: categories, error } = await supabase
             .from('categories')
             .select('*')
-            .eq('is_visible', true) // Only show visible categories? Or all? Usually all for admin.
             .order('display_order', { ascending: true });
 
-        // Admin might want to filter by hidden categories too? Let's show all.
-        // Actually, let's re-fetch WITHOUT .eq('is_visible', true) to be safe for admin.
-        // Re-fetching inside render is wasteful, let's just use what we have, but previous logic showed all.
-        // So removal of .eq check is correct.
-
         if (error) throw error;
+
+        // Store globally for sorting products by category order
+        allCategories = categories || [];
 
         let html = `
             <div class="filter-option selected" data-value="all" onclick="selectCategory('all', 'All Categories')">
@@ -709,13 +713,61 @@ async function fetchSettings() {
     }
 }
 
+// Cancel settings changes - revert to original values
+window.cancelSettingsChanges = function () {
+    if (!editSnapshot) {
+        showToast('No changes to cancel', 'info');
+        return;
+    }
+
+    const data = editSnapshot;
+
+    // Reset all fields to snapshot values
+    document.getElementById('setSiteTitle').value = data.site_title || '';
+    document.getElementById('setSiteTitleTelugu').value = data.site_title_telugu || '';
+    document.getElementById('setHeroTitle').value = data.hero_title || '';
+    document.getElementById('setHeroSubtitle').value = data.hero_subtitle || '';
+    document.getElementById('setHeroDesc').value = data.hero_description || '';
+    document.getElementById('setHeroTelugu').value = data.hero_telugu_subtitle || '';
+    document.getElementById('setPhonePri').value = data.contact_phone_primary || '';
+    document.getElementById('setPhoneSec').value = data.contact_phone_secondary || '';
+    document.getElementById('setEmail').value = data.contact_email || '';
+    document.getElementById('setMapUrl').value = data.map_embed_url || '';
+    document.getElementById('setFssai').value = data.fssai_number || '';
+    document.getElementById('setLogoUrl').value = data.logo_url || '';
+    document.getElementById('setFaviconUrl').value = data.fav_icon_url || '';
+    document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
+    document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
+
+    // Catalogue & Address Settings
+    document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
+    document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
+    document.getElementById('setAddress').value = data.company_address || '';
+
+    // QC Settings
+    document.getElementById('setQuickHeroTitle').value = data.quick_hero_title || '';
+    document.getElementById('setQuickHeroSubtitle').value = data.quick_hero_subtitle || '';
+    document.getElementById('setQuickHeroTelugu').value = data.quick_hero_telugu_subtitle || '';
+    document.getElementById('setQuickHeroBg').value = data.quick_hero_image_url || '';
+    document.getElementById('setShowMrp').checked = data.show_mrp !== false;
+    document.getElementById('setSalesMode').checked = data.sales_mode_enabled || false;
+
+    // Sales Page Settings
+    document.getElementById('setAllProductsTagline').value = data.all_products_tagline || 'Featuring our premium brands';
+
+    showToast('Settings changes cancelled', 'info');
+};
+
 if (siteSettingsForm) {
     siteSettingsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = siteSettingsForm.querySelector('button[type="submit"]');
-        const oldText = btn.textContent;
-        btn.textContent = 'Saving...';
-        btn.disabled = true;
+        const btn = siteSettingsForm.querySelector('.fab-save');
+        const oldHtml = btn ? btn.innerHTML : '<i class="fas fa-save"></i><span>Save</span>';
+
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+            btn.disabled = true;
+        }
 
         const settingsData = {
             site_title: document.getElementById('setSiteTitle').value,
@@ -759,8 +811,66 @@ if (siteSettingsForm) {
             if (data) {
                 const { error } = await supabase.from('site_settings').update(settingsData).eq('id', data.id);
                 if (error) throw error;
-                const changes = getChanges(editSnapshot, settingsData);
-                showToast(`Updated: ${changes.join(', ')}`, 'success');
+
+                // Get changed field keys
+                const changedKeys = [];
+                if (editSnapshot) {
+                    for (const key in settingsData) {
+                        if (!isLooseEqual(editSnapshot[key], settingsData[key])) {
+                            changedKeys.push(key);
+                        }
+                    }
+                }
+
+                // Highlight the changed form inputs
+                const fieldIdMap = {
+                    'site_title': 'setSiteTitle',
+                    'site_title_telugu': 'setSiteTitleTelugu',
+                    'hero_title': 'setHeroTitle',
+                    'hero_subtitle': 'setHeroSubtitle',
+                    'hero_description': 'setHeroDesc',
+                    'hero_telugu_subtitle': 'setHeroTelugu',
+                    'contact_phone_primary': 'setPhonePri',
+                    'contact_phone_secondary': 'setPhoneSec',
+                    'contact_email': 'setEmail',
+                    'map_embed_url': 'setMapUrl',
+                    'fssai_number': 'setFssai',
+                    'logo_url': 'setLogoUrl',
+                    'fav_icon_url': 'setFaviconUrl',
+                    'hero_background_url': 'setHeroBgUrl',
+                    'product_placeholder_url': 'setProductPlaceholder',
+                    'catalogue_image_url': 'setCatalogueUrl',
+                    'catalogue_share_message': 'setCatalogueMsg',
+                    'company_address': 'setAddress',
+                    'quick_hero_title': 'setQuickHeroTitle',
+                    'quick_hero_subtitle': 'setQuickHeroSubtitle',
+                    'quick_hero_telugu_subtitle': 'setQuickHeroTelugu',
+                    'quick_hero_image_url': 'setQuickHeroBg',
+                    'show_mrp': 'setShowMrp',
+                    'sales_mode_enabled': 'setSalesMode',
+                    'all_products_tagline': 'setAllProductsTagline'
+                };
+
+                changedKeys.forEach(key => {
+                    const inputId = fieldIdMap[key];
+                    if (inputId) {
+                        const el = document.getElementById(inputId);
+                        if (el) {
+                            el.classList.add('field-updated');
+                            setTimeout(() => el.classList.remove('field-updated'), 1500);
+                        }
+                    }
+                });
+
+                // Show toast
+                if (changedKeys.length > 0) {
+                    const labels = changedKeys.map(k =>
+                        k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    );
+                    showToast(`Updated: ${labels.join(', ')}`, 'success');
+                } else {
+                    showToast('Data already matches your input', 'info');
+                }
             } else {
                 const { error } = await supabase.from('site_settings').insert([settingsData]);
                 if (error) throw error;
@@ -770,8 +880,10 @@ if (siteSettingsForm) {
         } catch (e) {
             showToast('Error: ' + e.message, 'error');
         } finally {
-            btn.textContent = oldText;
-            btn.disabled = false;
+            if (btn) {
+                btn.innerHTML = oldHtml;
+                btn.disabled = false;
+            }
         }
     });
 }
@@ -855,7 +967,7 @@ async function fetchProducts() {
 }
 
 function renderProductList() { // No arg needed, uses global allProducts + filter
-    let displayProducts = allProducts;
+    let displayProducts = [...allProducts]; // Clone to avoid mutating original
 
     // Apply Filter
     const categoryFilter = document.getElementById('categoryFilter');
@@ -863,7 +975,9 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
 
     const isCatFiltered = categoryFilter && categoryFilter.value !== 'all';
     const isTrendingFiltered = trendingFilter && trendingFilter.checked;
-    const isFiltered = isCatFiltered || isTrendingFiltered; // General filter state
+
+    // Drag-and-drop is ONLY enabled when filtering by a specific category (not trending, not all)
+    const isDragEnabled = isCatFiltered && !isTrendingFiltered;
 
     if (isCatFiltered) {
         displayProducts = displayProducts.filter(p => p.product_category === categoryFilter.value);
@@ -878,31 +992,46 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
         return;
     }
 
-    // Sort logic for Display (Filtered or Not)
-    if (isFiltered) {
+    // Sort logic:
+    // - If category filtered: sort by display_order within that category
+    // - If "All" or trending: sort by category order first, then display_order within category
+    if (isCatFiltered && !isTrendingFiltered) {
+        // Single category: just sort by display_order
         displayProducts.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    } else {
+        // All categories or trending: sort by category order first, then product display_order
+        // Build a category order map from allCategories
+        const categoryOrderMap = {};
+        allCategories.forEach((cat, index) => {
+            categoryOrderMap[cat.slug] = cat.display_order || index;
+        });
+
+        displayProducts.sort((a, b) => {
+            const catOrderA = categoryOrderMap[a.product_category] ?? 999;
+            const catOrderB = categoryOrderMap[b.product_category] ?? 999;
+            if (catOrderA !== catOrderB) {
+                return catOrderA - catOrderB;
+            }
+            // Same category: sort by display_order
+            return (a.display_order || 0) - (b.display_order || 0);
+        });
     }
 
     const saveOrderBtn = document.getElementById('saveOrderBtn');
     if (saveOrderBtn) {
-        // Always show button but disable if not filtered, OR just hide if not filtered.
-        // User said "Did not get a save button", implies they might expect it always. 
-        // But reordering only makes sense when filtered usually. 
-        // Let's make it visible but disabled if not filtered, with a tooltip? 
-        // Or stick to hiding but ensure it works. 
-        // Let's try: Display always, but disabled if not filtered (with alert if clicked? no, simple disable).
-        // actually existing logic was display: none. 
-        // Let's change to: Show if isFiltered OR if sort is by display_order? 
-        // For simplicity: Show if isFiltered. 
-        saveOrderBtn.style.display = isFiltered ? 'inline-block' : 'none';
-
-        // Debugging: force show to see if it exists
-        // saveOrderBtn.style.display = 'inline-block'; 
+        // Only show save button when drag is enabled (category filtered, not trending)
+        saveOrderBtn.style.display = isDragEnabled ? 'inline-block' : 'none';
     }
 
-    // Drag hint
-    const dndHint = !isFiltered ?
-        '<div style="grid-column: 1/-1; text-align: center; background: #fff3cd; color: #856404; padding: 8px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Please select a specific category from the dropdown to enable reordering.</div>' : '';
+    // Drag hint - show when not in a draggable state
+    let dndHint = '';
+    if (!isDragEnabled) {
+        if (isTrendingFiltered) {
+            dndHint = '<div style="grid-column: 1/-1; text-align: center; background: #e0f2fe; color: #0369a1; padding: 8px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Trending products are sorted by category order. Select a specific category to reorder.</div>';
+        } else if (!isCatFiltered) {
+            dndHint = '<div style="grid-column: 1/-1; text-align: center; background: #fff3cd; color: #856404; padding: 8px; font-size: 0.9rem; border-radius: 8px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Products are grouped by category order. Select a specific category to enable reordering.</div>';
+        }
+    }
 
     productList.innerHTML = dndHint + displayProducts.map((product, index) => {
         // Variants Grid
@@ -935,10 +1064,10 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
 
         return `
         <div class="admin-product-card draggable-item" 
-             draggable="${isFiltered}" 
+             draggable="${isDragEnabled}" 
              data-id="${product.id}"
              data-order="${product.display_order || 0}"
-             ${isFiltered ? `
+             ${isDragEnabled ? `
              ondragstart="handleDragStart(event)"
              ondragover="handleDragOver(event)"
              ondrop="handleDrop(event)"
@@ -947,11 +1076,11 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
             
             <div class="card-row" onclick="toggleCardDetails('${product.id}')">
                 <!-- Grip for Drag -->
-                ${isFiltered ? '<div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>' : ''}
+                ${isDragEnabled ? '<div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>' : ''}
                 
                 <img src="${product.showcase_image || PLACEHOLDER_IMAGE}" 
                      onerror="this.src=PLACEHOLDER_IMAGE"
-                     style="${isFiltered ? 'margin-left: 15px;' : ''}">
+                     style="${isDragEnabled ? 'margin-left: 15px;' : ''}">
                 
                 <div class="row-info">
                     <h3 ${!product.is_visible ? 'style="opacity: 0.5;"' : ''}>
@@ -1429,9 +1558,17 @@ async function loadProductData(productId) {
         // New Fields
         document.getElementById('productIngredients').value = product.ingredients || '';
         document.getElementById('productUsage').value = product.serving_suggestion || '';
+        document.getElementById('productShelfLife').value = product.shelf_life || '';
+        document.getElementById('productRefrigeration').checked = product.is_refrigerated || false;
 
         // Nutrition Parsing
-        const nutri = product.nutrition_info || {};
+        let nutri = product.nutrition_info || {};
+        try {
+            if (typeof nutri === 'string') nutri = JSON.parse(nutri);
+        } catch (e) {
+            console.warn('Error parsing nutrition info:', e);
+            nutri = {};
+        }
         // Map JSON snake_case to Form IDs
         document.getElementById('nutriDetails').value = nutri.serving_size || nutri.details || ''; // Backwards compat
         document.getElementById('nutriCalories').value = nutri.calories || '';
@@ -1442,14 +1579,26 @@ async function loadProductData(productId) {
         document.getElementById('nutriFiber').value = nutri.fiber || '';
         document.getElementById('nutriSugars').value = nutri.sugars || '';
         document.getElementById('nutriSodium').value = nutri.sodium || '';
+        // document.getElementById('prodNutrition').value = typeof product.nutrition_info === 'object' ? JSON.stringify(product.nutrition_info, null, 2) : (product.nutrition_info || '');
+
 
         document.getElementById('showcaseImage').value = product.showcase_image || '';
 
         // Handle Variants
+        // Handle Variants
         variantsContainer.innerHTML = ''; // Clear existing
+
+        let variants = [];
+        try {
+            variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+        } catch (e) {
+            console.warn('Error parsing variants:', e);
+            variants = [];
+        }
+
         // Populate variants
-        if (product.quantity_variants && product.quantity_variants.length > 0) {
-            product.quantity_variants.forEach(variant => {
+        if (variants && variants.length > 0) {
+            variants.forEach(variant => {
                 addVariantRow(variant);
             });
         } else {
@@ -1463,7 +1612,8 @@ async function loadProductData(productId) {
 
     } catch (error) {
         console.error('Error loading product:', error);
-        showToast('Error loading product data', 'error');
+        console.error('Error details:', error.message, error.stack); // Added stack trace
+        showToast('Error loading product data: ' + error.message, 'error'); // Show actual error in toast
         closeProductModal();
     }
 }
@@ -1568,6 +1718,8 @@ productForm.addEventListener('submit', async (e) => {
             product_description: document.getElementById('productDescription').value,
             ingredients: document.getElementById('productIngredients').value,
             serving_suggestion: document.getElementById('productUsage').value,
+            shelf_life: document.getElementById('productShelfLife').value,
+            is_refrigerated: document.getElementById('productRefrigeration').checked, // New Field
             nutrition_info: {
                 // Save as snake_case standard
                 serving_size: document.getElementById('nutriDetails').value,
@@ -1591,6 +1743,38 @@ productForm.addEventListener('submit', async (e) => {
             quantity_variants: variants,
             slug: uniqueSlug
         };
+
+        // Determine display_order based on category
+        const newCategory = productData.product_category;
+        let needsNewDisplayOrder = false;
+
+        if (productId) {
+            // Check if category changed
+            const oldCategory = editSnapshot?.product_category;
+            if (oldCategory && oldCategory !== newCategory) {
+                // Category changed - need new display_order in the new category
+                needsNewDisplayOrder = true;
+            }
+        } else {
+            // New product - always needs display_order
+            needsNewDisplayOrder = true;
+        }
+
+        if (needsNewDisplayOrder) {
+            // Get max display_order in the target category
+            const { data: maxOrderData, error: maxError } = await supabase
+                .from('products')
+                .select('display_order')
+                .eq('product_category', newCategory)
+                .order('display_order', { ascending: false })
+                .limit(1);
+
+            if (!maxError && maxOrderData && maxOrderData.length > 0) {
+                productData.display_order = (maxOrderData[0].display_order || 0) + 1;
+            } else {
+                productData.display_order = 1; // First product in this category
+            }
+        }
 
         let error;
         if (productId) {
@@ -1793,6 +1977,177 @@ const setupUploadListeners = () => {
 // Initialize listeners when script loads (or call this in your init function)
 setupUploadListeners();
 
+// ========================================
+// NUTRITION QUICK FILL FUNCTIONALITY
+// ========================================
+/**
+ * Parses a nutrition string like:
+ * "Calories: 14.95kcal, Protein: 0.63g, Carbs: 2.47g, Fiber: 0.91g, Sugar: 0.52g, Sodium: 0.11g"
+ * OR without colons:
+ * "Calories 20.88kcal, Protein 0.7g, Total Fat 1.49g, Carbs 1.51g"
+ * And populates the corresponding nutrition input fields.
+ */
+const parseNutritionString = (inputString) => {
+    if (!inputString || typeof inputString !== 'string') return { count: 0, filledServing: false };
+
+    // Clean up the string
+    const str = inputString.trim();
+
+    // Define field mappings: key variations -> form input ID
+    const fieldMappings = {
+        // Calories
+        'calories': 'nutriCalories',
+        'cal': 'nutriCalories',
+        'energy': 'nutriCalories',
+        // Protein
+        'protein': 'nutriProtein',
+        // Carbs
+        'carbs': 'nutriCarbs',
+        'carbohydrates': 'nutriCarbs',
+        'carbohydrate': 'nutriCarbs',
+        // Fiber
+        'fiber': 'nutriFiber',
+        'fibre': 'nutriFiber',
+        'dietary fiber': 'nutriFiber',
+        // Sugar/Sugars
+        'sugar': 'nutriSugars',
+        'sugars': 'nutriSugars',
+        // Sodium
+        'sodium': 'nutriSodium',
+        'salt': 'nutriSodium',
+        // Total Fat
+        'fat': 'nutriFat',
+        'total fat': 'nutriFat',
+        'totalfat': 'nutriFat',
+        // Saturated Fat
+        'saturated fat': 'nutriSatFat',
+        'sat fat': 'nutriSatFat',
+        'satfat': 'nutriSatFat',
+        'saturatedfat': 'nutriSatFat',
+        // Serving Size
+        'serving size': 'nutriDetails',
+        'serving': 'nutriDetails',
+        'per serving': 'nutriDetails'
+    };
+
+    // Split by comma to get individual key-value pairs
+    const parts = str.split(',');
+
+    let matchedCount = 0;
+    let filledServing = false;
+
+    parts.forEach(part => {
+        part = part.trim();
+        if (!part) return;
+
+        let key = '';
+        let value = '';
+
+        // Check if there's a colon separator
+        const colonIndex = part.indexOf(':');
+        if (colonIndex !== -1) {
+            // Format: "Key: Value"
+            key = part.substring(0, colonIndex).trim().toLowerCase();
+            value = part.substring(colonIndex + 1).trim();
+        } else {
+            // Format: "Key Value" (e.g., "Calories 20.88kcal")
+            // Find where the numeric value starts
+            const match = part.match(/^([a-zA-Z\s]+)\s+([\d.]+.*)$/);
+            if (match) {
+                key = match[1].trim().toLowerCase();
+                value = match[2].trim();
+            }
+        }
+
+        if (!key || !value) return;
+
+        // Try to find a matching field
+        const inputId = fieldMappings[key];
+        if (inputId) {
+            const inputEl = document.getElementById(inputId);
+            if (inputEl) {
+                inputEl.value = value;
+                matchedCount++;
+
+                // Track if serving size was filled
+                if (inputId === 'nutriDetails') {
+                    filledServing = true;
+                }
+
+                // Add a brief highlight animation
+                inputEl.classList.add('field-updated');
+                setTimeout(() => {
+                    inputEl.classList.remove('field-updated');
+                }, 800);
+            }
+        }
+    });
+
+    return { count: matchedCount, filledServing };
+};
+
+// Event listener for Quick Fill input
+const setupNutritionQuickFill = () => {
+    const quickFillInput = document.getElementById('nutriQuickFill');
+
+    if (quickFillInput) {
+        // Common handler for both blur and Enter
+        const handleQuickFill = (e) => {
+            const val = e.target.value.trim();
+            if (val) {
+                const result = parseNutritionString(val);
+                if (result.count > 0) {
+                    e.target.value = ''; // Clear once filled
+
+                    // Check if serving size was filled
+                    if (!result.filledServing) {
+                        // Highlight the serving size field to prompt user
+                        const servingInput = document.getElementById('nutriDetails');
+                        if (servingInput) {
+                            servingInput.style.border = '2px solid #f59e0b';
+                            servingInput.style.background = '#fef3c7';
+                            servingInput.setAttribute('placeholder', '⚠️ Please enter serving size (e.g., 5g)');
+
+                            // Focus on serving size field
+                            setTimeout(() => servingInput.focus(), 100);
+
+                            // Reset styling after user interacts
+                            const resetStyle = () => {
+                                servingInput.style.border = '';
+                                servingInput.style.background = '';
+                                servingInput.setAttribute('placeholder', 'e.g. Per 100g');
+                                servingInput.removeEventListener('input', resetStyle);
+                                servingInput.removeEventListener('blur', resetStyle);
+                            };
+                            servingInput.addEventListener('input', resetStyle);
+                            servingInput.addEventListener('blur', resetStyle);
+                        }
+
+                        showToast(`Filled ${result.count} field(s). Please update Serving Size!`, 'info');
+                    } else {
+                        showToast(`Filled ${result.count} nutrition field(s)!`, 'success');
+                    }
+                }
+            }
+        };
+
+        // Parse on blur (when user leaves the field)
+        quickFillInput.addEventListener('blur', handleQuickFill);
+
+        // Also parse on Enter key
+        quickFillInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleQuickFill(e);
+            }
+        });
+    }
+};
+
+// Initialize nutrition quick fill
+setupNutritionQuickFill();
+
+
 // Global Escape Key Listener to Close Modals
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1971,133 +2326,115 @@ async function fetchSectionSettings() {
         if (error && error.code !== 'PGRST116') throw error;
 
         if (data) {
+            // Hero Section
             editSnapshot = JSON.parse(JSON.stringify(data)); // Snapshot
+            const heroToggle = document.getElementById('secShowHero');
+            if (heroToggle) heroToggle.checked = data.show_hero_section !== false;
 
-            // Map DB fields to Element IDs
-            const mapping = {
-                'secShowHero': 'show_hero_section',
-                'secShowTicker': 'show_product_carousel',
-                'secShowCollections': 'show_collections',
-                'secShowQuickLayout': 'show_quick_layout',
-                'secShowTestimonials': 'show_testimonials',
-                'secShowWhyUs': 'show_why_us',
-                'secShowContact': 'show_contact_form',
-                'secShowFooter': 'show_footer'
-            };
+            // Product Carousel
+            const tickerToggle = document.getElementById('secShowTicker');
+            if (tickerToggle) tickerToggle.checked = data.show_product_carousel !== false;
 
-            for (const [elId, dbField] of Object.entries(mapping)) {
-                const el = document.getElementById(elId);
-                if (el) el.checked = data[dbField] !== false;
-            }
+            // Our Collections
+            const collectionsToggle = document.getElementById('secShowCollections');
+            if (collectionsToggle) collectionsToggle.checked = data.show_collections !== false;
 
-            // Render Draggable List
-            if (typeof renderSectionList === 'function') renderSectionList(data);
+            // Quick Commerce Layout
+            const quickLayoutToggle = document.getElementById('secShowQuickLayout');
+            if (quickLayoutToggle) quickLayoutToggle.checked = data.show_quick_layout !== false;
+
+            // Testimonials
+            const testimonialsToggle = document.getElementById('secShowTestimonials');
+            if (testimonialsToggle) testimonialsToggle.checked = data.show_testimonials !== false;
+
+            // Why Us
+            const whyUsToggle = document.getElementById('secShowWhyUs');
+            if (whyUsToggle) whyUsToggle.checked = data.show_why_us !== false;
+
+            // Get In Touch (Contact Form)
+            const contactToggle = document.getElementById('secShowContact');
+            if (contactToggle) contactToggle.checked = data.show_contact_form !== false;
+
+            // Footer
+            const footerToggle = document.getElementById('secShowFooter');
+            if (footerToggle) footerToggle.checked = data.show_footer !== false;
         } else {
-            // No data found - set all toggles to ON (default)
-            const toggles = [
-                'secShowHero', 'secShowTicker', 'secShowCollections',
-                'secShowQuickLayout', 'secShowTestimonials', 'secShowWhyUs',
-                'secShowContact', 'secShowFooter'
-            ];
-            toggles.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.checked = true;
-            });
+            // No data found - set all toggles to ON (default) with null checks
+            const heroEl = document.getElementById('secShowHero');
+            const tickerEl = document.getElementById('secShowTicker');
+            const collectionsEl = document.getElementById('secShowCollections');
+            const quickLayoutEl = document.getElementById('secShowQuickLayout');
+            const testimonialsEl = document.getElementById('secShowTestimonials');
+            const whyUsEl = document.getElementById('secShowWhyUs');
+            const contactEl = document.getElementById('secShowContact');
+            const footerEl = document.getElementById('secShowFooter');
 
-            // Render default list
-            if (typeof renderSectionList === 'function') renderSectionList({});
+            if (heroEl) heroEl.checked = true;
+            if (tickerEl) tickerEl.checked = true;
+            if (collectionsEl) collectionsEl.checked = true;
+            if (quickLayoutEl) quickLayoutEl.checked = true;
+            if (testimonialsEl) testimonialsEl.checked = true;
+            if (whyUsEl) whyUsEl.checked = true;
+            if (contactEl) contactEl.checked = true;
+            if (footerEl) footerEl.checked = true;
         }
     } catch (e) {
         console.error('Section settings fetch error:', e);
-        showToast('Error loading settings: ' + e.message, 'error');
     }
 }
 
-// Render Draggable Section List
-function renderSectionList(data) {
-    const listContainer = document.getElementById('sectionListContainer');
-    if (!listContainer) return;
+// Cancel section changes - revert to original values
+window.cancelSectionChanges = function () {
+    if (!editSnapshot) {
+        showToast('No changes to cancel', 'info');
+        return;
+    }
 
-    // Define Sections Config
-    const sectionsConfig = [
-        { id: 'sec-hero', label: 'Hero Section', toggleId: 'secShowHero', dbField: 'show_hero_section' },
-        { id: 'sec-ticker', label: 'Product Carousel', toggleId: 'secShowTicker', dbField: 'show_product_carousel' },
-        { id: 'sec-collections', label: 'Our Collections', toggleId: 'secShowCollections', dbField: 'show_collections' },
-        { id: 'sec-testimonials', label: 'Testimonials', toggleId: 'secShowTestimonials', dbField: 'show_testimonials' },
-        { id: 'sec-why-us', label: 'Why Us Features', toggleId: 'secShowWhyUs', dbField: 'show_why_us' },
-        { id: 'sec-contact', label: 'Contact Form', toggleId: 'secShowContact', dbField: 'show_contact_form' },
-        { id: 'sec-footer', label: 'Footer', toggleId: 'secShowFooter', dbField: 'show_footer' }
-    ];
+    // Map of toggle IDs to their corresponding data keys
+    const toggleMap = {
+        'secShowHero': 'show_hero_section',
+        'secShowTicker': 'show_product_carousel',
+        'secShowCollections': 'show_collections',
+        'secShowQuickLayout': 'show_quick_layout',
+        'secShowTestimonials': 'show_testimonials',
+        'secShowWhyUs': 'show_why_us',
+        'secShowContact': 'show_contact_form',
+        'secShowFooter': 'show_footer'
+    };
 
-    // Get Order from DB or Default
-    let order = data.section_order || sectionsConfig.map(s => s.id);
+    // Revert each toggle to its original value
+    for (const [toggleId, dataKey] of Object.entries(toggleMap)) {
+        const toggle = document.getElementById(toggleId);
+        if (toggle && editSnapshot.hasOwnProperty(dataKey)) {
+            toggle.checked = editSnapshot[dataKey] !== false;
+        }
+    }
 
-    // Validate order contains all known sections (append any new ones)
-    sectionsConfig.forEach(s => {
-        if (!order.includes(s.id)) order.push(s.id);
-    });
-
-    listContainer.innerHTML = '';
-
-    order.forEach(sectionId => {
-        const config = sectionsConfig.find(s => s.id === sectionId);
-        if (!config) return;
-
-        const isChecked = data[config.dbField] !== false;
-
-        const item = document.createElement('div');
-        item.className = 'draggable-item';
-        item.setAttribute('draggable', 'true');
-        item.dataset.id = config.id;
-        item.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div class="handle"><i class="fas fa-grip-vertical"></i></div>
-                <div style="font-weight:500;">${config.label}</div>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="${config.toggleId}_list" ${isChecked ? 'checked' : ''} onchange="document.getElementById('${config.toggleId}').checked = this.checked">
-                <span class="slider round"></span>
-            </label>
-        `;
-
-        // Sync initial state with hidden legacy checkboxes
-        const hiddenCheckbox = document.getElementById(config.toggleId);
-        if (hiddenCheckbox) hiddenCheckbox.checked = isChecked;
-
-        // Drag Events
-        addDragHandlers(item);
-
-        listContainer.appendChild(item);
-    });
-}
-
-// Re-use existing drag handlers but slightly adapted or new ones?
-// Existing handlers rely on 'draggable-item' class which we used.
-// We need to ensure 'handleDrop' works for this list too.
-function addDragHandlers(item) {
-    item.addEventListener('dragstart', handleDragStart);
-    item.addEventListener('dragover', handleDragOver);
-    item.addEventListener('drop', handleDrop);
-    item.addEventListener('dragenter', handleDragEnter);
-    item.addEventListener('dragleave', handleDragLeave);
-}
+    showToast('Changes cancelled', 'info');
+};
 
 window.saveSectionSettings = async function () {
-    const btn = document.getElementById('saveSettingsBtn');
-    const oldHtml = btn ? btn.innerHTML : 'Save Section Settings';
+    const btn = document.querySelector('.floating-actions .fab-save');
+    const oldHtml = btn ? btn.innerHTML : '<i class="fas fa-save"></i><span>Save</span>';
 
     if (btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Saving...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
         btn.disabled = true;
     }
 
+    // Map section data keys to toggle element IDs for highlighting
+    const fieldToToggleMap = {
+        'show_hero_section': 'secShowHero',
+        'show_product_carousel': 'secShowTicker',
+        'show_collections': 'secShowCollections',
+        'show_quick_layout': 'secShowQuickLayout',
+        'show_testimonials': 'secShowTestimonials',
+        'show_why_us': 'secShowWhyUs',
+        'show_contact_form': 'secShowContact',
+        'show_footer': 'secShowFooter'
+    };
+
     // All defaults are TRUE
-    // Reconstruct Section Data from Hidden Checkboxes (synced from list)
-
-    // Capture Order from List
-    const listContainer = document.getElementById('sectionListContainer');
-    const order = Array.from(listContainer.children).map(el => el.dataset.id).filter(id => id);
-
     const sectionData = {
         show_hero_section: document.getElementById('secShowHero')?.checked ?? true,
         show_product_carousel: document.getElementById('secShowTicker')?.checked ?? true,
@@ -2106,8 +2443,7 @@ window.saveSectionSettings = async function () {
         show_testimonials: document.getElementById('secShowTestimonials')?.checked ?? true,
         show_why_us: document.getElementById('secShowWhyUs')?.checked ?? true,
         show_contact_form: document.getElementById('secShowContact')?.checked ?? true,
-        show_footer: document.getElementById('secShowFooter')?.checked ?? true,
-        section_order: order // Save the JSON Array
+        show_footer: document.getElementById('secShowFooter')?.checked ?? true
     };
 
     try {
@@ -2117,8 +2453,43 @@ window.saveSectionSettings = async function () {
         if (data) {
             const { error } = await supabase.from('website_sections').update(sectionData).eq('id', data.id);
             if (error) throw error;
-            const changes = getChanges(editSnapshot, sectionData);
-            showToast(`Updated: ${changes.join(', ')}`, 'success');
+
+            // Get list of changed fields
+            const changedFields = [];
+            if (editSnapshot) {
+                for (const key in sectionData) {
+                    if (!isLooseEqual(editSnapshot[key], sectionData[key])) {
+                        changedFields.push(key);
+                    }
+                }
+            }
+
+            // Highlight the changed toggle cards
+            changedFields.forEach(field => {
+                const toggleId = fieldToToggleMap[field];
+                if (toggleId) {
+                    const toggleEl = document.getElementById(toggleId);
+                    if (toggleEl) {
+                        // Find the parent section-toggle-card
+                        const card = toggleEl.closest('.section-toggle-card');
+                        if (card) {
+                            card.classList.add('updated');
+                            // Remove the class after animation completes
+                            setTimeout(() => card.classList.remove('updated'), 2000);
+                        }
+                    }
+                }
+            });
+
+            // Show toast with changes
+            if (changedFields.length > 0) {
+                const labels = changedFields.map(f =>
+                    f.replace(/^show_/, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                );
+                showToast(`Updated: ${labels.join(', ')}`, 'success');
+            } else {
+                showToast('Data already matches your input', 'info');
+            }
         } else {
             const { error } = await supabase.from('website_sections').insert([sectionData]);
             if (error) throw error;
@@ -2138,3 +2509,53 @@ window.saveSectionSettings = async function () {
         }
     }
 };
+
+// ========================================
+// GLOBAL EXPORTS FOR CSV MANAGER
+// ========================================
+window.fetchProducts = fetchProducts;
+window.fetchCategories = fetchCategories;
+window.fetchTestimonials = fetchTestimonials;
+
+// Expose state via getter to ensure freshness (primitives like currentView need this)
+window.getAppState = () => ({
+    currentView,
+    allProducts,
+    allCategories, // Ensure this variable exists in admin.js
+    allTestimonials
+});
+
+// ==========================================
+// CSV MANAGER SHIMS (Fallbacks if script fails)
+// ==========================================
+const createShim = (name) => {
+    // Only shim if not already defined (though admin.js loads first so it defines them first)
+    // We define them here. csv_manager.js (loading second) will overwrite them if it uses window.name = ...
+    // OR if we use CsvManager pattern, we rely on these shims to proxy.
+    // Let's implement Proxy Shim Pattern.
+    window[name] = (...args) => {
+        if (window.CsvManager && typeof window.CsvManager[name] === 'function') {
+            return window.CsvManager[name](...args);
+        }
+
+        // Backward compatibility: If csv_manager.js still uses window.openCsvModal (old way)
+        // Then these shims would have been overwritten. 
+        // IF we are here, it means they were NOT overwritten OR we are using CsvManager pattern 
+        // but CsvManager is missing.
+
+        console.warn(`Shim: ${name} called but CSV Manager not ready.`);
+        alert('CSV Manager functionality is not loaded. Please check console for errors or refresh.');
+    };
+};
+
+[
+    'openCsvModal',
+    'closeCsvModal',
+    'switchCsvTab',
+    'exportProductsCsv',
+    'handleCsvUpload',
+    'processCsvImport',
+    'selectAllCsvFields',
+    'clearCsvUpload'
+].forEach(createShim);
+console.log('CSV Shims Initialized from admin.js');

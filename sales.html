@@ -144,6 +144,9 @@
                 const product = state.currentProduct;
                 const tagline = product.product_tagline ? ` - "${product.product_tagline}"` : '';
                 shareText = `Check out ${product.product_name}${tagline} at Telugu Delicacies! 😋`;
+            } else if (state.currentCategory === 'all-products') {
+                // Special message for All Products page
+                shareText = `🍽️ From Podis to Parotas - explore our complete range at Telugu Delicacies!`;
             } else if (state.currentCategory) {
                 const cat = state.categories.find(c => c.slug === state.currentCategory);
                 if (cat) {
@@ -915,20 +918,22 @@
             ${!category?.sub_brand_logo_url && category?.sub_brand ? `<div
                 style="text-transform:uppercase; font-size:0.8rem; font-weight:700; color:var(--text-muted);">
                 ${category.sub_brand}</div>` : ''}
-            <h1 class="product-title">${product.product_name}</h1>
-            <div class="telugu-title">${product.product_name_telugu || ''}</div>
-            ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
+            <div class="product-header-fields">
+                <h1 class="product-title">${product.product_name}</h1>
+                <div class="telugu-title">${product.product_name_telugu || ''}</div>
+                ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
 
-            <div class="price-row">
-                <span class="current-price" id="view-price">₹${product.price}</span>
-                <span class="mrp-strike" id="view-mrp"
-                    style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
-                <span class="discount-badge" id="view-discount"
-                    style="${product.mrp > product.price ? '' : 'display:none'}"></span>
-            </div>
+                <div class="price-row">
+                    <span class="current-price" id="view-price">₹${product.price}</span>
+                    <span class="mrp-strike" id="view-mrp"
+                        style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
+                    <span class="discount-badge" id="view-discount"
+                        style="${product.mrp > product.price ? '' : 'display:none'}"></span>
+                </div>
 
-            <div class="selection-area">
-                ${renderVariants(product)}
+                <div class="selection-area">
+                    ${renderVariants(product)}
+                </div>
             </div>
 
             <div class="info-tabs">
@@ -938,18 +943,24 @@
                 <div id="ingredients-content" class="info-content-block"></div>
                 <div id="nutrition-content" class="info-content-block"></div>
                 <div id="usage-content" class="info-content-block"></div>
+                <div id="shelf-life-content" class="info-content-block"></div>
             </div>
         </div>
 
         <div class="add-to-cart-section">
-            <div class="qty-control-lg">
-                <button class="qty-btn-lg" onclick="updateDetailQty(-1)">−</button>
-                <input type="number" class="qty-input-lg" id="detailQty" value="1" min="1" onchange="window.validateDetailQty(this)">
-                <button class="qty-btn-lg" onclick="updateDetailQty(1)">+</button>
+            <div id="detailActionArea">
+                <!-- Add to Cart Button -->
+                <button class="add-cart-btn" id="detailAddBtn" onclick="window.addToCartFromDetail()">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+                
+                <!-- Qty Counter (Hidden by default) -->
+                <div class="qty-control-lg" id="detailQtyCounter" style="display:none;">
+                    <button class="qty-btn-lg" onclick="window.updateDetailQty(-1)">−</button>
+                    <input type="number" class="qty-input-lg" id="detailQty" value="1" min="1" onchange="window.validateDetailQty(this)">
+                    <button class="qty-btn-lg" onclick="window.updateDetailQty(1)">+</button>
+                </div>
             </div>
-            <button class="add-cart-btn" onclick="addToCartFromDetail()">
-                <i class="fas fa-cart-plus"></i> Add to Cart
-            </button>
         </div>
     </div>
     </article>
@@ -958,8 +969,8 @@
     <aside class="sidebar">
         <section class="sidebar-card">
             <div class="sidebar-tabs">
-                <div class="sidebar-tab active" data-tab="similar">Similar</div>
-                <div class="sidebar-tab" data-tab="trending">Trending</div>
+                <div class="sidebar-tab active" data-tab="similar" onclick="window.switchSidebarTab('similar')">Similar</div>
+                <div class="sidebar-tab" data-tab="trending" onclick="window.switchSidebarTab('trending')">Trending</div>
             </div>
             <div id="side-content">
                 ${renderVerticalItems(getSimilarProducts(product))}
@@ -978,38 +989,51 @@
     `;
 
             initProductInteractions(product);
+            window.initSwipeNavigation();
         }
 
         // --- Helpers: Components ---
         function renderVariants(p) {
             let variants = [];
             try {
-                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants ||
-                    []);
+                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
             } catch (e) { }
 
-            if (variants.length <= 1) return `<p style="color:var(--text-secondary)"><strong>Pack Size:</strong>
-        ${variants[0]?.quantity || 'Standard'}</p>`;
+            if (variants.length === 0) return '';
+
+            if (variants.length === 1) {
+                return `<div style="color:var(--text-secondary); font-size: 0.95rem;">
+                    <strong>Pack Size:</strong> ${variants[0].quantity}
+                </div>`;
+            }
+
+            // Default to first variant label
+            const activeV = variants[0];
+            const label = `${activeV.quantity} - ₹${activeV.price}`;
+
+            // Store variants in window for dropdown access
+            window._currentVariants = variants;
 
             return `
-        <div style="margin-bottom:20px;">
-            <label style="display:block; font-size:0.8rem; margin-bottom:5px; color:var(--text-muted);">SELECT
-                SIZE</label>
-            <select id="variantSelect"
-                style="width:100%; max-width:300px; padding:12px; border-radius:8px; border:1px solid var(--border-medium); background:var(--bg-secondary);">
-                ${variants.map((v, i) => `<option value="${i}">${v.quantity} - ₹${v.price}</option>`).join('')}
-            </select>
-        </div>
-        `;
+            <div class="variant-select-wrapper">
+                <div class="variant-trigger" id="variantTrigger" onclick="event.stopPropagation(); window.openVariantDropdown(this)">
+                    <span id="variantLabel">${label}</span>
+                    <i class="fas fa-chevron-down" style="font-size:0.8rem; opacity:0.7;"></i>
+                </div>
+            </div>
+            `;
         }
 
         function initProductInteractions(p) {
+            console.log('Product Data for Tabs:', { name: p.product_name, shelf_life: p.shelf_life, is_refrigerated: p.is_refrigerated });
             const vSelect = document.getElementById('variantSelect');
             let variants = [];
             try {
                 variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) :
                     (p.quantity_variants || []);
             } catch (e) { }
+
+            let activeVariantIdx = 0;
 
             const updatePrice = (v) => {
                 document.getElementById('view-price').innerText = '₹' + v.price;
@@ -1027,10 +1051,136 @@
                 }
             };
 
-            if (vSelect) {
-                vSelect.onchange = (e) => updatePrice(variants[e.target.value]);
+            window.openVariantDropdown = function (triggerEl) {
+                const variants = window._currentVariants;
+                if (!variants || !variants.length) return;
+
+                const existing = document.getElementById('variant-portal-dropdown');
+                if (existing) {
+                    existing.remove();
+                    return;
+                }
+
+                const menu = document.createElement('div');
+                menu.id = 'variant-portal-dropdown';
+                menu.className = 'variant-portal-menu';
+
+                menu.innerHTML = variants.map((v, i) => `
+                    <div class="variant-portal-item ${i === activeVariantIdx ? 'active' : ''}" 
+                         onclick="window.handleVariantClick(${i})">
+                        <span>${v.quantity}</span>
+                        <span class="var-price">₹${v.price}</span>
+                    </div>
+                `).join('');
+
+                document.body.appendChild(menu);
+
+                const rect = triggerEl.getBoundingClientRect();
+                menu.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+                menu.style.left = (rect.left + window.scrollX) + 'px';
+                menu.style.width = rect.width + 'px';
+
+                requestAnimationFrame(() => menu.classList.add('open'));
+
+                const closeHandler = (e) => {
+                    if (!menu.contains(e.target) && !triggerEl.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+                setTimeout(() => document.addEventListener('click', closeHandler), 0);
+            };
+
+            window.handleVariantClick = function (idx) {
+                const variants = window._currentVariants;
+                if (!variants || !variants[idx]) return;
+
+                activeVariantIdx = idx;
+                const v = variants[idx];
+                const labelEl = document.getElementById('variantLabel');
+                if (labelEl) labelEl.innerText = `${v.quantity} - ₹${v.price}`;
+
+                updatePrice(v);
+                window.syncDetailPageCart(v);
+
+                // Update Nutrition if toggle logic exists
+                const nutContent = document.getElementById('nutrition-content');
+                if (nutContent && nutritionData) {
+                    nutContent.innerHTML = renderNutrition(nutritionData, v);
+                    if (window.adjustFontSize) window.adjustFontSize(nutContent, true);
+                }
+
+                const menu = document.getElementById('variant-portal-dropdown');
+                if (menu) menu.remove();
+            };
+
+            // Define adjustFontSize as window property so it's globally accessible
+            window.adjustFontSize = (el, force = false) => {
+                if (!el) return;
+
+                if (force) delete el.dataset.calculatedSize;
+
+                // IF already sized, just ensure the size is applied and stop
+                if (el.dataset.calculatedSize) {
+                    el.style.fontSize = el.dataset.calculatedSize + 'rem';
+                    return;
+                }
+
+                // TARGET CONTENT HEIGHT
+                const isMobile = window.innerWidth < 768;
+                const targetContentHeight = isMobile ? 94 : 104; // Reduced from 130 per 1/5th rule
+
+                // Reset to base size before measurement
+                let size = 1.25;
+                el.style.fontSize = size + 'rem';
+
+                let iterations = 0;
+                while (el.scrollHeight > targetContentHeight && size > 0.72 && iterations < 20) {
+                    size -= 0.02;
+                    el.style.fontSize = size + 'rem';
+                    iterations++;
+                }
+
+                el.dataset.calculatedSize = size;
+            };
+
+            // 1. Define Sync Function
+            window.syncDetailPageCart = function (v) {
+                const addBtn = document.getElementById('detailAddBtn');
+                const qtyCounter = document.getElementById('detailQtyCounter');
+                const qtyInput = document.getElementById('detailQty');
+
+                if (!addBtn || !qtyCounter || !qtyInput) return;
+
+                if (!v) {
+                    const vars = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
+                    v = vars[activeVariantIdx];
+                }
+
+                if (!v) return;
+
+                const cartItem = state.cart.find(c => c.id == p.id &&
+                    (c.variant ? c.variant.quantity === v.quantity : true)
+                );
+
+                if (cartItem) {
+                    addBtn.style.display = 'none';
+                    qtyCounter.style.display = 'flex';
+                    qtyInput.value = cartItem.qty;
+                    state.detailQty = cartItem.qty;
+                } else {
+                    addBtn.style.display = 'block';
+                    qtyCounter.style.display = 'none';
+                    qtyInput.value = 1;
+                    state.detailQty = 1;
+                }
+            };
+
+            // Check Variants and Sync
+            if (variants[0]) {
+                updatePrice(variants[0]);
+                window.syncDetailPageCart(variants[0]);
             }
-            if (variants[0]) updatePrice(variants[0]);
 
 
             // 2. Toggles & Content
@@ -1048,11 +1198,31 @@
                 return val;
             };
 
+            console.log(`[Use By Final Check] Product: ${p.product_name}`);
+            console.log(`[Use By Final Check] Available Keys:`, Object.keys(p));
+            console.log(`[Use By Final Check] shelf_life prop:`, p.shelf_life);
+
             // Ingredients
             if (p.ingredients) {
                 sections.push({
                     id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `
         <p style="text-align:justify;">${p.ingredients}</p>`
+                });
+            }
+
+            // Use By (Shelf Life)
+            if (p.shelf_life && p.shelf_life.toString().trim() !== '') {
+                let shelfText = `<p style="text-align:justify; margin:0;">The product is best consumed within <strong>${p.shelf_life}</strong> days from the date of packing.</p>`;
+
+                // Refrigeration Alert Append (Visual Icon/Box)
+                if (p.is_refrigerated) {
+                    shelfText += `<div style="margin-top:6px; padding:6px 10px; background:#e0f2fe; border-left:4px solid #0284c7; border-radius:4px; color:#0c4a6e; font-size:0.85em; line-height:1.2;">
+                        <i class="fas fa-snowflake"></i> <strong>Note:</strong> Refrigeration Required.
+                    </div>`;
+                }
+
+                sections.push({
+                    id: 'shelf', label: 'Shelf Life', icon: 'fas fa-history', target: 'shelf-life-content', html: shelfText
                 });
             }
 
@@ -1102,7 +1272,7 @@
 
                     // Calculate Servings per pack from variant
                     let displayedServings = null;
-                    if (currentVariant && servingSize) {
+                    if (currentVariant && currentVariant.quantity && servingSize) {
                         const packWeight = parseWeight(currentVariant.quantity);
                         const sSize = parseWeight(servingSize);
                         if (packWeight > 0 && sSize > 0) {
@@ -1139,8 +1309,8 @@
                 nutritionData[k] !== undefined && nutritionData[k] !== null && nutritionData[k] !== ''
             ).length : 0;
 
-            // Only show Nutrition button if at least 3 actual nutrition values exist
-            if (nutritionData && actualNutritionCount >= 3) {
+            // Only show Nutrition button if data exists
+            if (actualNutritionCount > 0) {
                 sections.push({
                     id: 'nut',
                     label: 'Nutrition',
@@ -1161,37 +1331,36 @@
 
             // Render Buttons & Inject Content
             if (btnContainer) {
+                btnContainer.className = 'info-btns-row'; // Use standard CSS class
                 btnContainer.innerHTML = sections.map(s =>
-                    `<button class="toggle-btn" id="btn-${s.id}" data-target="${s.target}">
-            ${s.label}</button>`
+                    `<button class="info-btn" id="btn-${s.id}" data-target="${s.target}">
+                        <i class="${s.icon}" style="margin-right:5px;"></i>
+                        <span class="bt-txt">${s.label}</span>
+                    </button>`
                 ).join('');
 
                 sections.forEach(s => {
-                    document.getElementById(s.target).innerHTML = s.html;
+                    const el = document.getElementById(s.target);
+                    if (el) el.innerHTML = s.html;
                 });
 
                 // Add Toggle Logic
-                const adjustFontSize = (el) => {
-                    if (!el) return;
+                // Local adjustFontSize removed in favor of window.adjustFontSize
 
-                    // Start large
-                    let size = 1.05;
-                    el.style.fontSize = size + 'rem';
 
-                    // If it already fits, stop
-                    if (el.scrollHeight <= el.offsetHeight) return;
-
-                    // Otherwise shrink
-                    let count = 0;
-                    while (el.scrollHeight > el.offsetHeight && size > 0.75 && count < 10) {
-                        size -= 0.05;
-                        el.style.fontSize = size + 'rem';
-                        count++;
+                // Pre-adjust ALL tab contents immediately
+                sections.forEach(s => {
+                    const el = document.getElementById(s.target);
+                    if (el) {
+                        el.innerHTML = s.html;
+                        // Important: el must have its styles (like padding) to measure scrollHeight correctly
+                        // We run it after a tiny delay to ensure DOM is ready
+                        // setTimeout(() => window.adjustFontSize(el), 50);
                     }
-                };
+                });
 
                 btnContainer.onclick = (e) => {
-                    const btn = e.target.closest('.toggle-btn');
+                    const btn = e.target.closest('.info-btn');
                     if (!btn) return;
 
                     const targetId = btn.dataset.target;
@@ -1200,17 +1369,14 @@
                     const wasActive = btn.classList.contains('active');
 
                     // Close ALL
-                    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.info-btn').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.info-content-block').forEach(d => d.classList.remove('active'));
 
                     if (!wasActive) {
                         btn.classList.add('active');
                         contentDiv.classList.add('active');
-                        // Use requestAnimationFrame to ensure the 'active' class (and its height) 
-                        // is fully applied before we measure scrollHeight
-                        requestAnimationFrame(() => {
-                            adjustFontSize(contentDiv);
-                        });
+                        // Just call adjustFontSize - it will use cached value if available
+                        // window.adjustFontSize(contentDiv);
                     }
                 };
             }
@@ -1227,34 +1393,30 @@
                     const nutContent = document.getElementById('nutrition-content');
                     if (nutContent) {
                         nutContent.innerHTML = renderNutrition(nutritionData, selectedVar);
-                        if (nutContent.classList.contains('active')) {
-                            adjustFontSize(nutContent);
-                        }
+                        // FORCE recalculate because content changed
+                        // adjustFontSize(nutContent, true);
                     }
                 };
             }
 
-            // Sidebar Tabs
-            document.querySelectorAll('.sidebar-tab').forEach(tab => {
-                tab.onclick = () => {
-                    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    const mode = tab.dataset.tab;
-                    document.getElementById('side-content').innerHTML = renderVerticalItems(mode === 'similar' ?
-                        getSimilarProducts(p) : state.allProducts.filter(x => x.is_trending));
-                };
-            });
+            // Initialize sidebar tab switcher
+            window.switchSidebarTab = function (mode) {
+                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                const activeTab = document.querySelector(`.sidebar-tab[data-tab="${mode}"]`);
+                if (activeTab) activeTab.classList.add('active');
 
-            // Initialize swipe navigation for mobile
-            if (window.initSwipeNavigation) {
-                window.initSwipeNavigation();
-            }
+                const sideContent = document.getElementById('side-content');
+                if (sideContent) {
+                    sideContent.innerHTML = renderVerticalItems(mode === 'similar' ?
+                        getSimilarProducts(p) : state.allProducts.filter(x => x.is_trending));
+                }
+            };
 
             // Auto-activate default tab (Nutrition if available, else first available)
             setTimeout(() => {
                 if (!btnContainer) return;
                 const nutBtn = document.getElementById('btn-nut');
-                const firstBtn = btnContainer.querySelector('.toggle-btn');
+                const firstBtn = btnContainer.querySelector('.info-btn');
                 const activeBtn = nutBtn || firstBtn;
                 if (activeBtn) activeBtn.click();
             }, 100);
@@ -1284,6 +1446,12 @@
                 const variantLabel = firstVariant.quantity || '';
                 const displayPrice = firstVariant.price || item.price || item.mrp || '';
 
+                // Check Cart State
+                const cartItem = state.cart.find(c => c.id == item.id &&
+                    (c.variant ? c.variant.quantity === firstVariant.quantity : true)
+                );
+                const qty = cartItem ? cartItem.qty : 0;
+
                 return `
         <div class="sim-item" data-product-id="${item.id}" data-product='${JSON.stringify(item).replace(/'/g, "\\'")}' data-variant='${JSON.stringify(firstVariant).replace(/'/g, "\\'")}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
             <img src="${item.showcase_image || state.placeholder}" class="sim-img"
@@ -1293,13 +1461,13 @@
                 ${item.product_tagline ? `<span style="font-size:0.7rem; color:var(--text-secondary); display:block; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.product_tagline}</span>` : ''}
                 <!-- Price + Add Button inline -->
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px;">
-                    <span style="font-size:0.8rem; font-weight:700; color:var(--color-primary-blue);">${variantLabel ? variantLabel + ' - ' : ''}₹${displayPrice}</span>
-                    <!-- Add Button (visible initially) -->
-                    <button class="sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="background:#FFF9C4; border:1px solid #FBC02D; border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; color:#333; cursor:pointer;">Add</button>
-                    <!-- Quantity Controls (hidden initially) -->
-                    <div class="quantity-controls sidebar-qty-controls" id="sidebar-qty-wrap-${index}" style="display:none; min-width:70px; padding:2px 6px; transform:scale(0.85);">
+                    <span style="font-size:0.8rem; font-weight:700; color:var(--color-primary-blue);">₹${displayPrice} ${variantLabel ? `<span style="font-size:0.75em; font-weight:500; opacity:0.8;">(${variantLabel})</span>` : ''}</span>
+                    <!-- Add Button -->
+                    <button class="sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="${qty > 0 ? 'display:none;' : 'display:block;'} background:#FFF9C4; border:1px solid #FBC02D; border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; color:#333; cursor:pointer;">Add</button>
+                    <!-- Quantity Controls -->
+                    <div class="quantity-controls sidebar-qty-controls ${qty > 0 ? 'show' : ''}" id="sidebar-qty-wrap-${index}" style="${qty > 0 ? 'display:flex;' : 'display:none;'} min-width:70px; padding:2px 6px; transform:scale(0.85);">
                         <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, -1)">−</button>
-                        <span class="quantity-display" id="sidebar-qty-${index}">1</span>
+                        <span class="quantity-display" id="sidebar-qty-${index}">${qty || 1}</span>
                         <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, 1)">+</button>
                     </div>
                 </div>
@@ -1331,12 +1499,6 @@
             val = isInit ? 1 : Math.max(0, val + delta);
             qtyEl.innerText = val;
 
-            // If qty becomes 0, show Add button again
-            if (val === 0) {
-                if (addBtn) addBtn.style.display = 'inline-block';
-                if (qtyWrap) qtyWrap.classList.remove('show');
-            }
-
             // Get product data and update cart
             const simItem = document.querySelector(`#sidebar-qty-${index}`).closest('.sim-item');
             if (simItem) {
@@ -1346,23 +1508,38 @@
 
                     // Find or update cart item
                     const existingIdx = state.cart.findIndex(item =>
-                        item.id === product.id && JSON.stringify(item.variant) === JSON.stringify(variant)
+                        item.id === product.id &&
+                        (item.variant ? item.variant.quantity === variant.quantity : true)
                     );
 
-                    if (val === 0 && existingIdx > -1) {
-                        state.cart.splice(existingIdx, 1);
-                    } else if (existingIdx > -1) {
-                        state.cart[existingIdx].qty = val;
-                    } else if (val > 0) {
-                        state.cart.push({
-                            id: product.id,
-                            name: product.product_name,
-                            telugu_name: product.product_name_telugu,
-                            price: variant.price || product.price || product.mrp,
-                            image: product.showcase_image,
-                            variant: variant,
-                            qty: val
-                        });
+                    if (val === 0) {
+                        if (existingIdx > -1) {
+                            state.cart.splice(existingIdx, 1);
+                        }
+                        if (addBtn) addBtn.style.display = 'block';
+                        if (qtyWrap) {
+                            qtyWrap.style.display = 'none';
+                            qtyWrap.classList.remove('show');
+                        }
+                    } else {
+                        if (existingIdx > -1) {
+                            state.cart[existingIdx].qty = val;
+                        } else {
+                            state.cart.push({
+                                id: product.id,
+                                name: product.product_name,
+                                telugu_name: product.product_name_telugu,
+                                price: variant.price || product.price || product.mrp,
+                                image: product.showcase_image,
+                                variant: variant,
+                                qty: val
+                            });
+                        }
+                        if (addBtn) addBtn.style.display = 'none';
+                        if (qtyWrap) {
+                            qtyWrap.style.display = 'flex';
+                            qtyWrap.classList.add('show');
+                        }
                     }
                     window.saveCart();
                 } catch (e) {
@@ -1526,64 +1703,42 @@
         };
 
         window.updateDetailQty = function (delta) {
-            const input = document.getElementById('detailQty');
-            if (!input) return;
-            const currentVal = parseInt(input.value) || 1;
-            let newQty = currentVal + delta;
+            if (!state.currentProduct) return;
 
-            let maxStock = 999;
-            if (state.currentProduct) {
-                const variants = state.currentProduct.quantity_variants || [];
-                if (variants.length > 0) {
-                    const select = document.getElementById('variantSelect');
-                    const v = variants[select ? select.value : 0];
-                    if (v && v.stock !== undefined) maxStock = v.stock;
-                } else if (state.currentProduct.total_stock !== undefined) {
-                    maxStock = state.currentProduct.total_stock;
-                }
-            }
+            // Get selected variant
+            const select = document.getElementById('variantSelect');
+            const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
+            const variant = variants[select ? select.value : 0];
 
-            if (newQty < 1) newQty = 1;
-            if (newQty > maxStock) {
-                if (maxStock <= 0) {
-                    window.showToast('Sorry, this item is Out of Stock', 'error');
-                } else {
-                    window.showToast(`Max ${maxStock} units available`, 'error');
-                }
-                newQty = Math.max(1, maxStock);
-            }
+            // Update cart relative to delta
+            window.addToCart(state.currentProduct, variant, delta);
 
-            state.detailQty = newQty;
-            input.value = state.detailQty;
+            // Sync detail page UI (ADD button vs Qty counter)
+            window.syncDetailPageCart(variant);
         };
 
         window.validateDetailQty = function (input) {
+            if (!state.currentProduct) return;
             let val = parseInt(input.value);
             if (isNaN(val) || val < 1) val = 1;
 
-            let maxStock = 999;
-            if (state.currentProduct) {
-                const variants = state.currentProduct.quantity_variants || [];
-                if (variants.length > 0) {
-                    const select = document.getElementById('variantSelect');
-                    const v = variants[select ? select.value : 0];
-                    if (v && v.stock !== undefined) maxStock = v.stock;
-                } else if (state.currentProduct.total_stock !== undefined) {
-                    maxStock = state.currentProduct.total_stock;
-                }
-            }
+            const select = document.getElementById('variantSelect');
+            const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
+            const variant = variants[select ? select.value : 0];
 
-            if (val > maxStock) {
-                if (maxStock <= 0) {
-                    window.showToast('Out of Stock', 'error');
-                    val = 1;
-                } else {
-                    window.showToast(`Max ${maxStock} units available`, 'error');
-                    val = maxStock;
-                }
+            // Update cart to absolute value
+            const existingIdx = state.cart.findIndex(item =>
+                item.id === state.currentProduct.id &&
+                (item.variant ? item.variant.quantity === variant.quantity : true)
+            );
+
+            if (existingIdx > -1) {
+                const currentQty = state.cart[existingIdx].qty;
+                const delta = val - currentQty;
+                window.addToCart(state.currentProduct, variant, delta);
+            } else {
+                window.addToCart(state.currentProduct, variant, val);
             }
-            state.detailQty = val;
-            input.value = val;
         };
 
         // Helper for cart animation
@@ -1605,12 +1760,17 @@
             const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
             const maxStock = variant ? (variant.stock || 0) : (product.total_stock || 0);
 
-            if (qty < 1) {
-                window.showToast('Quantity must be at least 1', 'error');
+            // Calculation check
+            const targetQty = currentCartQty + qty;
+
+            if (targetQty < 0) {
+                // If removing more than we have, just set to 0 (which usually removes it or keeps at min)
+                // But normally delta is -1, so targetQty would be at least 0.
+                window.showToast('Minimum quantity reached', 'error');
                 return;
             }
 
-            if (currentCartQty + qty > maxStock) {
+            if (targetQty > maxStock) {
                 if (maxStock <= 0) {
                     window.showToast('Out of Stock', 'error');
                 } else {
@@ -1620,8 +1780,13 @@
             }
 
             if (existingIdx > -1) {
-                state.cart[existingIdx].qty += qty;
-            } else {
+                state.cart[existingIdx].qty = targetQty;
+                // If 0, handle removal
+                if (state.cart[existingIdx].qty === 0) {
+                    state.cart.splice(existingIdx, 1);
+                    window.showToast('Item removed from cart', 'info');
+                }
+            } else if (qty > 0) {
                 state.cart.push({
                     id: product.id,
                     name: product.product_name,
@@ -1712,6 +1877,8 @@
                 resetSidebarForProduct(item.id);
                 // Refresh grid card to show ADD button
                 window.refreshGridCardUI(item.id);
+                // Sync detail page if it's the same product
+                if (window.syncDetailPageCart) window.syncDetailPageCart();
             }
         };
 
@@ -1740,6 +1907,9 @@
 
             // 5. Update Cart Drawer UI
             window.updateCartUI();
+
+            // 6. Sync current detail page
+            if (window.syncDetailPageCart) window.syncDetailPageCart();
 
             window.showToast('Cart cleared', 'info');
         };
@@ -1798,15 +1968,69 @@
                 }).join('');
             }
             if (cartTotal) cartTotal.innerText = total;
+
+            // Sync detail page quantity if on product view
+            if (window.syncDetailPageCart) window.syncDetailPageCart();
         };
 
-        window.sendToWhatsApp = function () {
+        window.sendToWhatsApp = async function () {
             if (state.cart.length === 0) {
                 window.showToast('Your cart is empty!', 'error');
                 return;
             }
 
-            // --- Background Stock Update ---
+            // Show loading state
+            window.showToast('Validating prices...', 'info');
+
+            // --- 1. Price Validation ---
+            try {
+                const itemIds = [...new Set(state.cart.map(i => i.id))];
+                const { data: dbProducts, error } = await supabase
+                    .from('products')
+                    .select('id, price, quantity_variants')
+                    .in('id', itemIds);
+
+                if (!error && dbProducts) {
+                    let pricesChanged = false;
+                    state.cart.forEach(cartItem => {
+                        const dbProd = dbProducts.find(p => p.id === cartItem.id);
+                        if (dbProd) {
+                            let currentPrice = dbProd.price; // Default base price
+
+                            // If variant, find variant price
+                            if (cartItem.variant) {
+                                let vars = [];
+                                try {
+                                    vars = typeof dbProd.quantity_variants === 'string'
+                                        ? JSON.parse(dbProd.quantity_variants)
+                                        : (dbProd.quantity_variants || []);
+                                } catch (e) { }
+
+                                // Match by quantity label matches
+                                const v = vars.find(x => x.quantity === cartItem.variant.quantity);
+                                if (v) currentPrice = v.price;
+                            }
+
+                            // Update if different
+                            if (cartItem.price !== currentPrice) {
+                                console.log(`Price update for ${cartItem.name}: ${cartItem.price} -> ${currentPrice}`);
+                                cartItem.price = currentPrice;
+                                pricesChanged = true;
+                            }
+                        }
+                    });
+
+                    if (pricesChanged) {
+                        window.saveCart();
+                        window.showToast('Prices updated to latest values.', 'info');
+                    }
+                }
+            } catch (err) {
+                console.error('Price validation error:', err);
+                // Continue with existing cart prices if check fails
+            }
+
+            // --- 2. Background Stock Update (Fire & Forget) ---
             const updateStock = async () => {
                 for (const item of state.cart) {
                     try {
@@ -1821,10 +2045,9 @@
                     }
                 }
             };
-
-            // Initiate stock update in background
             updateStock();
 
+            // --- 3. Construct Message ---
             let message = `👋 Hi Telugu Delicacies! I would like to place an order.\n\n🛒 *ORDER SUMMARY*`;
             let total = 0;
             state.cart.forEach(item => {
