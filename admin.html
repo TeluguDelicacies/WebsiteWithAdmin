@@ -353,6 +353,49 @@
             max-width: 200px;
         }
 
+        /* Bulk Upload Controls Container */
+        .bulk-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* Tag Chips Row */
+        .bulk-tags-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .bulk-tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .bulk-tag-chip:hover {
+            background: #e2e8f0;
+        }
+
+        .bulk-tag-chip.active {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+
+        .bulk-tag-chip input[type="checkbox"] {
+            display: none;
+        }
+
         /* Product Image Gallery Styles */
         .image-gallery-card {
             position: relative;

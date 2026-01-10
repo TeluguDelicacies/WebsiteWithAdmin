@@ -2399,6 +2399,9 @@ async function handleBulkFilesSelected(files) {
 
         // Render preview item - always show dropdown for override capability
         const selectedProductId = match.product?.id || '';
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Front View', 'Back View', 'Lifestyle'];
+        const detectedTags = match.tags || [];
+
         const html = `
             <div class="bulk-preview-item" data-idx="${pendingBulkImages.length - 1}">
                 <img src="${objectUrl}" alt="${file.name}">
@@ -2406,14 +2409,25 @@ async function handleBulkFilesSelected(files) {
                     <div class="file-name">${file.name}</div>
                     <div class="match-result ${match.product ? 'matched' : 'unmatched'}">
                         ${match.product
-                ? `<i class="fas fa-check-circle"></i> Auto-matched${match.tags.length ? ' • ' + match.tags.join(', ') : ''}`
-                : `<i class="fas fa-question-circle"></i> Select product below`}
+                ? `<i class="fas fa-check-circle"></i> Auto-matched`
+                : `<i class="fas fa-question-circle"></i> Select product`}
                     </div>
                 </div>
-                <select onchange="window.manualMatchProduct(${pendingBulkImages.length - 1}, this.value)" class="bulk-product-select">
-                    <option value="">Select Product...</option>
-                    ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === selectedProductId ? 'selected' : ''}>${p.product_name}</option>`).join('')}
-                </select>
+                <div class="bulk-controls">
+                    <select onchange="window.manualMatchProduct(${pendingBulkImages.length - 1}, this.value)" class="bulk-product-select">
+                        <option value="">Select Product...</option>
+                        ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === selectedProductId ? 'selected' : ''}>${p.product_name}</option>`).join('')}
+                    </select>
+                    <div class="bulk-tags-row">
+                        ${bulkTags.map(tag => `
+                            <label class="bulk-tag-chip ${detectedTags.includes(tag) ? 'active' : ''}">
+                                <input type="checkbox" ${detectedTags.includes(tag) ? 'checked' : ''} 
+                                    onchange="window.toggleBulkTag(${pendingBulkImages.length - 1}, '${tag}', this.checked)">
+                                ${tag}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
             </div>
         `;
 
@@ -2449,6 +2463,29 @@ window.manualMatchProduct = function (idx, productId) {
 
         // Update matched count
         updateBulkMatchCounts();
+    }
+};
+
+// Toggle tag for a bulk image
+window.toggleBulkTag = function (idx, tag, isChecked) {
+    if (idx < 0 || idx >= pendingBulkImages.length) return;
+
+    const item = pendingBulkImages[idx];
+    if (!item.tags) item.tags = [];
+
+    if (isChecked && !item.tags.includes(tag)) {
+        item.tags.push(tag);
+    } else if (!isChecked) {
+        item.tags = item.tags.filter(t => t !== tag);
+    }
+
+    // Update visual state of the chip
+    const itemEl = document.querySelector(`.bulk-preview-item[data-idx="${idx}"]`);
+    if (itemEl) {
+        const chip = itemEl.querySelector(`label.bulk-tag-chip input[onchange*="'${tag}'"]`)?.parentElement;
+        if (chip) {
+            chip.classList.toggle('active', isChecked);
+        }
     }
 };
 
