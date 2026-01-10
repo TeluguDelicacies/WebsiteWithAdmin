@@ -2486,9 +2486,15 @@ window.loadExistingImages = async function () {
                     </div>
                 </div>
                 <div class="bulk-controls">
-                    <select onchange="window.updateExistingImageProduct('${img.id}', this.value)">
-                        ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === img.product_id ? 'selected' : ''}>${p.product_name}</option>`).join('')}
-                    </select>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <select onchange="window.updateExistingImageProduct('${img.id}', this.value)" style="flex: 1;">
+                            ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === img.product_id ? 'selected' : ''}>${p.product_name}</option>`).join('')}
+                        </select>
+                        <button onclick="window.deleteExistingImage('${img.id}')" class="btn-delete-small" title="Delete Image" 
+                            style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; padding: 0 10px; cursor: pointer;">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                     <div class="bulk-tags-row">
                         ${bulkTags.map(tag => `
                             <label class="bulk-tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}">
@@ -2499,9 +2505,6 @@ window.loadExistingImages = async function () {
                         `).join('')}
                     </div>
                 </div>
-                <button onclick="window.deleteExistingImage('${img.id}')" class="btn-delete-small" title="Delete Image" style="position: absolute; top: 10px; right: 10px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; padding: 4px 8px; cursor: pointer;">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
             </div>
         `).join('');
 
