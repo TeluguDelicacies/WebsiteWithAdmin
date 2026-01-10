@@ -2035,11 +2035,22 @@ const CLOUDINARY_CLOUD_NAME = 'telugudelicacies';
 const CLOUDINARY_UPLOAD_PRESET = 'product_images'; // User must create this preset in Cloudinary settings
 
 // Upload single image to Cloudinary and return URL
-async function uploadImageToStorage(file) {
+async function uploadImageToStorage(file, customPublicId) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     formData.append('folder', 'products'); // Organize in products folder
+
+    // If a custom public ID is provided (without extension), suggest it to Cloudinary
+    // Note: 'use_filename' must be true in preset, or we use 'public_id' param if unsigned allowed it (often restricted)
+    // Safer to just RELY ON FILE NAME being meaningful if preset has "Use filename or external ID" checked.
+    // So we just ensure 'file.name' is good before passing here.
+
+    // However, if we CAN set public_id (requires specific unsigned settings), we try:
+    if (customPublicId) {
+        // formData.append('public_id', customPublicId); 
+        // Often blocked in unsigned. Let's rely on the file object having a correct name constructor
+    }
 
     try {
         const response = await fetch(
@@ -2062,6 +2073,105 @@ async function uploadImageToStorage(file) {
         throw error;
     }
 }
+
+// ==========================================
+// MIGRATION TOOL: Products Table (Showcase/Info) -> Cloudinary
+// ==========================================
+window.migrateProductsTableToCloudinary = async function () {
+    if (!confirm("This will migrate MAIN product images (Showcase/Info) from Supabase to Cloudinary. Continue?")) return;
+
+    const progressDiv = document.getElementById('migrationProgress');
+    const progressBar = document.getElementById('migrationBar');
+    const progressText = document.getElementById('migrationStatusText');
+    const progressCount = document.getElementById('migrationCount');
+
+    if (progressDiv) progressDiv.style.display = 'block';
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.innerText = 'Scanning products table...';
+
+    try {
+        // 1. Fetch products with Supabase images
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('id, product_name, slug, showcase_image, info_image');
+
+        if (error) throw error;
+
+        // Filter locally for Supabase URLs
+        const toMigrate = [];
+        for (const p of products) {
+            let needsMigration = false;
+            let type = '';
+
+            if (p.showcase_image && p.showcase_image.includes('supabase.co')) {
+                toMigrate.push({ id: p.id, field: 'showcase_image', url: p.showcase_image, slug: p.slug, name: p.product_name });
+            }
+            if (p.info_image && p.info_image.includes('supabase.co')) {
+                toMigrate.push({ id: p.id, field: 'info_image', url: p.info_image, slug: p.slug, name: p.product_name });
+            }
+        }
+
+        if (toMigrate.length === 0) {
+            if (progressText) progressText.innerText = 'No Supabase images found in products table.';
+            showToast('All main product images are already migrated!', 'success');
+            return;
+        }
+
+        const total = toMigrate.length;
+        let migrated = 0;
+        let failed = 0;
+
+        if (progressCount) progressCount.innerText = `0/${total}`;
+
+        // 2. Migrate
+        for (const item of toMigrate) {
+            try {
+                if (progressText) progressText.innerText = `Migrating ${item.name} (${item.field})...`;
+
+                // Fetch Blob
+                const response = await fetch(item.url);
+                if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
+                const blob = await response.blob();
+
+                // Create Meaningful Filename: slug-field.jpg
+                const ext = item.url.split('.').pop().split('?')[0] || 'jpg';
+                const filename = `${item.slug}-${item.field === 'showcase_image' ? 'showcase' : 'info'}.${ext}`;
+                const file = new File([blob], filename, { type: blob.type });
+
+                // Upload
+                const newUrl = await uploadImageToStorage(file);
+
+                // Update DB
+                const updateObj = {};
+                updateObj[item.field] = newUrl;
+
+                const { error: updateError } = await supabase
+                    .from('products')
+                    .update(updateObj)
+                    .eq('id', item.id);
+
+                if (updateError) throw updateError;
+
+                migrated++;
+            } catch (e) {
+                console.error('Migration failed:', item, e);
+                failed++;
+            }
+
+            // Progress
+            const pct = Math.round(((migrated + failed) / total) * 100);
+            if (progressBar) progressBar.style.width = `${pct}%`;
+            if (progressCount) progressCount.innerText = `${migrated + failed}/${total}`;
+        }
+
+        if (progressText) progressText.innerText = `Main Images Migration Complete! ${migrated} success, ${failed} failed.`;
+        showToast(`Migrated ${migrated} main product images`, 'success');
+
+    } catch (e) {
+        console.error('Error migrating products table:', e);
+        showToast('Error migrating main images', 'error');
+    }
+};
 
 // Bulk upload images
 async function handleBulkImageUpload(files, productId) {
@@ -3380,7 +3490,7 @@ console.log('CSV Shims Initialized from admin.js');
 // ==========================================
 // MIGRATION TOOL: Supabase -> Cloudinary
 // ==========================================
-window.migrateSupabaseToCloudinary = async function() {
+window.migrateSupabaseToCloudinary = async function () {
     if (!confirm("This will migrate images from Supabase Storage to Cloudinary. It may take some time. Continue?")) return;
 
     // UI Setup
@@ -3388,11 +3498,11 @@ window.migrateSupabaseToCloudinary = async function() {
     const progressBar = document.getElementById('migrationBar');
     const progressText = document.getElementById('migrationStatusText');
     const progressCount = document.getElementById('migrationCount');
-    
+
     if (progressDiv) progressDiv.style.display = 'block';
     if (progressBar) progressBar.style.width = '0%';
     if (progressText) progressText.innerText = 'Scanning for Supabase images...';
-    
+
     try {
         // 1. Fetch images needing migration (URLs containing 'supabase')
         // We scan product_images table
@@ -3424,14 +3534,14 @@ window.migrateSupabaseToCloudinary = async function() {
                 const response = await fetch(img.image_url);
                 if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
                 const blob = await response.blob();
-                
+
                 // Convert to File for our upload function
                 const file = new File([blob], `migrated_${img.id}.jpg`, { type: blob.type });
-                
+
                 // B. Upload to Cloudinary
                 // This uses our NEW uploadImageToStorage which points to Cloudinary
                 const newUrl = await uploadImageToStorage(file);
-                
+
                 // C. Update Database
                 const { error: updateError } = await supabase
                     .from('product_images')
@@ -3439,28 +3549,28 @@ window.migrateSupabaseToCloudinary = async function() {
                     .eq('id', img.id);
 
                 if (updateError) throw updateError;
-                
+
                 migrated++;
             } catch (e) {
                 console.error('Migration failed for image:', img.id, e);
                 failed++;
             }
-            
+
             // Update Progress
             const pct = Math.round(((migrated + failed) / total) * 100);
             if (progressBar) progressBar.style.width = `${pct}%`;
             if (progressCount) progressCount.innerText = `${migrated + failed}/${total}`;
         }
-        
+
         if (progressText) progressText.innerText = `Migration Complete! ${migrated} success, ${failed} failed.`;
         showToast(`Migration complete: ${migrated} moved to Cloudinary`, 'success');
-        
+
         // Refresh grid if on the tab
         if (window.loadExistingImages) {
             const filter = document.getElementById('editImageProductFilter');
             window.loadExistingImages(filter ? filter.value : 'all');
         }
-        
+
     } catch (e) {
         console.error('Migration error:', e);
         if (progressText) progressText.innerText = 'Error during migration check console.';

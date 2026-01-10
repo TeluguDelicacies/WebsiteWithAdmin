@@ -2379,11 +2379,19 @@
                             <option value="all">All Products</option>
                         </select>
 
-                        <!-- Migration Tool -->
-                        <button onclick="window.migrateSupabaseToCloudinary()" class="btn-secondary"
-                            style="font-size: 0.8rem; padding: 8px 12px; border: 1px dashed #f59e0b; color: #92400e; background: #fffbeb;">
-                            <i class="fas fa-random"></i> Migrate Supabase to Cloudinary
-                        </button>
+                        <!-- Migration Tools -->
+                        <div style="display:flex; gap: 8px;">
+                            <button onclick="window.migrateSupabaseToCloudinary()" class="btn-secondary"
+                                style="font-size: 0.8rem; padding: 8px 12px; border: 1px dashed #f59e0b; color: #92400e; background: #fffbeb;"
+                                title="Migrate gallery images (from product_images table)">
+                                <i class="fas fa-images"></i> Migrate Gallery
+                            </button>
+                            <button onclick="window.migrateProductsTableToCloudinary()" class="btn-secondary"
+                                style="font-size: 0.8rem; padding: 8px 12px; border: 1px dashed #3b82f6; color: #1e40af; background: #eff6ff;"
+                                title="Migrate main Showcase and Info images (from products table)">
+                                <i class="fas fa-star"></i> Migrate Main
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Migration Progress -->
