@@ -1215,11 +1215,15 @@
                 thumbnailStrip.innerHTML = images.map((img, idx) => `
                     <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
                          onclick="window.selectProductImage('${img.image_url}', this)"
-                         data-idx="${idx}">
+                         data-idx="${idx}"
+                         data-tags="${(img.tags || []).join(',')}">
                         <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy">
                         ${img.tags && img.tags.length > 0 ? `<span class="thumb-tag">${img.tags[0]}</span>` : ''}
                     </div>
                 `).join('');
+
+                // Store images globally for variant-based switching
+                window._productImages = images;
 
                 // Set first image as main
                 if (images.length > 0) {
@@ -1231,6 +1235,30 @@
                 console.warn('Error loading product gallery:', e);
             }
         }
+
+        // Switch image based on variant packaging type  
+        window.switchImageByPackaging = function (packagingType) {
+            if (!packagingType || !window._productImages) return;
+
+            // Normalize for matching (e.g., "PET Jar" from variant matches "PET Jar" tag)
+            const normalized = packagingType.toLowerCase().trim();
+
+            for (const img of window._productImages) {
+                const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                if (tags.some(tag => tag.includes(normalized) || normalized.includes(tag))) {
+                    // Found matching image - switch to it
+                    const mainImg = document.querySelector('.gallery-front .main-img');
+                    if (mainImg) mainImg.src = img.image_url;
+
+                    // Update active thumbnail
+                    document.querySelectorAll('.image-thumb').forEach(t => {
+                        t.classList.toggle('active', t.dataset.tags?.toLowerCase().includes(normalized));
+                    });
+                    return;
+                }
+            }
+        };
+
 
         // Switch main image when thumbnail is clicked
         window.selectProductImage = function (imageUrl, thumbEl) {
@@ -1394,6 +1422,11 @@
 
                 updatePrice(v);
                 window.syncDetailPageCart(v);
+
+                // Switch product image to match variant packaging (if tagged image exists)
+                if (v.packaging_type && window.switchImageByPackaging) {
+                    window.switchImageByPackaging(v.packaging_type);
+                }
 
                 // Sync mobile dropdown
                 const mobileSelect = document.getElementById('mobileVariantSelect');
