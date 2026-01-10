@@ -391,10 +391,11 @@
 
             try {
                 console.log('[Sales Init] Starting data fetch...');
-                const [settingsRes, productsRes, categoriesRes] = await Promise.all([
+                const [settingsRes, productsRes, categoriesRes, imagesRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
                     supabase.from('products').select('*').order('display_order', { ascending: true }),
-                    supabase.from('categories').select('*').order('display_order', { ascending: true })
+                    supabase.from('categories').select('*').order('display_order', { ascending: true }),
+                    supabase.from('product_images').select('product_id, image_url, tags, is_default')
                 ]);
 
                 // Check for Supabase errors (these don't throw, they return .error)
@@ -409,6 +410,9 @@
                     console.error('[Sales Init] Categories Error:', categoriesRes.error);
                     throw new Error('Failed to load categories: ' + categoriesRes.error.message);
                 }
+                if (imagesRes.error) {
+                    console.warn('[Sales Init] Images Error:', imagesRes.error);
+                }
 
                 console.log('[Sales Init] Data fetched:', {
                     settings: settingsRes.data ? 'OK' : 'Empty',
@@ -417,6 +421,7 @@
                 });
 
                 state.settings = settingsRes.data || {};
+                state.allProductImages = imagesRes.data || [];
                 preloadCatalogue(); // Pre-load after settings
                 // Filter out hidden products
                 state.allProducts = (productsRes.data || []).filter(p => p.is_visible !== false);
@@ -689,9 +694,11 @@
             window.updateBreadcrumbScroll();
         }
 
-        // --- Helper: Render Individual Card ---
-        function renderProductCard(product, category) {
-            // 1. Parsing Variants & sorting (Smallest First)
+        /**
+         * Helper: Sort variants based on default image tag and price
+         * Rule: Matching Tag first, then Cheapest to Costliest
+         */
+        window.getSortedVariants = function (product) {
             let variants = [];
             try {
                 if (typeof product.quantity_variants === 'string') {
@@ -703,19 +710,49 @@
                 console.warn('Variant parse error', e);
             }
 
-            // Fallback for non-variant products
-            if (variants.length === 0) {
-                variants = [{
+            if (!variants || variants.length === 0) {
+                return [{
                     quantity: product.quantity || 'Standard',
                     price: product.price,
                     mrp: product.mrp,
-                    stock: product.total_stock
+                    stock: product.total_stock,
+                    packaging_type: ''
                 }];
             }
 
-            // Sort variants by MRP (lowest to highest)
-            // Sort variants by Price (lowest to highest) to show cheapest entry
-            const sortedVariants = [...variants].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+            // 1. Identify "Active Tag" from Showcase Image
+            const showcaseUrl = product.showcase_image;
+            const productImages = state.allProductImages || [];
+            const showcaseMeta = productImages.find(img => img.image_url === showcaseUrl && img.product_id === product.id);
+            const activeTags = (showcaseMeta?.tags || []).map(t => t.toLowerCase().trim());
+
+            // 2. Separate Matching Variant (First Match Wins)
+            let matchingIdx = -1;
+            if (activeTags.length > 0) {
+                matchingIdx = variants.findIndex(v => {
+                    const pkg = (v.packaging_type || '').toLowerCase().trim();
+                    return pkg && activeTags.some(tag => tag.includes(pkg) || pkg.includes(tag));
+                });
+            }
+
+            let firstVariant = null;
+            let otherVariants = [...variants];
+
+            if (matchingIdx > -1) {
+                firstVariant = otherVariants.splice(matchingIdx, 1)[0];
+            }
+
+            // 3. Sort Others by Price (Ascending)
+            otherVariants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+
+            // 4. Combine
+            return firstVariant ? [firstVariant, ...otherVariants] : otherVariants;
+        };
+
+        // --- Helper: Render Individual Card ---
+        function renderProductCard(product, category) {
+            // Sort variants: Matching Tag first, then Cheapest to Costliest
+            const sortedVariants = window.getSortedVariants(product);
 
             // Default selected variant (Index 0 after sort)
             const defaultVar = sortedVariants[0];
@@ -950,6 +987,24 @@
             const pkgEl = document.getElementById(`pkg-${productId}`);
             if (pkgEl) {
                 pkgEl.innerText = variant.packaging_type || '';
+            }
+
+            // --- FEATURE: Image Switching on Grid Card ---
+            if (variant.packaging_type) {
+                const normalized = variant.packaging_type.toLowerCase().trim();
+                const productImages = state.allProductImages || [];
+                const matchingImg = productImages.find(img => {
+                    if (img.product_id !== productId) return false;
+                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                    return tags.some(tag => tag.includes(normalized) || normalized.includes(tag));
+                });
+
+                if (matchingImg) {
+                    const cardImg = data.card.querySelector('.product-image');
+                    if (cardImg) {
+                        cardImg.src = matchingImg.image_url;
+                    }
+                }
             }
 
             // Hide Dropdown
@@ -1393,10 +1448,7 @@
 
         // --- Helpers: Components ---
         function renderVariants(p) {
-            let variants = [];
-            try {
-                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
-            } catch (e) { }
+            const variants = window.getSortedVariants(p);
 
             if (variants.length === 0) return '';
 
@@ -1425,12 +1477,7 @@
 
         function initProductInteractions(p) {
             console.log('Product Data for Tabs:', { name: p.product_name, shelf_life: p.shelf_life, is_refrigerated: p.is_refrigerated });
-            const vSelect = document.getElementById('variantSelect');
-            let variants = [];
-            try {
-                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) :
-                    (p.quantity_variants || []);
-            } catch (e) { }
+            const variants = window.getSortedVariants(p);
 
             // Initialize Mobile Variant Trigger (Custom dropdown)
             const mobileVariantLabel = document.getElementById('mobileVariantLabel');
@@ -1447,7 +1494,6 @@
                 // This prevents it from showing on desktop
                 if (mobileVarContainer) {
                     mobileVarContainer.removeAttribute('style'); // Clear inline "display: none" if present
-                    // We DO NOT set display:block here, causing desktop leak. CSS handles it.
                 }
             } else if (mobileVarContainer) {
                 // Single or no variants - FORCE hide the dropdown

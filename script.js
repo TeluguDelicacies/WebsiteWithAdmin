@@ -286,31 +286,9 @@ window.showQuickPreview = function (product) {
     window.quickPreviewState.selectedVariantIndex = 0;
     window.quickPreviewState.variantsOpen = false;
 
-    // Parse variants
-    let variants = [];
-    try {
-        if (typeof product.quantity_variants === 'string') {
-            variants = JSON.parse(product.quantity_variants);
-        } else if (Array.isArray(product.quantity_variants)) {
-            variants = product.quantity_variants;
-        }
-    } catch (e) {
-        console.warn('Variant parse error', e);
-    }
-
-    // Fallback for non-variant products
-    if (variants.length === 0) {
-        variants = [{
-            quantity: product.quantity || 'Standard',
-            price: product.price,
-            mrp: product.mrp,
-            stock: product.total_stock
-        }];
-    }
-
-    // Sort variants by price (smallest first)
-    variants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
-    window.quickPreviewState.variants = variants;
+    // Sort variants: Matching Tag first, then Cheapest to Costliest
+    const sortedVariants = window.getSortedVariants(product);
+    window.quickPreviewState.variants = sortedVariants;
 
     // Populate UI elements  
     const imgEl = document.getElementById('quickPreviewImg');
@@ -357,7 +335,7 @@ window.showQuickPreview = function (product) {
     }
 
     // Set first variant as selected
-    const selectedVariant = variants[0];
+    const selectedVariant = sortedVariants[0];
 
     // Price display
     if (priceEl) priceEl.textContent = `₹${selectedVariant.price}`;
@@ -381,7 +359,7 @@ window.showQuickPreview = function (product) {
 
     // Populate variants list
     if (variantsList) {
-        variantsList.innerHTML = variants.map((v, idx) => `
+        variantsList.innerHTML = sortedVariants.map((v, idx) => `
             <div class="quick-preview-variant-option ${idx === 0 ? 'active' : ''}" onclick="window.selectQuickPreviewVariant(${idx})">
                 <span>${v.quantity}</span>
                 <span class="variant-price">₹${v.price}</span>
@@ -397,7 +375,7 @@ window.showQuickPreview = function (product) {
 
     // View Details button - link to sales page
     const productSlug = product.slug || product.id;
-    const defaultVariant = variants[0];
+    const defaultVariant = sortedVariants[0];
     viewBtn.href = `/sales/${productSlug}${defaultVariant ? `?variant=${encodeURIComponent(defaultVariant.quantity)}` : ''}`;
 
     // Reset flip state on parent gallery
@@ -483,6 +461,24 @@ window.selectQuickPreviewVariant = function (index) {
     if (viewBtn && product) {
         const productSlug = product.slug || product.id;
         viewBtn.href = `/sales/${productSlug}?variant=${encodeURIComponent(variant.quantity)}`;
+    }
+
+    // Check for Matching Image based on Packaging Type
+    if (variant.packaging_type) {
+        const normalized = variant.packaging_type.toLowerCase().trim();
+        const productImages = window.allProductImagesCache || [];
+        const matchingImg = productImages.find(img => {
+            if (img.product_id !== product.id) return false;
+            const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+            return tags.some(tag => tag.includes(normalized) || normalized.includes(tag));
+        });
+
+        if (matchingImg) {
+            const imgEl = document.getElementById('quickPreviewImg');
+            if (imgEl) {
+                imgEl.src = optimizeImage(matchingImg.image_url, { width: 500 });
+            }
+        }
     }
 
     // Check if this variant is in cart
@@ -1095,6 +1091,62 @@ SCROLL ANIMATIONS
 Intersection Observer for element animations on scroll
 ========================================
 */
+
+/**
+ * Helper: Sort variants based on default image tag and price (Ascending)
+ * First: Variant matching Showcase Image Tag
+ * Others: Smallest to Largest Price
+ */
+window.getSortedVariants = function (product) {
+    let variants = [];
+    try {
+        if (typeof product.quantity_variants === 'string') {
+            variants = JSON.parse(product.quantity_variants);
+        } else if (Array.isArray(product.quantity_variants)) {
+            variants = product.quantity_variants;
+        }
+    } catch (e) {
+        console.warn('Variant parse error', e);
+    }
+
+    if (!variants || variants.length === 0) {
+        return [{
+            quantity: product.quantity || 'Standard',
+            price: product.price,
+            mrp: product.mrp,
+            stock: product.total_stock,
+            packaging_type: ''
+        }];
+    }
+
+    // 1. Identify "Active Tag" from Showcase Image
+    const showcaseUrl = product.showcase_image;
+    const productImages = window.allProductImagesCache || [];
+    const showcaseMeta = productImages.find(img => img.image_url === showcaseUrl && img.product_id === product.id);
+    const activeTags = (showcaseMeta?.tags || []).map(t => t.toLowerCase().trim());
+
+    // 2. Separate Matching Variant (First Match Wins)
+    let matchingIdx = -1;
+    if (activeTags.length > 0) {
+        matchingIdx = variants.findIndex(v => {
+            const pkg = (v.packaging_type || '').toLowerCase().trim();
+            return pkg && activeTags.some(tag => tag.includes(pkg) || pkg.includes(tag));
+        });
+    }
+
+    let firstVariant = null;
+    let otherVariants = [...variants];
+
+    if (matchingIdx > -1) {
+        firstVariant = otherVariants.splice(matchingIdx, 1)[0];
+    }
+
+    // 3. Sort Others by Price (Ascending)
+    otherVariants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+
+    // 4. Combine
+    return firstVariant ? [firstVariant, ...otherVariants] : otherVariants;
+};
 
 /**
  * Initializes scroll-triggered animations using Intersection Observer
@@ -2836,13 +2888,14 @@ async function fetchCategories() {
 async function fetchAndRenderProducts() {
     try {
         // Parallel fetch for speed
-        const [productsResp, categories] = await Promise.all([
+        const [productsResp, categories, imagesResp] = await Promise.all([
             // Fetch products sorted by category and then display_order
             supabase.from('products')
                 .select('*')
                 .order('display_order', { ascending: true })
                 .order('created_at', { ascending: false }),
-            fetchCategories()
+            fetchCategories(),
+            supabase.from('product_images').select('product_id, image_url, tags, is_default')
         ]);
 
         const products = productsResp.data;
@@ -2864,6 +2917,7 @@ async function fetchAndRenderProducts() {
         const visibleProducts = (products || []).filter(p => p.is_visible !== false);
 
         window.allProductsCache = visibleProducts;
+        window.allProductImagesCache = imagesResp.data || [];
         renderProducts(visibleProducts, categories);
 
         // Re-initialize animations and controls after rendering
