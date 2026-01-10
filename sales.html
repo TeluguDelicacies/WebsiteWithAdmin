@@ -271,25 +271,26 @@
 
             // Mobile Swipe Navigation
             window.initSwipeNavigation = function () {
-                const gallery = document.querySelector('.product-gallery');
-                if (!gallery) return;
+                const targetArea = document.querySelector('.main-product-area');
+                if (!targetArea) return;
 
                 let touchStartX = 0;
                 let touchEndX = 0;
                 const minSwipeDistance = 50;
 
-                gallery.addEventListener('touchstart', (e) => {
+                targetArea.addEventListener('touchstart', (e) => {
                     touchStartX = e.changedTouches[0].screenX;
                 }, { passive: true });
 
-                gallery.addEventListener('touchend', (e) => {
+                targetArea.addEventListener('touchend', (e) => {
                     touchEndX = e.changedTouches[0].screenX;
                     handleSwipe();
                 }, { passive: true });
 
                 function handleSwipe() {
                     // Only navigate if NOT flipped (image is visible)
-                    const inner = gallery.querySelector('.gallery-inner');
+                    const gallery = document.querySelector('.product-gallery');
+                    const inner = gallery ? gallery.querySelector('.gallery-inner') : null;
                     if (inner && inner.classList.contains('flipped')) return;
 
                     const swipeDistance = touchEndX - touchStartX;
@@ -1229,25 +1230,34 @@
                 // We always repopulate to ensure correct order and fresh state
                 mainCarousel.innerHTML = visibleImages.map((img, idx) => `
                     <div class="carousel-item" id="slide-${idx}">
-                         <img src="${img.image_url}" class="carousel-img" alt="Product view ${idx + 1}">
+                         <img src="${img.image_url}" class="carousel-img" alt="Product view ${idx + 1}"
+                              onerror="window.handleProductImageError(this, '${productId}', '${fallbackImage}')">
                     </div>
                 `).join('');
 
                 // --- 2. POPULATE DOTS ---
                 if (dotsContainer) {
-                    dotsContainer.innerHTML = visibleImages.map((_, idx) => `
-                        <div class="carousel-dot ${idx === 0 ? 'active' : ''}" data-idx="${idx}"></div>
-                    `).join('');
+                    if (visibleImages.length > 1) {
+                        dotsContainer.style.display = 'flex';
+                        dotsContainer.innerHTML = visibleImages.map((_, idx) => `
+                            <div class="carousel-dot ${idx === 0 ? 'active' : ''}" data-idx="${idx}"></div>
+                        `).join('');
+                    } else {
+                        dotsContainer.style.display = 'none';
+                        dotsContainer.innerHTML = '';
+                    }
                 }
 
                 // --- 3. POPULATE THUMBNAILS (Desktop) ---
                 thumbnailStrip.style.display = 'flex';
                 thumbnailStrip.innerHTML = visibleImages.map((img, idx) => `
                     <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
+                         id="thumb-${idx}"
                          onclick="window.scrollToSlide(${idx})"
                          data-idx="${idx}"
                          data-tags="${(img.tags || []).join(',')}">
-                        <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy">
+                        <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy"
+                             onerror="this.parentElement.style.display='none'">
                         ${img.tags && img.tags.length > 0 ? `<span class="thumb-tag">${img.tags[0]}</span>` : ''}
                     </div>
                 `).join('');
@@ -1277,8 +1287,7 @@
                                 dots[i].classList.toggle('active', i === idx);
                             }
                         }
-                        // Update Thumbnails (Optional, maybe distracting on desktop if auto-sync?)
-                        // Let's filtered sync: only if we are mobile? No, good for desktop too.
+                        // Update Thumbnails
                         const thumbs = thumbnailStrip.children;
                         for (let i = 0; i < thumbs.length; i++) {
                             thumbs[i].classList.toggle('active', i === idx);
@@ -1297,6 +1306,41 @@
                 console.warn('Error loading product gallery:', e);
             }
         }
+
+        // Helper: Handle Broken Images in Gallery
+        window.handleProductImageError = function (imgEl, productId, fallbackImage) {
+            const item = imgEl.closest('.carousel-item');
+            if (!item) return;
+
+            const idx = item.id.replace('slide-', '');
+            const dot = document.querySelector(`.carousel-dot[data-idx="${idx}"]`);
+            const thumb = document.getElementById(`thumb-${idx}`);
+
+            // Remove/Hide broken elements
+            item.remove();
+            if (dot) dot.remove();
+            if (thumb) thumb.style.display = 'none';
+
+            // Check if gallery is now empty
+            const carousel = document.getElementById('mainCarousel');
+            if (carousel && carousel.querySelectorAll('.carousel-item').length === 0) {
+                const finalFallback = fallbackImage || state.placeholder;
+                carousel.innerHTML = `
+                    <div class="carousel-item" id="slide-error-fallback">
+                        <img src="${finalFallback}" class="carousel-img" alt="Product image placeholder"
+                             onerror="this.src='${state.placeholder}'">
+                    </div>
+                `;
+                document.getElementById('carouselDots').style.display = 'none';
+                document.getElementById('imageThumbnailStrip').style.display = 'none';
+            } else {
+                // Update dots display if only 1 image remains
+                const dots = document.getElementById('carouselDots');
+                if (dots && dots.querySelectorAll('.carousel-dot').length <= 1) {
+                    dots.style.display = 'none';
+                }
+            }
+        };
 
         // Helper: Scroll to specific slide
         window.scrollToSlide = function (idx) {
