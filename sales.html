@@ -299,9 +299,10 @@
 
                     const deltaX = touchEndX - touchStartX;
                     const deltaY = touchEndY - touchStartY;
+                    const totalMotion = Math.abs(deltaX) + Math.abs(deltaY);
 
-                    // If vertical movement is greater than horizontal, it's likely a scroll
-                    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+                    // Require horizontal motion to be at least 80% of total motion
+                    if (totalMotion === 0 || (Math.abs(deltaX) / totalMotion) < 0.8) return;
 
                     if (Math.abs(deltaX) < minSwipeDistance) return;
 
