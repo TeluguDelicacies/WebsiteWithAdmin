@@ -13,9 +13,11 @@ SELECT
 FROM products
 WHERE showcase_image IS NOT NULL 
   AND showcase_image != ''
+  -- Only insert if this specific image URL is not already in product_images for this product
   AND NOT EXISTS (
-    -- Skip if product already has images in product_images table
-    SELECT 1 FROM product_images pi WHERE pi.product_id = products.id
+    SELECT 1 FROM product_images pi 
+    WHERE pi.product_id = products.id 
+    AND pi.image_url = products.showcase_image
   );
 
 -- Output: Shows how many images were migrated
