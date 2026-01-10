@@ -232,6 +232,223 @@
             background: #f0f9ff;
         }
 
+        /* Bulk Images Upload Zone Styles */
+        .bulk-drop-zone {
+            border: 3px dashed #c4b5fd;
+            border-radius: 16px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        }
+
+        .bulk-drop-zone:hover {
+            border-color: #8b5cf6;
+            background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+            transform: scale(1.01);
+        }
+
+        .bulk-drop-zone.dragover {
+            border-color: #7c3aed;
+            background: #ede9fe;
+            transform: scale(1.02);
+        }
+
+        .bulk-drop-zone i {
+            font-size: 3.5rem;
+            color: #8b5cf6;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .bulk-drop-zone .drop-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #5b21b6;
+            margin: 0 0 5px 0;
+        }
+
+        .bulk-drop-zone .drop-subtext {
+            font-size: 0.9rem;
+            color: #7c3aed;
+            margin: 0;
+        }
+
+        /* Bulk Preview Item */
+        .bulk-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .bulk-preview-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .bulk-preview-item .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .bulk-preview-item .file-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bulk-preview-item .match-result {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .bulk-preview-item .match-result.matched {
+            color: #059669;
+        }
+
+        .bulk-preview-item .match-result.unmatched {
+            color: #dc2626;
+        }
+
+        .bulk-preview-item .match-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .bulk-preview-item .match-badge.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .bulk-preview-item .match-badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .bulk-preview-item .match-badge.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .bulk-preview-item select {
+            padding: 6px 10px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            max-width: 200px;
+        }
+
+        /* Product Image Gallery Styles */
+        .image-gallery-card {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid var(--border-light);
+            transition: all 0.2s;
+        }
+
+        .image-gallery-card:hover {
+            border-color: var(--color-primary-blue);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-gallery-card.is-default {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+        }
+
+        .image-gallery-card img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .image-gallery-card .card-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .image-gallery-card .card-actions button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-secondary);
+        }
+
+        .image-gallery-card .card-actions button:hover {
+            transform: scale(1.1);
+        }
+
+        .image-gallery-card .card-actions .btn-default {
+            color: #9ca3af;
+        }
+
+        .image-gallery-card .card-actions .btn-default.active,
+        .image-gallery-card .card-actions .btn-default:hover {
+            color: #f59e0b;
+            background: #fef3c7;
+        }
+
+        .image-gallery-card .card-actions .btn-delete {
+            color: #ef4444;
+        }
+
+        .image-gallery-card .card-actions .btn-delete:hover {
+            background: #fef2f2;
+        }
+
+        .image-gallery-card .card-tags {
+            padding: 6px 8px;
+            background: #f8fafc;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .image-gallery-card .card-tags select {
+            width: 100%;
+            font-size: 0.7rem;
+            padding: 4px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            background: white;
+        }
+
+        .image-tag {
+            display: inline-block;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            background: var(--color-primary-blue);
+            color: white;
+            border-radius: 10px;
+            margin: 1px;
+        }
+
 
         .admin-container {
             max-width: 100%;
@@ -982,6 +1199,12 @@
                             <i class="fas fa-file-csv"></i><span class="btn-text">CSV</span>
                         </button>
 
+                        <!-- Bulk Images Upload Button (Products Tab Only) -->
+                        <button id="bulkImagesBtn" onclick="openBulkImagesModal()" class="header-action-btn"
+                            style="display: none; color: #8b5cf6; border-color: #8b5cf6;">
+                            <i class="fas fa-images"></i><span class="btn-text">Bulk Images</span>
+                        </button>
+
                         <!-- Add Button (Context-Aware) -->
                         <button id="addBtn" onclick="handleAddClick()" class="header-action-btn">
                             <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
@@ -1576,18 +1799,44 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Product Image</label>
-                        <div class="upload-group">
-                            <input type="text" id="showcaseImage" placeholder="Image URL or Upload File ->"
-                                style="flex: 1;">
-                            <label for="showcaseUpload" class="upload-btn">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload
-                            </label>
-                            <input type="file" id="showcaseUpload" accept="image/*" style="display: none;"
-                                onchange="handleAssetUpload(this, 'showcaseImage')">
+                        <label style="display: flex; align-items: center; justify-content: space-between;">
+                            <span>Product Images</span>
+                            <span id="imageGalleryCount"
+                                style="font-size: 0.8rem; color: var(--text-secondary); font-weight: normal;">0
+                                images</span>
+                        </label>
+
+                        <!-- Image Gallery Grid -->
+                        <div id="productImageGallery"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; min-height: 60px; background: #f8fafc; border: 2px dashed var(--border-medium); border-radius: 12px; padding: 15px;">
+                            <div id="imageGalleryPlaceholder"
+                                style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 20px;">
+                                <i class="fas fa-images"
+                                    style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                                <p style="margin: 0; font-size: 0.85rem;">No images yet. Upload images below.</p>
+                            </div>
                         </div>
-                        <small id="showcaseStatus" style="color: var(--text-secondary);"></small>
+
+                        <!-- Upload Controls -->
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                            <label for="bulkImageUpload" class="admin-btn"
+                                style="cursor: pointer; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none;">
+                                <i class="fas fa-cloud-upload-alt"></i> Upload Images
+                            </label>
+                            <input type="file" id="bulkImageUpload" accept="image/*" multiple style="display: none;">
+                            <span id="bulkUploadStatus" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
+                        </div>
+
+                        <!-- Hidden field to store the default/showcase image URL -->
+                        <input type="hidden" id="showcaseImage">
+
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i>
+                            Upload multiple images. Click the <i class="fas fa-star"></i> to set default. Use tags to
+                            categorize (PET Jar, Glass Jar, etc.)
+                        </p>
                     </div>
+
 
                     <div class="form-group">
                         <label>Quantity Variants</label>
@@ -1968,6 +2217,64 @@
                         <i class="fas fa-check"></i> Apply Changes
                     </button>
                     <button onclick="closeCsvModal()" class="btn-cancel">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Images Upload Modal -->
+        <div id="bulkImagesModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 800px;">
+                <h2><i class="fas fa-images" style="color: #8b5cf6;"></i> Smart Bulk Image Upload</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Upload images with <strong>product names in the filename</strong>. We'll automatically match them!
+                    <br><small>Example: <code>palli-kaaram-front.jpg</code> → matches "Palli Kaaram"</small>
+                </p>
+
+                <!-- Drag-Drop Upload Zone -->
+                <div id="bulkImagesDropZone" class="bulk-drop-zone"
+                    onclick="document.getElementById('bulkImagesInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p class="drop-text">Drag & Drop images here</p>
+                    <p class="drop-subtext">or <u>click to browse</u></p>
+                    <input type="file" id="bulkImagesInput" accept="image/*" multiple style="display: none;">
+                </div>
+
+                <!-- Upload Progress -->
+                <div id="bulkImagesProgress" style="display: none; margin: 15px 0;">
+                    <div style="background: #e5e7eb; border-radius: 10px; height: 8px; overflow: hidden;">
+                        <div id="bulkProgressBar"
+                            style="background: linear-gradient(90deg, #8b5cf6, #7c3aed); height: 100%; width: 0%; transition: width 0.3s;">
+                        </div>
+                    </div>
+                    <p id="bulkProgressText"
+                        style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin-top: 5px;">
+                        Uploading...</p>
+                </div>
+
+                <!-- Preview Grid with Match Status -->
+                <div id="bulkImagesPreview" style="max-height: 350px; overflow-y: auto; margin-top: 15px;">
+                    <!-- Preview items injected here -->
+                </div>
+
+                <!-- Summary Stats -->
+                <div id="bulkImagesSummary"
+                    style="display: none; margin-top: 15px; padding: 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #86efac;">
+                    <span style="font-weight: 600; color: #166534;">
+                        <i class="fas fa-check-circle"></i> <span id="matchedCount">0</span> matched
+                    </span>
+                    <span style="margin-left: 15px; color: #b91c1c;">
+                        <i class="fas fa-question-circle"></i> <span id="unmatchedCount">0</span> unmatched
+                    </span>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="modal-actions" style="margin-top: 20px;">
+                    <button id="bulkUploadSaveBtn" onclick="saveBulkImages()" class="btn-save" style="display: none;">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload All Matched
+                    </button>
+                    <button onclick="closeBulkImagesModal()" class="btn-cancel">
                         <i class="fas fa-times"></i> Close
                     </button>
                 </div>

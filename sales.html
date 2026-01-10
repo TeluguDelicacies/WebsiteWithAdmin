@@ -1080,7 +1080,13 @@
                                     <i class="fas fa-info-circle"></i> View Description
                                 </button>
                             </div>
+                            
+                            <!-- Image Thumbnail Strip (Populated by JS if multiple images exist) -->
+                            <div class="image-thumbnail-strip" id="imageThumbnailStrip" style="display:none; margin-top:15px;">
+                                <!-- Thumbnails will be injected here -->
+                            </div>
                         </div>
+
                         
 
 
@@ -1169,12 +1175,75 @@
             window.initSwipeNavigation();
             window.initImageZoom();
 
+            // Load product images gallery (multi-image support)
+            loadProductImageGallery(product.id, product.showcase_image);
+
             // Final Sync (After all components are ready)
             if (window.syncDetailPageCart) {
                 const vars = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
                 window.syncDetailPageCart(vars[0]);
             }
         }
+
+        // --- Product Image Gallery ---
+        async function loadProductImageGallery(productId, fallbackImage) {
+            const thumbnailStrip = document.getElementById('imageThumbnailStrip');
+            const mainImg = document.querySelector('.gallery-front .main-img');
+            if (!thumbnailStrip || !mainImg) return;
+
+            try {
+                // Fetch images from product_images table
+                const { data: images, error } = await supabase
+                    .from('product_images')
+                    .select('*')
+                    .eq('product_id', productId)
+                    .order('display_order', { ascending: true });
+
+                if (error) {
+                    console.warn('Could not load product images:', error);
+                    return;
+                }
+
+                // If no images in product_images table, keep using single showcase_image
+                if (!images || images.length <= 1) {
+                    thumbnailStrip.style.display = 'none';
+                    return;
+                }
+
+                // Show thumbnail strip and populate
+                thumbnailStrip.style.display = 'flex';
+                thumbnailStrip.innerHTML = images.map((img, idx) => `
+                    <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
+                         onclick="window.selectProductImage('${img.image_url}', this)"
+                         data-idx="${idx}">
+                        <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy">
+                        ${img.tags && img.tags.length > 0 ? `<span class="thumb-tag">${img.tags[0]}</span>` : ''}
+                    </div>
+                `).join('');
+
+                // Set first image as main
+                if (images.length > 0) {
+                    const defaultImg = images.find(i => i.is_default) || images[0];
+                    mainImg.src = defaultImg.image_url;
+                }
+
+            } catch (e) {
+                console.warn('Error loading product gallery:', e);
+            }
+        }
+
+        // Switch main image when thumbnail is clicked
+        window.selectProductImage = function (imageUrl, thumbEl) {
+            const mainImg = document.querySelector('.gallery-front .main-img');
+            if (mainImg) {
+                mainImg.src = imageUrl;
+            }
+
+            // Update active state
+            document.querySelectorAll('.image-thumb').forEach(t => t.classList.remove('active'));
+            if (thumbEl) thumbEl.classList.add('active');
+        };
+
 
         // --- Helpers: Components ---
         function renderVariants(p) {
