@@ -2372,11 +2372,32 @@
                     </p>
 
                     <!-- Filter by Product -->
-                    <div style="margin-bottom: 15px;">
+                    <div
+                        style="margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                         <select id="editImageProductFilter" onchange="window.loadExistingImages(this.value)"
                             style="padding: 10px; border: 1px solid var(--border-medium); border-radius: 8px; width: 100%; max-width: 300px;">
                             <option value="all">All Products</option>
                         </select>
+
+                        <!-- Migration Tool -->
+                        <button onclick="window.migrateSupabaseToCloudinary()" class="btn-secondary"
+                            style="font-size: 0.8rem; padding: 8px 12px; border: 1px dashed #f59e0b; color: #92400e; background: #fffbeb;">
+                            <i class="fas fa-random"></i> Migrate Supabase to Cloudinary
+                        </button>
+                    </div>
+
+                    <!-- Migration Progress -->
+                    <div id="migrationProgress"
+                        style="display: none; margin-bottom: 15px; padding: 10px; background: #fff7ed; border-radius: 8px; border: 1px solid #fed7aa;">
+                        <div
+                            style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
+                            <span id="migrationStatusText">Migrating...</span>
+                            <span id="migrationCount">0/0</span>
+                        </div>
+                        <div style="background: #fed7aa; border-radius: 6px; height: 6px; overflow: hidden;">
+                            <div id="migrationBar"
+                                style="background: #f97316; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                        </div>
                     </div>
 
                     <!-- Existing Images Grid -->

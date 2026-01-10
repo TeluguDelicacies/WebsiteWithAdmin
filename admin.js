@@ -3376,3 +3376,94 @@ const createShim = (name) => {
     'clearCsvUpload'
 ].forEach(createShim);
 console.log('CSV Shims Initialized from admin.js');
+
+// ==========================================
+// MIGRATION TOOL: Supabase -> Cloudinary
+// ==========================================
+window.migrateSupabaseToCloudinary = async function() {
+    if (!confirm("This will migrate images from Supabase Storage to Cloudinary. It may take some time. Continue?")) return;
+
+    // UI Setup
+    const progressDiv = document.getElementById('migrationProgress');
+    const progressBar = document.getElementById('migrationBar');
+    const progressText = document.getElementById('migrationStatusText');
+    const progressCount = document.getElementById('migrationCount');
+    
+    if (progressDiv) progressDiv.style.display = 'block';
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.innerText = 'Scanning for Supabase images...';
+    
+    try {
+        // 1. Fetch images needing migration (URLs containing 'supabase')
+        // We scan product_images table
+        const { data: images, error } = await supabase
+            .from('product_images')
+            .select('id, image_url')
+            .ilike('image_url', '%supabase%');
+
+        if (error) throw error;
+
+        if (!images || images.length === 0) {
+            if (progressText) progressText.innerText = 'No Supabase images found in product_images table.';
+            showToast('No Supabase images found to migrate in product_images table.', 'info');
+            return;
+        }
+
+        const total = images.length;
+        let migrated = 0;
+        let failed = 0;
+
+        if (progressCount) progressCount.innerText = `0/${total}`;
+
+        // 2. Migrate each image
+        for (const img of images) {
+            try {
+                if (progressText) progressText.innerText = `Migrating image ${migrated + failed + 1} of ${total}...`;
+
+                // A. Download image from Supabase
+                const response = await fetch(img.image_url);
+                if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+                const blob = await response.blob();
+                
+                // Convert to File for our upload function
+                const file = new File([blob], `migrated_${img.id}.jpg`, { type: blob.type });
+                
+                // B. Upload to Cloudinary
+                // This uses our NEW uploadImageToStorage which points to Cloudinary
+                const newUrl = await uploadImageToStorage(file);
+                
+                // C. Update Database
+                const { error: updateError } = await supabase
+                    .from('product_images')
+                    .update({ image_url: newUrl })
+                    .eq('id', img.id);
+
+                if (updateError) throw updateError;
+                
+                migrated++;
+            } catch (e) {
+                console.error('Migration failed for image:', img.id, e);
+                failed++;
+            }
+            
+            // Update Progress
+            const pct = Math.round(((migrated + failed) / total) * 100);
+            if (progressBar) progressBar.style.width = `${pct}%`;
+            if (progressCount) progressCount.innerText = `${migrated + failed}/${total}`;
+        }
+        
+        if (progressText) progressText.innerText = `Migration Complete! ${migrated} success, ${failed} failed.`;
+        showToast(`Migration complete: ${migrated} moved to Cloudinary`, 'success');
+        
+        // Refresh grid if on the tab
+        if (window.loadExistingImages) {
+            const filter = document.getElementById('editImageProductFilter');
+            window.loadExistingImages(filter ? filter.value : 'all');
+        }
+        
+    } catch (e) {
+        console.error('Migration error:', e);
+        if (progressText) progressText.innerText = 'Error during migration check console.';
+        showToast('Error migrating images', 'error');
+    }
+};
