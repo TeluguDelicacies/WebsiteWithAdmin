@@ -1380,7 +1380,7 @@ textarea {
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.2s ease-out;
+    transition: none;
     padding: 0 15px;
     margin-bottom: 0;
     font-size: 0.95rem;
@@ -1388,7 +1388,8 @@ textarea {
 }
 
 .info-content-block.active {
-    height: 120px; /* Fixed window height for standardization */
+    height: 120px;
+    /* Fixed window height for standardization */
     opacity: 1;
     visibility: visible;
     padding: 15px;
