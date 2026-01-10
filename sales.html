@@ -1040,7 +1040,7 @@
                     <article class="main-product-area">
                         <!-- Mobile Swipe Hint (replaces prev/next buttons) -->
                         <div class="swipe-hint-row" style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px; padding: 0 10px;">
-                            <span class="swipe-hint-text">← Swipe left or right to browse →</span>
+                            <span class="swipe-hint-text">Swipe image to view photos • Swipe details to change item</span>
                         </div>
                         
                         <div class="gallery-wrapper">
@@ -1049,7 +1049,15 @@
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
-                                        <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
+                                        <!-- Image Carousel -->
+                                        <div class="image-carousel" id="mainCarousel">
+                                            <div class="carousel-item">
+                                                <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
+                                            </div>
+                                        </div>
+                                        <!-- Dots -->
+                                        <div class="carousel-dots" id="carouselDots"></div>
+                                        
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
                                         
                                         <!-- Mobile Variant Dropdown REMOVED FROM GALLERY per user request -->
@@ -1186,10 +1194,13 @@
         }
 
         // --- Product Image Gallery ---
+        // --- Product Image Gallery ---
         async function loadProductImageGallery(productId, fallbackImage) {
             const thumbnailStrip = document.getElementById('imageThumbnailStrip');
-            const mainImg = document.querySelector('.gallery-front .main-img');
-            if (!thumbnailStrip || !mainImg) return;
+            const mainCarousel = document.getElementById('mainCarousel'); // NEW
+            const dotsContainer = document.getElementById('carouselDots'); // NEW
+
+            if (!thumbnailStrip || !mainCarousel) return;
 
             try {
                 // Fetch images from product_images table
@@ -1200,21 +1211,40 @@
                     .order('display_order', { ascending: true });
 
                 if (error) {
-                    console.warn('Could not load product images:', error);
+                    // console.warn('Could not load product images:', error);
                     return;
                 }
 
-                // If no images in product_images table, keep using single showcase_image
-                if (!images || images.length <= 1) {
+                // Filter: Only show images that have TAGS
+                const visibleImages = images.filter(img => img.tags && img.tags.length > 0);
+
+                // If no visible images, keep default static image (already in HTML) but hide strips
+                if (!visibleImages || visibleImages.length === 0) {
                     thumbnailStrip.style.display = 'none';
+                    if (dotsContainer) dotsContainer.style.display = 'none';
                     return;
                 }
 
-                // Show thumbnail strip and populate
+                // --- 1. POPULATE CAROUSEL ---
+                // We always repopulate to ensure correct order and fresh state
+                mainCarousel.innerHTML = visibleImages.map((img, idx) => `
+                    <div class="carousel-item" id="slide-${idx}">
+                         <img src="${img.image_url}" class="carousel-img" alt="Product view ${idx + 1}">
+                    </div>
+                `).join('');
+
+                // --- 2. POPULATE DOTS ---
+                if (dotsContainer) {
+                    dotsContainer.innerHTML = visibleImages.map((_, idx) => `
+                        <div class="carousel-dot ${idx === 0 ? 'active' : ''}" data-idx="${idx}"></div>
+                    `).join('');
+                }
+
+                // --- 3. POPULATE THUMBNAILS (Desktop) ---
                 thumbnailStrip.style.display = 'flex';
-                thumbnailStrip.innerHTML = images.map((img, idx) => `
+                thumbnailStrip.innerHTML = visibleImages.map((img, idx) => `
                     <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
-                         onclick="window.selectProductImage('${img.image_url}', this)"
+                         onclick="window.scrollToSlide(${idx})"
                          data-idx="${idx}"
                          data-tags="${(img.tags || []).join(',')}">
                         <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy">
@@ -1222,13 +1252,45 @@
                     </div>
                 `).join('');
 
-                // Store images globally for variant-based switching
-                window._productImages = images;
+                // Store global images for external logic
+                window._productImages = visibleImages;
 
-                // Set first image as main
-                if (images.length > 0) {
-                    const defaultImg = images.find(i => i.is_default) || images[0];
-                    mainImg.src = defaultImg.image_url;
+
+                // --- 4. CAROUSEL EVENTS (Stop Propagation) ---
+                ['touchstart', 'touchmove', 'touchend'].forEach(evt => {
+                    mainCarousel.addEventListener(evt, (e) => e.stopPropagation(), { padding: true });
+                });
+
+                // --- 5. DOT SYNC ON SCROLL ---
+                let scrollTimeout;
+                mainCarousel.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        const scrollLeft = mainCarousel.scrollLeft;
+                        const width = mainCarousel.clientWidth;
+                        const idx = Math.round(scrollLeft / width);
+
+                        // Update Dots
+                        if (dotsContainer) {
+                            const dots = dotsContainer.children;
+                            for (let i = 0; i < dots.length; i++) {
+                                dots[i].classList.toggle('active', i === idx);
+                            }
+                        }
+                        // Update Thumbnails (Optional, maybe distracting on desktop if auto-sync?)
+                        // Let's filtered sync: only if we are mobile? No, good for desktop too.
+                        const thumbs = thumbnailStrip.children;
+                        for (let i = 0; i < thumbs.length; i++) {
+                            thumbs[i].classList.toggle('active', i === idx);
+                        }
+                    }, 50);
+                });
+
+                // Prioritize Default Image if exists
+                const defaultIdx = visibleImages.findIndex(i => i.is_default);
+                if (defaultIdx > 0) {
+                    // Scroll to it immediately
+                    setTimeout(() => window.scrollToSlide(defaultIdx), 100);
                 }
 
             } catch (e) {
@@ -1236,40 +1298,37 @@
             }
         }
 
+        // Helper: Scroll to specific slide
+        window.scrollToSlide = function (idx) {
+            const mainCarousel = document.getElementById('mainCarousel');
+            if (!mainCarousel) return;
+            const slide = document.getElementById(`slide-${idx}`);
+            if (slide) {
+                // Smooth scroll
+                slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            }
+        };
+
         // Switch image based on variant packaging type  
         window.switchImageByPackaging = function (packagingType) {
             if (!packagingType || !window._productImages) return;
 
-            // Normalize for matching (e.g., "PET Jar" from variant matches "PET Jar" tag)
+            // Normalize for matching
             const normalized = packagingType.toLowerCase().trim();
 
-            for (const img of window._productImages) {
+            const idx = window._productImages.findIndex(img => {
                 const tags = (img.tags || []).map(t => t.toLowerCase().trim());
-                if (tags.some(tag => tag.includes(normalized) || normalized.includes(tag))) {
-                    // Found matching image - switch to it
-                    const mainImg = document.querySelector('.gallery-front .main-img');
-                    if (mainImg) mainImg.src = img.image_url;
+                return tags.some(tag => tag.includes(normalized) || normalized.includes(tag));
+            });
 
-                    // Update active thumbnail
-                    document.querySelectorAll('.image-thumb').forEach(t => {
-                        t.classList.toggle('active', t.dataset.tags?.toLowerCase().includes(normalized));
-                    });
-                    return;
-                }
+            if (idx > -1) {
+                window.scrollToSlide(idx);
             }
         };
 
-
-        // Switch main image when thumbnail is clicked
+        // Deprecated: selectProductImage (Replaced by scrollToSlide)
         window.selectProductImage = function (imageUrl, thumbEl) {
-            const mainImg = document.querySelector('.gallery-front .main-img');
-            if (mainImg) {
-                mainImg.src = imageUrl;
-            }
-
-            // Update active state
-            document.querySelectorAll('.image-thumb').forEach(t => t.classList.remove('active'));
-            if (thumbEl) thumbEl.classList.add('active');
+            // Backward compat or no-op
         };
 
 
