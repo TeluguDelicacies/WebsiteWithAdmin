@@ -275,15 +275,19 @@
                 if (!targetArea) return;
 
                 let touchStartX = 0;
+                let touchStartY = 0;
                 let touchEndX = 0;
-                const minSwipeDistance = 50;
+                let touchEndY = 0;
+                const minSwipeDistance = 75; // Increased for better stability
 
                 targetArea.addEventListener('touchstart', (e) => {
                     touchStartX = e.changedTouches[0].screenX;
+                    touchStartY = e.changedTouches[0].screenY;
                 }, { passive: true });
 
                 targetArea.addEventListener('touchend', (e) => {
                     touchEndX = e.changedTouches[0].screenX;
+                    touchEndY = e.changedTouches[0].screenY;
                     handleSwipe();
                 }, { passive: true });
 
@@ -293,19 +297,23 @@
                     const inner = gallery ? gallery.querySelector('.gallery-inner') : null;
                     if (inner && inner.classList.contains('flipped')) return;
 
-                    const swipeDistance = touchEndX - touchStartX;
+                    const deltaX = touchEndX - touchStartX;
+                    const deltaY = touchEndY - touchStartY;
 
-                    if (Math.abs(swipeDistance) < minSwipeDistance) return;
+                    // If vertical movement is greater than horizontal, it's likely a scroll
+                    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+                    if (Math.abs(deltaX) < minSwipeDistance) return;
 
                     // Find navigation links
                     const prevLink = document.querySelector('.nav-btn-pill.prev:not(.disabled)');
                     const nextLink = document.querySelector('.nav-btn-pill.next:not(.disabled)');
 
-                    if (swipeDistance > 0 && prevLink) {
+                    if (deltaX > 0 && prevLink) {
                         // Swiped right -> go to previous product
                         const prevId = prevLink.getAttribute('data-id');
                         navigateToProduct(prevId, 'left');
-                    } else if (swipeDistance < 0 && nextLink) {
+                    } else if (deltaX < 0 && nextLink) {
                         // Swiped left -> go to next product
                         const nextId = nextLink.getAttribute('data-id');
                         navigateToProduct(nextId, 'right');
