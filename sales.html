@@ -303,6 +303,10 @@
                     const swipeDistance = Math.abs(deltaX);
                     const viewportWidth = window.innerWidth;
 
+                    // 0. Absolute vertical cap - reject curved scrolls
+                    const maxVerticalForSwipe = 40; // px
+                    if (Math.abs(deltaY) > maxVerticalForSwipe) return;
+
                     // 1. Require horizontal motion to be at least 80% of total motion
                     if (totalMotion === 0 || (swipeDistance / totalMotion) < 0.8) return;
 
