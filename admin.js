@@ -2397,7 +2397,8 @@ async function handleBulkFilesSelected(files) {
         if (match.product) matchedCount++;
         else unmatchedCount++;
 
-        // Render preview item
+        // Render preview item - always show dropdown for override capability
+        const selectedProductId = match.product?.id || '';
         const html = `
             <div class="bulk-preview-item" data-idx="${pendingBulkImages.length - 1}">
                 <img src="${objectUrl}" alt="${file.name}">
@@ -2405,19 +2406,17 @@ async function handleBulkFilesSelected(files) {
                     <div class="file-name">${file.name}</div>
                     <div class="match-result ${match.product ? 'matched' : 'unmatched'}">
                         ${match.product
-                ? `<i class="fas fa-check-circle"></i> ${match.product.product_name}${match.tags.length ? ' • ' + match.tags.join(', ') : ''}`
-                : `<i class="fas fa-question-circle"></i> No match found`}
+                ? `<i class="fas fa-check-circle"></i> Auto-matched${match.tags.length ? ' • ' + match.tags.join(', ') : ''}`
+                : `<i class="fas fa-question-circle"></i> Select product below`}
                     </div>
                 </div>
-                ${match.product
-                ? `<span class="match-badge success">${Math.round(match.score)}% Match</span>`
-                : `<select onchange="window.manualMatchProduct(${pendingBulkImages.length - 1}, this.value)">
-                        <option value="">Select Product...</option>
-                        ${allProductsCache.map(p => `<option value="${p.id}">${p.product_name}</option>`).join('')}
-                       </select>`
-            }
+                <select onchange="window.manualMatchProduct(${pendingBulkImages.length - 1}, this.value)" class="bulk-product-select">
+                    <option value="">Select Product...</option>
+                    ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === selectedProductId ? 'selected' : ''}>${p.product_name}</option>`).join('')}
+                </select>
             </div>
         `;
+
 
         preview.insertAdjacentHTML('beforeend', html);
     }
