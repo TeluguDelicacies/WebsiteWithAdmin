@@ -1376,18 +1376,19 @@ textarea {
 .info-content-block {
     background: var(--bg-tertiary);
     border-radius: var(--radius-md);
-    max-height: 0;
+    height: 0;
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    transition: none;
-    /* Removed animation for instant switching */
+    transition: all 0.2s ease-out;
     padding: 0 15px;
     margin-bottom: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 .info-content-block.active {
-    max-height: 250px;
+    height: 120px; /* Fixed window height for standardization */
     opacity: 1;
     visibility: visible;
     padding: 15px;
@@ -3578,54 +3579,31 @@ textarea {
     margin: 0 !important;
 }
 
-/* === TAB CONTENT - AUTO HEIGHT, NO SCROLL === */
-.info-content-block {
-    /* Hidden by default */
-    height: 0;
-    min-height: 0;
-    overflow: hidden;
-    transition: none !important;
-}
-
-.info-content-block.active {
-    height: auto !important;
-    min-height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    padding: 0.8em 1em !important;
-    margin-bottom: 8px;
-}
-
-/* === CONSISTENT TAB CONTENT FONT SIZING === */
-.info-content-block {
-    font-size: 0.8rem !important;
-    line-height: 1.5 !important;
-}
-
+/* === TAB CONTENT - STANDARDIZED WINDOW === */
 .info-content-block p,
 .info-content-block span,
 .info-content-block div,
 .info-content-block li {
-    font-size: inherit !important;
-    line-height: inherit !important;
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
 }
 
 .info-content-block h4,
 .info-content-block strong {
-    font-size: 0.9rem !important;
+    font-size: 1rem !important;
     font-weight: 600;
 }
 
 /* Nutrition table consistent sizing */
 .info-content-block table {
-    font-size: 0.8rem !important;
+    font-size: 0.9rem !important;
     width: 100%;
 }
 
 .info-content-block td,
 .info-content-block th {
     padding: 4px 8px !important;
-    font-size: 0.8rem !important;
+    font-size: 0.9rem !important;
 }
 
 

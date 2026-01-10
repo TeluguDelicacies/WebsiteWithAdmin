@@ -1600,7 +1600,6 @@
                 const nutContent = document.getElementById('nutrition-content');
                 if (nutContent && nutritionData) {
                     nutContent.innerHTML = renderNutrition(nutritionData, v);
-                    if (window.adjustFontSize) window.adjustFontSize(nutContent, true);
                 }
 
                 const menu = document.getElementById('variant-portal-dropdown');
@@ -1672,35 +1671,6 @@
                 if (menu) menu.remove();
             };
 
-            // Define adjustFontSize as window property so it's globally accessible
-            window.adjustFontSize = (el, force = false) => {
-                if (!el) return;
-
-                if (force) delete el.dataset.calculatedSize;
-
-                // IF already sized, just ensure the size is applied and stop
-                if (el.dataset.calculatedSize) {
-                    el.style.fontSize = el.dataset.calculatedSize + 'rem';
-                    return;
-                }
-
-                // TARGET CONTENT HEIGHT
-                const isMobile = window.innerWidth < 768;
-                const targetContentHeight = isMobile ? 94 : 104; // Reduced from 130 per 1/5th rule
-
-                // Reset to base size before measurement
-                let size = 1.25;
-                el.style.fontSize = size + 'rem';
-
-                let iterations = 0;
-                while (el.scrollHeight > targetContentHeight && size > 0.72 && iterations < 20) {
-                    size -= 0.02;
-                    el.style.fontSize = size + 'rem';
-                    iterations++;
-                }
-
-                el.dataset.calculatedSize = size;
-            };
 
             // Sync Function is defined globally at window.syncDetailPageCart
             // calling it here to ensure initial state
