@@ -2030,22 +2030,37 @@ async function fetchProductImages(productId) {
     }
 }
 
-// Upload single image to storage and return URL
+// Cloudinary Configuration
+const CLOUDINARY_CLOUD_NAME = 'telugudelicacies';
+const CLOUDINARY_UPLOAD_PRESET = 'product_images'; // User must create this preset in Cloudinary settings
+
+// Upload single image to Cloudinary and return URL
 async function uploadImageToStorage(file) {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'products'); // Organize in products folder
 
-    const { data, error } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file);
+    try {
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
 
-    if (error) throw error;
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Cloudinary upload failed');
+        }
 
-    const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
-    return publicUrl;
+        const data = await response.json();
+        return data.secure_url; // Return the HTTPS URL
+    } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        throw error;
+    }
 }
 
 // Bulk upload images
