@@ -307,6 +307,10 @@
                     const maxVerticalForSwipe = 40; // px
                     if (Math.abs(deltaY) > maxVerticalForSwipe) return;
 
+                    // 0b. Angle-based detection - reject diagonal swipes (must be within ±15° of horizontal)
+                    const angle = Math.abs(Math.atan2(deltaY, deltaX) * (180 / Math.PI));
+                    if (angle > 15 && angle < 165) return; // Too diagonal = not a horizontal swipe
+
                     // 1. Require horizontal motion to be at least 80% of total motion
                     if (totalMotion === 0 || (swipeDistance / totalMotion) < 0.8) return;
 
