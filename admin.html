@@ -2391,79 +2391,67 @@
                             </select>
                         </div>
 
-                        <!-- Migration Tools -->
-                        <div style="display:flex; gap: 8px;">
-                            <button onclick="window.migrateSupabaseToCloudinary()" class="btn-secondary"
-                                style="font-size: 0.8rem; padding: 8px 12px; border: 1px dashed #f59e0b; color: #92400e; background: #fffbeb;"
-                                title="Migrate gallery images (from product_images table)">
-                                <i class="fas fa-images"></i> Migrate Gallery
+
+                        <!-- Migration Progress -->
+                        <div id="migrationProgress"
+                            style="display: none; margin-bottom: 15px; padding: 10px; background: #fff7ed; border-radius: 8px; border: 1px solid #fed7aa;">
+                            <div
+                                style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
+                                <span id="migrationStatusText">Migrating...</span>
+                                <span id="migrationCount">0/0</span>
+                            </div>
+                            <div style="background: #fed7aa; border-radius: 6px; height: 6px; overflow: hidden;">
+                                <div id="migrationBar"
+                                    style="background: #f97316; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Existing Images Grid -->
+                        <div id="existingImagesGrid" style="max-height: 350px; overflow-y: auto;">
+                            <p style="text-align: center; color: var(--text-secondary); padding: 30px;">
+                                Select a filter or click "Edit Existing" tab to load images.
+                            </p>
+                        </div>
+
+                        <!-- Edit Actions -->
+                        <div class="modal-actions" style="margin-top: 20px;">
+                            <button id="saveExistingImagesBtn" onclick="window.saveExistingImageChanges()"
+                                class="btn-save">
+                                <i class="fas fa-save"></i> Save Changes
                             </button>
-                            <button onclick="window.migrateProductsTableToCloudinary()" class="btn-secondary"
-                                style="font-size: 0.8rem; padding: 8px 12px; border: 1px dashed #3b82f6; color: #1e40af; background: #eff6ff;"
-                                title="Migrate main Showcase and Info images (from products table)">
-                                <i class="fas fa-star"></i> Migrate Main
-                            </button>
                         </div>
-                    </div>
+                    </div> <!-- End bulkEditSection -->
 
-                    <!-- Migration Progress -->
-                    <div id="migrationProgress"
-                        style="display: none; margin-bottom: 15px; padding: 10px; background: #fff7ed; border-radius: 8px; border: 1px solid #fed7aa;">
-                        <div
-                            style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
-                            <span id="migrationStatusText">Migrating...</span>
-                            <span id="migrationCount">0/0</span>
-                        </div>
-                        <div style="background: #fed7aa; border-radius: 6px; height: 6px; overflow: hidden;">
-                            <div id="migrationBar"
-                                style="background: #f97316; height: 100%; width: 0%; transition: width 0.3s;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Existing Images Grid -->
-                    <div id="existingImagesGrid" style="max-height: 350px; overflow-y: auto;">
-                        <p style="text-align: center; color: var(--text-secondary); padding: 30px;">
-                            Select a filter or click "Edit Existing" tab to load images.
-                        </p>
-                    </div>
-
-                    <!-- Edit Actions -->
-                    <div class="modal-actions" style="margin-top: 20px;">
-                        <button id="saveExistingImagesBtn" onclick="window.saveExistingImageChanges()" class="btn-save">
-                            <i class="fas fa-save"></i> Save Changes
+                    <!-- Close Button -->
+                    <div class="modal-actions"
+                        style="margin-top: 10px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
+                        <button onclick="closeBulkImagesModal()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Close
                         </button>
                     </div>
-                </div> <!-- End bulkEditSection -->
-
-                <!-- Close Button -->
-                <div class="modal-actions" style="margin-top: 10px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
-                    <button onclick="closeBulkImagesModal()" class="btn-cancel">
-                        <i class="fas fa-times"></i> Close
-                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Toast Container -->
-        <div id="toast-container"></div>
+            <!-- Toast Container -->
+            <div id="toast-container"></div>
 
-        <!-- Mobile Bottom Navigation (Hidden on Desktop) -->
-        <nav id="mobile-bottom-nav">
-            <button onclick="switchView('products')" data-view="products"><i
-                    class="fas fa-box"></i><span>Products</span></button>
-            <button onclick="switchView('categories')" data-view="categories"><i
-                    class="fas fa-tags"></i><span>Categories</span></button>
-            <button onclick="switchView('testimonials')" data-view="testimonials"><i
-                    class="fas fa-quote-right"></i><span>Reviews</span></button>
-            <button onclick="switchView('why-us')" data-view="why-us"><i class="fas fa-star"></i><span>Why
-                    Us</span></button>
-            <button onclick="switchView('sections')" data-view="sections"><i
-                    class="fas fa-layer-group"></i><span>Sections</span></button>
-            <button onclick="switchView('settings')" data-view="settings"><i
-                    class="fas fa-cog"></i><span>Settings</span></button>
-        </nav>
-        <script type="module" src="admin.js"></script>
-        <script type="module" src="csv_manager.js"></script>
+            <!-- Mobile Bottom Navigation (Hidden on Desktop) -->
+            <nav id="mobile-bottom-nav">
+                <button onclick="switchView('products')" data-view="products"><i
+                        class="fas fa-box"></i><span>Products</span></button>
+                <button onclick="switchView('categories')" data-view="categories"><i
+                        class="fas fa-tags"></i><span>Categories</span></button>
+                <button onclick="switchView('testimonials')" data-view="testimonials"><i
+                        class="fas fa-quote-right"></i><span>Reviews</span></button>
+                <button onclick="switchView('why-us')" data-view="why-us"><i class="fas fa-star"></i><span>Why
+                        Us</span></button>
+                <button onclick="switchView('sections')" data-view="sections"><i
+                        class="fas fa-layer-group"></i><span>Sections</span></button>
+                <button onclick="switchView('settings')" data-view="settings"><i
+                        class="fas fa-cog"></i><span>Settings</span></button>
+            </nav>
+            <script type="module" src="admin.js"></script>
+            <script type="module" src="csv_manager.js"></script>
 </body>
 
 </html>

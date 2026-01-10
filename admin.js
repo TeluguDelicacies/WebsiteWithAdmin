@@ -2499,12 +2499,42 @@ window.loadExistingImages = async function () {
                         `).join('')}
                     </div>
                 </div>
+                <button onclick="window.deleteExistingImage('${img.id}')" class="btn-delete-small" title="Delete Image" style="position: absolute; top: 10px; right: 10px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; padding: 4px 8px; cursor: pointer;">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </div>
         `).join('');
 
     } catch (e) {
         console.error('Error loading existing images:', e);
         grid.innerHTML = '<p style="text-align:center; padding:30px; color:#dc2626;">Error loading images. Make sure the product_images table exists.</p>';
+    }
+};
+
+// Delete existing image
+window.deleteExistingImage = async function (id) {
+    if (!confirm('Are you sure you want to delete this image? This cannot be undone.')) return;
+
+    // Optimistic UI update
+    const item = document.querySelector(`.bulk-preview-item[data-id="${id}"]`);
+    if (item) item.style.opacity = '0.5';
+
+    try {
+        const { error } = await supabase
+            .from('product_images')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // Remove from UI
+        if (item) item.remove();
+        showToast('Image deleted successfully', 'success');
+
+    } catch (e) {
+        console.error('Error deleting image:', e);
+        if (item) item.style.opacity = '1';
+        showToast('Error deleting image', 'error');
     }
 };
 
