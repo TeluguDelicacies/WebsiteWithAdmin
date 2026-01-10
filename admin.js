@@ -2549,8 +2549,8 @@ window.updateExistingImageProduct = function (imageId, newProductId) {
     existingImagesEdits[imageId].product_id = newProductId;
 };
 
-// Track tag change
-window.updateExistingImageTag = function (imageId, tag, isChecked) {
+// Track tag change & Enforce Unique Tags
+window.updateExistingImageTag = async function (imageId, tag, isChecked) {
     const img = existingImagesData.find(i => i.id === imageId);
     if (!img) return;
 
@@ -2561,21 +2561,67 @@ window.updateExistingImageTag = function (imageId, tag, isChecked) {
         existingImagesEdits[imageId].tags = [...(img.tags || [])];
     }
 
+    // CHECK FOR DUPLICATES IF ADDING A TAG
+    if (isChecked) {
+        // Find current product ID (could be edited or original)
+        const currentProductId = existingImagesEdits[imageId]?.product_id || img.product_id;
+
+        // Check if any OTHER image for this product already has this tag
+        const duplicateImg = existingImagesData.find(otherImg => {
+            if (otherImg.id === imageId) return false; // Skip self
+
+            // Check product match (handle if other image was also edited)
+            const otherProductId = existingImagesEdits[otherImg.id]?.product_id || otherImg.product_id;
+            if (otherProductId !== currentProductId) return false;
+
+            // Check if it has the tag (handle edits)
+            const otherTags = existingImagesEdits[otherImg.id]?.tags || otherImg.tags || [];
+            return otherTags.includes(tag);
+        });
+
+        if (duplicateImg) {
+            const confirmReplace = confirm(
+                `Product already has an image tagged "${tag}".\n\nDo you want to MOVE this tag to the current image?`
+            );
+
+            if (!confirmReplace) {
+                // Revert checkbox in UI
+                const checkbox = document.querySelector(`.bulk-preview-item[data-id="${imageId}"] input[onchange*="'${tag}'"]`);
+                if (checkbox) checkbox.checked = false;
+                return; // Stop
+            }
+
+            // Remove tag from the OTHER image
+            if (!existingImagesEdits[duplicateImg.id]) {
+                existingImagesEdits[duplicateImg.id] = { tags: [...(duplicateImg.tags || [])] };
+            }
+            if (!existingImagesEdits[duplicateImg.id].tags) {
+                existingImagesEdits[duplicateImg.id].tags = [...(duplicateImg.tags || [])];
+            }
+            // Remove the tag
+            existingImagesEdits[duplicateImg.id].tags = existingImagesEdits[duplicateImg.id].tags.filter(t => t !== tag);
+
+            // Update UI for the OTHER image (uncheck it)
+            const otherCheckbox = document.querySelector(`.bulk-preview-item[data-id="${duplicateImg.id}"] input[onchange*="'${tag}'"]`);
+            if (otherCheckbox) {
+                otherCheckbox.checked = false;
+                otherCheckbox.parentElement.classList.remove('active');
+            }
+            showToast(`Tag "${tag}" moved to this image.`, 'info');
+        }
+    }
+
     if (isChecked && !existingImagesEdits[imageId].tags.includes(tag)) {
         existingImagesEdits[imageId].tags.push(tag);
     } else if (!isChecked) {
         existingImagesEdits[imageId].tags = existingImagesEdits[imageId].tags.filter(t => t !== tag);
     }
 
-    // Update chip visual
-    const itemEl = document.querySelector(`.bulk-preview-item[data-id="${imageId}"]`);
-    if (itemEl) {
-        const chips = itemEl.querySelectorAll('.bulk-tag-chip');
-        chips.forEach(chip => {
-            if (chip.textContent.trim() === tag) {
-                chip.classList.toggle('active', isChecked);
-            }
-        });
+    // Update current chip visual
+    const checkbox = document.querySelector(`.bulk-preview-item[data-id="${imageId}"] input[onchange*="'${tag}'"]`);
+    if (checkbox && checkbox.parentElement) {
+        if (isChecked) checkbox.parentElement.classList.add('active');
+        else checkbox.parentElement.classList.remove('active');
     }
 };
 
