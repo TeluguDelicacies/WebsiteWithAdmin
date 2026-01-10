@@ -557,13 +557,24 @@ Persistent header with hamburger menu and WhatsApp integration
   align-items: center;
   gap: 8px;
   text-decoration: none;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .mobile-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-1);
   margin-left: auto;
-  margin-right: var(--space-2);
+  margin-right: var(--space-1);
+  flex-shrink: 0;
+}
+
+/* Make buttons smaller on mobile for accessibility (large font) users */
+.mobile-actions .nav-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 0.95rem;
 }
 
 @media (min-width: 1024px) {
@@ -610,14 +621,22 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .logo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   object-fit: contain;
   background: transparent !important;
   border: none;
   animation: logoGlowAndWiggle 3s ease-in-out infinite !important;
   transition: all var(--transition-normal);
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .logo {
+    width: 50px;
+    height: 50px;
+  }
 }
 
 .logo:hover {
@@ -660,7 +679,6 @@ Persistent header with hamburger menu and WhatsApp integration
   font-family: 'Mallanna', sans-serif;
   color: var(--text-telugu);
   margin-top: 2px;
-  /* Balanced gap */
   line-height: 1.2;
   font-weight: 600;
   opacity: 0.9;
