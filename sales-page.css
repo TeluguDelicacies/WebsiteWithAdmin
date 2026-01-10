@@ -2920,6 +2920,33 @@ textarea {
     display: flex !important;
 }
 
+/* Sidebar Add Button and Qty Controls - Consistent Height */
+.sim-item .btn-add,
+.sim-item .sidebar-qty-controls {
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
+    padding: 0 12px;
+    font-size: 0.8rem;
+    line-height: 28px;
+    box-sizing: border-box;
+}
+
+.sim-item .sidebar-qty-controls button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 28px;
+}
+
+.sim-item .sidebar-qty-controls .qty-val {
+    min-width: 24px;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 28px;
+}
+
 /* =========================================
    SMART BREADCRUMBS
 ========================================= */
