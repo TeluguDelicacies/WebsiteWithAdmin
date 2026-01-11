@@ -2294,9 +2294,6 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px !important;
 }
 
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
 .qty-counter button {
   background: transparent;
   border: none;
