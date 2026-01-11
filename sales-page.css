@@ -1799,25 +1799,26 @@ textarea {
         justify-content: center !important;
         border-radius: 20px !important;
         /* Pill shape */
-        border: 1px solid var(--border-medium) !important;
+        border: 1px solid var(--border-light) !important;
         background: white !important;
         color: var(--text-secondary) !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         display: flex !important;
         align-items: center !important;
         white-space: nowrap !important;
+        box-shadow: var(--shadow-sm);
     }
 
     .info-btn i {
         display: none !important;
-        /* Remove icon for cleaner 'Add button' look if needed, or keep for style */
     }
 
     .info-btn.active {
-        background: var(--color-primary-blue) !important;
+        background: var(--color-brand-blue-primary) !important;
         color: white !important;
-        border-color: var(--color-primary-blue) !important;
-        box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2) !important;
+        border: 2px solid var(--color-brand-blue-primary) !important;
+        box-shadow: 0 6px 15px rgba(0, 119, 182, 0.3) !important;
+        transform: translateY(-1px);
     }
 
     .info-content-wrapper {
@@ -2411,6 +2412,10 @@ textarea {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+.qty-btn-sm:hover {
+    background: rgba(0, 119, 182, 0.1);
+}
+
 .qty-val-sm {
     font-size: 0.8rem;
     font-weight: 600;
@@ -2501,26 +2506,25 @@ textarea {
 .qty-control-lg {
     display: flex;
     align-items: center;
-    background: #FFF9C4 !important;
-    /* Yellow theme */
-    border: 1px solid #FBC02D !important;
+    background: var(--color-brand-blue-primary) !important;
+    color: var(--color-white) !important;
+    border: none !important;
     border-radius: 50px !important;
-    padding: 4px 12px;
+    padding: 6px 18px;
     width: fit-content;
-    gap: 0.8rem;
+    gap: 1rem;
     margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .qty-btn-lg {
-    width: auto;
-    min-width: 44px;
-    height: auto;
-    min-height: 44px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: none !important;
-    background: transparent !important;
-    color: #333;
-    font-size: 1.4rem;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    font-size: 1.2rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
@@ -2529,9 +2533,8 @@ textarea {
     transition: all 0.2s;
 }
 
-
 .qty-btn-lg:hover {
-    background: rgba(251, 192, 45, 0.3) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
 }
 
 .qty-val-lg {
@@ -2545,9 +2548,9 @@ textarea {
     width: auto;
     min-width: 120px;
     /* Smaller, compact pill */
-    background: #FFF9C4 !important;
-    border: 1px solid #FBC02D !important;
-    color: #333;
+    background: var(--color-brand-blue-primary) !important;
+    border: 1px solid var(--color-brand-blue-primary) !important;
+    color: white !important;
     padding: 8px 20px;
     border-radius: 20px !important;
     /* Same as sidebar Add button */
@@ -2999,12 +3002,13 @@ textarea {
 .sidebar-qty-controls {
     display: none !important;
     width: 75px !important;
-    /* Reduced width by ~30% from original ~104px */
     justify-content: space-between !important;
-    background: #FFF9C4 !important;
-    border: 1px solid #FBC02D !important;
+    background: var(--color-brand-blue-primary) !important;
+    border: none !important;
     border-radius: 12px !important;
     overflow: hidden;
+    color: white !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-qty-controls.show {
@@ -3034,17 +3038,23 @@ textarea {
 }
 
 .sim-item .sidebar-qty-controls button {
-    width: 22px;
-    /* Reduced from 24px */
-    height: 24px;
+    width: 24px;
+    height: 100%;
     padding: 0;
-    font-size: 0.9rem;
-    line-height: 24px;
-    background: transparent !important;
+    font-size: 1rem;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
     border: none !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sim-item .sidebar-qty-controls button:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
 }
 
 .sim-item .sidebar-qty-controls .qty-val {
