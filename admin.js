@@ -315,8 +315,10 @@ window.switchView = (view) => {
     if (saveOrderBtn) saveOrderBtn.style.display = 'none';
     const csvBtn = document.getElementById('csvBtn');
     if (csvBtn) csvBtn.style.display = 'none';
-    const bulkImagesBtn = document.getElementById('bulkImagesBtn');
-    if (bulkImagesBtn) bulkImagesBtn.style.display = 'none';
+    // bulkImagesBtn is now managed by its parent container (Images tab) or shown explicitly in Products if needed
+    // But since the user wants it in Images section, we can let it be hidden by default and shown there.
+    const bulkSyncControls = document.getElementById('bulkSyncControls');
+    if (bulkSyncControls) bulkSyncControls.style.display = 'none';
 
     // Reset buttons active state
     [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
@@ -338,7 +340,7 @@ window.switchView = (view) => {
             addBtnText.textContent = 'Add Product';
         }
         if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
-        if (bulkImagesBtn) bulkImagesBtn.style.display = 'inline-flex'; // Show Bulk Images button
+        if (bulkSyncControls) bulkSyncControls.style.display = 'flex'; // Show Bulk Sync button in Products too
 
         populateCategoryFilter();
         fetchProducts();
@@ -379,6 +381,7 @@ window.switchView = (view) => {
     } else if (view === 'images') {
         if (imagesContainer) imagesContainer.style.display = 'block';
         activeStyle(viewImagesBtn);
+        if (bulkSyncControls) bulkSyncControls.style.display = 'flex'; // Also show in Images tab
         showImagesProductGrid(); // Default to grid view
         fetchProducts(); // Refresh product list for the grid
 
@@ -1008,6 +1011,11 @@ async function fetchProducts() {
 
         await populateCategoryFilter(); // WAIT for categories to ensure dropdown is ready
         renderProductList(); // Render based on current filter state
+
+        // Also refresh images grid if visible
+        if (typeof renderImagesProductGrid === 'function' && document.getElementById('imagesContainer')?.style.display !== 'none') {
+            renderImagesProductGrid();
+        }
     } catch (error) {
         console.error('Fetch error:', error);
         productList.innerHTML = `<p style="color: red; text-align: center;">Error: ${error.message}</p>`;
@@ -2241,7 +2249,9 @@ window.renderImageGallery = (targetContainerId = 'productImageGallery') => {
     if (!gallery) return;
     gallery.innerHTML = ''; // Clear gallery
 
-    const countEl = document.getElementById('imageGalleryCount');
+    // Update count based on which gallery is being rendered
+    const countId = targetContainerId === 'productGalleryContainer' ? 'managerGalleryCount' : 'imageGalleryCount';
+    const countEl = document.getElementById(countId);
     if (countEl) {
         countEl.textContent = `${currentProductImages.length} image${currentProductImages.length !== 1 ? 's' : ''}`;
     }
@@ -2265,7 +2275,7 @@ window.renderImageGallery = (targetContainerId = 'productImageGallery') => {
         card.dataset.imageId = img.id;
 
         card.innerHTML = `
-            <img src="${img.image_url}" alt="Product image ${index + 1}" onerror="this.src='./images/placeholder-product.jpg'">
+            <img src="${img.image_url}" alt="Product image ${index + 1}" onerror="this.src=PLACEHOLDER_IMAGE">
             <div class="card-actions">
                 <button type="button" class="btn-default ${img.is_default ? 'active' : ''}" 
                         onclick="setDefaultImage('${img.id}')" title="Set as default">
@@ -2430,7 +2440,11 @@ const setupImageGalleryListeners = () => {
                     });
                 }
                 await saveProductImages(productId);
-                renderImageGallery();
+                if (currentView === 'images') {
+                    renderImageGallery('productGalleryContainer');
+                } else {
+                    renderImageGallery();
+                }
                 showToast(`Uploaded ${files.length} images`);
             } catch (err) {
                 showToast(err.message, 'error');
@@ -2479,7 +2493,7 @@ window.renderImagesProductGrid = () => {
         return `
             <div class="image-manage-card" onclick="manageProductImages('${product.id}')">
                 <div class="img-wrapper">
-                    <img src="${defaultImg}" onerror="this.src='/images/placeholder-product.jpg'">
+                    <img src="${defaultImg}" onerror="this.src=PLACEHOLDER_IMAGE">
                     <span class="image-count">${productImages.length}</span>
                 </div>
                 <h4>${product.product_name}</h4>
@@ -2499,14 +2513,19 @@ window.manageProductImages = async (productId) => {
     const bulkControls = document.getElementById('bulkSyncControls');
 
     // Update UI elements
-    document.getElementById('managerProductName').textContent = product.product_name;
-    document.getElementById('managerProductCategory').textContent = product.product_category;
-    document.getElementById('managerImageUpload').dataset.productId = productId;
+    const nameEl = document.getElementById('managerProductName');
+    const catEl = document.getElementById('managerProductCategory');
+    const uploadEl = document.getElementById('managerImageUpload');
+    const thumbEl = document.getElementById('managerProductThumbnail');
+
+    if (nameEl) nameEl.textContent = product.product_name;
+    if (catEl) catEl.textContent = product.product_category;
+    if (uploadEl) uploadEl.dataset.productId = productId;
 
     // Set thumbnail for the manager header
     const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
     const defaultImg = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || PLACEHOLDER_IMAGE;
-    document.getElementById('managerProductThumbnail').src = defaultImg;
+    if (thumbEl) thumbEl.src = defaultImg;
 
     if (grid) grid.style.display = 'none';
     if (manager) manager.style.display = 'block';
@@ -2530,7 +2549,23 @@ window.handleBulkSyncDefault = async () => {
 
     if (!confirm(`Are you sure you want to set the default image for ALL products to the image tagged "${tag}"?`)) return;
 
-    showLoading(true);
+    const progressArea = document.getElementById('bulkProgressArea');
+    const progressBar = document.getElementById('bulkProgressBar');
+    const statusPercent = document.getElementById('bulkStatusPercent');
+    const statusText = document.getElementById('bulkStatusText');
+    const statusTitle = document.getElementById('bulkStatusTitle');
+
+    if (progressArea) progressArea.style.display = 'block';
+    if (statusTitle) statusTitle.textContent = 'Syncing Default Images...';
+
+    const updateProgress = (percent, text) => {
+        if (progressBar) progressBar.style.width = `${percent}%`;
+        if (statusPercent) statusPercent.textContent = `${Math.round(percent)}%`;
+        if (statusText) statusText.textContent = text;
+    };
+
+    updateProgress(0, 'Fetching all image metadata from database...');
+
     try {
         const { data: allImages, error } = await supabase
             .from('product_images')
@@ -2545,40 +2580,61 @@ window.handleBulkSyncDefault = async () => {
             productsImages[img.product_id].push(img);
         });
 
+        const productIds = Object.keys(productsImages);
         let updatedCount = 0;
-        const updates = [];
+        let skippedCount = 0;
+        let processedCount = 0;
+        const total = productIds.length;
 
-        for (const productId in productsImages) {
+        updateProgress(5, `Scan complete. Found ${total} products with images. Starting update...`);
+
+        for (const productId of productIds) {
+            processedCount++;
             const images = productsImages[productId];
+            // Find the image with the target tag
             const targetImg = images.find(img => (img.tags || []).some(t => t.toLowerCase() === tag.toLowerCase()));
 
             if (targetImg) {
-                // If the target is not already default
                 if (!targetImg.is_default) {
-                    // Update all images for this product to NOT be default, then set target as default
-                    updates.push(
+                    const progress = 5 + (processedCount / total) * 90;
+                    updateProgress(progress, `Updating product ${processedCount}/${total}: Setting default for ${productId}...`);
+
+                    // Perform updates
+                    await Promise.all([
                         supabase.from('product_images').update({ is_default: false }).eq('product_id', productId),
                         supabase.from('product_images').update({ is_default: true }).eq('id', targetImg.id)
-                    );
+                    ]);
                     updatedCount++;
+                } else {
+                    skippedCount++;
+                    updateProgress(5 + (processedCount / total) * 90, `Skipping product ${processedCount}/${total}: Already default.`);
                 }
+            } else {
+                skippedCount++;
+                updateProgress(5 + (processedCount / total) * 90, `Skipping product ${processedCount}/${total}: No image with tag "${tag}".`);
             }
         }
 
-        if (updates.length > 0) {
-            await Promise.all(updates);
-            showToast(`Successfully updated defaults for ${updatedCount} products`);
-        } else {
-            showToast(`No products found with image tag "${tag}"`, 'info');
-        }
+        updateProgress(100, `Sync completed! Updated: ${updatedCount}, Skipped: ${skippedCount}`);
+        if (statusTitle) statusTitle.textContent = 'Sync Completed Successfully';
+        showToast(`Successfully updated defaults for ${updatedCount} products`);
 
-        // Refresh global cache and grid
-        fetchProducts();
+        // Refresh global cache and ALL views
+        await fetchProducts();
+        renderImagesProductGrid(); // Refresh the images grid
+
+        // Hide progress after a delay
+        setTimeout(() => {
+            if (progressArea) progressArea.style.display = 'none';
+        }, 5000);
+
     } catch (err) {
         console.error('Bulk sync error:', err);
+        if (statusTitle) statusTitle.textContent = 'Sync Failed';
+        if (statusText) statusText.textContent = 'Error: ' + err.message;
         showToast('Sync failed: ' + err.message, 'error');
-    } finally {
-        showLoading(false);
+
+        // Don't hide automatically on error so user can see what happened
     }
 };
 

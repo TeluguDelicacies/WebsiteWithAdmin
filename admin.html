@@ -1014,6 +1014,15 @@
             color: var(--text-primary);
         }
 
+        .image-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+            min-height: 60px;
+            padding: 10px;
+        }
+
         /* View Containers */
         .view-container {
             background: white;
@@ -1331,11 +1340,24 @@
                             <i class="fas fa-file-csv"></i><span class="btn-text">CSV</span>
                         </button>
 
-                        <!-- Bulk Images Upload Button (Products Tab Only) -->
-                        <button id="bulkImagesBtn" onclick="openBulkImagesModal()" class="header-action-btn"
-                            style="display: none; color: #8b5cf6; border-color: #8b5cf6;">
-                            <i class="fas fa-images"></i><span class="btn-text">Bulk Images</span>
-                        </button>
+                        <!-- Bulk Sync Defaults (Visible in Products/Images) -->
+                        <div id="bulkSyncControls" style="display: none; align-items: center; gap: 8px;">
+                            <select id="bulkTagSelector" class="header-action-btn"
+                                style="width: auto; height: 35px; padding: 0 10px; font-size: 0.85rem;">
+                                <option value="">Sync Default By Tag</option>
+                                <option value="Front View">Front View</option>
+                                <option value="Back View">Back View</option>
+                                <option value="Lifestyle">Lifestyle</option>
+                                <option value="PET Jar">PET Jar</option>
+                                <option value="Glass Jar">Glass Jar</option>
+                                <option value="Standup Pouch">Standup Pouch</option>
+                                <option value="Packet">Packet</option>
+                            </select>
+                            <button onclick="handleBulkSyncDefault()" class="header-action-btn"
+                                style="color: var(--color-primary-blue); border-color: var(--color-primary-blue); height: 35px;">
+                                <i class="fas fa-sync-alt"></i><span class="btn-text">Sync</span>
+                            </button>
+                        </div>
 
                         <!-- Add Button (Context-Aware) -->
                         <button id="addBtn" onclick="handleAddClick()" class="header-action-btn">
@@ -1348,6 +1370,23 @@
             <!-- Products List (Cards) -->
             <div id="productListContainer" class="view-container">
                 <!-- Products injected here -->
+            </div>
+
+            <!-- Bulk Operation Progress Area -->
+            <div id="bulkProgressArea" class="view-container" style="display: none; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 id="bulkStatusTitle" style="margin: 0; color: var(--color-primary-blue);">Bulk Operation
+                        Running...</h4>
+                    <span id="bulkStatusPercent" style="font-weight: bold; color: var(--color-primary-blue);">0%</span>
+                </div>
+                <!-- Progress Bar -->
+                <div
+                    style="width: 100%; height: 20px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
+                    <div id="bulkProgressBar"
+                        style="width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); transition: width 0.3s ease;">
+                    </div>
+                </div>
+                <div id="bulkStatusText" style="font-size: 0.9rem; color: var(--text-secondary);">Initializing...</div>
             </div>
             <!-- Categories Container (Card Grid) -->
             <div id="categoriesTableContainer" class="view-container" style="display: none;">
@@ -1370,30 +1409,20 @@
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                         <div>
-                            <h3 style="margin: 0; color: var(--color-primary-blue);">
-                                <i class="fas fa-images" style="margin-right: 10px;"></i>Image Management
-                            </h3>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <h3 style="margin: 0; color: var(--color-primary-blue);">
+                                    <i class="fas fa-images" style="margin-right: 10px;"></i>Image Management
+                                </h3>
+                                <!-- Bulk Images Upload Button (Moved here) -->
+                                <button id="bulkImagesBtn" onclick="openBulkImagesModal()" class="admin-btn"
+                                    style="color: #8b5cf6; border: 1px solid #8b5cf6; background: white; padding: 5px 12px; font-size: 0.8rem; border-radius: 6px;">
+                                    <i class="fas fa-images"></i> Bulk Images
+                                </button>
+                            </div>
                             <p id="imagesNavText"
                                 style="color: var(--text-secondary); margin: 5px 0 0; font-size: 0.9rem;">
                                 Manage product galleries and set primary showcase images.
                             </p>
-                        </div>
-                        <div id="bulkSyncControls" style="display: flex; align-items: center; gap: 10px;">
-                            <select id="bulkTagSelector" class="form-input"
-                                style="width: auto; height: 38px; padding: 0 10px;">
-                                <option value="">Select Tag to Set Default</option>
-                                <option value="Front View">Front View</option>
-                                <option value="Back View">Back View</option>
-                                <option value="Lifestyle">Lifestyle</option>
-                                <option value="PET Jar">PET Jar</option>
-                                <option value="Glass Jar">Glass Jar</option>
-                                <option value="Standup Pouch">Standup Pouch</option>
-                                <option value="Packet">Packet</option>
-                            </select>
-                            <button onclick="handleBulkSyncDefault()" class="admin-btn"
-                                style="background: var(--color-primary-blue); color: white; border: none; height: 38px;">
-                                <i class="fas fa-sync-alt"></i> Sync Defaults
-                            </button>
                         </div>
                         <button id="backToProductGrid" onclick="showImagesProductGrid()" class="admin-btn"
                             style="display: none;">
@@ -1414,10 +1443,14 @@
                         style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; gap: 15px;">
                         <img id="managerProductThumbnail" src=""
                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                        <div>
+                        <div style="flex: 1;">
                             <h4 id="managerProductName" style="margin: 0;">Product Name</h4>
                             <p id="managerProductCategory"
                                 style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Category</p>
+                        </div>
+                        <div id="managerGalleryCount"
+                            style="font-size: 0.9rem; font-weight: 600; color: var(--color-primary-blue);">
+                            0 images
                         </div>
                     </div>
                     <!-- Existing Gallery logic will be reused/adapted here -->
