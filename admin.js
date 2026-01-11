@@ -12,6 +12,28 @@ function generateSlug(name) {
         .replace(/-+/g, '-');          // Remove consecutive hyphens
 }
 
+// Global Loading Indicator (Self-healing)
+window.showLoading = (isLoading) => {
+    let loader = document.getElementById('globalLoadingOverlay');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'globalLoadingOverlay';
+        loader.innerHTML = `
+            <div style="background: white; padding: 20px 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--color-primary-blue);"></i>
+                <span style="color: var(--text-primary); font-weight: 500;">Processing...</span>
+            </div>
+        `;
+        loader.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8); z-index: 9999;
+            display: none; justify-content: center; align-items: center;
+        `;
+        document.body.appendChild(loader);
+    }
+    loader.style.display = isLoading ? 'flex' : 'none';
+};
+
 // DOM Elements
 const loginSection = document.getElementById('loginSection');
 const dashboardSection = document.getElementById('dashboardSection');
