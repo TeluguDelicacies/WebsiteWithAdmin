@@ -1293,7 +1293,7 @@
             window.initImageZoom();
 
             // Load product images gallery (multi-image support)
-            loadProductImageGallery(product.id, product.showcase_image);
+            loadProductImageGallery(product.id, displayImg);
 
             // Final Sync (After all components are ready)
             if (window.syncDetailPageCart) {
@@ -2083,7 +2083,7 @@
 
                 return `
         <div class="sim-item" data-product-id="${item.id}" data-product='${escapedProduct}' data-variant='${escapedVariant}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
-            <img src="${item.showcase_image || state.placeholder}" class="sim-img"
+            <img src="${(state.allProductImages || []).find(img => img.product_id === item.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === item.id)?.image_url || item.showcase_image || state.placeholder}" class="sim-img"
                 onerror="this.src='${state.placeholder}'">
             <div class="sim-info">
                 <h4 style="font-size:0.9rem; margin:0; line-height:1.2; cursor:pointer;" onclick="window.location.href='/sales/${item.slug || item.id}'">${item.product_name}</h4>
@@ -2160,7 +2160,7 @@
                                 name: product.product_name,
                                 telugu_name: product.product_name_telugu,
                                 price: variant.price || product.price || product.mrp,
-                                image: product.showcase_image,
+                                image: (state.allProductImages || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === product.id)?.image_url || product.showcase_image,
                                 variant: variant,
                                 qty: val
                             });
@@ -2412,7 +2412,7 @@
                     name: product.product_name,
                     telugu_name: product.product_name_telugu,
                     price: variant ? variant.price : product.mrp,
-                    image: product.showcase_image,
+                    image: (state.allProductImages || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === product.id)?.image_url || product.showcase_image,
                     variant: variant,
                     qty: qty
                 });

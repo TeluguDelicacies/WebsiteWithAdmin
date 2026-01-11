@@ -305,7 +305,9 @@ window.showQuickPreview = function (product) {
     const viewBtn = document.getElementById('quickPreviewViewBtn');
 
     // Image (optimized for popup display ~500px)
-    const rawImageUrl = product.showcase_image || window.currentSiteSettings?.product_placeholder_url || '';
+    const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+    const showcaseImg = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
+    const rawImageUrl = showcaseImg || window.currentSiteSettings?.product_placeholder_url || '';
     const imageUrl = optimizeImage(rawImageUrl, { width: 500 });
     imgEl.src = imageUrl;
     imgEl.alt = product.product_name;
@@ -553,7 +555,7 @@ window.quickPreviewAddToCart = function () {
             id: product.id,
             name: product.product_name,
             telugu_name: product.product_name_telugu || '',
-            image: product.showcase_image,
+            image: (window.allProductImagesCache || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (window.allProductImagesCache || []).find(img => img.product_id === product.id)?.image_url || product.showcase_image,
             variant: variant,
             price: Number(variant.price) || 0,
             qty: 1
@@ -1120,10 +1122,9 @@ window.getSortedVariants = function (product) {
     }
 
     // 1. Identify "Active Tag" from Showcase Image
-    const showcaseUrl = product.showcase_image;
     const productImages = window.allProductImagesCache || [];
-    const showcaseMeta = productImages.find(img => img.image_url === showcaseUrl && img.product_id === product.id);
-    const activeTags = (showcaseMeta?.tags || []).map(t => t.toLowerCase().trim());
+    const showcaseImg = productImages.find(img => img.product_id === product.id && img.is_default) || productImages.find(img => img.product_id === product.id);
+    const activeTags = (showcaseImg?.tags || []).map(t => t.toLowerCase().trim());
 
     // 2. Separate Matching Variant (First Match Wins)
     let matchingIdx = -1;
@@ -3677,7 +3678,8 @@ function renderQuickProductsHTML(products, showMrp) {
     if (!products.length) return '<p class="text-muted">No products.</p>';
 
     return products.map(product => {
-        let localImage = product.showcase_image;
+        const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+        let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
         if (!localImage || localImage.trim() === '') localImage = window.currentSiteSettings?.product_placeholder_url;
         const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
 
@@ -3777,7 +3779,8 @@ window.openQuickProductModal = function (productId) {
     // We should put the listener logic OUTSIDE this function to be safe.
 
     // Prepare Content
-    let localImage = product.showcase_image;
+    const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+    let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
     if (!localImage || localImage.trim() === '') localImage = window.currentSiteSettings?.product_placeholder_url;
     const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
 
