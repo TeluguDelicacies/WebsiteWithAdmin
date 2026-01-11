@@ -2282,7 +2282,7 @@ QUICK COMMERCE GRID & CARD (New Implementation)
 
 /* Quantity Counter State (Hidden by default) */
 .qty-counter {
-  display: flex !important;
+  display: flex;
   align-items: center !important;
   gap: 8px !important;
   background: var(--color-brand-blue-primary) !important;
