@@ -2044,9 +2044,12 @@ async function fetchProductImages(productId) {
     if (!productId) return [];
 
     try {
+        console.log(`Fetching images for product ID: ${productId} (${typeof productId})`);
+
         const { data, error } = await supabase
             .from('product_images')
             .select('*')
+            // Handle both string and number inputs safely, though Postgres usually handles strings fine
             .eq('product_id', productId)
             .order('display_order', { ascending: true });
 
@@ -2054,6 +2057,7 @@ async function fetchProductImages(productId) {
         return data || [];
     } catch (e) {
         console.error('Error fetching product images:', e);
+        showToast(`Error fetching images: ${e.message}`, 'error'); // Debugging aid
         return [];
     }
 }
