@@ -956,7 +956,11 @@ textarea {
     /* Thicker border for better visibility */
 }
 
-.gallery-front .btn-add:hover {
+.gallery-front .btn-add:hover,
+.gallery-front .btn-add:active,
+.gallery-front .btn-add:focus {
+    background: var(--color-brand-blue-primary) !important;
+    color: var(--color-white) !important;
     transform: translateY(-2px) scale(1.02);
     box-shadow: 0 6px 20px rgba(0, 119, 182, 0.4) !important;
 }
@@ -964,9 +968,20 @@ textarea {
 .gallery-front .qty-counter {
     padding: 0.4em 1em !important;
     font-size: 1rem !important;
-    background: var(--color-white) !important;
-    border: 2px solid var(--color-primary-blue) !important;
+    background: var(--color-brand-blue-primary) !important;
+    color: var(--color-white) !important;
+    border: 2px solid var(--color-brand-blue-primary) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.gallery-front .qty-counter .qty-val {
+    color: var(--color-white) !important;
+}
+
+.gallery-front .qty-counter button {
+    color: var(--color-white) !important;
+    background: transparent !important;
+    border: none !important;
 }
 
 .gallery-front .main-img {

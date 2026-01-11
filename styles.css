@@ -2273,22 +2273,28 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   transform: scale(1.05);
 }
 
-.btn-add:active {
-  transform: scale(0.95);
+.btn-add:active,
+.btn-add:focus {
+  background: var(--color-brand-blue-primary) !important;
+  color: var(--color-white) !important;
+  transform: scale(0.98);
 }
 
 /* Quantity Counter State (Hidden by default) */
 .qty-counter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--color-brand-blue-primary);
-  color: var(--color-white);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: var(--color-brand-blue-primary) !important;
+  color: var(--color-white) !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px !important;
+}
+
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .qty-counter button {
