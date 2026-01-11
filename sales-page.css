@@ -1733,51 +1733,71 @@ textarea {
     color: var(--color-primary-blue);
 }
 
-/* Force buttons to single line on desktop */
-.info-btns-row {
-    flex-wrap: nowrap;
-    margin: 2px 0 6px 0;
-}
-
-.info-btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-}
-
-/* Compact the info content for desktop */
+/* Vertical Tabs for Product Info on Desktop */
 .info-tabs {
-    min-height: 135px;
-    /* Ensures space is reserved for tabs and content */
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start;
+    min-height: 140px;
+    gap: 15px;
+    margin-top: 10px;
     border-bottom: none !important;
 }
 
 .info-toggles {
-    margin-bottom: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 140px;
+    flex-shrink: 0;
+    margin-bottom: 0 !important;
+    gap: 1px;
+    border-right: 1px solid var(--border-light);
 }
 
-.info-toggles .toggle-btn {
-    padding: 8px 15px !important;
+.info-btns-row {
+    flex-direction: column !important;
+    width: 100% !important;
+}
+
+.info-toggles .toggle-btn,
+.info-btn {
+    text-align: left !important;
+    padding: 10px 12px !important;
     font-size: 0.85rem !important;
+    width: 100% !important;
     background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
-    box-shadow: none !important;
-    flex: 0 1 auto !important;
+    border-right: 3px solid transparent !important;
+    justify-content: flex-start !important;
+}
+
+.info-toggles .toggle-btn.active,
+.info-btn.active {
+    background: rgba(251, 192, 45, 0.1) !important;
+    border-right: 3px solid var(--color-brand-yellow) !important;
+    color: var(--color-primary-blue) !important;
+    font-weight: 700 !important;
 }
 
 .info-content-block {
-    font-size: 1.05rem;
-    /* Larger default - JS will shrink to fit */
-    line-height: 1.35;
-    text-align: justify;
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: left;
+    display: none;
+    /* Hide by default in flex mode */
 }
 
 .info-content-block.active {
-    height: 112px;
-    /* Reduced by 1/5th from 140px */
-    padding: 5px 10px;
+    display: block !important;
+    height: auto !important;
+    min-height: 120px;
+    padding: 0 10px !important;
     margin-bottom: 0 !important;
-    overflow: hidden;
+    overflow-y: auto;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 @media (max-width: 767px) {
