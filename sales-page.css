@@ -707,6 +707,9 @@ textarea {
     .swipe-hint-row {
         display: flex !important;
         justify-content: center;
+        padding: 0 !important;
+        /* Remove horizontal padding here */
+        margin-bottom: 8px;
     }
 
     .swipe-hint-text {
@@ -739,7 +742,8 @@ textarea {
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.15);
     border: none;
     overflow: hidden;
-    padding: 10px;
+    padding: 0;
+    /* Compact mobile base */
     /* Default for mobile */
 }
 
@@ -935,20 +939,34 @@ textarea {
 
 /* Position overlay button higher to avoid covering disclaimer on main product view */
 .gallery-front .card-action-container {
-    bottom: 45px !important;
-    right: 15px !important;
+    bottom: 50px !important;
+    /* Lifted slightly more */
+    right: 18px !important;
     z-index: 10;
 }
 
 .gallery-front .btn-add {
-    padding: 8px 24px !important;
-    font-size: 0.95rem !important;
-    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2) !important;
+    padding: 10px 28px !important;
+    /* More premium padding */
+    font-size: 1rem !important;
+    /* Slightly larger text */
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3) !important;
+    border-width: 2px !important;
+    /* Thicker border for better visibility */
+}
+
+.gallery-front .btn-add:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 119, 182, 0.4) !important;
 }
 
 .gallery-front .qty-counter {
     padding: 0.4em 1em !important;
-    font-size: 0.95rem !important;
+    font-size: 1rem !important;
+    background: var(--color-white) !important;
+    border: 2px solid var(--color-primary-blue) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 .gallery-front .main-img {
@@ -1452,6 +1470,14 @@ textarea {
         padding: 0;
     }
 
+    .toggle-desktop {
+        display: none !important;
+    }
+
+    .toggle-mobile {
+        display: block !important;
+    }
+
     .action-btn-pill {
         padding: 6px 16px;
         font-size: 0.85rem;
@@ -1462,6 +1488,14 @@ textarea {
     .toggle-btn-container {
         text-align: left !important;
         margin-top: 20px;
+    }
+
+    .toggle-desktop {
+        display: block !important;
+    }
+
+    .toggle-mobile {
+        display: none !important;
     }
 }
 

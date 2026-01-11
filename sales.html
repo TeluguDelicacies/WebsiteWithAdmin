@@ -236,7 +236,7 @@
             // Expose toggleFlip globally
             window.toggleFlip = function () {
                 const el = document.querySelector('.gallery-inner');
-                const btn = document.getElementById('toggleDescriptionBtn');
+                const btns = document.querySelectorAll('.toggleDescriptionBtn'); // Update all buttons
                 const disclaimer = document.querySelector('.product-disclaimer-overlay');
                 if (el) {
                     el.classList.toggle('flipped');
@@ -256,12 +256,13 @@
                         mobileVariantContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
                     }
 
-                    // Update button text based on state
-                    if (btn) {
+                    // Update button text based on state for all instances
+                    btns.forEach(btn => {
                         btn.innerHTML = isFlipped
                             ? '<i class="fas fa-image"></i> Back to Image'
                             : '<i class="fas fa-info-circle"></i> About Product';
-                    }
+                    });
+
                     // Hide/show disclaimer
                     if (disclaimer) {
                         disclaimer.style.opacity = isFlipped ? '0' : '1';
@@ -273,7 +274,7 @@
                         if (backPanel) {
                             setTimeout(() => {
                                 backPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }, 400); // Increased delay to ensure animation starts
+                            }, 400);
                         }
                     }
                 }
@@ -1171,6 +1172,12 @@
                                 </div>
                             </div>
                             
+                            <!-- Toggle Button Below Image (Mobile Only) -->
+                            <div class="toggle-btn-container toggle-mobile" style="text-align:center; margin-top:15px; display:none;">
+                                <button id="toggleDescriptionBtnMobile" onclick="toggleFlip()" class="action-btn-pill outline toggleDescriptionBtn">
+                                    <i class="fas fa-info-circle"></i> About Product
+                                </button>
+                            </div>
 
                             
                             <!-- Image Thumbnail Strip (Populated by JS if multiple images exist) -->
@@ -1225,9 +1232,9 @@
                     ${renderVariants(product)}
                 </div>
 
-                <!-- Repositioned Toggle Button (Desktop: Below variants, Mobile: follows natural order) -->
-                <div class="toggle-btn-container" style="margin-top:20px;">
-                    <button id="toggleDescriptionBtn" onclick="toggleFlip()" class="action-btn-pill outline">
+                <!-- Repositioned Toggle Button (Desktop Only) -->
+                <div class="toggle-btn-container toggle-desktop" style="margin-top:20px;">
+                    <button id="toggleDescriptionBtnDesktop" onclick="toggleFlip()" class="action-btn-pill outline toggleDescriptionBtn">
                         <i class="fas fa-info-circle"></i> About Product
                     </button>
                 </div>
