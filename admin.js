@@ -319,7 +319,7 @@ window.switchView = (view) => {
     if (bulkImagesBtn) bulkImagesBtn.style.display = 'none';
 
     // Reset buttons active state
-    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
+    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
         if (btn) btn.classList.remove('active');
     });
 
@@ -375,6 +375,12 @@ window.switchView = (view) => {
             addBtnText.textContent = 'Add Feature';
         }
         fetchWhyUsFeatures();
+
+    } else if (view === 'images') {
+        if (imagesContainer) imagesContainer.style.display = 'block';
+        activeStyle(viewImagesBtn);
+        showImagesProductGrid(); // Default to grid view
+        fetchProducts(); // Refresh product list for the grid
 
     } else if (view === 'sections') {
         if (sectionsContainer) sectionsContainer.style.display = 'block';
@@ -2229,19 +2235,16 @@ async function handleBulkImageUpload(files, productId) {
     }
 }
 
-// Render image gallery in modal
-function renderImageGallery() {
-    const gallery = document.getElementById('productImageGallery');
-    const countEl = document.getElementById('imageGalleryCount');
-    const placeholder = document.getElementById('imageGalleryPlaceholder');
-
+// Render images in the gallery grid
+window.renderImageGallery = (targetContainerId = 'productImageGallery') => {
+    const gallery = document.getElementById(targetContainerId);
     if (!gallery) return;
+    gallery.innerHTML = ''; // Clear gallery
 
-    // Update count
-    countEl.textContent = `${currentProductImages.length} image${currentProductImages.length !== 1 ? 's' : ''}`;
-
-    // Clear gallery but keep placeholder
-    gallery.innerHTML = '';
+    const countEl = document.getElementById('imageGalleryCount');
+    if (countEl) {
+        countEl.textContent = `${currentProductImages.length} image${currentProductImages.length !== 1 ? 's' : ''}`;
+    }
 
     if (currentProductImages.length === 0) {
         gallery.innerHTML = `
@@ -2250,7 +2253,8 @@ function renderImageGallery() {
                 <p style="margin: 0; font-size: 0.85rem;">No images yet. Upload images below.</p>
             </div>
         `;
-        document.getElementById('showcaseImage').value = '';
+        const showcaseInput = document.getElementById('showcaseImage');
+        if (showcaseInput) showcaseInput.value = '';
         return;
     }
 
@@ -2285,42 +2289,74 @@ function renderImageGallery() {
 
     // Update hidden showcase image field with default image URL
     const defaultImg = currentProductImages.find(img => img.is_default);
-    document.getElementById('showcaseImage').value = defaultImg ? defaultImg.image_url : (currentProductImages[0]?.image_url || '');
-}
+    const showcaseInput = document.getElementById('showcaseImage');
+    if (showcaseInput) {
+        showcaseInput.value = defaultImg ? defaultImg.image_url : (currentProductImages[0]?.image_url || '');
+    }
+};
 
 // Set default image
-window.setDefaultImage = (imageId) => {
+window.setDefaultImage = async (imageId) => {
     currentProductImages.forEach(img => {
         img.is_default = (img.id === imageId);
     });
-    renderImageGallery();
+
+    // Auto-save if in standalone image management view
+    if (currentView === 'images') {
+        const productId = document.getElementById('managerImageUpload').dataset.productId;
+        if (productId) {
+            showLoading(true);
+            await saveProductImages(productId);
+            showLoading(false);
+        }
+        renderImageGallery('productGalleryContainer');
+    } else {
+        renderImageGallery();
+    }
 };
 
 // Update image tags
-window.updateImageTags = (imageId, selectEl) => {
+window.updateImageTags = async (imageId, selectEl) => {
     const selectedTags = Array.from(selectEl.selectedOptions).map(opt => opt.value);
     const img = currentProductImages.find(i => i.id === imageId);
     if (img) {
         img.tags = selectedTags;
+
+        // Auto-save if in standalone image management view
+        if (currentView === 'images') {
+            const productId = document.getElementById('managerImageUpload').dataset.productId;
+            if (productId) {
+                showLoading(true);
+                await saveProductImages(productId);
+                showLoading(false);
+            }
+        }
     }
 };
 
 // Remove image from gallery
-window.removeProductImage = (imageId) => {
+window.removeProductImage = async (imageId) => {
     if (!confirm('Remove this image?')) return;
 
-    const index = currentProductImages.findIndex(img => img.id === imageId);
-    if (index > -1) {
-        const wasDefault = currentProductImages[index].is_default;
-        currentProductImages.splice(index, 1);
+    currentProductImages = currentProductImages.filter(img => img.id !== imageId);
 
-        // If removed image was default, make first image default
-        if (wasDefault && currentProductImages.length > 0) {
-            currentProductImages[0].is_default = true;
-        }
+    // Set first image as default if none left defaults
+    if (currentProductImages.length > 0 && !currentProductImages.some(img => img.is_default)) {
+        currentProductImages[0].is_default = true;
     }
 
-    renderImageGallery();
+    // Auto-save if in standalone image management view
+    if (currentView === 'images') {
+        const productId = document.getElementById('managerImageUpload').dataset.productId;
+        if (productId) {
+            showLoading(true);
+            await saveProductImages(productId);
+            showLoading(false);
+        }
+        renderImageGallery('productGalleryContainer');
+    } else {
+        renderImageGallery();
+    }
 };
 
 // Save product images to database
@@ -2363,6 +2399,7 @@ async function saveProductImages(productId) {
 // Setup bulk upload listener
 const setupImageGalleryListeners = () => {
     const bulkUpload = document.getElementById('bulkImageUpload');
+    const managerUpload = document.getElementById('managerImageUpload');
 
     if (bulkUpload) {
         bulkUpload.addEventListener('change', (e) => {
@@ -2371,10 +2408,179 @@ const setupImageGalleryListeners = () => {
             e.target.value = ''; // Reset input
         });
     }
+
+    if (managerUpload) {
+        managerUpload.addEventListener('change', async (e) => {
+            const productId = managerUpload.dataset.productId;
+            if (!productId) return;
+
+            showLoading(true);
+            try {
+                const files = Array.from(e.target.files);
+                for (const file of files) {
+                    const url = await uploadImageToStorage(file);
+                    currentProductImages.push({
+                        id: 'new_' + Date.now() + Math.random(),
+                        product_id: productId,
+                        image_url: url,
+                        is_default: currentProductImages.length === 0,
+                        tags: [],
+                        display_order: currentProductImages.length,
+                        isNew: true
+                    });
+                }
+                await saveProductImages(productId);
+                renderImageGallery();
+                showToast(`Uploaded ${files.length} images`);
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                showLoading(false);
+                e.target.value = '';
+            }
+        });
+    }
 };
 
 // Initialize listeners
 setupImageGalleryListeners();
+
+// --- Image Management Section Logic ---
+
+window.showImagesProductGrid = () => {
+    const grid = document.getElementById('imagesProductGrid');
+    const manager = document.getElementById('productImageManager');
+    const backBtn = document.getElementById('backToProductGrid');
+    const navText = document.getElementById('imagesNavText');
+    const bulkControls = document.getElementById('bulkSyncControls');
+
+    if (grid) grid.style.display = 'grid';
+    if (manager) manager.style.display = 'none';
+    if (backBtn) backBtn.style.display = 'none';
+    if (bulkControls) bulkControls.style.display = 'flex';
+    if (navText) navText.textContent = 'Manage product galleries and set primary showcase images.';
+
+    renderImagesProductGrid();
+};
+
+window.renderImagesProductGrid = () => {
+    const grid = document.getElementById('imagesProductGrid');
+    if (!grid) return;
+
+    if (!allProducts || allProducts.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">No products found.</p>';
+        return;
+    }
+
+    grid.innerHTML = allProducts.map(product => {
+        const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+        const defaultImg = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || PLACEHOLDER_IMAGE;
+
+        return `
+            <div class="image-manage-card" onclick="manageProductImages('${product.id}')">
+                <div class="img-wrapper">
+                    <img src="${defaultImg}" onerror="this.src='/images/placeholder-product.jpg'">
+                    <span class="image-count">${productImages.length}</span>
+                </div>
+                <h4>${product.product_name}</h4>
+            </div>
+        `;
+    }).join('');
+};
+
+window.manageProductImages = async (productId) => {
+    const product = allProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    const grid = document.getElementById('imagesProductGrid');
+    const manager = document.getElementById('productImageManager');
+    const backBtn = document.getElementById('backToProductGrid');
+    const navText = document.getElementById('imagesNavText');
+    const bulkControls = document.getElementById('bulkSyncControls');
+
+    // Update UI elements
+    document.getElementById('managerProductName').textContent = product.product_name;
+    document.getElementById('managerProductCategory').textContent = product.product_category;
+    document.getElementById('managerImageUpload').dataset.productId = productId;
+
+    // Set thumbnail for the manager header
+    const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+    const defaultImg = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || PLACEHOLDER_IMAGE;
+    document.getElementById('managerProductThumbnail').src = defaultImg;
+
+    if (grid) grid.style.display = 'none';
+    if (manager) manager.style.display = 'block';
+    if (backBtn) backBtn.style.display = 'inline-flex';
+    if (bulkControls) bulkControls.style.display = 'none';
+    if (navText) navText.textContent = `Managing images for ${product.product_name}`;
+
+    // Load images into the gallery
+    showLoading(true);
+    currentProductImages = await fetchProductImages(productId);
+    renderImageGallery('productGalleryContainer'); // Pass target container
+    showLoading(false);
+};
+
+window.handleBulkSyncDefault = async () => {
+    const tag = document.getElementById('bulkTagSelector').value;
+    if (!tag) {
+        showToast('Please select a tag first', 'error');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to set the default image for ALL products to the image tagged "${tag}"?`)) return;
+
+    showLoading(true);
+    try {
+        const { data: allImages, error } = await supabase
+            .from('product_images')
+            .select('*');
+
+        if (error) throw error;
+
+        // Group by product
+        const productsImages = {};
+        allImages.forEach(img => {
+            if (!productsImages[img.product_id]) productsImages[img.product_id] = [];
+            productsImages[img.product_id].push(img);
+        });
+
+        let updatedCount = 0;
+        const updates = [];
+
+        for (const productId in productsImages) {
+            const images = productsImages[productId];
+            const targetImg = images.find(img => (img.tags || []).some(t => t.toLowerCase() === tag.toLowerCase()));
+
+            if (targetImg) {
+                // If the target is not already default
+                if (!targetImg.is_default) {
+                    // Update all images for this product to NOT be default, then set target as default
+                    updates.push(
+                        supabase.from('product_images').update({ is_default: false }).eq('product_id', productId),
+                        supabase.from('product_images').update({ is_default: true }).eq('id', targetImg.id)
+                    );
+                    updatedCount++;
+                }
+            }
+        }
+
+        if (updates.length > 0) {
+            await Promise.all(updates);
+            showToast(`Successfully updated defaults for ${updatedCount} products`);
+        } else {
+            showToast(`No products found with image tag "${tag}"`, 'info');
+        }
+
+        // Refresh global cache and grid
+        fetchProducts();
+    } catch (err) {
+        console.error('Bulk sync error:', err);
+        showToast('Sync failed: ' + err.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+};
 
 /*
 ========================================
