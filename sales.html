@@ -236,7 +236,7 @@
             // Expose toggleFlip globally
             window.toggleFlip = function () {
                 const el = document.querySelector('.gallery-inner');
-                const btn = document.querySelector('.gallery-wrapper > div:last-child .action-btn-pill');
+                const btn = document.getElementById('toggleDescriptionBtn');
                 const disclaimer = document.querySelector('.product-disclaimer-overlay');
                 if (el) {
                     el.classList.toggle('flipped');
@@ -260,11 +260,21 @@
                     if (btn) {
                         btn.innerHTML = isFlipped
                             ? '<i class="fas fa-image"></i> Back to Image'
-                            : '<i class="fas fa-info-circle"></i> View Description';
+                            : '<i class="fas fa-info-circle"></i> About Product';
                     }
                     // Hide/show disclaimer
                     if (disclaimer) {
                         disclaimer.style.opacity = isFlipped ? '0' : '1';
+                    }
+
+                    // Auto-scroll into view on mobile when flipped to description
+                    if (isFlipped && window.innerWidth < 768) {
+                        const backPanel = document.querySelector('.gallery-back');
+                        if (backPanel) {
+                            setTimeout(() => {
+                                backPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300);
+                        }
                     }
                 }
             };
@@ -1156,15 +1166,15 @@
                                     <!-- Back: Description -->
                                     <div class="gallery-back">
                                         <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
-                                        <p>${product.product_description || 'No description available.'}</p>
+                                        <p>${(product.product_description || 'No description available.').replace(/\n/g, '<br>')}</p>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Toggle Button Below Image -->
-                            <div style="text-align:center; margin-top:15px;">
-                                <button onclick="toggleFlip()" class="action-btn-pill outline">
-                                    <i class="fas fa-info-circle"></i> View Description
+                            <div class="toggle-btn-container" style="text-align:center; margin-top:15px;">
+                                <button id="toggleDescriptionBtn" onclick="toggleFlip()" class="action-btn-pill outline">
+                                    <i class="fas fa-info-circle"></i> About Product
                                 </button>
                             </div>
                             
