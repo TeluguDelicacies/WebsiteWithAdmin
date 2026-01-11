@@ -24,7 +24,7 @@
     <!-- Core Assets -->
     <link rel="stylesheet" href="styles.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Ubuntu+Mono:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Mallanna&family=Montserrat:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Ubuntu+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png"
@@ -38,8 +38,8 @@
     <header class="header sales-header">
         <div class="container">
             <div class="header-content">
-                <!-- Logo Section - Same as Main Page structure -->
-                <a href="index.html" class="logo-section" onclick="event.stopPropagation();">
+                <!-- Logo Section -->
+                <a href="/" class="logo-section">
                     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                         id="headerLogo" alt="Telugu Delicacies Logo" class="logo"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -50,8 +50,8 @@
                     </div>
                 </a>
 
-                <!-- Navigation Buttons (Sales Specific - Always Visible) -->
-                <nav class="sales-nav">
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
                     <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()"
                         data-tooltip="Share Page">
                         <i class="fas fa-arrow-up-from-bracket"></i>
@@ -59,12 +59,28 @@
                     <button class="nav-btn cart-btn" id="cartBtn" onclick="window.toggleCartDrawer()"
                         data-tooltip="View Cart">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="cart-count" id="mainCartCount" style="display:none;">0</span>
                     </button>
-                    <a href="index.html" class="nav-btn home-btn" data-tooltip="Back Home">
+                    <a href="/" class="nav-btn home-btn" data-tooltip="Back Home">
                         <i class="fas fa-home"></i>
                     </a>
                 </nav>
+
+                <!-- Mobile Actions -->
+                <div class="mobile-actions">
+                    <button class="nav-btn share-page-btn" onclick="window.shareCurrentPage()"
+                        data-tooltip="Share Page">
+                        <i class="fas fa-arrow-up-from-bracket"></i>
+                    </button>
+                    <button class="nav-btn cart-btn" id="mobileCartBtn" onclick="window.toggleCartDrawer()"
+                        data-tooltip="View Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="mobileCartCount" style="display:none;">0</span>
+                    </button>
+                    <a href="/" class="nav-btn home-btn" data-tooltip="Back Home">
+                        <i class="fas fa-home"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -107,6 +123,9 @@
     <script type="module">
         import { supabase } from './lib/supabase.js';
 
+        // Expose supabase to window for HeaderComponent
+        window.supabase = supabase;
+
         // State Management
         const state = {
             allProducts: [],
@@ -118,6 +137,39 @@
             cart: [],
             detailQty: 1,
             catalogueFile: null
+        };
+
+        // Expose state for debugging
+        window.state = state;
+
+        // Initialize header cart button visibility
+        window.initHeaderCartButton = function () {
+            try {
+                const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+
+                // Update Badge Count
+                const count = cart.reduce((sum, item) => sum + (item.qty || item.quantity || 1), 0);
+                ['mainCartCount', 'mobileCartCount'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = count;
+                        // Only show badge if count > 0
+                        el.style.display = count > 0 ? 'flex' : 'none';
+                    }
+                });
+
+                // Check if we should auto-open cart (from legal page redirect)
+                // Use a slight delay to ensure drawer JS is ready if needed, 
+                // though window.toggleCartDrawer comes from sales.html external script/previous definition
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('cart') === 'open' && window.toggleCartDrawer) {
+                    setTimeout(() => window.toggleCartDrawer(), 300);
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, '', newUrl);
+                }
+            } catch (e) {
+                console.warn('[Cart Init] Error:', e);
+            }
         };
 
         async function preloadCatalogue() {
@@ -184,60 +236,110 @@
             // Expose toggleFlip globally
             window.toggleFlip = function () {
                 const el = document.querySelector('.gallery-inner');
-                const btn = document.querySelector('.gallery-wrapper > div:last-child .action-btn-pill');
+                const btns = document.querySelectorAll('.toggleDescriptionBtn'); // Update all buttons
                 const disclaimer = document.querySelector('.product-disclaimer-overlay');
                 if (el) {
                     el.classList.toggle('flipped');
                     const isFlipped = el.classList.contains('flipped');
-                    // Update button text based on state
-                    if (btn) {
+
+                    // Hide/Show action container (Add/Qty buttons)
+                    const actionContainer = document.querySelector('.gallery-front .card-action-container');
+                    if (actionContainer) {
+                        actionContainer.style.opacity = isFlipped ? '0' : '1';
+                        actionContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
+                    }
+
+                    // Hide/Show mobile variant container
+                    const mobileVariantContainer = document.getElementById('mobileVariantContainer');
+                    if (mobileVariantContainer) {
+                        mobileVariantContainer.style.opacity = isFlipped ? '0' : '1';
+                        mobileVariantContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
+                    }
+
+                    // Update button text based on state for all instances
+                    btns.forEach(btn => {
                         btn.innerHTML = isFlipped
                             ? '<i class="fas fa-image"></i> Back to Image'
-                            : '<i class="fas fa-info-circle"></i> View Description';
-                    }
+                            : '<i class="fas fa-info-circle"></i> About Product';
+                    });
+
                     // Hide/show disclaimer
                     if (disclaimer) {
                         disclaimer.style.opacity = isFlipped ? '0' : '1';
+                    }
+
+                    // Auto-scroll into view on mobile when flipped to description
+                    if (isFlipped && window.innerWidth < 768) {
+                        const backPanel = document.querySelector('.gallery-back');
+                        if (backPanel) {
+                            setTimeout(() => {
+                                backPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 400);
+                        }
                     }
                 }
             };
 
             // Mobile Swipe Navigation
             window.initSwipeNavigation = function () {
-                const gallery = document.querySelector('.product-gallery');
-                if (!gallery) return;
+                const targetArea = document.querySelector('.main-product-area');
+                if (!targetArea) return;
 
                 let touchStartX = 0;
+                let touchStartY = 0;
                 let touchEndX = 0;
-                const minSwipeDistance = 50;
+                let touchEndY = 0;
+                const minSwipeDistance = 75; // Increased for better stability
 
-                gallery.addEventListener('touchstart', (e) => {
+                targetArea.addEventListener('touchstart', (e) => {
                     touchStartX = e.changedTouches[0].screenX;
+                    touchStartY = e.changedTouches[0].screenY;
                 }, { passive: true });
 
-                gallery.addEventListener('touchend', (e) => {
+                targetArea.addEventListener('touchend', (e) => {
                     touchEndX = e.changedTouches[0].screenX;
+                    touchEndY = e.changedTouches[0].screenY;
                     handleSwipe();
                 }, { passive: true });
 
                 function handleSwipe() {
                     // Only navigate if NOT flipped (image is visible)
-                    const inner = gallery.querySelector('.gallery-inner');
+                    const gallery = document.querySelector('.product-gallery');
+                    const inner = gallery ? gallery.querySelector('.gallery-inner') : null;
                     if (inner && inner.classList.contains('flipped')) return;
 
-                    const swipeDistance = touchEndX - touchStartX;
+                    const deltaX = touchEndX - touchStartX;
+                    const deltaY = touchEndY - touchStartY;
+                    const totalMotion = Math.abs(deltaX) + Math.abs(deltaY);
+                    const swipeDistance = Math.abs(deltaX);
+                    const viewportWidth = window.innerWidth;
 
-                    if (Math.abs(swipeDistance) < minSwipeDistance) return;
+                    // 0. Absolute vertical cap - reject curved scrolls
+                    const maxVerticalForSwipe = 40; // px
+                    if (Math.abs(deltaY) > maxVerticalForSwipe) return;
+
+                    // 0b. Angle-based detection - reject diagonal swipes (must be within ±15° of horizontal)
+                    const angle = Math.abs(Math.atan2(deltaY, deltaX) * (180 / Math.PI));
+                    if (angle > 15 && angle < 165) return; // Too diagonal = not a horizontal swipe
+
+                    // 1. Require horizontal motion to be at least 80% of total motion
+                    if (totalMotion === 0 || (swipeDistance / totalMotion) < 0.8) return;
+
+                    // 2. Ignore swipes that are too short (noise)
+                    if (swipeDistance < minSwipeDistance) return;
+
+                    // 3. Ignore swipes that are too long (likely a browser or full-screen gesture)
+                    if (swipeDistance > viewportWidth * 0.9) return;
 
                     // Find navigation links
                     const prevLink = document.querySelector('.nav-btn-pill.prev:not(.disabled)');
                     const nextLink = document.querySelector('.nav-btn-pill.next:not(.disabled)');
 
-                    if (swipeDistance > 0 && prevLink) {
+                    if (deltaX > 0 && prevLink) {
                         // Swiped right -> go to previous product
                         const prevId = prevLink.getAttribute('data-id');
                         navigateToProduct(prevId, 'left');
-                    } else if (swipeDistance < 0 && nextLink) {
+                    } else if (deltaX < 0 && nextLink) {
                         // Swiped left -> go to next product
                         const nextId = nextLink.getAttribute('data-id');
                         navigateToProduct(nextId, 'right');
@@ -307,13 +409,38 @@
             });
 
             try {
-                const [settingsRes, productsRes, categoriesRes] = await Promise.all([
+                console.log('[Sales Init] Starting data fetch...');
+                const [settingsRes, productsRes, categoriesRes, imagesRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
                     supabase.from('products').select('*').order('display_order', { ascending: true }),
-                    supabase.from('categories').select('*').order('display_order', { ascending: true })
+                    supabase.from('categories').select('*').order('display_order', { ascending: true }),
+                    supabase.from('product_images').select('product_id, image_url, tags, is_default')
                 ]);
 
+                // Check for Supabase errors (these don't throw, they return .error)
+                if (settingsRes.error) {
+                    console.error('[Sales Init] Settings Error:', settingsRes.error);
+                }
+                if (productsRes.error) {
+                    console.error('[Sales Init] Products Error:', productsRes.error);
+                    throw new Error('Failed to load products: ' + productsRes.error.message);
+                }
+                if (categoriesRes.error) {
+                    console.error('[Sales Init] Categories Error:', categoriesRes.error);
+                    throw new Error('Failed to load categories: ' + categoriesRes.error.message);
+                }
+                if (imagesRes.error) {
+                    console.warn('[Sales Init] Images Error:', imagesRes.error);
+                }
+
+                console.log('[Sales Init] Data fetched:', {
+                    settings: settingsRes.data ? 'OK' : 'Empty',
+                    products: productsRes.data?.length || 0,
+                    categories: categoriesRes.data?.length || 0
+                });
+
                 state.settings = settingsRes.data || {};
+                state.allProductImages = imagesRes.data || [];
                 preloadCatalogue(); // Pre-load after settings
                 // Filter out hidden products
                 state.allProducts = (productsRes.data || []).filter(p => p.is_visible !== false);
@@ -324,11 +451,11 @@
                 // Sync Logo & Favicon
                 if (state.settings.logo_url) {
                     const logoImg = document.getElementById('headerLogo');
-                    logoImg.src = state.settings.logo_url;
+                    if (logoImg) logoImg.src = state.settings.logo_url;
 
                     // Also set favicon if available, otherwise use logo
                     const faviconLink = document.getElementById('dynamic-favicon');
-                    faviconLink.href = state.settings.favicon_url || state.settings.logo_url;
+                    if (faviconLink) faviconLink.href = state.settings.favicon_url || state.settings.logo_url;
                 }
 
                 // Populate Telugu Brand Name in Header
@@ -339,10 +466,33 @@
                     }
                 }
 
+                console.log('[Sales Init] Routing...');
                 handleRouting();
+
+                // Initialize header cart button visibility
+                initHeaderCartButton();
             } catch (err) {
                 console.error("Initialization Failed:", err);
-                document.getElementById('app').innerHTML = "<h2>Something went wrong. Please try again later.</h2>";
+                document.getElementById('app').innerHTML = `
+                    <div class="error-state">
+                        <div class="error-card">
+                            <div class="error-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h2>Oops! Something went wrong</h2>
+                            <p>We couldn't load the products right now. This might be a temporary issue.</p>
+                            <div class="error-actions">
+                                <button class="action-btn-pill primary" onclick="location.reload()">
+                                    <i class="fas fa-redo"></i> Try Again
+                                </button>
+                                <a href="/" class="action-btn-pill outline">
+                                    <i class="fas fa-home"></i> Go Home
+                                </a>
+                            </div>
+                            <p class="error-hint">If the problem persists, please contact us via WhatsApp.</p>
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -563,9 +713,11 @@
             window.updateBreadcrumbScroll();
         }
 
-        // --- Helper: Render Individual Card ---
-        function renderProductCard(product, category) {
-            // 1. Parsing Variants & sorting (Smallest First)
+        /**
+         * Helper: Sort variants based on default image tag and price
+         * Rule: Matching Tag first, then Cheapest to Costliest
+         */
+        window.getSortedVariants = function (product) {
             let variants = [];
             try {
                 if (typeof product.quantity_variants === 'string') {
@@ -577,25 +729,57 @@
                 console.warn('Variant parse error', e);
             }
 
-            // Fallback for non-variant products
-            if (variants.length === 0) {
-                variants = [{
+            if (!variants || variants.length === 0) {
+                return [{
                     quantity: product.quantity || 'Standard',
                     price: product.price,
                     mrp: product.mrp,
-                    stock: product.total_stock
+                    stock: product.total_stock,
+                    packaging_type: ''
                 }];
             }
 
-            // Sort variants by price (proxy for weight/size) ascending
-            const sortedVariants = [...variants].sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+            // 1. Identify "Active Tag" from Showcase Image
+            const showcaseUrl = product.showcase_image;
+            const productImages = state.allProductImages || [];
+            const showcaseMeta = productImages.find(img => img.image_url === showcaseUrl && img.product_id === product.id);
+            const activeTags = (showcaseMeta?.tags || []).map(t => t.toLowerCase().trim());
+
+            // 2. Separate Matching Variant (First Match Wins)
+            let matchingIdx = -1;
+            if (activeTags.length > 0) {
+                matchingIdx = variants.findIndex(v => {
+                    const pkg = (v.packaging_type || '').toLowerCase().trim();
+                    return pkg && activeTags.some(tag => tag.includes(pkg) || pkg.includes(tag));
+                });
+            }
+
+            let firstVariant = null;
+            let otherVariants = [...variants];
+
+            if (matchingIdx > -1) {
+                firstVariant = otherVariants.splice(matchingIdx, 1)[0];
+            }
+
+            // 3. Sort Others by Price (Ascending)
+            otherVariants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+
+            // 4. Combine
+            return firstVariant ? [firstVariant, ...otherVariants] : otherVariants;
+        };
+
+        // --- Helper: Render Individual Card ---
+        function renderProductCard(product, category) {
+            // Sort variants: Matching Tag first, then Cheapest to Costliest
+            const sortedVariants = window.getSortedVariants(product);
 
             // Default selected variant (Index 0 after sort)
             const defaultVar = sortedVariants[0];
             const defaultVarIdx = 0;
 
             // 2. Check Cart State for this specific variant
-            const cartItem = state.cart.find(item => item.id === product.id &&
+            const cartList = state.cart || [];
+            const cartItem = cartList.find(item => item.id === product.id &&
                 (item.variant ? item.variant.quantity === defaultVar.quantity : true)
             );
             const qty = cartItem ? cartItem.qty : 0;
@@ -662,14 +846,7 @@
                     <!-- 3. Telugu Title -->
                     <p class="product-subtitle">${product.product_name_telugu || category.telugu_title || ''}</p>
 
-                     <!-- 4. Price Row -->
-                    <div class="price-row">
-                        <span class="price-pill" id="price-${product.id}">₹${defaultVar.price}</span>
-                        ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
-                        ${discountTag}
-                    </div>
-
-                     <!-- 5. Variant Selector (Bottom) -->
+                    <!-- 4. Variant Selector (Relocated below tagline) -->
                     ${sortedVariants.length > 0 ? `
                         <div class="variant-selector" onclick="window.toggleGridVariantDropdown('${product.id}')" tabindex="0">
                             <span class="current-variant" id="var-label-${product.id}">${defaultVar.quantity || 'Standard'}</span>
@@ -687,7 +864,19 @@
                             `).join('')}
                         </div>
                     ` : ''}
-                    
+
+                     <!-- 5. Price Row -->
+                    <div class="price-row">
+                        <span class="price-pill" id="price-${product.id}">₹${defaultVar.price}</span>
+                        ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
+                        ${discountTag}
+                    </div>
+
+                    <!-- 6. Packaging Type (New) -->
+                    <div class="packaging-type" id="pkg-${product.id}" style="font-size: 0.75rem; color: #64748b; margin-top: 4px; font-weight: 500;">
+                        ${defaultVar.packaging_type || ''}
+                    </div>
+
                 </div>
             </article>
             `;
@@ -726,7 +915,7 @@
             // Find existing cart item to update
             const existingIdx = state.cart.findIndex(item =>
                 item.id == productId &&
-                (item.variant ? item.variant.quantity === variant.quantity : true)
+                (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
             );
 
             if (existingIdx > -1) {
@@ -748,7 +937,7 @@
 
             // Check Cart State
             const cartItem = state.cart.find(item => item.id == productId &&
-                (item.variant ? item.variant.quantity === variant.quantity : true)
+                (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
             );
             const qty = cartItem ? cartItem.qty : 0;
 
@@ -814,6 +1003,29 @@
                 }
             }
 
+            const pkgEl = document.getElementById(`pkg-${productId}`);
+            if (pkgEl) {
+                pkgEl.innerText = variant.packaging_type || '';
+            }
+
+            // --- FEATURE: Image Switching on Grid Card ---
+            if (variant.packaging_type) {
+                const normalized = variant.packaging_type.toLowerCase().trim();
+                const productImages = state.allProductImages || [];
+                const matchingImg = productImages.find(img => {
+                    if (img.product_id !== productId) return false;
+                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                    return tags.some(tag => tag.includes(normalized) || normalized.includes(tag));
+                });
+
+                if (matchingImg) {
+                    const cardImg = data.card.querySelector('.product-image');
+                    if (cardImg) {
+                        cardImg.src = matchingImg.image_url;
+                    }
+                }
+            }
+
             // Hide Dropdown
             document.getElementById(`var-list-${productId}`).style.display = 'none';
 
@@ -836,7 +1048,25 @@
                 product = state.allProducts.find(p => p.id == slugOrId);
             }
             if (!product) {
-                document.getElementById('app').innerHTML = "<h2>Product Not Found</h2>";
+                document.getElementById('app').innerHTML = `
+                    <div class="error-state">
+                        <div class="error-card">
+                            <div class="error-icon" style="background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); color: #2563EB;">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h2>Product Not Found</h2>
+                            <p>We couldn't find the product you're looking for. It may have been removed or the link is incorrect.</p>
+                            <div class="error-actions">
+                                <a href="/sales" class="action-btn-pill primary">
+                                    <i class="fas fa-store"></i> Browse Products
+                                </a>
+                                <a href="/" class="action-btn-pill outline">
+                                    <i class="fas fa-home"></i> Go Home
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
@@ -849,11 +1079,29 @@
             state.currentCategory = catSlug; // Ensure category context is valid
             const category = state.categories.find(c => c.slug === catSlug);
 
-            // Navigation
-            const siblingProducts = state.allProducts.filter(p => (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === catSlug);
-            const idx = siblingProducts.findIndex(p => p.id === product.id);
-            const prev = idx > 0 ? siblingProducts[idx - 1] : null;
-            const next = idx < siblingProducts.length - 1 ? siblingProducts[idx + 1] : null;
+            // 1. Get Product Data & Sort Variants by MRP lowest to highest
+            // Standardize variants
+            let rawVars = [];
+            try {
+                rawVars = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+            } catch (e) { }
+
+            // SORT: Lowest MRP to Highest
+            const sortedVariants = [...rawVars].sort((a, b) => {
+                const mrpA = Number(a.mrp || a.price) || 0;
+                const mrpB = Number(b.mrp || b.price) || 0;
+                return mrpA - mrpB;
+            });
+
+            // Re-assign sorted variants to a reference if needed
+            product.quantity_variants = sortedVariants;
+            const defaultV = sortedVariants[0] || { price: product.price, mrp: product.mrp, quantity: product.quantity };
+
+            // Find Prev/Next
+            const catProducts = state.allProducts.filter(p => (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === catSlug);
+            const currentIdx = catProducts.findIndex(p => p.id === product.id);
+            const prev = catProducts[currentIdx - 1] || catProducts[catProducts.length - 1];
+            const next = catProducts[currentIdx + 1] || catProducts[0];
 
             updateHistory(product);
 
@@ -873,17 +1121,16 @@
                         
                         <!-- Navigation (Right on Desktop, Hidden on Mobile) -->
                         <div class="nav-group desktop-only-nav">
-                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> <span>Prev</span></span>'}
-                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')"><span>Next</span> <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled"><span>Next</span> <i class="fas fa-arrow-right"></i></span>'}
+                            <a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> <span>Prev</span></a>
+                            <a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')"><span>Next</span> <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
 
                     <!-- Main Content -->
                     <article class="main-product-area">
-                        <!-- Navigation Row - Above Image -->
-                        <div class="nav-row mobile-only-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px;">
-                            ${prev ? `<a href="/sales/${prev.slug || prev.id}" class="nav-btn-pill prev" data-id="${prev.slug || prev.id}" title="${prev.product_name}" onclick="event.preventDefault(); navigateToProduct('${prev.slug || prev.id}', 'left')"><i class="fas fa-arrow-left"></i> Prev</a>` : '<span class="nav-btn-pill disabled"><i class="fas fa-arrow-left"></i> Prev</span>'}
-                            ${next ? `<a href="/sales/${next.slug || next.id}" class="nav-btn-pill next" data-id="${next.slug || next.id}" title="${next.product_name}" onclick="event.preventDefault(); navigateToProduct('${next.slug || next.id}', 'right')">Next <i class="fas fa-arrow-right"></i></a>` : '<span class="nav-btn-pill disabled">Next <i class="fas fa-arrow-right"></i></span>'}
+                        <!-- Mobile Swipe Hint (replaces prev/next buttons) -->
+                        <div class="swipe-hint-row" style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px; padding: 0 10px;">
+                            <span class="swipe-hint-text">Photos: Swipe image | Products: Swipe details</span>
                         </div>
                         
                         <div class="gallery-wrapper">
@@ -892,24 +1139,53 @@
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
-                                        <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
+                                        <!-- Image Carousel -->
+                                        <div class="image-carousel" id="mainCarousel">
+                                            <div class="carousel-item">
+                                                <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
+                                            </div>
+                                        </div>
+                                        <!-- Dots -->
+                                        <div class="carousel-dots" id="carouselDots"></div>
+                                        
                                         <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
+                                        
+                                        <!-- Mobile Variant Dropdown REMOVED FROM GALLERY per user request -->
+                                        
+                                        <!-- Overlay Action Bar (Add/Qty) - Bottom-Right -->
+                                        <div class="card-action-container" onclick="event.stopPropagation()">
+                                            <button class="btn-add" id="detailAddBtnOverlay" 
+                                                onclick="event.stopPropagation(); window.addToCartFromDetail()">Add</button>
+                                            <div class="qty-counter" id="detailQtyCounterOverlay" style="display:none;"
+                                                onclick="event.stopPropagation()">
+                                                <button onclick="event.stopPropagation(); window.updateDetailQty(-1)">-</button>
+                                                <span class="qty-val" id="detailQtyValOverlay" onclick="event.stopPropagation()">1</span>
+                                                <button onclick="event.stopPropagation(); window.updateDetailQty(1)">+</button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <!-- Back: Description -->
                                     <div class="gallery-back">
                                         <h3 style="margin-bottom:15px; color:var(--color-primary-blue);">About Product</h3>
-                                        <p>${product.product_description || 'No description available.'}</p>
+                                        <p>${(product.product_description || 'No description available.').replace(/\n/g, '<br>')}</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Toggle Button Below Image -->
-                            <div style="text-align:center; margin-top:15px;">
-                                <button onclick="toggleFlip()" class="action-btn-pill outline">
-                                    <i class="fas fa-info-circle"></i> View Description
+                            <!-- Toggle Button Below Image (Mobile Only) -->
+                            <div class="toggle-btn-container toggle-mobile" style="text-align:center; margin-top:15px; display:none;">
+                                <button id="toggleDescriptionBtnMobile" onclick="toggleFlip()" class="action-btn-pill outline toggleDescriptionBtn">
+                                    <i class="fas fa-info-circle"></i> About Product
                                 </button>
                             </div>
+
+                            
+                            <!-- Image Thumbnail Strip (Populated by JS if multiple images exist) -->
+                            <div class="image-thumbnail-strip" id="imageThumbnailStrip" style="display:none; margin-top:15px;">
+                                <!-- Thumbnails will be injected here -->
+                            </div>
                         </div>
+
                         
 
 
@@ -923,16 +1199,44 @@
                 <div class="telugu-title">${product.product_name_telugu || ''}</div>
                 ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
 
-                <div class="price-row">
-                    <span class="current-price" id="view-price">₹${product.price}</span>
-                    <span class="mrp-strike" id="view-mrp"
-                        style="${product.mrp > product.price ? '' : 'display:none'}">₹${product.mrp}</span>
-                    <span class="discount-badge" id="view-discount"
-                        style="${product.mrp > product.price ? '' : 'display:none'}"></span>
+                <div class="price-row-container" style="display: flex; flex-direction: column; gap: 4px; margin: 12px 0;">
+                    <div class="price-row" style="display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;">
+                        <span class="current-price" id="view-price">₹${defaultV.price}</span>
+                        <span class="mrp-strike" id="view-mrp"
+                            style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}">₹${defaultV.mrp}</span>
+                        <span class="discount-badge" id="view-discount"
+                            style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}"></span>
+                        
+                        <!-- Packaging Type (Conditional: Next to MRP if no discount on Mobile, usually block on Desktop) -->
+                        <div class="packaging-type-inline" id="view-pkg-inline" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'none' : 'block'};">
+                            (${defaultV.packaging_type || ''})
+                        </div>
+                    </div>
+
+                    <!-- Packaging Type (Conditional: Below MRP if discount exists) -->
+                    <div class="packaging-type-block" id="view-pkg-block" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'block' : 'none'};">
+                        (${defaultV.packaging_type || ''})
+                    </div>
                 </div>
 
+                <!-- Mobile Variant Selector (Moved out of selection-area) -->
+                <div class="mobile-variant-container" id="mobileVariantContainer" style="display:none; margin-bottom: 12px;">
+                    <div class="mobile-variant-trigger" id="mobileVariantTrigger" onclick="window.openMobileVariantDropdown(this)">
+                        <span class="mv-label" id="mobileVariantLabel">Select Variant</span>
+                        <i class="fas fa-caret-down"></i>
+                    </div>
+                </div>
+
+                <!-- Variant Selection (Desktop) -->
                 <div class="selection-area">
                     ${renderVariants(product)}
+                </div>
+
+                <!-- Repositioned Toggle Button (Desktop Only) -->
+                <div class="toggle-btn-container toggle-desktop" style="margin-top:20px;">
+                    <button id="toggleDescriptionBtnDesktop" onclick="toggleFlip()" class="action-btn-pill outline toggleDescriptionBtn">
+                        <i class="fas fa-info-circle"></i> About Product
+                    </button>
                 </div>
             </div>
 
@@ -940,28 +1244,15 @@
                 <div class="info-toggles" id="tabs-buttons">
                     <!-- Buttons injected here -->
                 </div>
-                <div id="ingredients-content" class="info-content-block"></div>
-                <div id="nutrition-content" class="info-content-block"></div>
-                <div id="usage-content" class="info-content-block"></div>
-                <div id="shelf-life-content" class="info-content-block"></div>
-            </div>
-        </div>
-
-        <div class="add-to-cart-section">
-            <div id="detailActionArea">
-                <!-- Add to Cart Button -->
-                <button class="add-cart-btn" id="detailAddBtn" onclick="window.addToCartFromDetail()">
-                    <i class="fas fa-cart-plus"></i> Add to Cart
-                </button>
-                
-                <!-- Qty Counter (Hidden by default) -->
-                <div class="qty-control-lg" id="detailQtyCounter" style="display:none;">
-                    <button class="qty-btn-lg" onclick="window.updateDetailQty(-1)">−</button>
-                    <input type="number" class="qty-input-lg" id="detailQty" value="1" min="1" onchange="window.validateDetailQty(this)">
-                    <button class="qty-btn-lg" onclick="window.updateDetailQty(1)">+</button>
+                <div class="info-content-wrapper">
+                    <div id="ingredients-content" class="info-content-block"></div>
+                    <div id="nutrition-content" class="info-content-block"></div>
+                    <div id="usage-content" class="info-content-block"></div>
+                    <div id="shelf-life-content" class="info-content-block"></div>
                 </div>
             </div>
         </div>
+
     </div>
     </article>
 
@@ -990,14 +1281,203 @@
 
             initProductInteractions(product);
             window.initSwipeNavigation();
+            window.initImageZoom();
+
+            // Load product images gallery (multi-image support)
+            loadProductImageGallery(product.id, product.showcase_image);
+
+            // Final Sync (After all components are ready)
+            if (window.syncDetailPageCart) {
+                const vars = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+                window.syncDetailPageCart(vars[0]);
+            }
         }
+
+        // --- Product Image Gallery ---
+        // --- Product Image Gallery ---
+        async function loadProductImageGallery(productId, fallbackImage) {
+            const thumbnailStrip = document.getElementById('imageThumbnailStrip');
+            const mainCarousel = document.getElementById('mainCarousel'); // NEW
+            const dotsContainer = document.getElementById('carouselDots'); // NEW
+
+            if (!thumbnailStrip || !mainCarousel) return;
+
+            try {
+                // Fetch images from product_images table
+                const { data: images, error } = await supabase
+                    .from('product_images')
+                    .select('*')
+                    .eq('product_id', productId)
+                    .order('display_order', { ascending: true });
+
+                if (error) {
+                    // console.warn('Could not load product images:', error);
+                    return;
+                }
+
+                // Filter: Only show images that have TAGS
+                const visibleImages = images.filter(img => img.tags && img.tags.length > 0);
+
+                // If no visible images, keep default static image (already in HTML) but hide strips
+                if (!visibleImages || visibleImages.length === 0) {
+                    thumbnailStrip.style.display = 'none';
+                    if (dotsContainer) dotsContainer.style.display = 'none';
+                    return;
+                }
+
+                // --- 1. POPULATE CAROUSEL ---
+                // We always repopulate to ensure correct order and fresh state
+                mainCarousel.innerHTML = visibleImages.map((img, idx) => `
+                    <div class="carousel-item" id="slide-${idx}">
+                         <img src="${img.image_url}" class="carousel-img" alt="Product view ${idx + 1}"
+                              onerror="window.handleProductImageError(this, '${productId}', '${fallbackImage}')">
+                    </div>
+                `).join('');
+
+                // --- 2. POPULATE DOTS ---
+                if (dotsContainer) {
+                    if (visibleImages.length > 1) {
+                        dotsContainer.style.display = 'flex';
+                        dotsContainer.innerHTML = visibleImages.map((_, idx) => `
+                            <div class="carousel-dot ${idx === 0 ? 'active' : ''}" data-idx="${idx}"></div>
+                        `).join('');
+                    } else {
+                        dotsContainer.style.display = 'none';
+                        dotsContainer.innerHTML = '';
+                    }
+                }
+
+                // --- 3. POPULATE THUMBNAILS (Desktop) ---
+                thumbnailStrip.style.display = 'flex';
+                thumbnailStrip.innerHTML = visibleImages.map((img, idx) => `
+                    <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
+                         id="thumb-${idx}"
+                         onclick="window.scrollToSlide(${idx})"
+                         data-idx="${idx}"
+                         data-tags="${(img.tags || []).join(',')}">
+                        <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy"
+                             onerror="this.parentElement.style.display='none'">
+                        ${img.tags && img.tags.length > 0 ? `<span class="thumb-tag">${img.tags[0]}</span>` : ''}
+                    </div>
+                `).join('');
+
+                // Store global images for external logic
+                window._productImages = visibleImages;
+
+
+                // --- 4. CAROUSEL EVENTS (Stop Propagation) ---
+                ['touchstart', 'touchmove', 'touchend'].forEach(evt => {
+                    mainCarousel.addEventListener(evt, (e) => e.stopPropagation(), { padding: true });
+                });
+
+                // --- 5. DOT SYNC ON SCROLL ---
+                let scrollTimeout;
+                mainCarousel.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        const scrollLeft = mainCarousel.scrollLeft;
+                        const width = mainCarousel.clientWidth;
+                        const idx = Math.round(scrollLeft / width);
+
+                        // Update Dots
+                        if (dotsContainer) {
+                            const dots = dotsContainer.children;
+                            for (let i = 0; i < dots.length; i++) {
+                                dots[i].classList.toggle('active', i === idx);
+                            }
+                        }
+                        // Update Thumbnails
+                        const thumbs = thumbnailStrip.children;
+                        for (let i = 0; i < thumbs.length; i++) {
+                            thumbs[i].classList.toggle('active', i === idx);
+                        }
+                    }, 50);
+                });
+
+                // Prioritize Default Image if exists
+                const defaultIdx = visibleImages.findIndex(i => i.is_default);
+                if (defaultIdx > 0) {
+                    // Scroll to it immediately
+                    setTimeout(() => window.scrollToSlide(defaultIdx), 100);
+                }
+
+            } catch (e) {
+                console.warn('Error loading product gallery:', e);
+            }
+        }
+
+        // Helper: Handle Broken Images in Gallery
+        window.handleProductImageError = function (imgEl, productId, fallbackImage) {
+            const item = imgEl.closest('.carousel-item');
+            if (!item) return;
+
+            const idx = item.id.replace('slide-', '');
+            const dot = document.querySelector(`.carousel-dot[data-idx="${idx}"]`);
+            const thumb = document.getElementById(`thumb-${idx}`);
+
+            // Remove/Hide broken elements
+            item.remove();
+            if (dot) dot.remove();
+            if (thumb) thumb.style.display = 'none';
+
+            // Check if gallery is now empty
+            const carousel = document.getElementById('mainCarousel');
+            if (carousel && carousel.querySelectorAll('.carousel-item').length === 0) {
+                const finalFallback = fallbackImage || state.placeholder;
+                carousel.innerHTML = `
+                    <div class="carousel-item" id="slide-error-fallback">
+                        <img src="${finalFallback}" class="carousel-img" alt="Product image placeholder"
+                             onerror="this.src='${state.placeholder}'">
+                    </div>
+                `;
+                document.getElementById('carouselDots').style.display = 'none';
+                document.getElementById('imageThumbnailStrip').style.display = 'none';
+            } else {
+                // Update dots display if only 1 image remains
+                const dots = document.getElementById('carouselDots');
+                if (dots && dots.querySelectorAll('.carousel-dot').length <= 1) {
+                    dots.style.display = 'none';
+                }
+            }
+        };
+
+        // Helper: Scroll to specific slide
+        window.scrollToSlide = function (idx) {
+            const mainCarousel = document.getElementById('mainCarousel');
+            if (!mainCarousel) return;
+            const slide = document.getElementById(`slide-${idx}`);
+            if (slide) {
+                // Smooth scroll
+                slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            }
+        };
+
+        // Switch image based on variant packaging type  
+        window.switchImageByPackaging = function (packagingType) {
+            if (!packagingType || !window._productImages) return;
+
+            // Normalize for matching
+            const normalized = packagingType.toLowerCase().trim();
+
+            const idx = window._productImages.findIndex(img => {
+                const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                return tags.some(tag => tag.includes(normalized) || normalized.includes(tag));
+            });
+
+            if (idx > -1) {
+                window.scrollToSlide(idx);
+            }
+        };
+
+        // Deprecated: selectProductImage (Replaced by scrollToSlide)
+        window.selectProductImage = function (imageUrl, thumbEl) {
+            // Backward compat or no-op
+        };
+
 
         // --- Helpers: Components ---
         function renderVariants(p) {
-            let variants = [];
-            try {
-                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
-            } catch (e) { }
+            const variants = window.getSortedVariants(p);
 
             if (variants.length === 0) return '';
 
@@ -1026,20 +1506,38 @@
 
         function initProductInteractions(p) {
             console.log('Product Data for Tabs:', { name: p.product_name, shelf_life: p.shelf_life, is_refrigerated: p.is_refrigerated });
-            const vSelect = document.getElementById('variantSelect');
-            let variants = [];
-            try {
-                variants = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) :
-                    (p.quantity_variants || []);
-            } catch (e) { }
+            const variants = window.getSortedVariants(p);
+
+            // Initialize Mobile Variant Trigger (Custom dropdown)
+            const mobileVariantLabel = document.getElementById('mobileVariantLabel');
+            const mobileVarContainer = document.getElementById('mobileVariantContainer');
+
+            if (variants.length > 1 && mobileVariantLabel) {
+                // Multiple variants - show dropdown with first variant selected
+                const defaultV = variants[0];
+                mobileVariantLabel.innerText = `${defaultV.quantity} (₹${defaultV.price})`;
+                window._mobileActiveVariantIdx = 0;
+                window._currentVariants = variants;
+
+                // FORCE DISPLAY: RELY ON CSS MEDIA QUERY instead of inline style
+                // This prevents it from showing on desktop
+                if (mobileVarContainer) {
+                    mobileVarContainer.removeAttribute('style'); // Clear inline "display: none" if present
+                }
+            } else if (mobileVarContainer) {
+                // Single or no variants - FORCE hide the dropdown
+                mobileVarContainer.style.setProperty('display', 'none', 'important');
+            }
 
             let activeVariantIdx = 0;
+            window._detailActiveVariantIdx = 0; // Global state for cart sync
 
             const updatePrice = (v) => {
+                const hasDiscount = v.mrp && v.mrp > v.price;
                 document.getElementById('view-price').innerText = '₹' + v.price;
                 const mrpEl = document.getElementById('view-mrp');
                 const discEl = document.getElementById('view-discount');
-                if (v.mrp && v.mrp > v.price) {
+                if (hasDiscount) {
                     mrpEl.innerText = '₹' + v.mrp;
                     mrpEl.style.display = 'inline';
                     const off = Math.round(((v.mrp - v.price) / v.mrp) * 100);
@@ -1048,6 +1546,20 @@
                 } else {
                     mrpEl.style.display = 'none';
                     discEl.style.display = 'none';
+                }
+
+                // Update Packaging Display
+                const pkgInline = document.getElementById('view-pkg-inline');
+                const pkgBlock = document.getElementById('view-pkg-block');
+                const pkgLabel = v.packaging_type ? `(${v.packaging_type})` : '';
+
+                if (pkgInline) {
+                    pkgInline.innerText = pkgLabel;
+                    pkgInline.style.display = hasDiscount ? 'none' : (pkgLabel ? 'block' : 'none');
+                }
+                if (pkgBlock) {
+                    pkgBlock.innerText = pkgLabel;
+                    pkgBlock.style.display = hasDiscount ? (pkgLabel ? 'block' : 'none') : 'none';
                 }
             };
 
@@ -1096,6 +1608,7 @@
                 if (!variants || !variants[idx]) return;
 
                 activeVariantIdx = idx;
+                window._detailActiveVariantIdx = idx; // Update global state
                 const v = variants[idx];
                 const labelEl = document.getElementById('variantLabel');
                 if (labelEl) labelEl.innerText = `${v.quantity} - ₹${v.price}`;
@@ -1103,80 +1616,93 @@
                 updatePrice(v);
                 window.syncDetailPageCart(v);
 
+                // Switch product image to match variant packaging (if tagged image exists)
+                if (v.packaging_type && window.switchImageByPackaging) {
+                    window.switchImageByPackaging(v.packaging_type);
+                }
+
+                // Sync mobile dropdown
+                const mobileSelect = document.getElementById('mobileVariantSelect');
+                if (mobileSelect) mobileSelect.value = idx;
+
                 // Update Nutrition if toggle logic exists
                 const nutContent = document.getElementById('nutrition-content');
                 if (nutContent && nutritionData) {
                     nutContent.innerHTML = renderNutrition(nutritionData, v);
-                    if (window.adjustFontSize) window.adjustFontSize(nutContent, true);
                 }
 
                 const menu = document.getElementById('variant-portal-dropdown');
                 if (menu) menu.remove();
             };
 
-            // Define adjustFontSize as window property so it's globally accessible
-            window.adjustFontSize = (el, force = false) => {
-                if (!el) return;
+            // Mobile Variant Portal Dropdown
+            window.openMobileVariantDropdown = function (triggerEl) {
+                const variants = window._currentVariants;
+                if (!variants || variants.length <= 1) return;
 
-                if (force) delete el.dataset.calculatedSize;
-
-                // IF already sized, just ensure the size is applied and stop
-                if (el.dataset.calculatedSize) {
-                    el.style.fontSize = el.dataset.calculatedSize + 'rem';
+                // Close existing if any
+                const existing = document.getElementById('mv-portal-dropdown');
+                if (existing) {
+                    existing.remove();
                     return;
                 }
 
-                // TARGET CONTENT HEIGHT
-                const isMobile = window.innerWidth < 768;
-                const targetContentHeight = isMobile ? 94 : 104; // Reduced from 130 per 1/5th rule
+                // Create portal menu
+                const menu = document.createElement('div');
+                menu.id = 'mv-portal-dropdown';
+                menu.className = 'mv-portal-menu';
 
-                // Reset to base size before measurement
-                let size = 1.25;
-                el.style.fontSize = size + 'rem';
+                const activeIdx = window._mobileActiveVariantIdx || 0;
 
-                let iterations = 0;
-                while (el.scrollHeight > targetContentHeight && size > 0.72 && iterations < 20) {
-                    size -= 0.02;
-                    el.style.fontSize = size + 'rem';
-                    iterations++;
-                }
+                menu.innerHTML = variants.map((v, i) => `
+                    <div class="mv-portal-item ${i === activeIdx ? 'active' : ''}" 
+                         onclick="window.handleMobileVariantSelect(${i})">
+                        <span>${v.quantity}</span>
+                        <span class="mv-price">₹${v.price}</span>
+                    </div>
+                `).join('');
 
-                el.dataset.calculatedSize = size;
+                document.body.appendChild(menu);
+
+                // Position above the trigger
+                const rect = triggerEl.getBoundingClientRect();
+                menu.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+                menu.style.left = rect.left + 'px';
+
+                requestAnimationFrame(() => menu.classList.add('open'));
+
+                // Close on click outside
+                const closeHandler = (e) => {
+                    if (!menu.contains(e.target) && !triggerEl.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+                setTimeout(() => document.addEventListener('click', closeHandler), 0);
             };
 
-            // 1. Define Sync Function
-            window.syncDetailPageCart = function (v) {
-                const addBtn = document.getElementById('detailAddBtn');
-                const qtyCounter = document.getElementById('detailQtyCounter');
-                const qtyInput = document.getElementById('detailQty');
+            window.handleMobileVariantSelect = function (idx) {
+                const variants = window._currentVariants;
+                if (!variants || !variants[idx]) return;
 
-                if (!addBtn || !qtyCounter || !qtyInput) return;
+                window._mobileActiveVariantIdx = idx;
+                const v = variants[idx];
 
-                if (!v) {
-                    const vars = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants) : (p.quantity_variants || []);
-                    v = vars[activeVariantIdx];
-                }
+                // Update mobile label
+                const label = document.getElementById('mobileVariantLabel');
+                if (label) label.innerText = `${v.quantity} (₹${v.price})`;
 
-                if (!v) return;
+                // Trigger the main variant click handler
+                window.handleVariantClick(idx);
 
-                const cartItem = state.cart.find(c => c.id == p.id &&
-                    (c.variant ? c.variant.quantity === v.quantity : true)
-                );
-
-                if (cartItem) {
-                    addBtn.style.display = 'none';
-                    qtyCounter.style.display = 'flex';
-                    qtyInput.value = cartItem.qty;
-                    state.detailQty = cartItem.qty;
-                } else {
-                    addBtn.style.display = 'block';
-                    qtyCounter.style.display = 'none';
-                    qtyInput.value = 1;
-                    state.detailQty = 1;
-                }
+                // Close menu
+                const menu = document.getElementById('mv-portal-dropdown');
+                if (menu) menu.remove();
             };
 
-            // Check Variants and Sync
+
+            // Sync Function is defined globally at window.syncDetailPageCart
+            // calling it here to ensure initial state
             if (variants[0]) {
                 updatePrice(variants[0]);
                 window.syncDetailPageCart(variants[0]);
@@ -1196,6 +1722,116 @@
                 let unit = match[2];
                 if (unit === 'kg') val *= 1000;
                 return val;
+            };
+
+            // --- Feature: Image Zoom (Desktop Hover + Mobile Tap Lightbox) ---
+            window.initImageZoom = function () {
+                const container = document.querySelector('.gallery-front');
+                const img = container ? container.querySelector('.main-img') : null;
+                if (!container || !img) return;
+
+                const isMobile = window.innerWidth < 1024;
+
+                if (isMobile) {
+                    // --- MOBILE: Tap to open fullscreen lightbox ---
+                    container.style.cursor = 'zoom-in';
+                    container.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        window.openImageLightbox(img.src);
+                    });
+                } else {
+                    // --- DESKTOP: Hover to zoom ---
+                    container.style.cursor = 'crosshair';
+                    container.addEventListener('mousemove', function (e) {
+                        // Prevent zoom when mouse is over the action buttons
+                        if (e.target.closest('.card-action-container')) {
+                            img.style.transform = 'scale(1)';
+                            img.style.cursor = 'default';
+                            return;
+                        }
+
+                        const rect = container.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        let xPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                        let yPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
+                        img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                        img.style.transform = 'scale(2.0)';
+                    });
+                    container.addEventListener('mouseleave', function () {
+                        img.style.transform = 'scale(1)';
+                        setTimeout(() => { img.style.transformOrigin = 'center center'; }, 100);
+                    });
+                }
+            };
+
+            // --- Lightbox: Fullscreen Image Viewer ---
+            window.openImageLightbox = function (src) {
+                // Create overlay if not exists
+                let overlay = document.getElementById('imageLightbox');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'imageLightbox';
+                    overlay.innerHTML = `
+                        <div class="lightbox-backdrop"></div>
+                        <div class="lightbox-content">
+                            <img src="" alt="Product Image" class="lightbox-img">
+                            <button class="lightbox-close" aria-label="Close">&times;</button>
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
+
+                    // Close handlers
+                    overlay.querySelector('.lightbox-backdrop').addEventListener('click', window.closeImageLightbox);
+                    overlay.querySelector('.lightbox-close').addEventListener('click', window.closeImageLightbox);
+
+                    // Pinch zoom support using CSS transform
+                    let scale = 1;
+                    let startDistance = 0;
+                    const lightboxImg = overlay.querySelector('.lightbox-img');
+
+                    lightboxImg.addEventListener('touchstart', function (e) {
+                        if (e.touches.length === 2) {
+                            startDistance = Math.hypot(
+                                e.touches[0].pageX - e.touches[1].pageX,
+                                e.touches[0].pageY - e.touches[1].pageY
+                            );
+                        }
+                    }, { passive: true });
+
+                    lightboxImg.addEventListener('touchmove', function (e) {
+                        if (e.touches.length === 2) {
+                            const currentDistance = Math.hypot(
+                                e.touches[0].pageX - e.touches[1].pageX,
+                                e.touches[0].pageY - e.touches[1].pageY
+                            );
+                            scale = Math.min(3, Math.max(1, scale * (currentDistance / startDistance)));
+                            startDistance = currentDistance;
+                            lightboxImg.style.transform = `scale(${scale})`;
+                        }
+                    }, { passive: true });
+
+                    lightboxImg.addEventListener('touchend', function (e) {
+                        if (e.touches.length === 0) {
+                            // Reset scale on release
+                            scale = 1;
+                            lightboxImg.style.transform = 'scale(1)';
+                        }
+                    });
+                }
+
+                // Set image and show
+                overlay.querySelector('.lightbox-img').src = src;
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+            };
+
+            window.closeImageLightbox = function () {
+                const overlay = document.getElementById('imageLightbox');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
             };
 
             console.log(`[Use By Final Check] Product: ${p.product_name}`);
@@ -1381,23 +2017,6 @@
                 };
             }
 
-            // Hook Nutrition Update into Variant Selection
-            if (vSelect && nutritionData) {
-                const originalChange = vSelect.onchange;
-                vSelect.onchange = (e) => {
-                    // Call original price updater
-                    if (originalChange) originalChange(e);
-
-                    // Update Nutrition HTML
-                    const selectedVar = variants[e.target.value];
-                    const nutContent = document.getElementById('nutrition-content');
-                    if (nutContent) {
-                        nutContent.innerHTML = renderNutrition(nutritionData, selectedVar);
-                        // FORCE recalculate because content changed
-                        // adjustFontSize(nutContent, true);
-                    }
-                };
-            }
 
             // Initialize sidebar tab switcher
             window.switchSidebarTab = function (mode) {
@@ -1435,40 +2054,41 @@
         }
 
         function renderVerticalItems(items) {
-            if (!items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.</p>`;
+            if (!items || !items.length) return `<p style="text-align:center; padding:20px; color:var(--text-muted)">No items found.</p>`;
             return items.map((item, index) => {
-                // Get first variant info or use default price
-                let variants = [];
-                try {
-                    variants = typeof item.quantity_variants === 'string' ? JSON.parse(item.quantity_variants) : (item.quantity_variants || []);
-                } catch (e) { }
-                const firstVariant = variants[0] || {};
+                // Use sorted variants (default-tag-matching first)
+                const sortedVariants = window.getSortedVariants(item);
+                const firstVariant = sortedVariants[0] || {};
                 const variantLabel = firstVariant.quantity || '';
                 const displayPrice = firstVariant.price || item.price || item.mrp || '';
 
                 // Check Cart State
-                const cartItem = state.cart.find(c => c.id == item.id &&
+                const cartList = state.cart || [];
+                const cartItem = cartList.find(c => c.id == item.id &&
                     (c.variant ? c.variant.quantity === firstVariant.quantity : true)
                 );
                 const qty = cartItem ? cartItem.qty : 0;
 
+                const escapedProduct = JSON.stringify(item).replace(/'/g, "&apos;");
+                const escapedVariant = JSON.stringify(firstVariant).replace(/'/g, "&apos;");
+
                 return `
-        <div class="sim-item" data-product-id="${item.id}" data-product='${JSON.stringify(item).replace(/'/g, "\\'")}' data-variant='${JSON.stringify(firstVariant).replace(/'/g, "\\'")}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
+        <div class="sim-item" data-product-id="${item.id}" data-product='${escapedProduct}' data-variant='${escapedVariant}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
             <img src="${item.showcase_image || state.placeholder}" class="sim-img"
                 onerror="this.src='${state.placeholder}'">
             <div class="sim-info">
                 <h4 style="font-size:0.9rem; margin:0; line-height:1.2; cursor:pointer;" onclick="window.location.href='/sales/${item.slug || item.id}'">${item.product_name}</h4>
-                ${item.product_tagline ? `<span style="font-size:0.7rem; color:var(--text-secondary); display:block; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.product_tagline}</span>` : ''}
+                ${item.product_tagline ? `<span style="font-size:0.75rem; color:var(--text-secondary); display:block; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.product_tagline}</span>` : ''}
                 <!-- Price + Add Button inline -->
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px;">
+                <div class="price-action-row" style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px;">
                     <span style="font-size:0.8rem; font-weight:700; color:var(--color-primary-blue);">₹${displayPrice} ${variantLabel ? `<span style="font-size:0.75em; font-weight:500; opacity:0.8;">(${variantLabel})</span>` : ''}</span>
                     <!-- Add Button -->
-                    <button class="sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="${qty > 0 ? 'display:none;' : 'display:block;'} background:#FFF9C4; border:1px solid #FBC02D; border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:600; color:#333; cursor:pointer;">Add</button>
+                    <button class="btn-add sidebar-add-btn" id="sidebar-add-${index}" onclick="event.stopPropagation(); showSidebarQty(${index})" style="${qty > 0 ? 'display:none;' : 'display:block;'}">Add</button>
                     <!-- Quantity Controls -->
-                    <div class="quantity-controls sidebar-qty-controls ${qty > 0 ? 'show' : ''}" id="sidebar-qty-wrap-${index}" style="${qty > 0 ? 'display:flex;' : 'display:none;'} min-width:70px; padding:2px 6px; transform:scale(0.85);">
-                        <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, -1)">−</button>
-                        <span class="quantity-display" id="sidebar-qty-${index}">${qty || 1}</span>
-                        <button class="quantity-btn" onclick="event.stopPropagation(); updateSidebarQty(${index}, 1)">+</button>
+                    <div class="qty-counter sidebar-qty-controls ${qty > 0 ? 'show' : ''}" id="sidebar-qty-wrap-${index}" style="${qty > 0 ? 'display:flex;' : 'display:none;'}">
+                        <button onclick="event.stopPropagation(); updateSidebarQty(${index}, -1)">−</button>
+                        <span class="qty-val" id="sidebar-qty-${index}">${qty || 1}</span>
+                        <button onclick="event.stopPropagation(); updateSidebarQty(${index}, 1)">+</button>
                     </div>
                 </div>
             </div>
@@ -1503,8 +2123,9 @@
             const simItem = document.querySelector(`#sidebar-qty-${index}`).closest('.sim-item');
             if (simItem) {
                 try {
-                    const product = JSON.parse(simItem.dataset.product.replace(/\\'/g, "'"));
-                    const variant = JSON.parse(simItem.dataset.variant.replace(/\\'/g, "'"));
+                    // dataset items are already HTML-decoded by the browser
+                    const product = JSON.parse(simItem.dataset.product);
+                    const variant = JSON.parse(simItem.dataset.variant);
 
                     // Find or update cart item
                     const existingIdx = state.cart.findIndex(item =>
@@ -1683,8 +2304,14 @@
         window.initCart = function () {
             try {
                 const saved = localStorage.getItem('td_cart');
-                if (saved) state.cart = JSON.parse(saved);
-            } catch (e) { console.error('Cart load error', e); }
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.cart = Array.isArray(parsed) ? parsed : [];
+                }
+            } catch (e) {
+                console.error('Cart load error', e);
+                state.cart = [];
+            }
             updateCartUI();
         };
 
@@ -1706,9 +2333,16 @@
             if (!state.currentProduct) return;
 
             // Get selected variant
-            const select = document.getElementById('variantSelect');
             const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
-            const variant = variants[select ? select.value : 0];
+
+            let idx = 0;
+            if (typeof window._detailActiveVariantIdx === 'number') {
+                idx = window._detailActiveVariantIdx;
+            } else {
+                const select = document.getElementById('variantSelect');
+                idx = select ? select.value : 0;
+            }
+            const variant = variants[idx];
 
             // Update cart relative to delta
             window.addToCart(state.currentProduct, variant, delta);
@@ -1717,29 +2351,6 @@
             window.syncDetailPageCart(variant);
         };
 
-        window.validateDetailQty = function (input) {
-            if (!state.currentProduct) return;
-            let val = parseInt(input.value);
-            if (isNaN(val) || val < 1) val = 1;
-
-            const select = document.getElementById('variantSelect');
-            const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
-            const variant = variants[select ? select.value : 0];
-
-            // Update cart to absolute value
-            const existingIdx = state.cart.findIndex(item =>
-                item.id === state.currentProduct.id &&
-                (item.variant ? item.variant.quantity === variant.quantity : true)
-            );
-
-            if (existingIdx > -1) {
-                const currentQty = state.cart[existingIdx].qty;
-                const delta = val - currentQty;
-                window.addToCart(state.currentProduct, variant, delta);
-            } else {
-                window.addToCart(state.currentProduct, variant, val);
-            }
-        };
 
         // Helper for cart animation
         function animateCartBtn() {
@@ -1753,8 +2364,8 @@
         window.addToCart = function (product, variant, qty) {
             // Hardened Validation: Check existing cart qty + new qty against stock
             const existingIdx = state.cart.findIndex(item =>
-                item.id === product.id &&
-                JSON.stringify(item.variant) === JSON.stringify(variant)
+                item.id == product.id &&
+                (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
             );
 
             const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
@@ -1817,17 +2428,25 @@
             let selectedVariant = null;
             if (variants.length > 0) {
                 const select = document.getElementById('variantSelect');
-                if (select) {
-                    selectedVariant = variants[select.value];
-                } else {
-                    selectedVariant = variants[0];
+                let variantIdx = 0;
+
+                if (typeof window._detailActiveVariantIdx === 'number') {
+                    variantIdx = window._detailActiveVariantIdx;
+                } else if (select) {
+                    variantIdx = parseInt(select.value, 10) || 0;
+                } else if (typeof window._mobileActiveVariantIdx === 'number') {
+                    // Use mobile portal dropdown selection
+                    variantIdx = window._mobileActiveVariantIdx;
                 }
+
+                selectedVariant = variants[variantIdx];
             }
 
             const qtyInput = document.getElementById('detailQty');
             const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
 
             window.addToCart(state.currentProduct, selectedVariant, qty);
+            window.syncDetailPageCart(selectedVariant);
         };
 
         window.updateCartItemQty = function (index, deltaOrVal, isDirect = false) {
@@ -1860,6 +2479,54 @@
             } else {
                 item.qty = newQty;
                 window.saveCart();
+            }
+        };
+
+        window.syncDetailPageCart = function (selectedVariant = null) {
+            if (!state.currentProduct) return;
+            const product = state.currentProduct;
+
+            // If specific variant not passed, try to get from UI
+            if (!selectedVariant) {
+                const variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+                if (variants.length > 0) {
+                    let idx = 0;
+                    if (typeof window._detailActiveVariantIdx === 'number') {
+                        idx = window._detailActiveVariantIdx;
+                    } else {
+                        const select = document.getElementById('variantSelect');
+                        idx = select ? select.value : 0;
+                    }
+                    selectedVariant = variants[idx];
+                }
+            }
+
+            // Find in cart
+            const cartItem = state.cart.find(item =>
+                item.id == product.id &&
+                (item.variant && selectedVariant ?
+                    (item.variant.quantity === selectedVariant.quantity && (item.variant.packaging_type || '') === (selectedVariant.packaging_type || '')) :
+                    true)
+            );
+
+            const qty = cartItem ? cartItem.qty : 0;
+
+            const btnAdd = document.getElementById('detailAddBtnOverlay');
+            const qtyCounter = document.getElementById('detailQtyCounterOverlay');
+            const qtyVal = document.getElementById('detailQtyValOverlay');
+
+            if (btnAdd && qtyCounter && qtyVal) {
+                if (qty > 0) {
+                    btnAdd.style.display = 'none';
+                    qtyCounter.style.display = 'flex';
+                    qtyVal.innerText = qty;
+                } else {
+                    btnAdd.style.display = 'block';
+                    qtyCounter.style.display = 'none';
+                    // Reset add input to 1?
+                    const detailQtyInput = document.getElementById('detailQty');
+                    if (detailQtyInput) detailQtyInput.value = 1;
+                }
             }
         };
 
@@ -1915,17 +2582,20 @@
         };
 
         window.updateCartUI = function () {
-            const cartCount = document.getElementById('cartCount');
+            const cartCount = document.getElementById('mainCartCount');
+            const mobileCartCount = document.getElementById('mobileCartCount');
             const cartItems = document.getElementById('cartItems');
             const cartTotal = document.getElementById('cartTotal');
             const clearBtn = document.querySelector('.clear-cart-btn');
 
-            // Update Badge
+            // Update Badge (Desktop + Mobile)
             const totalQty = state.cart.reduce((sum, item) => sum + item.qty, 0);
-            if (cartCount) {
-                cartCount.innerText = totalQty;
-                cartCount.style.display = totalQty > 0 ? 'flex' : 'none';
-            }
+            [cartCount, mobileCartCount].forEach(badge => {
+                if (badge) {
+                    badge.innerText = totalQty;
+                    badge.style.display = totalQty > 0 ? 'flex' : 'none';
+                }
+            });
 
             // Show/Hide Clear Button
             if (clearBtn) {
@@ -2209,7 +2879,21 @@
 
         window.initCart();
 
-        init();
+        init().catch(err => {
+            console.error("Critical Runtime Error:", err);
+            const app = document.getElementById('app');
+            if (app) {
+                app.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-card">
+                            <h2>Something went wrong</h2>
+                            <p>We encountered a technical error while loading the page.</p>
+                            <button onclick="location.reload()" class="action-btn-pill primary">Try Again</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
     </script>
 </body>
 

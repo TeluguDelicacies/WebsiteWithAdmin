@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Documents - Telugu Delicacies</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./images/favicon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Mallanna&family=Ramabhadra&family=Sree+Krushnadevaraya&family=Tenali+Ramakrishna&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Reuse main styles for consistency -->
+    <link rel="stylesheet" href="styles.css?v=99.9">
+
+    <!-- Supabase Logic -->
+    <script type="module">
+        import { supabase } from './lib/supabase.js';
+
+        // Global function to switch tabs
+        window.switchLegalTab = function (type) {
+            // Update URL
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('type', type);
+            window.history.pushState({}, '', newUrl);
+
+            // Update UI
+            loadLegalContent(type);
+        };
+
+        // Separate loading logic
+        async function loadLegalContent(type) {
+            const contentContainer = document.getElementById('legal-body');
+            const mainTitle = document.title;
+            const tabs = document.querySelectorAll('.legal-tab');
+
+            // Update Tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            const activeTab = document.querySelector(`.legal-tab[data-type="${type}"]`);
+            if (activeTab) activeTab.classList.add('active');
+
+            if (!type) {
+                contentContainer.innerHTML = '<p class="error">Please select a document.</p>';
+                return;
+            }
+
+            // Show loading
+            contentContainer.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+            try {
+                const { data, error } = await supabase
+                    .from('site_settings')
+                    .select('privacy_policy, cookie_policy, terms_conditions, site_title')
+                    .single();
+
+                if (error) throw error;
+
+                let content = '';
+                let pageTitle = '';
+
+                if (type === 'privacy') {
+                    content = data.privacy_policy;
+                    pageTitle = 'Privacy Policy';
+                } else if (type === 'cookie') {
+                    content = data.cookie_policy;
+                    pageTitle = 'Cookie Policy';
+                } else if (type === 'terms') {
+                    content = data.terms_conditions;
+                    pageTitle = 'Terms of Use';
+                }
+
+                if (content) {
+                    contentContainer.innerHTML = content;
+                    document.title = `${pageTitle} - ${data.site_title || 'Telugu Delicacies'}`;
+                } else {
+                    contentContainer.innerHTML = '<p>Content not available yet.</p>';
+                }
+
+            } catch (err) {
+                console.error('Error:', err);
+                contentContainer.innerHTML = '<p class="error">Unable to load content.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const type = urlParams.get('type') || 'privacy'; // Default to privacy
+
+            // Initial Load
+            loadLegalContent(type);
+
+            // Populate Header (Once)
+            try {
+                const { data } = await supabase.from('site_settings').select('site_title, site_title_telugu, logo_url').single();
+                if (data) {
+                    if (data.site_title) document.getElementById('header-site-title').textContent = data.site_title;
+                    if (data.site_title_telugu) document.getElementById('header-site-title-telugu').textContent = data.site_title_telugu;
+                    if (data.logo_url) document.querySelector('.logo').src = data.logo_url;
+                }
+            } catch (e) { console.warn('Header fetch failed', e); }
+        });
+    </script>
+
+    <style>
+        /* Fix Header Overlap */
+        body {
+            padding-top: var(--header-height-mobile);
+            /* Mobile Default */
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-top: var(--header-height-desktop);
+                /* Desktop Default */
+            }
+        }
+
+        .legal-page-header.header {
+            padding: 0;
+            background: #FFFFFF !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: left;
+            position: fixed !important;
+        }
+
+        .legal-nav {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-bottom: 5px;
+            /* Minimal gap */
+            /* Reduced from 30px to minimize gap */
+            flex-wrap: nowrap;
+            /* Prevent wrapping on mobile */
+            overflow-x: auto;
+            /* Enable horizontal scroll */
+            padding: 0 0 10px 0;
+            /* Only keep bottom padding for scrollbar/touch target */
+            /* Add bottom padding for scrollbar spacing if needed, remove left padding */
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 90%;
+            -webkit-overflow-scrolling: touch;
+            /* Smooth scroll on iOS */
+            /* Hide scrollbar for cleaner look */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE 10+ */
+        }
+
+        .legal-nav::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari */
+        }
+
+        button.legal-tab {
+            padding: 8px 16px;
+            border: 1px solid var(--color-primary-blue);
+            color: var(--color-primary-blue);
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        /* INACTIVE HOVER STATE - Force Dark Blue Text */
+        button.legal-tab:not(.active):hover {
+            background-color: #E2E8F0 !important;
+            /* Darker Gray */
+            color: #0C4A6E !important;
+            /* Very Dark Blue */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ACTIVE STATE (Selected Tab) */
+        button.legal-tab.active {
+            background-color: var(--color-primary-blue) !important;
+            color: white !important;
+            box-shadow: 0 4px 6px rgba(0, 119, 182, 0.3);
+        }
+
+        button.legal-tab.active:hover {
+            opacity: 0.9;
+        }
+
+        /* FOCUS/CLICK STATES - Prevent white flash */
+        button.legal-tab:not(.active):focus,
+        button.legal-tab:not(.active):active {
+            background-color: #E2E8F0 !important;
+            color: #0C4A6E !important;
+            outline: none;
+        }
+
+        /* Ensure icon inherits color */
+        button.legal-tab i {
+            color: inherit !important;
+        }
+
+        .legal-content {
+            padding: 0 0 80px;
+            /* Reduced top padding */
+            max-width: 800px;
+            margin: 0 auto;
+            width: 90%;
+            text-align: left;
+            /* Alignment Fix */
+        }
+
+        .legal-content h2,
+        .legal-content h3,
+        .legal-content h4,
+        .legal-content p,
+        .legal-content ul,
+        .legal-content li {
+            text-align: left !important;
+        }
+
+        .legal-content h2 {
+            margin-top: 0;
+            /* Forced 0 */
+            margin-bottom: 15px;
+            color: var(--color-primary-blue);
+            font-size: 1.5rem;
+        }
+
+        .legal-content h3 {
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: var(--color-secondary-blue);
+            font-size: 1.25rem;
+        }
+
+        .legal-content p,
+        .legal-content li {
+            margin-bottom: 15px;
+            line-height: 1.8;
+            color: var(--color-text-primary);
+            font-size: 1rem;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 100px 20px;
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+        }
+
+        @media (min-width: 768px) {
+            .legal-content h2 {
+                font-size: 2rem;
+            }
+
+            .legal-content h3 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 767px) {
+            main {
+                padding-top: 100px;
+            }
+
+            /* Ensure nav doesn't stick to top strictly if we use padding */
+            .legal-page-header {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header legal-page-header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo Section -->
+                <a href="/" class="logo-section">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        id="headerLogo" alt="Telugu Delicacies Logo" class="logo"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-fallback" style="display: none;">TD</div>
+                    <div class="logo-text">
+                        <h1 class="brand-name" id="header-site-title">Telugu Delicacies</h1>
+                        <span id="header-telugu-brand" class="telugu-brand"></span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="/sales?cart=open" class="nav-btn cart-btn" id="legalCartBtn" data-tooltip="View Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="mainCartCount" style="display:none;">0</span>
+                    </a>
+                    <a href="/" class="nav-btn home-btn" data-tooltip="Back Home">
+                        <i class="fas fa-home"></i>
+                    </a>
+                </nav>
+
+                <!-- Mobile Actions -->
+                <div class="mobile-actions">
+                    <a href="/sales?cart=open" class="nav-btn cart-btn" id="legalMobileCartBtn"
+                        data-tooltip="View Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="mobileCartCount" style="display:none;">0</span>
+                    </a>
+                    <a href="/" class="nav-btn home-btn" data-tooltip="Back Home">
+                        <i class="fas fa-home"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <script type="module">
+        import { supabase } from './lib/supabase.js';
+        window.supabase = supabase;
+
+        // Wrap in async IIFE to avoid top-level await (browser compatibility)
+        (async () => {
+            // Load header branding from Supabase
+            try {
+                const { data } = await supabase.from('site_settings').select('logo_url, site_title_telugu').single();
+                if (data?.logo_url) {
+                    const logo = document.getElementById('headerLogo');
+                    if (logo) logo.src = data.logo_url;
+                }
+                if (data?.site_title_telugu) {
+                    const telugu = document.getElementById('header-telugu-brand');
+                    if (telugu) telugu.textContent = data.site_title_telugu;
+                }
+            } catch (e) { console.warn('Failed to load branding:', e); }
+
+            // Check cart from localStorage
+            try {
+                const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+
+                // Update badge count
+                const count = cart.reduce((sum, item) => sum + (item.qty || item.quantity || 1), 0);
+                ['mainCartCount', 'mobileCartCount'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = count;
+                        // Only show badge if count > 0
+                        el.style.display = count > 0 ? 'flex' : 'none';
+                    }
+                });
+            } catch (e) { console.warn('Cart check failed:', e); }
+        })();
+    </script>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="legal-page-header">
+                <!-- Navigation Tabs -->
+                <nav class="legal-nav">
+                    <button class="legal-tab" data-type="privacy" onclick="switchLegalTab('privacy')">
+                        Privacy Policy
+                    </button>
+                    <button class="legal-tab" data-type="cookie" onclick="switchLegalTab('cookie')">
+                        Cookie Policy
+                    </button>
+                    <button class="legal-tab" data-type="terms" onclick="switchLegalTab('terms')">
+                        Terms of Use
+                    </button>
+                </nav>
+            </div>
+
+            <div class="legal-content">
+                <div id="legal-body" class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2025 Telugu Delicacies. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+</body>
+
+</html>

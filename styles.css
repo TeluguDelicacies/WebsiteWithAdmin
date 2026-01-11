@@ -457,7 +457,8 @@ Responsive containers and layout components
 */
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 95vw;
+  /* Updated to 95vw per user request */
   margin: 0 auto;
   padding: 0 var(--space-4);
 }
@@ -524,7 +525,8 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .header .container {
-  max-width: 100% !important;
+  max-width: 95vw !important;
+  /* Forces 95vw width */
   padding: 0 var(--space-2) !important;
 }
 
@@ -555,13 +557,24 @@ Persistent header with hamburger menu and WhatsApp integration
   align-items: center;
   gap: 8px;
   text-decoration: none;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .mobile-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-1);
   margin-left: auto;
-  margin-right: var(--space-2);
+  margin-right: var(--space-1);
+  flex-shrink: 0;
+}
+
+/* Make buttons smaller on mobile for accessibility (large font) users */
+.mobile-actions .nav-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 0.95rem;
 }
 
 @media (min-width: 1024px) {
@@ -608,14 +621,22 @@ Persistent header with hamburger menu and WhatsApp integration
 }
 
 .logo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   object-fit: contain;
   background: transparent !important;
   border: none;
   animation: logoGlowAndWiggle 3s ease-in-out infinite !important;
   transition: all var(--transition-normal);
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .logo {
+    width: 50px;
+    height: 50px;
+  }
 }
 
 .logo:hover {
@@ -658,7 +679,6 @@ Persistent header with hamburger menu and WhatsApp integration
   font-family: 'Mallanna', sans-serif;
   color: var(--text-telugu);
   margin-top: 2px;
-  /* Balanced gap */
   line-height: 1.2;
   font-weight: 600;
   opacity: 0.9;
@@ -1240,6 +1260,10 @@ Enhanced product cards and modern styling
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  /* iOS Safari Border Radius Fix */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  transform: translateZ(0);
 }
 
 .product-image-wrapper {
@@ -2249,22 +2273,25 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   transform: scale(1.05);
 }
 
-.btn-add:active {
-  transform: scale(0.95);
+.btn-add:active,
+.btn-add:focus {
+  background: var(--color-brand-blue-primary) !important;
+  color: var(--color-white) !important;
+  transform: scale(0.98);
 }
 
 /* Quantity Counter State (Hidden by default) */
 .qty-counter {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--color-brand-blue-primary);
-  color: var(--color-white);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  align-items: center !important;
+  gap: 8px !important;
+  background: var(--color-brand-blue-primary) !important;
+  color: var(--color-white) !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px !important;
 }
 
 .qty-counter button {
@@ -6025,4 +6052,107 @@ Uses same card structure as sales page product grid
 .product-item:hover .tap-indicator {
   opacity: 1;
   transform: scale(1);
+}
+
+/* Social Icons in Footer */
+.footer-social-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.footer-social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #FFFFFF;
+  /* High contrast white background */
+  border-radius: 50%;
+  color: var(--color-brand-blue-primary);
+  /* Brand blue icon */
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for depth */
+}
+
+.footer-social-icons a:hover {
+  background: var(--color-brand-blue-primary);
+  color: #FFFFFF;
+  transform: translateY(-3px);
+  border-color: var(--color-brand-blue-primary);
+  box-shadow: 0 6px 15px rgba(0, 119, 182, 0.3);
+}
+
+/* Footer Bottom Layout */
+.footer-bottom {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column-reverse;
+  /* Mobile: Links (2nd child) appear ABOVE Copyright (1st child) */
+  align-items: center;
+  gap: 15px;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .footer-bottom {
+    flex-direction: row;
+    /* Desktop: Side by side */
+    justify-content: center;
+    gap: 5px;
+    /* Minimal gap, looks like one line */
+  }
+
+  .footer-bottom p {
+    margin: 0;
+  }
+}
+
+/* Legal Links */
+.footer-legal-links {
+  display: flex;
+  flex-direction: row;
+  /* Mobile: Row with icon-like alignment */
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  justify-content: flex-start;
+  /* Align left */
+}
+
+@media (min-width: 768px) {
+  .footer-legal-links {
+    flex-direction: column;
+    /* Desktop: Column */
+    gap: 8px;
+  }
+}
+
+.footer-legal-links a {
+  color: var(--color-brand-blue-primary) !important;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.footer-legal-links a::before {
+  content: '\f05a';
+  /* Info icon */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  margin-right: 6px;
+  font-size: 0.85rem;
+}
+
+.footer-legal-links a:hover {
+  text-decoration: underline;
+  color: var(--color-brand-blue-dark) !important;
 }

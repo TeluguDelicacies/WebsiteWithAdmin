@@ -315,6 +315,8 @@ window.switchView = (view) => {
     if (saveOrderBtn) saveOrderBtn.style.display = 'none';
     const csvBtn = document.getElementById('csvBtn');
     if (csvBtn) csvBtn.style.display = 'none';
+    const bulkImagesBtn = document.getElementById('bulkImagesBtn');
+    if (bulkImagesBtn) bulkImagesBtn.style.display = 'none';
 
     // Reset buttons active state
     [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
@@ -336,6 +338,7 @@ window.switchView = (view) => {
             addBtnText.textContent = 'Add Product';
         }
         if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
+        if (bulkImagesBtn) bulkImagesBtn.style.display = 'inline-flex'; // Show Bulk Images button
 
         populateCategoryFilter();
         fetchProducts();
@@ -692,6 +695,17 @@ async function fetchSettings() {
             document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
             document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
 
+            // Social Media
+            document.getElementById('setFacebookUrl').value = data.facebook_url || '';
+            document.getElementById('setInstagramUrl').value = data.instagram_url || '';
+            document.getElementById('setWhatsappUrl').value = data.whatsapp_url || '';
+            document.getElementById('setYoutubeUrl').value = data.youtube_url || '';
+
+            // Legal Documents
+            document.getElementById('setPrivacyPolicy').value = data.privacy_policy || '';
+            document.getElementById('setCookiePolicy').value = data.cookie_policy || '';
+            document.getElementById('setTermsConditions').value = data.terms_conditions || '';
+
             // Catalogue & Address Settings
             document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
             document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
@@ -739,7 +753,18 @@ window.cancelSettingsChanges = function () {
     document.getElementById('setHeroBgUrl').value = data.hero_background_url || '';
     document.getElementById('setProductPlaceholder').value = data.product_placeholder_url || '';
 
-    // Catalogue & Address Settings
+    // Social Media
+    document.getElementById('setFacebookUrl').value = data.facebook_url || '';
+    document.getElementById('setInstagramUrl').value = data.instagram_url || '';
+    document.getElementById('setWhatsappUrl').value = data.whatsapp_url || '';
+    document.getElementById('setYoutubeUrl').value = data.youtube_url || '';
+
+    // Legal Documents
+    document.getElementById('setPrivacyPolicy').value = data.privacy_policy || '';
+    document.getElementById('setCookiePolicy').value = data.cookie_policy || '';
+    document.getElementById('setTermsConditions').value = data.terms_conditions || '';
+
+    // Catalogue & Address
     document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
     document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
     document.getElementById('setAddress').value = data.company_address || '';
@@ -785,6 +810,12 @@ if (siteSettingsForm) {
             fav_icon_url: document.getElementById('setFaviconUrl').value,
             hero_background_url: document.getElementById('setHeroBgUrl').value,
             product_placeholder_url: document.getElementById('setProductPlaceholder').value,
+
+            // Social Media
+            facebook_url: document.getElementById('setFacebookUrl').value,
+            instagram_url: document.getElementById('setInstagramUrl').value,
+            whatsapp_url: document.getElementById('setWhatsappUrl').value,
+            youtube_url: document.getElementById('setYoutubeUrl').value,
 
             // Catalogue & Address
             catalogue_image_url: document.getElementById('setCatalogueUrl').value,
@@ -1428,6 +1459,11 @@ window.openProductModal = async (productId = null) => {
     document.getElementById('productOrder').value = '0'; // Default order
     document.getElementById('productVisible').checked = true; // Default visible
 
+    // Reset image gallery
+    currentProductImages = [];
+    renderImageGallery();
+    document.getElementById('bulkUploadStatus').textContent = '';
+
     if (productId) {
         modalTitle.textContent = 'Edit Product';
         loadProductData(productId);
@@ -1437,6 +1473,7 @@ window.openProductModal = async (productId = null) => {
         addVariantRow(); // Always add one empty variant row
     }
 };
+
 
 window.closeProductModal = () => {
     productModal.style.display = 'none';
@@ -1487,7 +1524,7 @@ async function loadTestimonialData(id) {
 window.addVariantRow = (data = null) => {
     const div = document.createElement('div');
     div.className = 'variant-row';
-    div.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
+    div.style.cssText = 'display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr 1.2fr 1.5fr auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
 
     div.innerHTML = `
         <div>
@@ -1518,6 +1555,16 @@ window.addVariantRow = (data = null) => {
         <div>
             <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Global</label>
             <input type="number" class="variant-sold-global form-input" value="${data ? data.global_sold || data.total_sold || 0 : 0}" readonly style="padding: 10px; background: #f1f5f9; color: #64748b; font-weight: bold; width: 55px;">
+        </div>
+        <div style="grid-column: span 1;">
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Packaging Type</label>
+            <select class="variant-packaging form-input" style="padding: 10px; width: 100%;">
+                <option value="">Select Type</option>
+                <option value="Pouch" ${data && data.packaging_type === 'Pouch' ? 'selected' : ''}>Pouch</option>
+                <option value="Standup Pouch" ${data && data.packaging_type === 'Standup Pouch' ? 'selected' : ''}>Standup Pouch</option>
+                <option value="Glass Jar" ${data && data.packaging_type === 'Glass Jar' ? 'selected' : ''}>Glass Jar</option>
+                <option value="PET Jar" ${data && data.packaging_type === 'PET Jar' ? 'selected' : ''}>PET Jar</option>
+            </select>
         </div>
         <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: #ef4444; border-color: #ef4444; margin-top: 26px; min-width: auto; padding: 10px;" title="Delete Variant">
             <i class="fas fa-trash"></i>
@@ -1581,8 +1628,27 @@ async function loadProductData(productId) {
         document.getElementById('nutriSodium').value = nutri.sodium || '';
         // document.getElementById('prodNutrition').value = typeof product.nutrition_info === 'object' ? JSON.stringify(product.nutrition_info, null, 2) : (product.nutrition_info || '');
 
+        // Load product images from product_images table
+        currentProductImages = await fetchProductImages(productId);
+
+        // If no images in new table, check for legacy showcase_image
+        if (currentProductImages.length === 0 && product.showcase_image) {
+            // Migrate legacy single image to new format
+            currentProductImages = [{
+                id: 'legacy_' + Date.now(),
+                product_id: productId,
+                image_url: product.showcase_image,
+                is_default: true,
+                tags: [],
+                display_order: 0,
+                isNew: true // Will be saved to product_images on next save
+            }];
+        }
+
+        renderImageGallery();
 
         document.getElementById('showcaseImage').value = product.showcase_image || '';
+
 
         // Handle Variants
         // Handle Variants
@@ -1681,7 +1747,8 @@ productForm.addEventListener('submit', async (e) => {
                 mrp: parseFloat(row.querySelector('.variant-mrp').value || 0),
                 stock: stock,
                 current_sold: currentSold,
-                global_sold: globalSold
+                global_sold: globalSold,
+                packaging_type: row.querySelector('.variant-packaging').value
             });
             calculatedTotalStock += stock;
             calculatedTotalSold += globalSold; // Product level tracking uses global total
@@ -1777,6 +1844,8 @@ productForm.addEventListener('submit', async (e) => {
         }
 
         let error;
+        let savedProductId = productId;
+
         if (productId) {
             // Update
             const { error: updateError } = await supabase
@@ -1785,14 +1854,24 @@ productForm.addEventListener('submit', async (e) => {
                 .eq('id', productId);
             error = updateError;
         } else {
-            // Insert
-            const { error: insertError } = await supabase
+            // Insert - need to get the new ID
+            const { data: insertedData, error: insertError } = await supabase
                 .from('products')
-                .insert([productData]);
+                .insert([productData])
+                .select('id')
+                .single();
             error = insertError;
+            if (insertedData) {
+                savedProductId = insertedData.id;
+            }
         }
 
         if (error) throw error;
+
+        // Save product images to product_images table
+        if (savedProductId && currentProductImages.length > 0) {
+            await saveProductImages(savedProductId);
+        }
 
         closeProductModal();
         fetchProducts();
@@ -1814,6 +1893,7 @@ productForm.addEventListener('submit', async (e) => {
         submitBtn.disabled = false;
     }
 });
+
 
 // Form Submission (Testimonial)
 if (testimonialForm) {
@@ -1921,41 +2001,979 @@ window.editTestimonial = (id) => openTestimonialModal(id);
 
 /*
 ========================================
-IMAGE UPLOAD HANDLING
+PRODUCT IMAGE GALLERY MANAGEMENT
 ========================================
 */
 
+// Available image tags
+const IMAGE_TAGS = ['PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
+
+// Temp storage for images being edited (before saving to DB)
+let currentProductImages = [];
+
+// Fetch product images from database
+async function fetchProductImages(productId) {
+    if (!productId) return [];
+
+    try {
+        const { data, error } = await supabase
+            .from('product_images')
+            .select('*')
+            .eq('product_id', productId)
+            .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+    } catch (e) {
+        console.error('Error fetching product images:', e);
+        return [];
+    }
+}
+
+// Cloudinary Configuration
+const CLOUDINARY_CLOUD_NAME = 'telugudelicacies';
+const CLOUDINARY_UPLOAD_PRESET = 'product_images'; // User must create this preset in Cloudinary settings
+
+// Upload single image to Cloudinary and return URL
+async function uploadImageToStorage(file, customPublicId) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'products'); // Organize in products folder
+
+    // If a custom public ID is provided (without extension), suggest it to Cloudinary
+    // Note: 'use_filename' must be true in preset, or we use 'public_id' param if unsigned allowed it (often restricted)
+    // Safer to just RELY ON FILE NAME being meaningful if preset has "Use filename or external ID" checked.
+    // So we just ensure 'file.name' is good before passing here.
+
+    // However, if we CAN set public_id (requires specific unsigned settings), we try:
+    if (customPublicId) {
+        // formData.append('public_id', customPublicId); 
+        // Often blocked in unsigned. Let's rely on the file object having a correct name constructor
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Cloudinary upload failed');
+        }
+
+        const data = await response.json();
+        return data.secure_url; // Return the HTTPS URL
+    } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        throw error;
+    }
+}
+
+// ==========================================
+// MIGRATION TOOL: Products Table (Showcase/Info) -> Cloudinary
+// ==========================================
+window.migrateProductsTableToCloudinary = async function () {
+    if (!confirm("This will migrate MAIN product images (Showcase/Info) from Supabase to Cloudinary. Continue?")) return;
+
+    const progressDiv = document.getElementById('migrationProgress');
+    const progressBar = document.getElementById('migrationBar');
+    const progressText = document.getElementById('migrationStatusText');
+    const progressCount = document.getElementById('migrationCount');
+
+    if (progressDiv) progressDiv.style.display = 'block';
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.innerText = 'Scanning products table...';
+
+    try {
+        // 1. Fetch products with Supabase images
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('id, product_name, slug, showcase_image, info_image');
+
+        if (error) throw error;
+
+        // Filter locally for Supabase URLs
+        const toMigrate = [];
+        for (const p of products) {
+            let needsMigration = false;
+            let type = '';
+
+            if (p.showcase_image && p.showcase_image.includes('supabase.co')) {
+                toMigrate.push({ id: p.id, field: 'showcase_image', url: p.showcase_image, slug: p.slug, name: p.product_name });
+            }
+            if (p.info_image && p.info_image.includes('supabase.co')) {
+                toMigrate.push({ id: p.id, field: 'info_image', url: p.info_image, slug: p.slug, name: p.product_name });
+            }
+        }
+
+        if (toMigrate.length === 0) {
+            if (progressText) progressText.innerText = 'No Supabase images found in products table.';
+            showToast('All main product images are already migrated!', 'success');
+            return;
+        }
+
+        const total = toMigrate.length;
+        let migrated = 0;
+        let failed = 0;
+
+        if (progressCount) progressCount.innerText = `0/${total}`;
+
+        // 2. Migrate
+        for (const item of toMigrate) {
+            try {
+                if (progressText) progressText.innerText = `Migrating ${item.name} (${item.field})...`;
+
+                // Fetch Blob
+                const response = await fetch(item.url);
+                if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
+                const blob = await response.blob();
+
+                // Create Meaningful Filename: slug-field.jpg
+                const ext = item.url.split('.').pop().split('?')[0] || 'jpg';
+                const filename = `${item.slug}-${item.field === 'showcase_image' ? 'showcase' : 'info'}.${ext}`;
+                const file = new File([blob], filename, { type: blob.type });
+
+                // Upload
+                const newUrl = await uploadImageToStorage(file);
+
+                // Update DB
+                const updateObj = {};
+                updateObj[item.field] = newUrl;
+
+                const { error: updateError } = await supabase
+                    .from('products')
+                    .update(updateObj)
+                    .eq('id', item.id);
+
+                if (updateError) throw updateError;
+
+                migrated++;
+            } catch (e) {
+                console.error('Migration failed:', item, e);
+                failed++;
+            }
+
+            // Progress
+            const pct = Math.round(((migrated + failed) / total) * 100);
+            if (progressBar) progressBar.style.width = `${pct}%`;
+            if (progressCount) progressCount.innerText = `${migrated + failed}/${total}`;
+        }
+
+        if (progressText) progressText.innerText = `Main Images Migration Complete! ${migrated} success, ${failed} failed.`;
+        showToast(`Migrated ${migrated} main product images`, 'success');
+
+    } catch (e) {
+        console.error('Error migrating products table:', e);
+        showToast('Error migrating main images', 'error');
+    }
+};
+
+// Bulk upload images
+async function handleBulkImageUpload(files, productId) {
+    const statusEl = document.getElementById('bulkUploadStatus');
+    const total = files.length;
+    let uploaded = 0;
+
+    statusEl.textContent = `Uploading 0/${total}...`;
+    statusEl.style.color = 'var(--text-secondary)';
+
+    try {
+        for (const file of files) {
+            const imageUrl = await uploadImageToStorage(file);
+
+            // Add to local array (we'll save to DB when form submits)
+            const newImage = {
+                id: 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(7),
+                product_id: productId || null,
+                image_url: imageUrl,
+                is_default: currentProductImages.length === 0, // First image is default
+                tags: [],
+                display_order: currentProductImages.length,
+                isNew: true // Flag for new images
+            };
+
+            currentProductImages.push(newImage);
+            uploaded++;
+            statusEl.textContent = `Uploading ${uploaded}/${total}...`;
+        }
+
+        statusEl.textContent = `✓ ${uploaded} images uploaded`;
+        statusEl.style.color = '#10b981';
+
+        // Re-render gallery
+        renderImageGallery();
+
+    } catch (error) {
+        console.error('Bulk upload error:', error);
+        statusEl.textContent = 'Error: ' + error.message;
+        statusEl.style.color = '#ef4444';
+    }
+}
+
+// Render image gallery in modal
+function renderImageGallery() {
+    const gallery = document.getElementById('productImageGallery');
+    const countEl = document.getElementById('imageGalleryCount');
+    const placeholder = document.getElementById('imageGalleryPlaceholder');
+
+    if (!gallery) return;
+
+    // Update count
+    countEl.textContent = `${currentProductImages.length} image${currentProductImages.length !== 1 ? 's' : ''}`;
+
+    // Clear gallery but keep placeholder
+    gallery.innerHTML = '';
+
+    if (currentProductImages.length === 0) {
+        gallery.innerHTML = `
+            <div id="imageGalleryPlaceholder" style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 20px;">
+                <i class="fas fa-images" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p style="margin: 0; font-size: 0.85rem;">No images yet. Upload images below.</p>
+            </div>
+        `;
+        document.getElementById('showcaseImage').value = '';
+        return;
+    }
+
+    // Render each image card
+    currentProductImages.forEach((img, index) => {
+        const card = document.createElement('div');
+        card.className = `image-gallery-card ${img.is_default ? 'is-default' : ''}`;
+        card.dataset.imageId = img.id;
+
+        card.innerHTML = `
+            <img src="${img.image_url}" alt="Product image ${index + 1}" onerror="this.src='./images/placeholder-product.jpg'">
+            <div class="card-actions">
+                <button type="button" class="btn-default ${img.is_default ? 'active' : ''}" 
+                        onclick="setDefaultImage('${img.id}')" title="Set as default">
+                    <i class="fas fa-star"></i>
+                </button>
+                <button type="button" class="btn-delete" onclick="removeProductImage('${img.id}')" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="card-tags">
+                <select multiple size="2" onchange="updateImageTags('${img.id}', this)">
+                    ${IMAGE_TAGS.map(tag => `
+                        <option value="${tag}" ${(img.tags || []).includes(tag) ? 'selected' : ''}>${tag}</option>
+                    `).join('')}
+                </select>
+            </div>
+        `;
+
+        gallery.appendChild(card);
+    });
+
+    // Update hidden showcase image field with default image URL
+    const defaultImg = currentProductImages.find(img => img.is_default);
+    document.getElementById('showcaseImage').value = defaultImg ? defaultImg.image_url : (currentProductImages[0]?.image_url || '');
+}
+
+// Set default image
+window.setDefaultImage = (imageId) => {
+    currentProductImages.forEach(img => {
+        img.is_default = (img.id === imageId);
+    });
+    renderImageGallery();
+};
+
+// Update image tags
+window.updateImageTags = (imageId, selectEl) => {
+    const selectedTags = Array.from(selectEl.selectedOptions).map(opt => opt.value);
+    const img = currentProductImages.find(i => i.id === imageId);
+    if (img) {
+        img.tags = selectedTags;
+    }
+};
+
+// Remove image from gallery
+window.removeProductImage = (imageId) => {
+    if (!confirm('Remove this image?')) return;
+
+    const index = currentProductImages.findIndex(img => img.id === imageId);
+    if (index > -1) {
+        const wasDefault = currentProductImages[index].is_default;
+        currentProductImages.splice(index, 1);
+
+        // If removed image was default, make first image default
+        if (wasDefault && currentProductImages.length > 0) {
+            currentProductImages[0].is_default = true;
+        }
+    }
+
+    renderImageGallery();
+};
+
+// Save product images to database
+async function saveProductImages(productId) {
+    if (!productId) return;
+
+    try {
+        // Delete existing images for this product
+        const { error: deleteError } = await supabase
+            .from('product_images')
+            .delete()
+            .eq('product_id', productId);
+
+        if (deleteError) throw deleteError;
+
+        // Insert all current images
+        if (currentProductImages.length > 0) {
+            const imagesToInsert = currentProductImages.map((img, index) => ({
+                product_id: productId,
+                image_url: img.image_url,
+                is_default: img.is_default,
+                tags: img.tags || [],
+                display_order: index
+            }));
+
+            const { error: insertError } = await supabase
+                .from('product_images')
+                .insert(imagesToInsert);
+
+            if (insertError) throw insertError;
+        }
+
+        return true;
+    } catch (e) {
+        console.error('Error saving product images:', e);
+        throw e;
+    }
+}
+
+// Setup bulk upload listener
+const setupImageGalleryListeners = () => {
+    const bulkUpload = document.getElementById('bulkImageUpload');
+
+    if (bulkUpload) {
+        bulkUpload.addEventListener('change', (e) => {
+            const productId = document.getElementById('productId').value;
+            handleBulkImageUpload(Array.from(e.target.files), productId);
+            e.target.value = ''; // Reset input
+        });
+    }
+};
+
+// Initialize listeners
+setupImageGalleryListeners();
+
+/*
+========================================
+BULK IMAGES UPLOAD WITH PRODUCT MATCHING
+========================================
+*/
+
+// Store for pending bulk uploads
+let pendingBulkImages = [];
+let allProductsCache = [];
+
+// Open bulk images modal
+window.openBulkImagesModal = async function () {
+    const modal = document.getElementById('bulkImagesModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Reset state
+    pendingBulkImages = [];
+    document.getElementById('bulkImagesPreview').innerHTML = '';
+    document.getElementById('bulkImagesSummary').style.display = 'none';
+    document.getElementById('bulkUploadSaveBtn').style.display = 'none';
+    document.getElementById('bulkImagesProgress').style.display = 'none';
+
+    // Cache all products for matching
+    try {
+        const { data, error } = await supabase.from('products').select('id, product_name, slug');
+        if (!error) allProductsCache = data || [];
+    } catch (e) {
+        console.error('Error fetching products for matching:', e);
+    }
+
+    // Setup drag-drop
+    setupBulkDragDrop();
+};
+
+// Close modal
+window.closeBulkImagesModal = function () {
+    document.getElementById('bulkImagesModal').style.display = 'none';
+    document.body.style.overflow = '';
+    pendingBulkImages = [];
+    existingImagesEdits = {};
+};
+
+// Tab switching
+window.switchBulkTab = function (tab) {
+    const uploadTab = document.getElementById('bulkTabUpload');
+    const editTab = document.getElementById('bulkTabEdit');
+    const uploadSection = document.getElementById('bulkUploadSection');
+    const editSection = document.getElementById('bulkEditSection');
+
+    if (tab === 'upload') {
+        uploadTab.classList.add('active');
+        editTab.classList.remove('active');
+        uploadSection.style.display = 'block';
+        editSection.style.display = 'none';
+    } else {
+        uploadTab.classList.remove('active');
+        editTab.classList.add('active');
+        uploadSection.style.display = 'none';
+        editSection.style.display = 'block';
+
+        // Populate product filter and load images
+        populateEditProductFilter();
+        loadExistingImages('all');
+    }
+};
+
+// Track edits to existing images
+let existingImagesEdits = {};
+let existingImagesData = [];
+
+// Populate product filter dropdown
+async function populateEditProductFilter() {
+    const filter = document.getElementById('editImageProductFilter');
+    if (!filter) return;
+
+    // Use cached products
+    filter.innerHTML = '<option value="all">All Products</option>' +
+        allProductsCache.map(p => `<option value="${p.id}">${p.product_name}</option>`).join('');
+}
+
+// Load existing images from database
+window.loadExistingImages = async function () {
+    const grid = document.getElementById('existingImagesGrid');
+    const productFilterVal = document.getElementById('editImageProductFilter')?.value || 'all';
+    const tagFilterVal = document.getElementById('editImageTagFilter')?.value || 'all';
+
+    grid.innerHTML = '<p style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+
+    try {
+        let query = supabase.from('product_images').select('*, products(product_name)');
+
+        if (productFilterVal && productFilterVal !== 'all') {
+            query = query.eq('product_id', productFilterVal);
+        }
+
+        if (tagFilterVal && tagFilterVal !== 'all') {
+            query = query.contains('tags', [tagFilterVal]);
+        }
+
+        const { data: images, error } = await query.order('created_at', { ascending: false }).limit(100);
+
+        if (error) throw error;
+
+        if (!images || images.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; padding:30px; color:var(--text-secondary);">No images found matching criteria.</p>';
+            return;
+        }
+
+        existingImagesData = images;
+        existingImagesEdits = {};
+
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
+
+        grid.innerHTML = images.map((img, idx) => `
+            <div class="bulk-preview-item" data-id="${img.id}">
+                <img src="${img.image_url}" alt="Product image" loading="lazy">
+                <div class="file-info">
+                    <div class="file-name">${img.products?.product_name || 'Unknown Product'}</div>
+                    <div class="match-result matched">
+                        <i class="fas fa-link"></i> ${img.is_default ? '⭐ Default Image' : 'Additional Image'}
+                    </div>
+                </div>
+                <div class="bulk-controls">
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <select onchange="window.updateExistingImageProduct('${img.id}', this.value)" style="flex: 1;">
+                            ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === img.product_id ? 'selected' : ''}>${p.product_name}</option>`).join('')}
+                        </select>
+                        <button onclick="window.deleteExistingImage('${img.id}')" class="btn-delete-small" title="Delete Image" 
+                            style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; padding: 0 10px; cursor: pointer;">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div class="bulk-tags-row">
+                        ${bulkTags.map(tag => `
+                            <label class="bulk-tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}">
+                                <input type="checkbox" ${(img.tags || []).includes(tag) ? 'checked' : ''} 
+                                    onchange="window.updateExistingImageTag('${img.id}', '${tag}', this.checked)">
+                                ${tag}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        console.error('Error loading existing images:', e);
+        grid.innerHTML = '<p style="text-align:center; padding:30px; color:#dc2626;">Error loading images. Make sure the product_images table exists.</p>';
+    }
+};
+
+// Delete existing image
+window.deleteExistingImage = async function (id) {
+    if (!confirm('Are you sure you want to delete this image? This cannot be undone.')) return;
+
+    // Optimistic UI update
+    const item = document.querySelector(`.bulk-preview-item[data-id="${id}"]`);
+    if (item) item.style.opacity = '0.5';
+
+    try {
+        const { error } = await supabase
+            .from('product_images')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // Remove from UI
+        if (item) item.remove();
+        showToast('Image deleted successfully', 'success');
+
+    } catch (e) {
+        console.error('Error deleting image:', e);
+        if (item) item.style.opacity = '1';
+        showToast('Error deleting image', 'error');
+    }
+};
+
+// Track product assignment change
+window.updateExistingImageProduct = function (imageId, newProductId) {
+    if (!existingImagesEdits[imageId]) {
+        existingImagesEdits[imageId] = {};
+    }
+    existingImagesEdits[imageId].product_id = newProductId;
+};
+
+// Track tag change & Enforce Unique Tags
+window.updateExistingImageTag = async function (imageId, tag, isChecked) {
+    const img = existingImagesData.find(i => i.id === imageId);
+    if (!img) return;
+
+    if (!existingImagesEdits[imageId]) {
+        existingImagesEdits[imageId] = { tags: [...(img.tags || [])] };
+    }
+    if (!existingImagesEdits[imageId].tags) {
+        existingImagesEdits[imageId].tags = [...(img.tags || [])];
+    }
+
+    // CHECK FOR DUPLICATES IF ADDING A TAG
+    if (isChecked) {
+        // Find current product ID (could be edited or original)
+        const currentProductId = existingImagesEdits[imageId]?.product_id || img.product_id;
+
+        // Check if any OTHER image for this product already has this tag
+        const duplicateImg = existingImagesData.find(otherImg => {
+            if (otherImg.id === imageId) return false; // Skip self
+
+            // Check product match (handle if other image was also edited)
+            const otherProductId = existingImagesEdits[otherImg.id]?.product_id || otherImg.product_id;
+            if (otherProductId !== currentProductId) return false;
+
+            // Check if it has the tag (handle edits)
+            const otherTags = existingImagesEdits[otherImg.id]?.tags || otherImg.tags || [];
+            return otherTags.includes(tag);
+        });
+
+        if (duplicateImg) {
+            const confirmReplace = confirm(
+                `Product already has an image tagged "${tag}".\n\nDo you want to MOVE this tag to the current image?`
+            );
+
+            if (!confirmReplace) {
+                // Revert checkbox in UI
+                const checkbox = document.querySelector(`.bulk-preview-item[data-id="${imageId}"] input[onchange*="'${tag}'"]`);
+                if (checkbox) checkbox.checked = false;
+                return; // Stop
+            }
+
+            // Remove tag from the OTHER image
+            if (!existingImagesEdits[duplicateImg.id]) {
+                existingImagesEdits[duplicateImg.id] = { tags: [...(duplicateImg.tags || [])] };
+            }
+            if (!existingImagesEdits[duplicateImg.id].tags) {
+                existingImagesEdits[duplicateImg.id].tags = [...(duplicateImg.tags || [])];
+            }
+            // Remove the tag
+            existingImagesEdits[duplicateImg.id].tags = existingImagesEdits[duplicateImg.id].tags.filter(t => t !== tag);
+
+            // Update UI for the OTHER image (uncheck it)
+            const otherCheckbox = document.querySelector(`.bulk-preview-item[data-id="${duplicateImg.id}"] input[onchange*="'${tag}'"]`);
+            if (otherCheckbox) {
+                otherCheckbox.checked = false;
+                otherCheckbox.parentElement.classList.remove('active');
+            }
+            showToast(`Tag "${tag}" moved to this image.`, 'info');
+        }
+    }
+
+    if (isChecked && !existingImagesEdits[imageId].tags.includes(tag)) {
+        existingImagesEdits[imageId].tags.push(tag);
+    } else if (!isChecked) {
+        existingImagesEdits[imageId].tags = existingImagesEdits[imageId].tags.filter(t => t !== tag);
+    }
+
+    // Update current chip visual
+    const checkbox = document.querySelector(`.bulk-preview-item[data-id="${imageId}"] input[onchange*="'${tag}'"]`);
+    if (checkbox && checkbox.parentElement) {
+        if (isChecked) checkbox.parentElement.classList.add('active');
+        else checkbox.parentElement.classList.remove('active');
+    }
+};
+
+// Save all changes to existing images
+window.saveExistingImageChanges = async function () {
+    const editIds = Object.keys(existingImagesEdits);
+    if (editIds.length === 0) {
+        showToast('No changes to save', 'info');
+        return;
+    }
+
+    const btn = document.getElementById('saveExistingImagesBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    let saved = 0;
+    let errors = 0;
+
+    for (const imageId of editIds) {
+        try {
+            const updates = existingImagesEdits[imageId];
+            const { error } = await supabase
+                .from('product_images')
+                .update(updates)
+                .eq('id', imageId);
+
+            if (error) throw error;
+            saved++;
+        } catch (e) {
+            console.error('Error saving image:', e);
+            errors++;
+        }
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+
+    if (saved > 0) {
+        showToast(`Saved ${saved} image(s)${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
+        existingImagesEdits = {};
+    } else {
+        showToast('Failed to save changes', 'error');
+    }
+};
+
+
+// Setup drag-drop handlers
+function setupBulkDragDrop() {
+    const dropZone = document.getElementById('bulkImagesDropZone');
+    const fileInput = document.getElementById('bulkImagesInput');
+
+    // File input change
+    fileInput.onchange = (e) => handleBulkFilesSelected(Array.from(e.target.files));
+
+    // Drag events
+    dropZone.ondragover = (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    };
+
+    dropZone.ondragleave = () => {
+        dropZone.classList.remove('dragover');
+    };
+
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleBulkFilesSelected(Array.from(e.dataTransfer.files));
+    };
+}
+
+// Fuzzy match filename to product
+function matchFilenameToProduct(filename) {
+    // Remove extension and special chars
+    const baseName = filename.replace(/\.[^/.]+$/, '') // Remove extension
+        .toLowerCase()
+        .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
+        .replace(/\s+/g, ' ') // Normalize spaces
+        .trim();
+
+    // Extract potential tags
+    const tagKeywords = ['pet jar', 'glass jar', 'standup', 'pouch', 'front', 'back', 'lifestyle'];
+    const foundTags = [];
+    let searchName = baseName;
+
+    tagKeywords.forEach(tag => {
+        if (baseName.includes(tag)) {
+            foundTags.push(tag.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+            searchName = searchName.replace(tag, '').trim();
+        }
+    });
+
+    // Try to find matching product
+    let bestMatch = null;
+    let bestScore = 0;
+
+    allProductsCache.forEach(product => {
+        const productName = product.product_name.toLowerCase();
+        const productSlug = (product.slug || '').toLowerCase();
+
+        // Exact match check
+        if (searchName === productName || searchName === productSlug) {
+            bestMatch = product;
+            bestScore = 100;
+            return;
+        }
+
+        // Partial match - calculate similarity
+        const words = searchName.split(' ').filter(w => w.length > 2);
+        let matchedWords = 0;
+
+        words.forEach(word => {
+            if (productName.includes(word) || productSlug.includes(word)) {
+                matchedWords++;
+            }
+        });
+
+        const score = words.length > 0 ? (matchedWords / words.length) * 100 : 0;
+
+        if (score > bestScore && score >= 50) { // At least 50% match
+            bestScore = score;
+            bestMatch = product;
+        }
+    });
+
+    return { product: bestMatch, score: bestScore, tags: foundTags };
+}
+
+// Handle files selected
+async function handleBulkFilesSelected(files) {
+    const preview = document.getElementById('bulkImagesPreview');
+    const summary = document.getElementById('bulkImagesSummary');
+    const saveBtn = document.getElementById('bulkUploadSaveBtn');
+
+    // Filter only images
+    const imageFiles = files.filter(f => f.type.startsWith('image/'));
+
+    if (imageFiles.length === 0) {
+        showToast('Please select image files only', 'error');
+        return;
+    }
+
+    let matchedCount = 0;
+    let unmatchedCount = 0;
+
+    // Process each file
+    for (const file of imageFiles) {
+        const match = matchFilenameToProduct(file.name);
+        const objectUrl = URL.createObjectURL(file);
+
+        const item = {
+            file: file,
+            previewUrl: objectUrl,
+            matchedProduct: match.product,
+            matchScore: match.score,
+            tags: match.tags,
+            manualProductId: null
+        };
+
+        pendingBulkImages.push(item);
+
+        if (match.product) matchedCount++;
+        else unmatchedCount++;
+
+        // Render preview item - always show dropdown for override capability
+        const selectedProductId = match.product?.id || '';
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Front View', 'Back View', 'Lifestyle'];
+        const detectedTags = match.tags || [];
+
+        const html = `
+            <div class="bulk-preview-item" data-idx="${pendingBulkImages.length - 1}">
+                <img src="${objectUrl}" alt="${file.name}">
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="match-result ${match.product ? 'matched' : 'unmatched'}">
+                        ${match.product
+                ? `<i class="fas fa-check-circle"></i> Auto-matched`
+                : `<i class="fas fa-question-circle"></i> Select product`}
+                    </div>
+                </div>
+                <div class="bulk-controls">
+                    <select onchange="window.manualMatchProduct(${pendingBulkImages.length - 1}, this.value)" class="bulk-product-select">
+                        <option value="">Select Product...</option>
+                        ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === selectedProductId ? 'selected' : ''}>${p.product_name}</option>`).join('')}
+                    </select>
+                    <div class="bulk-tags-row">
+                        ${bulkTags.map(tag => `
+                            <label class="bulk-tag-chip ${detectedTags.includes(tag) ? 'active' : ''}">
+                                <input type="checkbox" ${detectedTags.includes(tag) ? 'checked' : ''} 
+                                    onchange="window.toggleBulkTag(${pendingBulkImages.length - 1}, '${tag}', this.checked)">
+                                ${tag}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+
+        preview.insertAdjacentHTML('beforeend', html);
+    }
+
+    // Update summary
+    document.getElementById('matchedCount').textContent = matchedCount;
+    document.getElementById('unmatchedCount').textContent = unmatchedCount;
+    summary.style.display = 'block';
+
+    // Show save button if any matches
+    if (matchedCount > 0) {
+        saveBtn.style.display = 'inline-flex';
+    }
+}
+
+// Manual product selection for unmatched files
+window.manualMatchProduct = function (idx, productId) {
+    if (idx < 0 || idx >= pendingBulkImages.length) return;
+
+    pendingBulkImages[idx].manualProductId = productId;
+
+    // Update UI
+    const item = document.querySelector(`.bulk-preview-item[data-idx="${idx}"]`);
+    const matchResult = item.querySelector('.match-result');
+
+    if (productId) {
+        const product = allProductsCache.find(p => p.id === productId);
+        matchResult.className = 'match-result matched';
+        matchResult.innerHTML = `<i class="fas fa-check-circle"></i> ${product?.product_name || 'Selected'}`;
+
+        // Update matched count
+        updateBulkMatchCounts();
+    }
+};
+
+// Toggle tag for a bulk image
+window.toggleBulkTag = function (idx, tag, isChecked) {
+    if (idx < 0 || idx >= pendingBulkImages.length) return;
+
+    const item = pendingBulkImages[idx];
+    if (!item.tags) item.tags = [];
+
+    if (isChecked && !item.tags.includes(tag)) {
+        item.tags.push(tag);
+    } else if (!isChecked) {
+        item.tags = item.tags.filter(t => t !== tag);
+    }
+
+    // Update visual state of the chip
+    const itemEl = document.querySelector(`.bulk-preview-item[data-idx="${idx}"]`);
+    if (itemEl) {
+        const chip = itemEl.querySelector(`label.bulk-tag-chip input[onchange*="'${tag}'"]`)?.parentElement;
+        if (chip) {
+            chip.classList.toggle('active', isChecked);
+        }
+    }
+};
+
+// Update match counts
+function updateBulkMatchCounts() {
+    let matched = 0;
+    let unmatched = 0;
+
+    pendingBulkImages.forEach(item => {
+        if (item.matchedProduct || item.manualProductId) matched++;
+        else unmatched++;
+    });
+
+    document.getElementById('matchedCount').textContent = matched;
+    document.getElementById('unmatchedCount').textContent = unmatched;
+
+    if (matched > 0) {
+        document.getElementById('bulkUploadSaveBtn').style.display = 'inline-flex';
+    }
+}
+
+// Save all matched images
+window.saveBulkImages = async function () {
+    const progress = document.getElementById('bulkImagesProgress');
+    const progressBar = document.getElementById('bulkProgressBar');
+    const progressText = document.getElementById('bulkProgressText');
+    const saveBtn = document.getElementById('bulkUploadSaveBtn');
+
+    // Filter matched images
+    const toUpload = pendingBulkImages.filter(item => item.matchedProduct || item.manualProductId);
+
+    if (toUpload.length === 0) {
+        showToast('No matched images to upload', 'error');
+        return;
+    }
+
+    saveBtn.disabled = true;
+    progress.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    let uploaded = 0;
+    let errors = 0;
+
+    for (const item of toUpload) {
+        try {
+            progressText.textContent = `Uploading ${uploaded + 1}/${toUpload.length}...`;
+
+            // Upload to storage
+            const imageUrl = await uploadImageToStorage(item.file);
+
+            // Get product ID
+            const productId = item.manualProductId || item.matchedProduct?.id;
+
+            // Save to product_images table
+            const { error } = await supabase.from('product_images').insert({
+                product_id: productId,
+                image_url: imageUrl,
+                is_default: false,
+                tags: item.tags || [],
+                display_order: 99 // Will be sorted later
+            });
+
+            if (error) throw error;
+
+            uploaded++;
+            progressBar.style.width = `${(uploaded / toUpload.length) * 100}%`;
+
+        } catch (e) {
+            console.error('Error uploading image:', e);
+            errors++;
+        }
+    }
+
+    saveBtn.disabled = false;
+    progress.style.display = 'none';
+
+    if (uploaded > 0) {
+        showToast(`Uploaded ${uploaded} images${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
+        closeBulkImagesModal();
+    } else {
+        showToast('Failed to upload images', 'error');
+    }
+};
+
+// Legacy single image upload (kept for other uses like category images)
 const handleImageUpload = async (file, statusElementId, inputElementId) => {
     const statusEl = document.getElementById(statusElementId);
     const inputEl = document.getElementById(inputElementId);
 
     if (!file) return;
 
-    // reset status
     statusEl.textContent = 'Uploading...';
     statusEl.style.color = 'var(--text-secondary)';
 
     try {
-        // Sanitize filename to avoid weird character issues
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `${fileName}`; // Uploading to root of bucket for simplicity
-
-        const { data, error } = await supabase.storage
-            .from('product-images')
-            .upload(filePath, file);
-
-        if (error) throw error;
-
-        // Get Public URL
-        const { data: { publicUrl } } = supabase.storage
-            .from('product-images')
-            .getPublicUrl(filePath);
-
+        const publicUrl = await uploadImageToStorage(file);
         inputEl.value = publicUrl;
         statusEl.textContent = 'Upload Complete!';
-        statusEl.style.color = '#10b981'; // Success green
-
+        statusEl.style.color = '#10b981';
     } catch (error) {
         console.error('Upload Error:', error);
         statusEl.textContent = 'Error: ' + error.message;
@@ -1963,19 +2981,14 @@ const handleImageUpload = async (file, statusElementId, inputElementId) => {
     }
 };
 
-// Event Listeners for Upload Inputs
+// Event Listeners for Legacy Upload Inputs (categories, settings, etc.)
 const setupUploadListeners = () => {
-    const showcaseUpload = document.getElementById('showcaseUpload');
-
-    if (showcaseUpload) {
-        showcaseUpload.addEventListener('change', (e) => {
-            handleImageUpload(e.target.files[0], 'showcaseStatus', 'showcaseImage');
-        });
-    }
+    // Legacy showcase upload removed - now using bulk upload
 };
 
-// Initialize listeners when script loads (or call this in your init function)
+// Initialize listeners when script loads
 setupUploadListeners();
+
 
 // ========================================
 // NUTRITION QUICK FILL FUNCTIONALITY
@@ -2559,3 +3572,94 @@ const createShim = (name) => {
     'clearCsvUpload'
 ].forEach(createShim);
 console.log('CSV Shims Initialized from admin.js');
+
+// ==========================================
+// MIGRATION TOOL: Supabase -> Cloudinary
+// ==========================================
+window.migrateSupabaseToCloudinary = async function () {
+    if (!confirm("This will migrate images from Supabase Storage to Cloudinary. It may take some time. Continue?")) return;
+
+    // UI Setup
+    const progressDiv = document.getElementById('migrationProgress');
+    const progressBar = document.getElementById('migrationBar');
+    const progressText = document.getElementById('migrationStatusText');
+    const progressCount = document.getElementById('migrationCount');
+
+    if (progressDiv) progressDiv.style.display = 'block';
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.innerText = 'Scanning for Supabase images...';
+
+    try {
+        // 1. Fetch images needing migration (URLs containing 'supabase')
+        // We scan product_images table
+        const { data: images, error } = await supabase
+            .from('product_images')
+            .select('id, image_url')
+            .ilike('image_url', '%supabase%');
+
+        if (error) throw error;
+
+        if (!images || images.length === 0) {
+            if (progressText) progressText.innerText = 'No Supabase images found in product_images table.';
+            showToast('No Supabase images found to migrate in product_images table.', 'info');
+            return;
+        }
+
+        const total = images.length;
+        let migrated = 0;
+        let failed = 0;
+
+        if (progressCount) progressCount.innerText = `0/${total}`;
+
+        // 2. Migrate each image
+        for (const img of images) {
+            try {
+                if (progressText) progressText.innerText = `Migrating image ${migrated + failed + 1} of ${total}...`;
+
+                // A. Download image from Supabase
+                const response = await fetch(img.image_url);
+                if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+                const blob = await response.blob();
+
+                // Convert to File for our upload function
+                const file = new File([blob], `migrated_${img.id}.jpg`, { type: blob.type });
+
+                // B. Upload to Cloudinary
+                // This uses our NEW uploadImageToStorage which points to Cloudinary
+                const newUrl = await uploadImageToStorage(file);
+
+                // C. Update Database
+                const { error: updateError } = await supabase
+                    .from('product_images')
+                    .update({ image_url: newUrl })
+                    .eq('id', img.id);
+
+                if (updateError) throw updateError;
+
+                migrated++;
+            } catch (e) {
+                console.error('Migration failed for image:', img.id, e);
+                failed++;
+            }
+
+            // Update Progress
+            const pct = Math.round(((migrated + failed) / total) * 100);
+            if (progressBar) progressBar.style.width = `${pct}%`;
+            if (progressCount) progressCount.innerText = `${migrated + failed}/${total}`;
+        }
+
+        if (progressText) progressText.innerText = `Migration Complete! ${migrated} success, ${failed} failed.`;
+        showToast(`Migration complete: ${migrated} moved to Cloudinary`, 'success');
+
+        // Refresh grid if on the tab
+        if (window.loadExistingImages) {
+            const filter = document.getElementById('editImageProductFilter');
+            window.loadExistingImages(filter ? filter.value : 'all');
+        }
+
+    } catch (e) {
+        console.error('Migration error:', e);
+        if (progressText) progressText.innerText = 'Error during migration check console.';
+        showToast('Error migrating images', 'error');
+    }
+};

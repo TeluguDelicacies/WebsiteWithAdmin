@@ -704,3 +704,79 @@ Only loads on screens < 768px
     padding: 4px 8px !important;
     font-size: 0.75rem !important;
 }
+
+/* ====================================
+   BULK IMAGES MODAL - MOBILE
+   ==================================== */
+
+#bulkImagesModal .modal-content {
+    padding: 16px !important;
+}
+
+#bulkImagesModal h2 {
+    font-size: 1.1rem !important;
+}
+
+/* Compact drop zone for mobile */
+.bulk-drop-zone {
+    padding: 30px 15px !important;
+}
+
+.bulk-drop-zone i {
+    font-size: 2.5rem !important;
+}
+
+.bulk-drop-zone .drop-text {
+    font-size: 1rem !important;
+}
+
+.bulk-drop-zone .drop-subtext {
+    font-size: 0.8rem !important;
+}
+
+/* Preview items - stacked layout */
+.bulk-preview-item {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 10px !important;
+}
+
+.bulk-preview-item img {
+    width: 50px !important;
+    height: 50px !important;
+}
+
+.bulk-preview-item .file-info {
+    width: calc(100% - 60px) !important;
+}
+
+.bulk-preview-item .file-name {
+    font-size: 0.8rem !important;
+}
+
+.bulk-preview-item .match-result {
+    font-size: 0.7rem !important;
+}
+
+.bulk-preview-item select {
+    width: 100% !important;
+    max-width: none !important;
+    margin-top: 8px !important;
+}
+
+/* Bulk Images Button - icon only like CSV button */
+#bulkImagesBtn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    padding: 0 !important;
+    border: 1px solid #8b5cf6 !important;
+    background: white !important;
+    color: #8b5cf6 !important;
+    border-radius: 8px !important;
+    font-size: 1.2rem !important;
+}
+
+#bulkImagesBtn .btn-text {
+    display: none !important;
+}
