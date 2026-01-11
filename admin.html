@@ -1340,25 +1340,6 @@
                             <i class="fas fa-file-csv"></i><span class="btn-text">CSV</span>
                         </button>
 
-                        <!-- Bulk Sync Defaults (Visible in Products/Images) -->
-                        <div id="bulkSyncControls" style="display: none; align-items: center; gap: 8px;">
-                            <select id="bulkTagSelector" class="header-action-btn"
-                                style="width: auto; height: 35px; padding: 0 10px; font-size: 0.85rem;">
-                                <option value="">Sync Default By Tag</option>
-                                <option value="Front View">Front View</option>
-                                <option value="Back View">Back View</option>
-                                <option value="Lifestyle">Lifestyle</option>
-                                <option value="PET Jar">PET Jar</option>
-                                <option value="Glass Jar">Glass Jar</option>
-                                <option value="Standup Pouch">Standup Pouch</option>
-                                <option value="Packet">Packet</option>
-                            </select>
-                            <button onclick="handleBulkSyncDefault()" class="header-action-btn"
-                                style="color: var(--color-primary-blue); border-color: var(--color-primary-blue); height: 35px;">
-                                <i class="fas fa-sync-alt"></i><span class="btn-text">Sync</span>
-                            </button>
-                        </div>
-
                         <!-- Add Button (Context-Aware) -->
                         <button id="addBtn" onclick="handleAddClick()" class="header-action-btn">
                             <i class="fas fa-plus"></i> <span id="addBtnText">Add Product</span>
@@ -1419,6 +1400,33 @@
                                     <i class="fas fa-images"></i> Bulk Images
                                 </button>
                             </div>
+
+                            <!-- Bulk Sync Defaults (Moved & Refined) -->
+                            <div id="bulkSyncControls"
+                                style="display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-light);">
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Set
+                                    Global Default Image:</span>
+                                <div style="position: relative;">
+                                    <select id="bulkTagSelector"
+                                        style="width: 180px; height: 32px; padding: 0 30px 0 10px; font-size: 0.85rem; border-radius: 4px; border: 1px solid var(--border-medium); appearance: none; background-color: white; color: var(--text-primary); cursor: pointer;">
+                                        <option value="" disabled selected>Select Tag...</option>
+                                        <option value="Front View">Front View</option>
+                                        <option value="Back View">Back View</option>
+                                        <option value="Lifestyle">Lifestyle</option>
+                                        <option value="PET Jar">PET Jar</option>
+                                        <option value="Glass Jar">Glass Jar</option>
+                                        <option value="Standup Pouch">Standup Pouch</option>
+                                        <option value="Packet">Packet</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down"
+                                        style="position: absolute; right: 10px; top: 10px; font-size: 0.7rem; color: var(--text-secondary); pointer-events: none;"></i>
+                                </div>
+                                <button onclick="handleBulkSyncDefault()" class="admin-btn"
+                                    style="background: var(--color-primary-blue); color: white; border: none; height: 32px; padding: 0 12px; border-radius: 4px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-sync-alt"></i> Apply to All
+                                </button>
+                            </div>
+
                             <p id="imagesNavText"
                                 style="color: var(--text-secondary); margin: 5px 0 0; font-size: 0.9rem;">
                                 Manage product galleries and set primary showcase images.

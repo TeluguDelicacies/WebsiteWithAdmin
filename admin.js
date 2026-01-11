@@ -362,7 +362,8 @@ window.switchView = (view) => {
             addBtnText.textContent = 'Add Product';
         }
         if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
-        if (bulkSyncControls) bulkSyncControls.style.display = 'flex'; // Show Bulk Sync button in Products too
+        if (csvBtn) csvBtn.style.display = 'inline-flex'; // Show CSV button
+        if (bulkSyncControls) bulkSyncControls.style.display = 'none'; // REMOVED from Products view
 
         populateCategoryFilter();
         fetchProducts();
