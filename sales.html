@@ -273,7 +273,7 @@
                         if (backPanel) {
                             setTimeout(() => {
                                 backPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }, 300);
+                            }, 400); // Increased delay to ensure animation starts
                         }
                     }
                 }
@@ -1171,12 +1171,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Toggle Button Below Image -->
-                            <div class="toggle-btn-container" style="text-align:center; margin-top:15px;">
-                                <button id="toggleDescriptionBtn" onclick="toggleFlip()" class="action-btn-pill outline">
-                                    <i class="fas fa-info-circle"></i> About Product
-                                </button>
-                            </div>
+
                             
                             <!-- Image Thumbnail Strip (Populated by JS if multiple images exist) -->
                             <div class="image-thumbnail-strip" id="imageThumbnailStrip" style="display:none; margin-top:15px;">
@@ -1228,6 +1223,13 @@
                 <!-- Variant Selection (Desktop) -->
                 <div class="selection-area">
                     ${renderVariants(product)}
+                </div>
+
+                <!-- Repositioned Toggle Button (Desktop: Below variants, Mobile: follows natural order) -->
+                <div class="toggle-btn-container" style="margin-top:20px;">
+                    <button id="toggleDescriptionBtn" onclick="toggleFlip()" class="action-btn-pill outline">
+                        <i class="fas fa-info-circle"></i> About Product
+                    </button>
                 </div>
             </div>
 

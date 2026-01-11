@@ -769,23 +769,24 @@ textarea {
         width: 80vw !important;
         height: 80vw !important;
         max-width: none;
+        perspective: 1200px;
         aspect-ratio: 1 / 1;
         margin: 0 auto;
     }
+}
 
-    .gallery-front .main-img {
-        object-fit: cover;
-        /* Eliminate white bars */
-        object-position: center bottom;
-    }
+.gallery-front .main-img {
+    object-fit: cover;
+    /* Eliminate white bars */
+    object-position: center bottom;
+}
 
-    .overlay-logo {
-        max-width: 30vw !important;
-        max-height: 20vw !important;
-        top: 15px !important;
-        right: 15px !important;
-        padding: 10px 15px !important;
-    }
+.overlay-logo {
+    max-width: 30vw !important;
+    max-height: 20vw !important;
+    top: 15px !important;
+    right: 15px !important;
+    padding: 10px 15px !important;
 }
 
 @media (max-width: 767px) {
@@ -1017,33 +1018,41 @@ textarea {
 ======================================== */
 .image-thumbnail-strip {
     display: flex;
-    gap: 10px;
-    justify-content: center;
+    gap: 12px;
+    justify-content: flex-start;
+    /* Elegantly left-aligned per user request */
     flex-wrap: wrap;
-    padding: 10px;
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-md);
+    padding: 10px 0;
+    /* Vertical breathing room only */
+    background: transparent;
+    /* Removed heavy background for "floating" look */
+    border-radius: 0;
 }
 
 .image-thumb {
     position: relative;
     width: 70px;
     height: 70px;
-    border-radius: 8px;
+    border-radius: 12px;
+    /* Smoother corners */
     overflow: hidden;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    /* Soft floating shadow */
 }
 
 .image-thumb:hover {
     border-color: var(--color-primary-blue);
-    transform: scale(1.05);
+    transform: translateY(-4px);
+    /* Premium lifting effect */
+    box-shadow: 0 6px 15px rgba(0, 119, 182, 0.15);
 }
 
 .image-thumb.active {
     border-color: #f59e0b;
-    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .image-thumb img {
@@ -1443,13 +1452,20 @@ textarea {
 
 @media (max-width: 767px) {
     .toggle-btn-container {
-        text-align: left !important;
-        padding-left: 10px;
+        text-align: center !important;
+        padding: 0;
     }
 
     .action-btn-pill {
         padding: 6px 16px;
         font-size: 0.85rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .toggle-btn-container {
+        text-align: left !important;
+        margin-top: 20px;
     }
 }
 
@@ -1594,10 +1610,10 @@ textarea {
         border-right: 1px solid var(--border-light);
         max-height: calc(100vh - var(--header-height) - 200px);
         min-height: 350px;
+        perspective: 1500px;
         aspect-ratio: 1 / 1;
     }
 
-    /* Product details - outer container */
     .product-details {
         max-height: calc(100vh - var(--header-height) - 120px);
         display: flex;
@@ -1607,161 +1623,162 @@ textarea {
         padding: 0;
         border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
     }
+}
 
-    /* Inner part - no scroll */
-    .details-body {
-        flex: 1;
-        overflow: visible !important;
-        padding: 5px 25px 5px 25px;
-    }
+/* Inner part - no scroll */
+.details-body {
+    flex: 1;
+    overflow: visible !important;
+    padding: 5px 25px 5px 25px;
+}
 
-    /* Compact Typography for Desktop to avoid scroll */
-    .product-title {
-        font-size: clamp(1.6rem, 4vw, 2rem) !important;
-        margin-top: 0 !important;
-        margin-bottom: 2px !important;
-    }
+/* Compact Typography for Desktop to avoid scroll */
+.product-title {
+    font-size: clamp(1.6rem, 4vw, 2rem) !important;
+    margin-top: 0 !important;
+    margin-bottom: 2px !important;
+}
 
-    .telugu-title {
-        font-size: 1.2rem !important;
-        margin-bottom: 2px !important;
-    }
+.telugu-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 2px !important;
+}
 
-    .product-tagline {
-        font-size: 1.2rem !important;
-        /* Match Telugu font size */
-        font-weight: 400 !important;
-        margin-top: 0 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
+.product-tagline {
+    font-size: 1.2rem !important;
+    /* Match Telugu font size */
+    font-weight: 400 !important;
+    margin-top: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
 
-    .current-price {
-        font-size: 2rem !important;
-    }
+.current-price {
+    font-size: 2rem !important;
+}
 
-    .price-row {
-        margin-bottom: 8px !important;
-    }
+.price-row {
+    margin-bottom: 8px !important;
+}
 
-    .selection-area {
-        margin-bottom: 8px !important;
-    }
+.selection-area {
+    margin-bottom: 8px !important;
+}
 
-    /* Fixed bottom part - centered */
-    .add-to-cart-section {
-        position: sticky;
-        bottom: 0;
-        background: white;
-        padding: 5px 25px;
-        border-top: none !important;
-        box-shadow: none !important;
-        margin-top: 5px !important;
-        padding-top: 5px !important;
-        z-index: 10;
-        display: flex;
-        justify-content: center;
-    }
+/* Fixed bottom part - centered */
+.add-to-cart-section {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 5px 25px;
+    border-top: none !important;
+    box-shadow: none !important;
+    margin-top: 5px !important;
+    padding-top: 5px !important;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+}
 
-    #detailActionArea {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
+#detailActionArea {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
 
-    .qty-control-lg {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #FFF9C4 !important;
-        border: 1px solid #FBC02D !important;
-        border-radius: 20px !important;
-        /* Match add-cart-btn */
-        padding: 4px 12px;
-        min-width: 120px;
-        /* Match add-cart-btn */
-        gap: 8px;
-        margin: 0 auto;
-    }
+.qty-control-lg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFF9C4 !important;
+    border: 1px solid #FBC02D !important;
+    border-radius: 20px !important;
+    /* Match add-cart-btn */
+    padding: 4px 12px;
+    min-width: 120px;
+    /* Match add-cart-btn */
+    gap: 8px;
+    margin: 0 auto;
+}
 
-    .qty-btn-lg {
-        width: 28px;
-        /* Compact size matching sidebar */
-        height: 28px;
-        border-radius: 50%;
-        border: none !important;
-        background: transparent !important;
-        color: #333;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
+.qty-btn-lg {
+    width: 28px;
+    /* Compact size matching sidebar */
+    height: 28px;
+    border-radius: 50%;
+    border: none !important;
+    background: transparent !important;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
 
-    .qty-btn-lg:hover {
-        background: rgba(251, 192, 45, 0.3) !important;
-    }
+.qty-btn-lg:hover {
+    background: rgba(251, 192, 45, 0.3) !important;
+}
 
-    .qty-input-lg {
-        width: 50px;
-        text-align: center;
-        font-size: 1.25rem;
-        font-weight: 700;
-        border: none;
-        background: transparent;
-        color: var(--color-primary-blue);
-    }
+.qty-input-lg {
+    width: 50px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    color: var(--color-primary-blue);
+}
 
-    /* Force buttons to single line on desktop */
-    .info-btns-row {
-        flex-wrap: nowrap;
-        margin: 2px 0 6px 0;
-    }
+/* Force buttons to single line on desktop */
+.info-btns-row {
+    flex-wrap: nowrap;
+    margin: 2px 0 6px 0;
+}
 
-    .info-btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-    }
+.info-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
 
-    /* Compact the info content for desktop */
-    .info-tabs {
-        min-height: 135px;
-        /* Ensures space is reserved for tabs and content */
-        border-bottom: none !important;
-    }
+/* Compact the info content for desktop */
+.info-tabs {
+    min-height: 135px;
+    /* Ensures space is reserved for tabs and content */
+    border-bottom: none !important;
+}
 
-    .info-toggles {
-        margin-bottom: 8px !important;
-    }
+.info-toggles {
+    margin-bottom: 8px !important;
+}
 
-    .info-toggles .toggle-btn {
-        padding: 8px 15px !important;
-        font-size: 0.85rem !important;
-        background: transparent !important;
-        border: none !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        flex: 0 1 auto !important;
-    }
+.info-toggles .toggle-btn {
+    padding: 8px 15px !important;
+    font-size: 0.85rem !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    flex: 0 1 auto !important;
+}
 
-    .info-content-block {
-        font-size: 1.05rem;
-        /* Larger default - JS will shrink to fit */
-        line-height: 1.35;
-        text-align: justify;
-    }
+.info-content-block {
+    font-size: 1.05rem;
+    /* Larger default - JS will shrink to fit */
+    line-height: 1.35;
+    text-align: justify;
+}
 
-    .info-content-block.active {
-        height: 112px;
-        /* Reduced by 1/5th from 140px */
-        padding: 5px 10px;
-        margin-bottom: 0 !important;
-        overflow: hidden;
-    }
+.info-content-block.active {
+    height: 112px;
+    /* Reduced by 1/5th from 140px */
+    padding: 5px 10px;
+    margin-bottom: 0 !important;
+    overflow: hidden;
+}
 }
 
 @media (max-width: 767px) {
