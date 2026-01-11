@@ -1797,7 +1797,7 @@ textarea {
         font-weight: 600 !important;
         text-align: center !important;
         justify-content: center !important;
-        border-radius: 20px !important;
+        border-radius: 8px !important;
         /* Pill shape */
         border: 1px solid var(--border-light) !important;
         background: white !important;
@@ -2509,7 +2509,7 @@ textarea {
     background: var(--color-brand-blue-primary) !important;
     color: var(--color-white) !important;
     border: none !important;
-    border-radius: 50px !important;
+    border-radius: 8px !important;
     padding: 6px 18px;
     width: fit-content;
     gap: 1rem;
@@ -2552,7 +2552,7 @@ textarea {
     border: 1px solid var(--color-brand-blue-primary) !important;
     color: white !important;
     padding: 8px 20px;
-    border-radius: 20px !important;
+    border-radius: 8px !important;
     /* Same as sidebar Add button */
     font-size: 0.9rem;
     font-weight: 600;
@@ -2731,8 +2731,8 @@ textarea {
     align-items: center;
     background: #F5F5F5;
     /* Light grey to contrast with white card */
-    border-radius: 50px;
-    /* Full capsule shape */
+    border-radius: 8px;
+    /* Rounded rectangle */
     padding: 4px;
     gap: 0;
     border: none;
@@ -2785,7 +2785,7 @@ textarea {
     width: 100%;
     padding: 16px 32px;
     /* Full Rounded Pill */
-    border-radius: 50px;
+    border-radius: 8px;
     /* Brand Blue Background */
     background: linear-gradient(135deg, #0077B6 0%, #005f8a 100%);
     border: none;
@@ -2923,12 +2923,10 @@ textarea {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    background: #FFF9C4 !important;
-    /* Light Yellow */
-    border: 1px solid #FBC02D !important;
-    /* Dark Yellow Border */
-    border-radius: 50px !important;
-    /* Pill Shape */
+    background: var(--color-brand-blue-primary) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    /* Rounded Rectangle */
     padding: 4px 12px;
     min-width: 100px;
     gap: 10px;
@@ -2939,7 +2937,7 @@ textarea {
     border: none;
     font-size: 1.2rem;
     font-weight: bold;
-    color: #333;
+    color: white;
     cursor: pointer;
     padding: 0;
     display: flex;
@@ -2957,7 +2955,7 @@ textarea {
 
 .quantity-display {
     font-weight: 600;
-    color: #000;
+    color: white;
     min-width: 24px;
     text-align: center;
 }
@@ -3005,7 +3003,7 @@ textarea {
     justify-content: space-between !important;
     background: var(--color-brand-blue-primary) !important;
     border: none !important;
-    border-radius: 12px !important;
+    border-radius: 8px !important;
     overflow: hidden;
     color: white !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -3031,7 +3029,7 @@ textarea {
 .sim-item .btn-add {
     width: 75px !important;
     /* Match reduced width */
-    border-radius: 12px !important;
+    border-radius: 8px !important;
     display: flex;
     align-items: center;
     justify-content: center;
