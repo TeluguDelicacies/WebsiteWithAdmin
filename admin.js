@@ -989,6 +989,17 @@ async function fetchProducts() {
         if (error) throw error;
 
         allProducts = products; // Store globally
+
+        // Fetch all product images to show in the list
+        const { data: images, error: imgError } = await supabase
+            .from('product_images')
+            .select('product_id, image_url, is_default')
+            .order('display_order', { ascending: true });
+
+        if (!imgError) {
+            window.allProductImagesCache = images || [];
+        }
+
         await populateCategoryFilter(); // WAIT for categories to ensure dropdown is ready
         renderProductList(); // Render based on current filter state
     } catch (error) {
@@ -1093,6 +1104,10 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
             variantsHtml = `<div style="grid-column: 1/span 3; text-align: center; color: var(--text-secondary); font-size: 0.8rem;">No variants</div>`;
         }
 
+        // Find default image from cache if available
+        const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+        const defaultImg = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image || PLACEHOLDER_IMAGE;
+
         return `
         <div class="admin-product-card draggable-item" 
              draggable="${isDragEnabled}" 
@@ -1109,7 +1124,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                 <!-- Grip for Drag -->
                 ${isDragEnabled ? '<div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>' : ''}
                 
-                <img src="${product.showcase_image || PLACEHOLDER_IMAGE}" 
+                <img src="${defaultImg}" 
                      onerror="this.src=PLACEHOLDER_IMAGE"
                      style="${isDragEnabled ? 'margin-left: 15px;' : ''}">
                 
@@ -1804,7 +1819,6 @@ productForm.addEventListener('submit', async (e) => {
             net_weight: topNetWeight,
             total_stock: calculatedTotalStock,
             global_sold: calculatedTotalSold,
-            showcase_image: document.getElementById('showcaseImage').value,
             is_trending: document.getElementById('productTrending').checked,
             is_visible: document.getElementById('productVisible').checked,
             quantity_variants: variants,

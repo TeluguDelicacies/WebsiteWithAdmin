@@ -2979,8 +2979,10 @@ function renderProducts(products, categories) {
                 showcaseItem.className = 'product-item';
                 showcaseItem.dataset.productId = product.id;
 
-                // Allow dynamic placeholder from site settings if needed, but for now specific or default
-                let localImage = product.showcase_image;
+                // Find default image from cache
+                const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+                let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
+
                 if (!localImage) {
                     localImage = window.currentSiteSettings?.product_placeholder_url;
                 }
@@ -3171,9 +3173,9 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
     const contentIngId = `content-ing-${product.id}`;
     const contentNutId = `content-nut-${product.id}`;
     const categoryName = cardElement.dataset.category;
+    const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
+    let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
 
-    let localImage = product.showcase_image;
-    const pName = product.product_name.toLowerCase();
     if (!localImage) {
         // Fallback to generic placeholders if no specific image is set
         localImage = window.currentSiteSettings?.product_placeholder_url;

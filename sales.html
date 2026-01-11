@@ -740,10 +740,9 @@
             }
 
             // 1. Identify "Active Tag" from Showcase Image
-            const showcaseUrl = product.showcase_image;
             const productImages = state.allProductImages || [];
-            const showcaseMeta = productImages.find(img => img.image_url === showcaseUrl && img.product_id === product.id);
-            const activeTags = (showcaseMeta?.tags || []).map(t => t.toLowerCase().trim());
+            const showcaseImg = productImages.find(img => img.product_id === product.id && img.is_default) || productImages.find(img => img.product_id === product.id);
+            const activeTags = (showcaseImg?.tags || []).map(t => t.toLowerCase().trim());
 
             // 2. Separate Matching Variant (First Match Wins)
             let matchingIdx = -1;
@@ -802,13 +801,18 @@
                 }
             }
 
-            // 5. Render
+            // 5. Resolve Images
+            const productImages = state.allProductImages || [];
+            const showcaseImg = productImages.find(img => img.product_id === product.id && img.is_default) || productImages.find(img => img.product_id === product.id);
+            const displayImg = showcaseImg?.image_url || product.showcase_image || state.placeholder;
+
+            // 6. Render
             return `
             <article class="product-card" id="card-${product.id}" data-variants='${JSON.stringify(sortedVariants).replace(/'/g, "&apos;")}' data-current-idx="0">
                 
                  <!-- Image Area -->
                 <div class="card-image-container">
-                    <img src="${product.showcase_image || state.placeholder}" 
+                    <img src="${displayImg}" 
                          alt="${product.product_name}" 
                          class="product-image" 
                          loading="lazy"
@@ -1079,6 +1083,11 @@
             state.currentCategory = catSlug; // Ensure category context is valid
             const category = state.categories.find(c => c.slug === catSlug);
 
+            // Resolve Images
+            const productImages = state.allProductImages || [];
+            const showcaseImg = productImages.find(img => img.product_id === product.id && img.is_default) || productImages.find(img => img.product_id === product.id);
+            const displayImg = showcaseImg?.image_url || product.showcase_image || state.placeholder;
+
             // 1. Get Product Data & Sort Variants by MRP lowest to highest
             // Standardize variants
             let rawVars = [];
@@ -1103,7 +1112,7 @@
             const prev = catProducts[currentIdx - 1] || catProducts[catProducts.length - 1];
             const next = catProducts[currentIdx + 1] || catProducts[0];
 
-            updateHistory(product);
+            updateHistory(product, displayImg);
 
             const app = document.getElementById('app');
 
@@ -1142,7 +1151,7 @@
                                         <!-- Image Carousel -->
                                         <div class="image-carousel" id="mainCarousel">
                                             <div class="carousel-item">
-                                                <img src="${product.showcase_image || state.placeholder}" class="main-img" alt="${product.product_name}">
+                                                <img src="${displayImg}" class="main-img" alt="${product.product_name}">
                                             </div>
                                         </div>
                                         <!-- Dots -->
@@ -2190,10 +2199,10 @@
             document.querySelectorAll('.sidebar-qty-controls .quantity-display').forEach(el => el.innerText = '1');
         }
 
-        function updateHistory(p) {
+        function updateHistory(p, resolvedImg) {
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }
             hist = hist.filter(x => x.slug !== p.slug && x.id !== p.id);
-            hist.unshift({ id: p.id, slug: p.slug, name: p.product_name, img: p.showcase_image });
+            hist.unshift({ id: p.id, slug: p.slug, name: p.product_name, img: resolvedImg || p.showcase_image });
             localStorage.setItem('td_history', JSON.stringify(hist.slice(0, 8)));
         }
 
@@ -2617,9 +2626,16 @@
                     total += itemTotal;
                     const variantLabel = item.variant ? `<div class="cart-item-variant">${item.variant.quantity}</div>` : '';
 
+                    // Find the default image for the product
+                    const defaultImage = (state.allProductImages || []).find(img => img.product_id === item.id && img.is_default);
+                    // If no default, find any image for the product
+                    const anyImage = (state.allProductImages || []).find(img => img.product_id === item.id);
+                    // Determine the image source
+                    const imgSrc = defaultImage?.image_url || anyImage?.image_url || item.image || state.placeholder;
+
                     return `
                         <div class="cart-item">
-                            <img src="${item.image || state.placeholder}" alt="${item.name}" onerror="this.src='${state.placeholder}'">
+                            <img src="${imgSrc}" alt="${item.name}" onerror="this.src='${state.placeholder}'">
                             <div class="cart-item-details">
                                 <h4>${item.name}</h4>
                                 ${variantLabel}
