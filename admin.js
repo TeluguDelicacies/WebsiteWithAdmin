@@ -58,6 +58,7 @@ const whyUsTableContainer = document.getElementById('whyUsTableContainer');
 const whyUsFeatureList = document.getElementById('whyUsFeatureList');
 const featureModal = document.getElementById('featureModal');
 const featureForm = document.getElementById('featureForm');
+const imagesContainer = document.getElementById('imagesContainer'); // Define imagesContainer
 const featureModalTitle = document.getElementById('featureModalTitle');
 const addBtnText = document.getElementById('addBtnText');
 const sectionsContainer = document.getElementById('sectionsContainer');
@@ -329,7 +330,9 @@ window.switchView = (view) => {
     if (categoriesTableContainer) categoriesTableContainer.style.display = 'none'; // Name might change
     if (whyUsTableContainer) whyUsTableContainer.style.display = 'none'; // Name might change
     if (settingsContainer) settingsContainer.style.display = 'none';
+    if (settingsContainer) settingsContainer.style.display = 'none';
     if (sectionsContainer) sectionsContainer.style.display = 'none';
+    if (imagesContainer) imagesContainer.style.display = 'none'; // Hide Images Container
 
     // Reset Header Actions (Default Hidden)
     if (filterRow) filterRow.style.display = 'none';
