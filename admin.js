@@ -1619,6 +1619,7 @@ window.addVariantRow = (data = null) => {
                 <option value="Standup Pouch" ${data && data.packaging_type === 'Standup Pouch' ? 'selected' : ''}>Standup Pouch</option>
                 <option value="Glass Jar" ${data && data.packaging_type === 'Glass Jar' ? 'selected' : ''}>Glass Jar</option>
                 <option value="PET Jar" ${data && data.packaging_type === 'PET Jar' ? 'selected' : ''}>PET Jar</option>
+                <option value="Packet" ${data && data.packaging_type === 'Packet' ? 'selected' : ''}>Packet</option>
             </select>
         </div>
         <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: #ef4444; border-color: #ef4444; margin-top: 26px; min-width: auto; padding: 10px;" title="Delete Variant">
@@ -2060,7 +2061,7 @@ PRODUCT IMAGE GALLERY MANAGEMENT
 */
 
 // Available image tags
-const IMAGE_TAGS = ['PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
+const IMAGE_TAGS = ['PET Jar', 'Glass Jar', 'Standup Pouch', 'Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
 
 // Temp storage for images being edited (before saving to DB)
 let currentProductImages = [];
@@ -2316,11 +2317,12 @@ window.renderImageGallery = (targetContainerId = 'productImageGallery') => {
                 </button>
             </div>
             <div class="card-tags">
-                <select multiple size="2" onchange="updateImageTags('${img.id}', this)">
-                    ${IMAGE_TAGS.map(tag => `
-                        <option value="${tag}" ${(img.tags || []).includes(tag) ? 'selected' : ''}>${tag}</option>
-                    `).join('')}
-                </select>
+                ${IMAGE_TAGS.map(tag => `
+                    <div class="tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}" 
+                         onclick="toggleImageTag('${img.id}', '${tag}')">
+                        ${tag}
+                    </div>
+                `).join('')}
             </div>
         `;
 
@@ -2354,8 +2356,34 @@ window.setDefaultImage = async (imageId) => {
         renderImageGallery();
     }
 };
+// Toggle image tag logic
+window.toggleImageTag = async (imageId, tag) => {
+    const img = currentProductImages.find(i => i.id === imageId);
+    if (!img) return;
 
-// Update image tags
+    if (!img.tags) img.tags = [];
+    const index = img.tags.indexOf(tag);
+    if (index > -1) {
+        img.tags.splice(index, 1);
+    } else {
+        img.tags.push(tag);
+    }
+
+    // Auto-save if in standalone image management view
+    if (currentView === 'images') {
+        const productId = document.getElementById('managerImageUpload').dataset.productId;
+        if (productId) {
+            showLoading(true);
+            await saveProductImages(productId);
+            showLoading(false);
+        }
+    } else {
+        // Just re-render the gallery in product modal
+        renderProductImages();
+    }
+};
+
+// Update image tags (keep for backward compatibility if needed, but we use toggle now)
 window.updateImageTags = async (imageId, selectEl) => {
     const selectedTags = Array.from(selectEl.selectedOptions).map(opt => opt.value);
     const img = currentProductImages.find(i => i.id === imageId);
@@ -2780,7 +2808,7 @@ window.loadExistingImages = async function () {
         existingImagesData = images;
         existingImagesEdits = {};
 
-        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
 
         grid.innerHTML = images.map((img, idx) => `
             <div class="bulk-preview-item" data-id="${img.id}">
@@ -2803,7 +2831,7 @@ window.loadExistingImages = async function () {
                     </div>
                     <div class="bulk-tags-row">
                         ${bulkTags.map(tag => `
-                            <label class="bulk-tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}">
+                            <label class="tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}">
                                 <input type="checkbox" ${(img.tags || []).includes(tag) ? 'checked' : ''} 
                                     onchange="window.updateExistingImageTag('${img.id}', '${tag}', this.checked)">
                                 ${tag}
@@ -2940,36 +2968,43 @@ window.saveExistingImageChanges = async function () {
     }
 
     const btn = document.getElementById('saveExistingImagesBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    const oldHtml = btn ? btn.innerHTML : '<i class="fas fa-save"></i> Save Changes';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
 
     let saved = 0;
     let errors = 0;
 
-    for (const imageId of editIds) {
-        try {
-            const updates = existingImagesEdits[imageId];
-            const { error } = await supabase
-                .from('product_images')
-                .update(updates)
-                .eq('id', imageId);
+    try {
+        for (const imageId of editIds) {
+            try {
+                const updates = existingImagesEdits[imageId];
+                const { error } = await supabase
+                    .from('product_images')
+                    .update(updates)
+                    .eq('id', imageId);
 
-            if (error) throw error;
-            saved++;
-        } catch (e) {
-            console.error('Error saving image:', e);
-            errors++;
+                if (error) throw error;
+                saved++;
+            } catch (e) {
+                console.error('Error saving image:', e);
+                errors++;
+            }
         }
-    }
 
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-
-    if (saved > 0) {
-        showToast(`Saved ${saved} image(s)${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
-        existingImagesEdits = {};
-    } else {
-        showToast('Failed to save changes', 'error');
+        if (saved > 0) {
+            showToast(`Saved ${saved} image(s)${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
+            existingImagesEdits = {};
+        } else if (errors > 0) {
+            showToast('Failed to save changes', 'error');
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = oldHtml;
+        }
     }
 };
 
@@ -3208,6 +3243,7 @@ window.saveBulkImages = async function () {
     const progressBar = document.getElementById('bulkProgressBar');
     const progressText = document.getElementById('bulkProgressText');
     const saveBtn = document.getElementById('bulkUploadSaveBtn');
+    const oldHtml = saveBtn ? saveBtn.innerHTML : 'Save to DB';
 
     // Filter matched images
     const toUpload = pendingBulkImages.filter(item => item.matchedProduct || item.manualProductId);
@@ -3217,51 +3253,59 @@ window.saveBulkImages = async function () {
         return;
     }
 
-    saveBtn.disabled = true;
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
     progress.style.display = 'block';
     progressBar.style.width = '0%';
 
     let uploaded = 0;
     let errors = 0;
 
-    for (const item of toUpload) {
-        try {
-            progressText.textContent = `Uploading ${uploaded + 1}/${toUpload.length}...`;
+    try {
+        for (const item of toUpload) {
+            try {
+                progressText.textContent = `Uploading ${uploaded + 1}/${toUpload.length}...`;
 
-            // Upload to storage
-            const imageUrl = await uploadImageToStorage(item.file);
+                // Upload to storage
+                const imageUrl = await uploadImageToStorage(item.file);
 
-            // Get product ID
-            const productId = item.manualProductId || item.matchedProduct?.id;
+                // Get product ID
+                const productId = item.manualProductId || item.matchedProduct?.id;
 
-            // Save to product_images table
-            const { error } = await supabase.from('product_images').insert({
-                product_id: productId,
-                image_url: imageUrl,
-                is_default: false,
-                tags: item.tags || [],
-                display_order: 99 // Will be sorted later
-            });
+                // Save to product_images table
+                const { error } = await supabase.from('product_images').insert({
+                    product_id: productId,
+                    image_url: imageUrl,
+                    is_default: false,
+                    tags: item.tags || [],
+                    display_order: 99 // Will be sorted later
+                });
 
-            if (error) throw error;
+                if (error) throw error;
 
-            uploaded++;
-            progressBar.style.width = `${(uploaded / toUpload.length) * 100}%`;
+                uploaded++;
+                progressBar.style.width = `${(uploaded / toUpload.length) * 100}%`;
 
-        } catch (e) {
-            console.error('Error uploading image:', e);
-            errors++;
+            } catch (e) {
+                console.error('Error uploading image:', e);
+                errors++;
+            }
         }
-    }
 
-    saveBtn.disabled = false;
-    progress.style.display = 'none';
-
-    if (uploaded > 0) {
-        showToast(`Uploaded ${uploaded} images${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
-        closeBulkImagesModal();
-    } else {
-        showToast('Failed to upload images', 'error');
+        if (uploaded > 0) {
+            showToast(`Uploaded ${uploaded} images${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
+            closeBulkImagesModal();
+        } else {
+            showToast('Failed to upload images', 'error');
+        }
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = oldHtml;
+        }
+        progress.style.display = 'none';
     }
 };
 
@@ -3601,6 +3645,14 @@ if (featureForm) {
     featureForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('featureId').value;
+        const btn = featureForm.querySelector('button[type="submit"]');
+        const oldText = btn ? btn.textContent : 'Save Feature';
+
+        if (btn) {
+            btn.textContent = 'Saving...';
+            btn.disabled = true;
+        }
+
         const featureData = {
             title: document.getElementById('featureTitle').value,
             description: document.getElementById('featureDescription').value,
@@ -3629,6 +3681,11 @@ if (featureForm) {
             showToast(toastMsg, 'success');
         } catch (e) {
             showToast('Error saving feature: ' + e.message, 'error');
+        } finally {
+            if (btn) {
+                btn.textContent = oldText;
+                btn.disabled = false;
+            }
         }
     });
 }
