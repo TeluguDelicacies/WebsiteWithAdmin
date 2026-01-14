@@ -744,6 +744,7 @@ async function fetchSettings() {
             // Catalogue & Address Settings
             document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
             document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
+            document.getElementById('setGoogleReviewUrl').value = data.google_review_url || '';
             document.getElementById('setAddress').value = data.company_address || '';
 
             // QC Settings
@@ -802,6 +803,7 @@ window.cancelSettingsChanges = function () {
     // Catalogue & Address
     document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
     document.getElementById('setCatalogueMsg').value = data.catalogue_share_message || 'Check out our latest catalogue of delicious treats!';
+    document.getElementById('setGoogleReviewUrl').value = data.google_review_url || '';
     document.getElementById('setAddress').value = data.company_address || '';
 
     // QC Settings
@@ -855,6 +857,7 @@ if (siteSettingsForm) {
             // Catalogue & Address
             catalogue_image_url: document.getElementById('setCatalogueUrl').value,
             catalogue_share_message: document.getElementById('setCatalogueMsg').value,
+            google_review_url: document.getElementById('setGoogleReviewUrl').value,
             company_address: document.getElementById('setAddress').value,
 
             // QC Fields

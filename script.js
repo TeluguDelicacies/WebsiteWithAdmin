@@ -2731,6 +2731,12 @@ async function fetchSiteSettings() {
                 }
             }
 
+            // Google Review URL (Write a Review button)
+            if (data.google_review_url) {
+                const writeReviewBtn = document.getElementById('writeReviewBtn');
+                if (writeReviewBtn) writeReviewBtn.href = data.google_review_url;
+            }
+
             // Social Media Links
             const socialMap = [
                 { id: 'footer-facebook-link', url: data.facebook_url },
