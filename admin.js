@@ -2390,6 +2390,7 @@ window.toggleImageTag = async (imageId, tag) => {
             await saveProductImages(productId);
             showLoading(false);
         }
+        renderImageGallery('productGalleryContainer');
     } else {
         // Just re-render the gallery in product modal
         renderImageGallery(); // Corrected function name
@@ -2424,6 +2425,7 @@ window.updateImageTags = async (imageId, selectEl) => {
             await saveProductImages(productId);
             showLoading(false);
         }
+        renderImageGallery('productGalleryContainer');
     } else {
         renderImageGallery();
     }
