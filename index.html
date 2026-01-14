@@ -219,7 +219,14 @@
     <!-- Customer Testimonials Section -->
     <section class="testimonials-showcase section" id="sec-testimonials">
         <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                <h2 class="section-title" style="margin-bottom: 0;">What Our Customers Say</h2>
+                <a href="https://g.page/r/CRR2Dyrv0BMyEAI/review" target="_blank" rel="noopener noreferrer"
+                    class="write-review-btn">
+                    <i class="fab fa-google"></i> Write a Review
+                </a>
+            </div>
             <div class="carousel-wrapper">
                 <div class="product-scroll-wrapper" id="testimonialScrollWrapper">
                     <div class="testimonials-scroll" id="testimonialsScroll">
@@ -234,6 +241,27 @@
             </div>
         </div>
     </section>
+
+    <!-- Testimonial Detail Modal -->
+    <div id="testimonialDetailOverlay" class="testimonial-modal-overlay" onclick="window.closeTestimonialDetail()">
+    </div>
+    <div id="testimonialDetailModal" class="testimonial-detail-modal">
+        <button class="testimonial-modal-close" onclick="window.closeTestimonialDetail()">&times;</button>
+        <div class="testimonial-modal-content">
+            <div class="stars" id="testimonialModalStars">★★★★★</div>
+            <p class="testimonial-modal-message" id="testimonialModalMessage"></p>
+            <div class="testimonial-modal-footer">
+                <div class="testimonial-modal-author">
+                    <strong id="testimonialModalName"></strong>
+                    <span id="testimonialModalLocation"></span>
+                </div>
+                <a href="#" id="testimonialModalLink" target="_blank" rel="noopener noreferrer"
+                    class="testimonial-source-link" style="display: none;">
+                    <i class="fas fa-external-link-alt"></i> View Original
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- Customer Testimonials Section (Loaded from external file) -->
     <section id="testimonials-placeholder">

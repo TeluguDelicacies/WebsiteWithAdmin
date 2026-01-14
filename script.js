@@ -3382,7 +3382,14 @@ async function fetchAndRenderTestimonials() {
                     </div>
                     ${t.product_name ? `<div class="testimonial-product"><i class="fas fa-tag"></i> ${t.product_name}</div>` : ''}
                 </div>
+                ${t.review_url ? `<a href="${t.review_url}" target="_blank" rel="noopener noreferrer" class="testimonial-source-icon" onclick="event.stopPropagation()" title="View original review"><i class="fab fa-google"></i></a>` : ''}
              `;
+
+            // Add click handler to open modal
+            div.addEventListener('click', () => {
+                window.openTestimonialDetail(t);
+            });
+
             return div;
         };
 
@@ -3430,6 +3437,54 @@ async function fetchAndRenderTestimonials() {
             </div>`;
     }
 }
+
+// Testimonial Modal Functions
+window.openTestimonialDetail = function (testimonial) {
+    const overlay = document.getElementById('testimonialDetailOverlay');
+    const modal = document.getElementById('testimonialDetailModal');
+    const starsEl = document.getElementById('testimonialModalStars');
+    const messageEl = document.getElementById('testimonialModalMessage');
+    const nameEl = document.getElementById('testimonialModalName');
+    const locationEl = document.getElementById('testimonialModalLocation');
+    const linkEl = document.getElementById('testimonialModalLink');
+
+    if (!modal || !overlay) return;
+
+    // Populate modal
+    starsEl.textContent = '★'.repeat(testimonial.rating || 5);
+    messageEl.textContent = `"${testimonial.message}"`;
+    nameEl.textContent = testimonial.name;
+    locationEl.textContent = testimonial.location || '';
+
+    // Show/hide review link
+    if (testimonial.review_url) {
+        linkEl.href = testimonial.review_url;
+        linkEl.style.display = 'inline-flex';
+    } else {
+        linkEl.style.display = 'none';
+    }
+
+    // Show modal
+    overlay.classList.add('active');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeTestimonialDetail = function () {
+    const overlay = document.getElementById('testimonialDetailOverlay');
+    const modal = document.getElementById('testimonialDetailModal');
+
+    if (overlay) overlay.classList.remove('active');
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+};
+
+// Close on Escape key for testimonial modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        window.closeTestimonialDetail();
+    }
+});
 
 /**
  * Renders the Quick Commerce Grid Layout

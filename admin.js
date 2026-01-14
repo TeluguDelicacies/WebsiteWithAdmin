@@ -1966,7 +1966,8 @@ if (testimonialForm) {
             location: document.getElementById('tLocation').value,
             message: document.getElementById('tMessage').value,
             rating: parseInt(document.getElementById('tRating').value),
-            product_name: document.getElementById('tProduct').value
+            product_name: document.getElementById('tProduct').value,
+            review_url: document.getElementById('tReviewUrl').value || null
         };
 
         try {
