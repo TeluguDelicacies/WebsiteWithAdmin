@@ -408,13 +408,61 @@
 
         /* Tags container in individual card */
         .card-tags {
-            padding: 10px;
+            padding: 12px 10px;
             background: #ffffff;
             border-top: 1px solid var(--border-light);
             display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 85px;
+            /* Ensure space for 2 lines of chips */
+        }
+
+        .tag-chips-desktop {
+            display: flex;
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 5px;
             justify-content: center;
+        }
+
+        .tag-select-mobile {
+            display: none;
+            width: 100%;
+            padding: 8px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-medium);
+            background: white;
+            color: var(--text-primary);
+        }
+
+        /* Responsive Visibility */
+        @media screen and (max-width: 768px) {
+            .tag-chips-desktop {
+                display: none;
+            }
+
+            .tag-select-mobile {
+                display: block;
+            }
+
+            .card-tags {
+                min-height: auto;
+            }
+        }
+
+        /* Adjust card height for tags */
+        .image-gallery-card {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            min-height: 220px;
+        }
+
+        .image-gallery-card img {
+            height: 140px;
+            width: 100%;
+            object-fit: cover;
         }
 
         /* Bulk Modal Tabs */

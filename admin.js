@@ -2317,12 +2317,25 @@ window.renderImageGallery = (targetContainerId = 'productImageGallery') => {
                 </button>
             </div>
             <div class="card-tags">
-                ${IMAGE_TAGS.map(tag => `
-                    <div class="tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}" 
-                         onclick="toggleImageTag('${img.id}', '${tag}')">
-                        ${tag}
-                    </div>
-                `).join('')}
+                <!-- Desktop View: Chips -->
+                <div class="tag-chips-desktop">
+                    ${IMAGE_TAGS.map(tag => `
+                        <div class="tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}" 
+                             onclick="toggleImageTag('${img.id}', '${tag}')">
+                            ${tag}
+                        </div>
+                    `).join('')}
+                </div>
+                <!-- Mobile View: Select Dropdown -->
+                <select class="tag-select-mobile" onchange="updateImageTags('${img.id}', this)">
+                    <option value="">Add Tag...</option>
+                    ${IMAGE_TAGS.map(tag => `
+                        <option value="${tag}" ${(img.tags || []).includes(tag) ? 'disabled' : ''}>
+                            ${(img.tags || []).includes(tag) ? '✓ ' : ''}${tag}
+                        </option>
+                    `).join('')}
+                    ${(img.tags || []).length > 0 ? `<option value="_REMOVE_ALL_">Clear All Tags</option>` : ''}
+                </select>
             </div>
         `;
 
@@ -2379,26 +2392,40 @@ window.toggleImageTag = async (imageId, tag) => {
         }
     } else {
         // Just re-render the gallery in product modal
-        renderProductImages();
+        renderImageGallery(); // Corrected function name
     }
 };
 
-// Update image tags (keep for backward compatibility if needed, but we use toggle now)
+// Update image tags (used by mobile dropdown)
 window.updateImageTags = async (imageId, selectEl) => {
-    const selectedTags = Array.from(selectEl.selectedOptions).map(opt => opt.value);
-    const img = currentProductImages.find(i => i.id === imageId);
-    if (img) {
-        img.tags = selectedTags;
+    const val = selectEl.value;
+    if (!val) return;
 
-        // Auto-save if in standalone image management view
-        if (currentView === 'images') {
-            const productId = document.getElementById('managerImageUpload').dataset.productId;
-            if (productId) {
-                showLoading(true);
-                await saveProductImages(productId);
-                showLoading(false);
-            }
+    const img = currentProductImages.find(i => i.id === imageId);
+    if (!img) return;
+
+    if (val === '_REMOVE_ALL_') {
+        img.tags = [];
+    } else {
+        if (!img.tags) img.tags = [];
+        if (!img.tags.includes(val)) {
+            img.tags.push(val);
+        } else {
+            // If already exists, toggle off (mobile behavior)
+            img.tags = img.tags.filter(t => t !== val);
         }
+    }
+
+    // Reuse save logic from toggle
+    if (currentView === 'images') {
+        const productId = document.getElementById('managerImageUpload').dataset.productId;
+        if (productId) {
+            showLoading(true);
+            await saveProductImages(productId);
+            showLoading(false);
+        }
+    } else {
+        renderImageGallery();
     }
 };
 
