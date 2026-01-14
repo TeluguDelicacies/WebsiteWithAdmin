@@ -1570,6 +1570,7 @@ async function loadTestimonialData(id) {
             document.getElementById('tMessage').value = data.message;
             document.getElementById('tRating').value = data.rating || 5;
             document.getElementById('tProduct').value = data.product_name || '';
+            document.getElementById('tReviewUrl').value = data.review_url || '';
         }
     } catch (e) {
         console.error('Error loading testimonial:', e);
