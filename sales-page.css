@@ -4361,6 +4361,7 @@ textarea {
         line-height: 1.2 !important;
         display: -webkit-box !important;
         -webkit-line-clamp: 1 !important;
+        line-clamp: 1 !important;
         -webkit-box-orient: vertical !important;
         overflow: hidden !important;
     }
