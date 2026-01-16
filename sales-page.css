@@ -4069,3 +4069,147 @@ textarea {
         overflow-x: hidden;
     }
 }
+
+/* ========================================
+   DESKTOP 100VH VIEWPORT-FIT LAYOUT
+   Ensures no vertical scrolling on desktop product page
+   All elements (Header, Breadcrumb, Product Card, Product Stack)
+   visible at once within the browser viewport.
+======================================== */
+@media (min-width: 1024px) {
+    
+    /* 1. Lock the page body to viewport height when on sales page */
+    html:has(.sales-page-container),
+    body:has(.sales-page-container) {
+        overflow: hidden;
+        height: 100vh;
+    }
+    
+    /* 2. Main container fills remaining height below header */
+    .sales-page-container {
+        height: calc(100vh - var(--header-height, 64px));
+        max-height: calc(100vh - var(--header-height, 64px));
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        padding-top: var(--header-height, 64px) !important;
+        padding-bottom: 10px !important;
+    }
+    
+    /* 3. Grid layout takes all remaining space with proper distribution */
+    .grid-layout {
+        flex: 1 1 auto;
+        min-height: 0; /* Critical: allows flex child to shrink below content size */
+        max-height: 100%;
+        overflow: hidden;
+        grid-template-rows: auto 1fr !important; /* Breadcrumb auto, main/side flex */
+    }
+    
+    /* 4. Breadcrumb section - compact fixed height */
+    .breadcrumb-section {
+        flex-shrink: 0;
+        max-height: 45px !important;
+        min-height: 35px;
+        margin-top: 5px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    /* 5. Main product area - constrained to available space */
+    .main-product-area {
+        min-height: 0;
+        max-height: 100%;
+        overflow: hidden;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+    }
+    
+    /* 6. Gallery wrapper - scales within bounds */
+    .gallery-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        max-height: 100%;
+        overflow: hidden;
+    }
+    
+    /* 7. Product gallery - proportional scaling with max constraint */
+    .product-gallery {
+        max-height: min(480px, calc(100vh - 220px)) !important;
+        height: auto !important;
+        width: auto !important;
+        max-width: 100%;
+        aspect-ratio: 1 / 1;
+    }
+    
+    /* 8. Image thumbnail strip - compact */
+    .image-thumbnail-strip {
+        max-height: 70px;
+        overflow-x: auto;
+        flex-shrink: 0;
+    }
+    
+    /* 9. Product details - internal scroll for overflow */
+    .product-details {
+        min-height: 0;
+        max-height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+    .details-body {
+        max-height: fit-content;
+        overflow: visible;
+    }
+    
+    /* 10. Info tabs - constrained height */
+    .info-tabs {
+        max-height: 200px;
+        overflow: hidden;
+    }
+    
+    .info-content-block.active {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+    
+    /* 11. Sidebar (Product Stack) - fills available height */
+    .sidebar {
+        min-height: 0;
+        max-height: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* 12. Sidebar card - flex layout for internal scrolling */
+    .sidebar-card {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden;
+    }
+    
+    /* 13. Sidebar tabs - fixed at top */
+    .sidebar-tabs {
+        flex-shrink: 0;
+    }
+    
+    /* 14. Sidebar content - scrollable list */
+    #side-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+    }
+    
+    /* 15. Similar items grid - allow shrink */
+    .similar-items-grid {
+        min-height: 0;
+    }
+}

@@ -3358,7 +3358,7 @@ async function fetchAndRenderTestimonials() {
         const { data: testimonials, error } = await supabase
             .from('testimonials')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('display_order', { ascending: true });
 
         if (error) throw error;
 

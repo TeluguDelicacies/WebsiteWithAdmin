@@ -1550,6 +1550,7 @@ window.openTestimonialModal = (id = null) => {
     } else {
         editSnapshot = null; // New
         testimonialModalTitle.textContent = 'Add Testimonial';
+        document.getElementById('tOrder').value = '0'; // Default order
     }
 };
 
@@ -1571,6 +1572,7 @@ async function loadTestimonialData(id) {
             document.getElementById('tRating').value = data.rating || 5;
             document.getElementById('tProduct').value = data.product_name || '';
             document.getElementById('tReviewUrl').value = data.review_url || '';
+            document.getElementById('tOrder').value = data.display_order || 0;
         }
     } catch (e) {
         console.error('Error loading testimonial:', e);
@@ -1971,7 +1973,8 @@ if (testimonialForm) {
             message: document.getElementById('tMessage').value,
             rating: parseInt(document.getElementById('tRating').value),
             product_name: document.getElementById('tProduct').value,
-            review_url: document.getElementById('tReviewUrl').value || null
+            review_url: document.getElementById('tReviewUrl').value || null,
+            display_order: parseInt(document.getElementById('tOrder').value) || 0
         };
 
         try {
