@@ -4129,7 +4129,7 @@ textarea {
         padding: clamp(0.3em, 0.5vw, 0.5em) clamp(0.8em, 1vw, 1.2em) !important;
     }
 
-    /* 5. Main product area - NO OVERFLOW */
+    /* 5. Main product area - REDUCED PADDING */
     .main-product-area {
         min-height: 0;
         max-height: 100%;
@@ -4137,8 +4137,8 @@ textarea {
         display: grid !important;
         grid-template-columns: 1fr 1fr;
         align-items: start;
-        padding: clamp(8px, 1.5vh, 20px) clamp(8px, 1vw, 15px) !important;
-        gap: clamp(5px, 1vw, 15px) !important;
+        padding: clamp(5px, 1vh, 12px) clamp(3px, 0.5vw, 8px) !important;
+        gap: clamp(3px, 0.6vw, 10px) !important;
     }
 
     /* 6. Gallery wrapper - NO OVERFLOW */
@@ -4262,31 +4262,39 @@ textarea {
         padding: clamp(5px, 0.7vh, 8px) clamp(10px, 1.2vw, 16px) !important;
     }
 
-    /* 14. Info tabs - COMPACT INLINE LAYOUT */
+    /* 14. Info tabs - HORIZONTAL LAYOUT */
     .info-tabs {
-        max-height: clamp(100px, 18vh, 160px) !important;
+        max-height: clamp(90px, 16vh, 140px) !important;
         overflow: hidden !important;
         margin-top: clamp(5px, 0.8vh, 10px) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: clamp(8px, 1vw, 15px) !important;
     }
 
     .info-toggles {
+        display: flex !important;
+        flex-direction: column !important;
         flex-wrap: nowrap !important;
-        gap: clamp(2px, 0.3vw, 4px) !important;
-        margin-bottom: clamp(3px, 0.5vh, 6px) !important;
+        gap: clamp(2px, 0.3vh, 4px) !important;
+        flex-shrink: 0 !important;
+        min-width: fit-content !important;
     }
 
     .info-toggle-btn {
         padding: clamp(3px, 0.5vh, 6px) clamp(6px, 0.8vw, 10px) !important;
         font-size: clamp(0.6rem, 0.75vw, 0.75rem) !important;
+        white-space: nowrap !important;
     }
 
     .info-content-wrapper {
-        max-height: clamp(60px, 12vh, 100px) !important;
+        flex: 1 1 auto !important;
+        max-height: 100% !important;
         overflow: hidden !important;
     }
 
     .info-content-block.active {
-        max-height: clamp(55px, 11vh, 90px) !important;
+        max-height: 100% !important;
         overflow: hidden !important;
         font-size: clamp(0.7rem, 0.9vw, 0.85rem) !important;
         line-height: 1.3 !important;
