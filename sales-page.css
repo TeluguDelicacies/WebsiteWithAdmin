@@ -4160,22 +4160,24 @@ textarea {
         aspect-ratio: 1 / 1;
     }
 
-    /* 8. Image thumbnail strip - NO SCROLLBAR */
+    /* 8. Image thumbnail strip - LARGER THUMBNAILS */
     .image-thumbnail-strip {
-        max-height: clamp(45px, 7vh, 70px) !important;
+        max-height: clamp(65px, 10vh, 90px) !important;
         overflow: hidden !important;
         flex-shrink: 0;
-        margin-top: clamp(5px, 1vh, 12px) !important;
+        margin-top: clamp(8px, 1.2vh, 15px) !important;
+        gap: clamp(6px, 0.8vw, 10px) !important;
     }
 
     .image-thumb {
-        width: clamp(40px, 5vh, 60px) !important;
-        height: clamp(40px, 5vh, 60px) !important;
+        width: clamp(55px, 8vh, 80px) !important;
+        height: clamp(55px, 8vh, 80px) !important;
         flex-shrink: 0;
     }
 
     .thumb-tag {
-        font-size: clamp(0.55rem, 0.7vw, 0.75rem) !important;
+        font-size: clamp(0.6rem, 0.8vw, 0.8rem) !important;
+        padding: 2px 6px !important;
     }
 
     /* 9. Product details - NO SCROLLBAR */
@@ -4250,43 +4252,44 @@ textarea {
         padding: clamp(8px, 1vh, 12px) clamp(10px, 1vw, 15px) !important;
     }
 
-    /* 13. Toggle button - scalable */
+    /* 13. Toggle button - compact but visible */
     .toggle-btn-container.toggle-desktop {
-        margin-top: clamp(8px, 1.2vh, 15px) !important;
+        margin-top: clamp(5px, 0.8vh, 10px) !important;
     }
 
     .toggle-btn-container .action-btn-pill {
-        font-size: clamp(0.75rem, 0.95vw, 0.9rem) !important;
-        padding: clamp(6px, 1vh, 10px) clamp(12px, 1.5vw, 20px) !important;
+        font-size: clamp(0.7rem, 0.85vw, 0.85rem) !important;
+        padding: clamp(5px, 0.7vh, 8px) clamp(10px, 1.2vw, 16px) !important;
     }
 
-    /* 14. Info tabs - NO SCROLLBAR, scalable */
+    /* 14. Info tabs - COMPACT INLINE LAYOUT */
     .info-tabs {
-        max-height: clamp(120px, 22vh, 200px) !important;
+        max-height: clamp(100px, 18vh, 160px) !important;
         overflow: hidden !important;
-        margin-top: clamp(8px, 1.2vh, 15px) !important;
+        margin-top: clamp(5px, 0.8vh, 10px) !important;
     }
 
     .info-toggles {
         flex-wrap: nowrap !important;
-        gap: clamp(3px, 0.4vw, 6px) !important;
+        gap: clamp(2px, 0.3vw, 4px) !important;
+        margin-bottom: clamp(3px, 0.5vh, 6px) !important;
     }
 
     .info-toggle-btn {
-        padding: clamp(4px, 0.7vh, 8px) clamp(8px, 1vw, 14px) !important;
-        font-size: clamp(0.65rem, 0.85vw, 0.8rem) !important;
+        padding: clamp(3px, 0.5vh, 6px) clamp(6px, 0.8vw, 10px) !important;
+        font-size: clamp(0.6rem, 0.75vw, 0.75rem) !important;
     }
 
     .info-content-wrapper {
-        max-height: clamp(80px, 16vh, 140px) !important;
+        max-height: clamp(60px, 12vh, 100px) !important;
         overflow: hidden !important;
     }
 
     .info-content-block.active {
-        max-height: clamp(75px, 15vh, 130px) !important;
+        max-height: clamp(55px, 11vh, 90px) !important;
         overflow: hidden !important;
-        font-size: clamp(0.75rem, 0.95vw, 0.9rem) !important;
-        line-height: 1.35 !important;
+        font-size: clamp(0.7rem, 0.9vw, 0.85rem) !important;
+        line-height: 1.3 !important;
     }
 
     /* 15. Sidebar (Product Stack) - NO SCROLLBAR */
@@ -4330,41 +4333,45 @@ textarea {
         padding-right: 0 !important;
     }
 
-    /* 19. Similar items - compact scalable cards */
+    /* 19. Similar items - VERY COMPACT CARDS to fit more */
     .similar-items-grid {
         min-height: 0;
         overflow: hidden !important;
-        gap: clamp(5px, 1vh, 10px) !important;
+        gap: clamp(4px, 0.7vh, 8px) !important;
     }
 
     .sim-item {
-        padding: clamp(6px, 1vh, 10px) !important;
-        gap: clamp(6px, 1vw, 10px) !important;
+        padding: clamp(4px, 0.6vh, 8px) !important;
+        gap: clamp(5px, 0.7vw, 8px) !important;
     }
 
     .sim-item img {
-        width: clamp(45px, 6vh, 65px) !important;
-        height: clamp(45px, 6vh, 65px) !important;
+        width: clamp(40px, 5vh, 55px) !important;
+        height: clamp(40px, 5vh, 55px) !important;
     }
 
     .sim-item h4 {
-        font-size: clamp(0.75rem, 1vw, 0.9rem) !important;
-        margin-bottom: clamp(1px, 0.2vh, 3px) !important;
-        line-height: 1.2 !important;
+        font-size: clamp(0.7rem, 0.9vw, 0.85rem) !important;
+        margin-bottom: 1px !important;
+        line-height: 1.15 !important;
     }
 
     .sim-item .sim-desc {
-        font-size: clamp(0.65rem, 0.85vw, 0.8rem) !important;
-        line-height: 1.25 !important;
+        font-size: clamp(0.6rem, 0.75vw, 0.7rem) !important;
+        line-height: 1.2 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 1 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
     }
 
     .sim-item .sim-price {
-        font-size: clamp(0.7rem, 0.9vw, 0.85rem) !important;
+        font-size: clamp(0.65rem, 0.85vw, 0.8rem) !important;
     }
 
     .sim-item .sim-add-btn {
-        padding: clamp(3px, 0.5vh, 6px) clamp(8px, 1vw, 12px) !important;
-        font-size: clamp(0.6rem, 0.8vw, 0.75rem) !important;
+        padding: clamp(2px, 0.4vh, 5px) clamp(6px, 0.8vw, 10px) !important;
+        font-size: clamp(0.55rem, 0.7vw, 0.7rem) !important;
     }
 
     /* 20. Hide swipe hint on desktop */
