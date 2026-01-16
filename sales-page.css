@@ -749,7 +749,7 @@ textarea {
 
 @media (min-width: 1024px) {
     .main-product-area {
-        padding: clamp(30px, 5vh, 50px) clamp(10px, 2vw, 20px);
+        padding: clamp(8px, 1vh, 15px) clamp(5px, 0.8vw, 12px);
     }
 }
 
