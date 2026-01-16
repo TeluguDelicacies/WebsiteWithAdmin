@@ -4135,10 +4135,10 @@ textarea {
         max-height: 100%;
         overflow: hidden !important;
         display: grid !important;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(auto, 45%) 1fr;
         align-items: start;
         padding: clamp(5px, 1vh, 12px) clamp(3px, 0.5vw, 8px) !important;
-        gap: clamp(3px, 0.6vw, 10px) !important;
+        gap: clamp(8px, 1.2vw, 20px) !important;
     }
 
     /* 6. Gallery wrapper - NO OVERFLOW */
@@ -4180,16 +4180,18 @@ textarea {
         padding: 2px 6px !important;
     }
 
-    /* 9. Product details - NO SCROLLBAR */
+    /* 9. Product details - FILL WIDTH */
     .product-details {
         min-height: 0;
         max-height: 100%;
+        width: 100% !important;
         overflow: hidden !important;
-        padding: 0 clamp(10px, 1.5vw, 20px) !important;
+        padding: 0 clamp(5px, 1vw, 15px) !important;
     }
 
     .details-body {
         max-height: 100%;
+        width: 100% !important;
         overflow: hidden !important;
     }
 
