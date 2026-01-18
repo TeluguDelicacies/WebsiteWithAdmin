@@ -2069,7 +2069,7 @@ PRODUCT IMAGE GALLERY MANAGEMENT
 */
 
 // Available image tags
-const IMAGE_TAGS = ['PET Jar', 'Glass Jar', 'Standup Pouch', 'Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
+const IMAGE_TAGS = ['PET Jar', 'Glass Jar', 'Standup Pouch', 'Pouch', 'Packet', 'Nutrition', 'Front View', 'Back View', 'Lifestyle'];
 
 // Temp storage for images being edited (before saving to DB)
 let currentProductImages = [];
