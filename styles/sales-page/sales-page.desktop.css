@@ -41,6 +41,14 @@ Features:
 
 .breadcrumb-section {
     grid-area: bread;
+    height: 45px !important;
+    max-height: 45px !important;
+    min-height: 45px !important;
+    flex-shrink: 0;
+    overflow: hidden !important;
+    padding: 0 10px !important;
+    margin: 0 !important;
+    width: 100% !important;
 }
 
 .main-product-area {
@@ -448,14 +456,7 @@ body:has(.sales-page-container) {
     overflow: hidden !important;
 }
 
-/* Breadcrumb section - compact */
-.breadcrumb-section {
-    flex-shrink: 0;
-    max-height: 45px !important;
-    min-height: 35px;
-    margin-bottom: 10px !important;
-    padding: 0 10px !important;
-}
+/* Breadcrumb section height already set above */
 
 .crumbs {
     font-size: 0.9rem !important;
