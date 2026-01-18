@@ -1847,32 +1847,7 @@
             console.log(`[Use By Final Check] Available Keys:`, Object.keys(p));
             console.log(`[Use By Final Check] shelf_life prop:`, p.shelf_life);
 
-            // Ingredients
-            if (p.ingredients) {
-                sections.push({
-                    id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `
-        <p style="text-align:justify;">${p.ingredients}</p>`
-                });
-            }
-
-            // Use By (Shelf Life)
-            if (p.shelf_life && p.shelf_life.toString().trim() !== '') {
-                let shelfText = `<p style="text-align:justify; margin:0;">The product is best consumed within <strong>${p.shelf_life}</strong> days from the date of packing.</p>`;
-
-                // Refrigeration Alert Append (Visual Icon/Box)
-                if (p.is_refrigerated) {
-                    shelfText += `<div style="margin-top:6px; padding:6px 10px; background:#e0f2fe; border-left:4px solid #0284c7; border-radius:4px; color:#0c4a6e; font-size:0.85em; line-height:1.2;">
-                        <i class="fas fa-snowflake"></i> <strong>Note:</strong> Refrigeration Required.
-                    </div>`;
-                }
-
-                sections.push({
-                    id: 'shelf', label: 'Shelf Life', icon: 'fas fa-history', target: 'shelf-life-content', html: shelfText
-                });
-            }
-
-            // Nutrition
-            // We need to keep a reference to update it later
+            // Nutrition - parse first since it's needed for the first tab
             let nutritionData = null;
             if (p.nutrition_info) {
                 try { nutritionData = typeof p.nutrition_info === 'string' ? JSON.parse(p.nutrition_info) : p.nutrition_info; }
@@ -1947,30 +1922,54 @@
                 return `<p style="color:var(--text-secondary); margin:0; text-align:justify;">${items.join(', ')}</p>`;
             };
 
-
             // Count actual nutrition values (not serving info)
             const nutritionFieldKeys = ['calories', 'Calories', 'protein', 'Protein', 'total_fat', 'fat', 'Fat', 'carbs', 'Carbs', 'fiber', 'Fiber', 'sugars', 'sugar', 'Sugars', 'sodium', 'Sodium'];
             const actualNutritionCount = nutritionData ? nutritionFieldKeys.filter(k =>
                 nutritionData[k] !== undefined && nutritionData[k] !== null && nutritionData[k] !== ''
             ).length : 0;
 
-            // Only show Nutrition button if data exists
+            // === BUILD SECTIONS IN ORDER: Nutrition, Usage, Ingredients, Use By ===
+
+            // 1. Nutrition (first tab)
             if (actualNutritionCount > 0) {
                 sections.push({
                     id: 'nut',
                     label: 'Nutrition',
                     icon: 'fas fa-heartbeat',
                     target: 'nutrition-content',
-                    // Initial render with first variant (or default)
                     html: renderNutrition(nutritionData, variants[0])
                 });
             }
 
-            // Usage
+            // 2. Usage
             if (p.serving_suggestion) {
                 sections.push({
                     id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p style="text-align:justify;">
             ${p.serving_suggestion}</p>`
+                });
+            }
+
+            // 3. Ingredients
+            if (p.ingredients) {
+                sections.push({
+                    id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `
+        <p style="text-align:justify;">${p.ingredients}</p>`
+                });
+            }
+
+            // 4. Use By (Shelf Life)
+            if (p.shelf_life && p.shelf_life.toString().trim() !== '') {
+                let shelfText = `<p style="text-align:justify; margin:0;">The product is best consumed within <strong>${p.shelf_life}</strong> days from the date of packing.</p>`;
+
+                // Refrigeration Alert Append (Visual Icon/Box)
+                if (p.is_refrigerated) {
+                    shelfText += `<div style="margin-top:6px; padding:6px 10px; background:#e0f2fe; border-left:4px solid #0284c7; border-radius:4px; color:#0c4a6e; font-size:0.85em; line-height:1.2;">
+                        <i class="fas fa-snowflake"></i> <strong>Note:</strong> Refrigeration Required.
+                    </div>`;
+                }
+
+                sections.push({
+                    id: 'shelf', label: 'Use By', icon: 'fas fa-history', target: 'shelf-life-content', html: shelfText
                 });
             }
 

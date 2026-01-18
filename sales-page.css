@@ -894,6 +894,8 @@ textarea {
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
 }
 
 /* Flipped State */
@@ -1645,10 +1647,32 @@ textarea {
         align-items: start;
     }
 
-    /* Gallery column - completely fixed, no movement */
+    /* Gallery column - Grid layout: thumbnails left, main image right */
     .gallery-wrapper {
         position: relative;
         height: fit-content;
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        gap: 12px;
+        align-items: start;
+    }
+
+    /* Vertical thumbnail strip on desktop - left side */
+    .gallery-wrapper .image-thumbnail-strip {
+        flex-direction: column;
+        gap: 8px;
+        padding: 0;
+        order: -1;
+        /* Ensure it appears first (left) */
+        max-height: 520px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .gallery-wrapper .image-thumb {
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
     }
 
     .product-gallery {
