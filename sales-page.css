@@ -757,8 +757,8 @@ textarea {
 .product-gallery {
     position: relative;
     width: 100%;
-    max-width: 650px;
-    /* Increased from 520px - 25% larger for desktop */
+    max-width: 520px;
+    /* Desktop gallery size */
     aspect-ratio: 1 / 1;
     /* Strict square aspect ratio */
     height: auto;
