@@ -1010,7 +1010,7 @@ textarea {
     border: none !important;
 }
 
-.gallery-front .main-img {
+.gallery-front .carousel-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1066,6 +1066,41 @@ textarea {
     padding: 8px 12px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s ease;
+}
+
+/* Image Carousel Styles */
+.image-carousel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    -webkit-overflow-scrolling: touch;
+}
+
+.image-carousel::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.carousel-item {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* For zoom clipping */
+    position: relative;
+    background: white;
 }
 
 /* ========================================

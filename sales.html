@@ -1164,7 +1164,7 @@
                                         <!-- Image Carousel -->
                                         <div class="image-carousel" id="mainCarousel">
                                             <div class="carousel-item">
-                                                <img src="${displayImg}" class="main-img" alt="${product.product_name}">
+                                                <img src="${displayImg}" class="carousel-img" alt="${product.product_name}">
                                             </div>
                                         </div>
                                         <!-- Dots -->
@@ -1349,10 +1349,12 @@
                     const getRank = (img) => {
                         if (img.image_url === fallbackImage) return -1;
                         const tags = (img.tags || []).map(t => t.toLowerCase().trim());
-                        if (tags.some(t => t === 'default')) return 0;
-                        if (tags.some(t => t.includes('glass'))) return 1;
-                        if (tags.some(t => t.includes('standup'))) return 2;
+                        if (tags.some(t => t.includes('glass jar'))) return 0;
+                        if (tags.some(t => t.includes('standup'))) return 1;
+                        if (tags.some(t => t.includes('pet jar'))) return 2;
                         if (tags.some(t => t.includes('nutrition'))) return 3;
+                        if (tags.some(t => t === 'default')) return 4;
+                        return 10;
                         return 10;
                     };
                     const rankA = getRank(a);
@@ -1408,6 +1410,40 @@
                 // Store global images for external logic
                 window._productImages = visibleImages;
 
+                // Function to update UI visibility based on active image tags
+                window.updateUIVisibilityByTags = function (idx) {
+                    const img = visibleImages[idx];
+                    if (!img) return;
+
+                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                    const isNutrition = tags.some(t => t.includes('nutrition'));
+
+                    // 1. Hide/Show Overlay Logo (Sub-brand text/logo)
+                    const overlayLogo = document.querySelector('.overlay-logo');
+                    if (overlayLogo) {
+                        overlayLogo.style.opacity = isNutrition ? '0' : '1';
+                        overlayLogo.style.pointerEvents = isNutrition ? 'none' : 'auto';
+                    }
+
+                    // 2. Hide/Show Add-to-Cart Buttons Overlay
+                    const actionContainer = document.querySelector('.gallery-front .card-action-container');
+                    if (actionContainer) {
+                        actionContainer.style.opacity = isNutrition ? '0' : '1';
+                        actionContainer.style.pointerEvents = isNutrition ? 'none' : 'auto';
+                    }
+
+                    // 3. Desktop Thumbnails: Hidden ONLY for Nutrition
+                    const isDesktop = window.innerWidth >= 1024;
+                    if (isDesktop && thumbnailStrip) {
+                        thumbnailStrip.style.display = isNutrition ? 'none' : 'flex';
+                    } else if (thumbnailStrip) {
+                        thumbnailStrip.style.display = 'none'; // Keep hidden on mobile
+                    }
+                };
+
+                // Initial visibility check
+                window.updateUIVisibilityByTags(0);
+
 
                 // --- 4. CAROUSEL EVENTS (Stop Propagation) ---
                 ['touchstart', 'touchmove', 'touchend'].forEach(evt => {
@@ -1434,6 +1470,11 @@
                         const thumbs = thumbnailStrip.children;
                         for (let i = 0; i < thumbs.length; i++) {
                             thumbs[i].classList.toggle('active', i === idx);
+                        }
+
+                        // Update UI Visibility
+                        if (window.updateUIVisibilityByTags) {
+                            window.updateUIVisibilityByTags(idx);
                         }
                     }, 50);
                 });
@@ -1770,9 +1811,8 @@
 
             // --- Feature: Image Zoom (Desktop Hover + Mobile Tap Lightbox) ---
             window.initImageZoom = function () {
-                const container = document.querySelector('.gallery-front');
-                const img = container ? container.querySelector('.main-img') : null;
-                if (!container || !img) return;
+                const container = document.getElementById('mainCarousel');
+                if (!container) return;
 
                 const isMobile = window.innerWidth < 1024;
 
@@ -1781,30 +1821,53 @@
                     container.style.cursor = 'zoom-in';
                     container.addEventListener('click', function (e) {
                         e.stopPropagation();
-                        window.openImageLightbox(img.src);
+                        // Get currently visible item
+                        const scrollLeft = container.scrollLeft;
+                        const width = container.clientWidth;
+                        const idx = Math.round(scrollLeft / width);
+                        const slide = document.getElementById(`slide-${idx}`);
+                        const img = slide ? slide.querySelector('img') : null;
+
+                        if (img) {
+                            window.openImageLightbox(img.src);
+                        }
                     });
                 } else {
                     // --- DESKTOP: Hover to zoom ---
                     container.style.cursor = 'crosshair';
                     container.addEventListener('mousemove', function (e) {
+                        // Find the hovered slide
+                        const item = e.target.closest('.carousel-item');
+                        if (!item) return;
+
                         // Prevent zoom when mouse is over the action buttons
                         if (e.target.closest('.card-action-container')) {
-                            img.style.transform = 'scale(1)';
-                            img.style.cursor = 'default';
+                            const activeImgs = container.querySelectorAll('.carousel-img');
+                            activeImgs.forEach(i => i.style.transform = 'scale(1)');
                             return;
                         }
 
-                        const rect = container.getBoundingClientRect();
+                        const img = item.querySelector('.carousel-img');
+                        if (!img) return;
+
+                        const rect = item.getBoundingClientRect();
                         const x = e.clientX - rect.left;
                         const y = e.clientY - rect.top;
+
                         let xPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
                         let yPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
+
                         img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-                        img.style.transform = 'scale(2.0)';
+                        img.style.transform = 'scale(2.5)';
+                        img.parentElement.style.zIndex = '10'; // Ensure active slide is on top if needed
                     });
+
                     container.addEventListener('mouseleave', function () {
-                        img.style.transform = 'scale(1)';
-                        setTimeout(() => { img.style.transformOrigin = 'center center'; }, 100);
+                        const imgs = container.querySelectorAll('.carousel-img');
+                        imgs.forEach(img => {
+                            img.style.transform = 'scale(1)';
+                            setTimeout(() => { img.style.transformOrigin = 'center center'; }, 100);
+                        });
                     });
                 }
             };

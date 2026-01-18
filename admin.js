@@ -3073,42 +3073,58 @@ function setupBulkDragDrop() {
 
 // Fuzzy match filename to product
 function matchFilenameToProduct(filename) {
-    // Remove extension and special chars
-    const baseName = filename.replace(/\.[^/.]+$/, '') // Remove extension
+    // 1. IMPROVED NORMALIZATION
+    // Remove extension, and replace common separators (. , + - _) with spaces
+    const baseName = filename.replace(/\.[^/.]+$/, '')
         .toLowerCase()
-        .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
-        .replace(/\s+/g, ' ') // Normalize spaces
+        .replace(/[.\-,_+]/g, ' ')
+        .replace(/\s+/g, ' ')
         .trim();
 
-    // Extract potential tags
-    const tagKeywords = ['pet jar', 'glass jar', 'standup', 'pouch', 'front', 'back', 'lifestyle'];
+    // 2. EXPANDED TAGS
+    // Added Nutrition and Packet
+    const tagKeywords = ['pet jar', 'glass jar', 'standup', 'pouch', 'front', 'back', 'lifestyle', 'nutrition', 'packet'];
     const foundTags = [];
     let searchName = baseName;
 
     tagKeywords.forEach(tag => {
         if (baseName.includes(tag)) {
+            // Capitalize for display
             foundTags.push(tag.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
             searchName = searchName.replace(tag, '').trim();
         }
     });
 
-    // Try to find matching product
+    // 3. ROBUST MATCHING
     let bestMatch = null;
     let bestScore = 0;
+
+    // Helper: Normalize for space-insensitive comparison
+    const clearStr = (s) => s.replace(/\s+/g, '');
 
     allProductsCache.forEach(product => {
         const productName = product.product_name.toLowerCase();
         const productSlug = (product.slug || '').toLowerCase();
 
-        // Exact match check
+        // A. Exact Match (Human Friendly)
         if (searchName === productName || searchName === productSlug) {
             bestMatch = product;
-            bestScore = 100;
+            bestScore = 150; // Bonus for exact match
             return;
         }
 
-        // Partial match - calculate similarity
-        const words = searchName.split(' ').filter(w => w.length > 2);
+        // B. Space-Insensitive Exact Match (Handles "AvisaginjalaKaaram")
+        const searchClear = clearStr(searchName);
+        if (searchClear === clearStr(productName) || searchClear === clearStr(productSlug)) {
+            if (bestScore < 120) {
+                bestMatch = product;
+                bestScore = 120;
+            }
+        }
+
+        // C. Partial/Fuzzy Word Match
+        // Filter out very short noise words, but allow 2-char words if they are part of the name
+        const words = searchName.split(' ').filter(w => w.length >= 2);
         let matchedWords = 0;
 
         words.forEach(word => {
@@ -3117,10 +3133,10 @@ function matchFilenameToProduct(filename) {
             }
         });
 
-        const score = words.length > 0 ? (matchedWords / words.length) * 100 : 0;
+        const wordScore = words.length > 0 ? (matchedWords / words.length) * 100 : 0;
 
-        if (score > bestScore && score >= 50) { // At least 50% match
-            bestScore = score;
+        if (wordScore > bestScore && wordScore >= 50) {
+            bestScore = wordScore;
             bestMatch = product;
         }
     });
@@ -3166,7 +3182,7 @@ async function handleBulkFilesSelected(files) {
 
         // Render preview item - always show dropdown for override capability
         const selectedProductId = match.product?.id || '';
-        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Front View', 'Back View', 'Lifestyle'];
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Nutrition', 'Front View', 'Back View', 'Lifestyle'];
         const detectedTags = match.tags || [];
 
         const html = `
