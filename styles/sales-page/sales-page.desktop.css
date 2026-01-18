@@ -86,9 +86,8 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   HIDE MOBILE/SIDEBAR ELEMENTS
+   HIDE MOBILE-ONLY ELEMENTS
 ======================================== */
-.sidebar,
 .recent-section,
 .nav-row.mobile-only-nav,
 .swipe-hint-row,
