@@ -3,12 +3,13 @@
 TELUGU DELICACIES - SALES PAGE TABLET STYLES
 OVERRIDES for 768px - 1023px
 ========================================
-Matches the new Full-Width Hero design pattern
+Matches the Full-Width Hero design pattern
+Each selector appears ONLY ONCE
 ========================================
 */
 
 /* ========================================
-   TABLET HEADER OVERRIDES
+   HEADER OVERRIDES
 ======================================== */
 .header.sales-header .container {
     padding: 0 var(--space-6);
@@ -19,7 +20,7 @@ Matches the new Full-Width Hero design pattern
 }
 
 /* ========================================
-   TABLET GRID LAYOUT
+   GRID LAYOUT
 ======================================== */
 .grid-layout {
     display: grid !important;
@@ -34,17 +35,40 @@ Matches the new Full-Width Hero design pattern
     padding: 0 15px;
 }
 
-/* HIDE SIDEBAR on Tablet */
-.sidebar {
-    display: none !important;
+/* ========================================
+   BREADCRUMB SECTION
+======================================== */
+.breadcrumb-section {
+    height: 50px !important;
+    max-height: 50px !important;
+    padding: 0 10px !important;
 }
 
-.recent-section {
+/* ========================================
+   HIDE MOBILE/SIDEBAR ELEMENTS
+======================================== */
+.sidebar,
+.recent-section,
+.swipe-hint-row,
+.sb-mobile-icon,
+.sb-mobile-text,
+.carousel-dots {
     display: none !important;
 }
 
 /* ========================================
-   TABLET PRODUCT CARD - 50/50 Split
+   SHOW DESKTOP TEXT
+======================================== */
+.sb-desktop-text {
+    display: inline !important;
+}
+
+.image-carousel {
+    overflow-x: hidden;
+}
+
+/* ========================================
+   PRODUCT CARD - 50/50 Split
 ======================================== */
 .main-product-area {
     display: grid !important;
@@ -52,8 +76,6 @@ Matches the new Full-Width Hero design pattern
     gap: 25px;
     align-items: start;
     padding: 20px;
-    max-height: calc(100vh - 150px);
-    overflow: visible;
 }
 
 .gallery-wrapper {
@@ -63,7 +85,7 @@ Matches the new Full-Width Hero design pattern
 
 .product-gallery {
     width: 100%;
-    max-height: calc(100vh - 250px);
+    max-height: 400px;
     min-height: 300px;
     perspective: 1500px;
 }
@@ -71,12 +93,12 @@ Matches the new Full-Width Hero design pattern
 .product-details {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     padding: 0;
 }
 
 /* ========================================
-   TABLET TYPOGRAPHY
+   TYPOGRAPHY
 ======================================== */
 .product-title {
     font-size: clamp(1.5rem, 3.5vw, 2rem) !important;
@@ -101,7 +123,21 @@ Matches the new Full-Width Hero design pattern
 }
 
 /* ========================================
-   TABLET INFO TABS - Vertical Layout
+   IMAGE THUMBNAILS
+======================================== */
+.image-thumbnail-strip {
+    display: flex !important;
+    margin-top: 12px !important;
+    gap: 8px !important;
+}
+
+.image-thumb {
+    width: 55px !important;
+    height: 55px !important;
+}
+
+/* ========================================
+   INFO TABS - Vertical Layout
 ======================================== */
 .info-tabs {
     display: flex !important;
@@ -164,7 +200,7 @@ Matches the new Full-Width Hero design pattern
 }
 
 /* ========================================
-   TABLET TOGGLE BUTTONS
+   TOGGLE BUTTONS
 ======================================== */
 .toggle-btn-container {
     text-align: left !important;
@@ -180,7 +216,7 @@ Matches the new Full-Width Hero design pattern
 }
 
 /* ========================================
-   TABLET DETAILS BODY
+   DETAILS BODY & ADD TO CART
 ======================================== */
 .details-body {
     flex: 1;
@@ -204,7 +240,7 @@ Matches the new Full-Width Hero design pattern
 }
 
 /* ========================================
-   TABLET QUANTITY CONTROLS
+   QUANTITY CONTROLS
 ======================================== */
 .qty-control-lg {
     background: #FFF9C4 !important;
@@ -227,47 +263,9 @@ Matches the new Full-Width Hero design pattern
 }
 
 /* ========================================
-   TABLET VISIBILITY
-======================================== */
-.sb-mobile-icon,
-.sb-mobile-text {
-    display: none !important;
-}
-
-.sb-desktop-text {
-    display: inline !important;
-}
-
-.carousel-dots {
-    display: none !important;
-}
-
-.swipe-hint-row {
-    display: none !important;
-}
-
-.image-carousel {
-    overflow-x: hidden;
-}
-
-/* ========================================
-   TABLET PRODUCT GRID
+   PRODUCT GRID
 ======================================== */
 .sales-product-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
-}
-
-/* ========================================
-   TABLET IMAGE THUMBNAILS
-======================================== */
-.image-thumbnail-strip {
-    display: flex !important;
-    margin-top: 12px !important;
-    gap: 8px !important;
-}
-
-.image-thumb {
-    width: 55px !important;
-    height: 55px !important;
 }

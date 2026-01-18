@@ -6,13 +6,34 @@ OPTION A: FULL-WIDTH HERO LAYOUT
 Features:
 - 50/50 image-details split (larger product image)
 - Sidebar hidden (similar products via tab)
-- Full-width tab bar at bottom
+- Full-width layout with scrollable page
 - Better space utilization (~85%)
+========================================
+IMPORTANT: Each selector should only appear ONCE in this file
 ========================================
 */
 
 /* ========================================
-   DESKTOP HEADER OVERRIDES
+   PAGE & BODY - Scrollable Desktop Layout
+======================================== */
+html:has(.sales-page-container),
+body:has(.sales-page-container) {
+    overflow: auto !important;
+    height: auto !important;
+}
+
+.sales-page-container {
+    height: auto !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+    padding-top: var(--header-height, 64px) !important;
+    padding-bottom: 30px !important;
+}
+
+/* ========================================
+   HEADER OVERRIDES
 ======================================== */
 .header.sales-header .container {
     padding: 0 var(--space-8);
@@ -23,7 +44,7 @@ Features:
 }
 
 /* ========================================
-   NEW DESKTOP GRID LAYOUT - Full Width Hero
+   GRID LAYOUT - Full Width Hero
 ======================================== */
 .grid-layout {
     display: grid !important;
@@ -37,89 +58,107 @@ Features:
     max-width: 1600px;
     margin: 0 auto;
     padding: 0 20px;
+    flex: 1 1 auto;
+    min-height: auto;
+    max-height: none;
+    overflow: visible !important;
 }
 
+/* ========================================
+   BREADCRUMB SECTION
+======================================== */
 .breadcrumb-section {
     grid-area: bread;
-    height: 45px !important;
-    max-height: 45px !important;
-    min-height: 45px !important;
+    height: 50px !important;
+    max-height: 50px !important;
+    min-height: 50px !important;
     flex-shrink: 0;
     overflow: hidden !important;
     padding: 0 10px !important;
     margin: 0 !important;
     width: 100% !important;
+    display: flex;
+    align-items: center;
 }
 
-.main-product-area {
-    grid-area: main;
+.crumbs {
+    font-size: 0.9rem !important;
 }
 
-/* HIDE SIDEBAR - Similar products now via tab */
-.sidebar {
-    display: none !important;
-}
-
-.recent-section {
-    display: none !important;
-}
-
-/* Hide mobile nav on desktop */
-.nav-row.mobile-only-nav {
-    display: none !important;
+.nav-btn-pill {
+    font-size: 0.85rem !important;
+    padding: 0.5em 1.2em !important;
 }
 
 /* ========================================
-   DESKTOP PRODUCT CARD - 50/50 Split
+   MAIN PRODUCT AREA - 50/50 Split
 ======================================== */
 .main-product-area {
+    grid-area: main;
     display: grid !important;
-    grid-template-columns: 50% 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 40px;
     align-items: start;
     padding: 25px 35px;
-    max-height: calc(100vh - 140px);
-    overflow: visible;
     background: #FFFFFF;
     border-radius: 24px;
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.12);
+    overflow: visible;
 }
 
-.main-product-area .nav-row.mobile-only-nav {
-    display: none !important;
-}
-
-/* Hide swipe hint on desktop */
-.swipe-hint-row {
+/* ========================================
+   HIDE MOBILE-ONLY ELEMENTS
+======================================== */
+.sidebar,
+.recent-section,
+.nav-row.mobile-only-nav,
+.swipe-hint-row,
+.toggle-mobile,
+.sb-mobile-icon,
+.sb-mobile-text,
+.mobile-brand-carousel,
+.carousel-dots {
     display: none !important;
 }
 
 /* ========================================
-   GALLERY WRAPPER - Left Column (50%)
+   SHOW DESKTOP-ONLY ELEMENTS
+======================================== */
+.toggle-desktop,
+.sb-desktop-text,
+.desktop-brand-grid {
+    display: flex !important;
+}
+
+.sb-desktop-text {
+    display: inline !important;
+}
+
+/* ========================================
+   GALLERY WRAPPER - Left Column
 ======================================== */
 .gallery-wrapper {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    max-height: 100%;
-    overflow: hidden !important;
-    position: sticky;
-    top: 20px;
+    overflow: visible !important;
 }
 
-/* Larger Product Gallery */
 .product-gallery {
     width: 100% !important;
     max-width: 100% !important;
     aspect-ratio: 1 / 1;
-    max-height: min(500px, calc(100vh - 280px)) !important;
+    max-height: 500px !important;
     perspective: 1500px;
     border-radius: 16px;
     overflow: hidden;
 }
 
-/* Image Thumbnail Strip - Horizontal below image */
+.image-carousel {
+    overflow-x: hidden;
+}
+
 .image-thumbnail-strip {
     display: flex !important;
     justify-content: center;
@@ -145,15 +184,19 @@ Features:
     padding: 2px 5px !important;
 }
 
+.overlay-logo {
+    max-width: 100px;
+    max-height: 70px;
+}
+
 /* ========================================
-   PRODUCT DETAILS - Right Column (50%)
+   PRODUCT DETAILS - Right Column
 ======================================== */
 .product-details {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-height: calc(100vh - 180px);
-    overflow: hidden !important;
+    overflow: visible !important;
     padding: 0 10px !important;
 }
 
@@ -161,12 +204,12 @@ Features:
     display: flex;
     flex-direction: column;
     gap: 12px;
-    overflow: hidden !important;
+    overflow: visible !important;
     padding: 0 !important;
 }
 
 /* ========================================
-   DESKTOP TYPOGRAPHY - Larger & Clearer
+   TYPOGRAPHY - Larger & Clearer
 ======================================== */
 .product-header-fields {
     margin-bottom: 10px !important;
@@ -193,7 +236,7 @@ Features:
 }
 
 /* ========================================
-   PRICE ROW - Prominent
+   PRICE ROW
 ======================================== */
 .price-row {
     margin-bottom: 12px !important;
@@ -214,7 +257,7 @@ Features:
 }
 
 /* ========================================
-   VARIANT SELECTION - Larger
+   VARIANT SELECTION
 ======================================== */
 .selection-area {
     margin-bottom: 15px !important;
@@ -232,10 +275,23 @@ Features:
 }
 
 /* ========================================
-   ADD TO CART - Prominent Button
+   TOGGLE BUTTONS
+======================================== */
+.toggle-btn-container {
+    text-align: left !important;
+}
+
+.toggle-btn-container .action-btn-pill,
+.action-btn-pill.outline {
+    font-size: 0.95rem !important;
+    padding: 10px 20px !important;
+}
+
+/* ========================================
+   ADD TO CART SECTION
 ======================================== */
 .add-to-cart-section {
-    margin-top: auto;
+    margin-top: 20px;
     padding: 15px 0;
     border-top: 1px solid var(--border-light);
     display: flex;
@@ -290,39 +346,31 @@ Features:
     font-size: 1.1rem !important;
 }
 
-/* ========================================
-   TOGGLE BUTTONS
-======================================== */
-.toggle-btn-container {
-    text-align: left !important;
+/* Gallery action container */
+.gallery-front .card-action-container {
+    position: absolute;
+    bottom: 20px !important;
+    right: 20px !important;
 }
 
-.toggle-desktop {
-    display: block !important;
-}
-
-.toggle-mobile {
-    display: none !important;
-}
-
-.toggle-btn-container .action-btn-pill {
-    font-size: 0.95rem !important;
-    padding: 10px 20px !important;
+.gallery-front .btn-add {
+    padding: 12px 32px !important;
+    font-size: 1.1rem !important;
+    box-shadow: 0 4px 15px rgba(0, 119, 182, 0.35) !important;
 }
 
 /* ========================================
-   INFO TABS - Full Width Horizontal
+   INFO TABS - Vertical Layout (Sidebar Style)
 ======================================== */
 .info-tabs {
     display: flex !important;
     flex-direction: row !important;
     align-items: stretch;
     gap: 20px;
-    margin-top: 15px;
+    margin-top: 20px;
     border-top: 1px solid var(--border-light);
-    padding-top: 15px;
-    min-height: 120px;
-    max-height: 180px;
+    padding-top: 20px;
+    min-height: 150px;
 }
 
 .info-btns-row {
@@ -386,7 +434,7 @@ Features:
     padding: 15px 20px !important;
     margin: 0 !important;
     height: auto !important;
-    max-height: 150px;
+    min-height: 120px;
     overflow-y: auto;
     font-size: 0.95rem;
     line-height: 1.5;
@@ -399,105 +447,9 @@ Features:
 }
 
 /* ========================================
-   DESKTOP VISIBILITY
-======================================== */
-.sb-mobile-icon,
-.sb-mobile-text {
-    display: none !important;
-}
-
-.sb-desktop-text {
-    display: inline !important;
-}
-
-.mobile-brand-carousel {
-    display: none !important;
-}
-
-.desktop-brand-grid {
-    display: flex !important;
-}
-
-.carousel-dots {
-    display: none !important;
-}
-
-.image-carousel {
-    overflow-x: hidden;
-}
-
-/* ========================================
-   DESKTOP LAYOUT (Scrollable)
-======================================== */
-
-/* Allow normal page scrolling */
-html:has(.sales-page-container),
-body:has(.sales-page-container) {
-    overflow: auto !important;
-    height: auto !important;
-}
-
-/* Main container - auto height */
-.sales-page-container {
-    height: auto !important;
-    max-height: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: visible !important;
-    padding-top: var(--header-height, 64px) !important;
-    padding-bottom: 30px !important;
-}
-
-/* Grid layout - auto sizing */
-.grid-layout {
-    flex: 1 1 auto;
-    min-height: auto;
-    max-height: none;
-    overflow: visible !important;
-}
-
-/* Breadcrumb section height already set above */
-
-.crumbs {
-    font-size: 0.9rem !important;
-}
-
-.nav-btn-pill {
-    font-size: 0.85rem !important;
-    padding: 0.5em 1.2em !important;
-}
-
-/* ========================================
    PRODUCT GRID (Category View)
 ======================================== */
 .sales-product-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 25px;
-}
-
-/* ========================================
-   OVERLAY ELEMENTS
-======================================== */
-.overlay-logo {
-    max-width: 100px;
-    max-height: 70px;
-}
-
-/* About Product button - better visibility */
-.action-btn-pill.outline {
-    font-size: 0.95rem !important;
-    padding: 10px 20px !important;
-}
-
-/* Card action container in gallery */
-.gallery-front .card-action-container {
-    position: absolute;
-    bottom: 20px !important;
-    right: 20px !important;
-}
-
-.gallery-front .btn-add {
-    padding: 12px 32px !important;
-    font-size: 1.1rem !important;
-    box-shadow: 0 4px 15px rgba(0, 119, 182, 0.35) !important;
 }
