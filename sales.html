@@ -1208,6 +1208,15 @@
                             </div>
                         </div>
 
+                        <script>
+                            // Initialize components after HTML is in DOM
+                            setTimeout(() => {
+                                window.loadProductImageGallery('${product.id}', '${displayImg}', '${product.product_name.replace(/'/g, "\\'")}');
+                                window.initProductInteractions();
+                                window.updateBreadcrumbScroll();
+                            }, 0);
+                        <\/script>
+
                         
 
 
@@ -1320,7 +1329,7 @@
 
         // --- Product Image Gallery ---
         // --- Product Image Gallery ---
-        async function loadProductImageGallery(productId, fallbackImage) {
+        window.loadProductImageGallery = async function (productId, fallbackImage, productName = '') {
             const thumbnailStrip = document.getElementById('imageThumbnailStrip');
             const mainCarousel = document.getElementById('mainCarousel'); // NEW
             const dotsContainer = document.getElementById('carouselDots'); // NEW
@@ -1395,10 +1404,11 @@
 
                 // --- 3. POPULATE THUMBNAILS (Desktop) ---
                 thumbnailStrip.style.display = 'flex';
-                const productName = state.currentProduct?.product_name || '';
+                // Use passed productName or fallback to global state
+                const pName = productName || state.currentProduct?.product_name || '';
                 thumbnailStrip.innerHTML = visibleImages.map((img, idx) => {
                     const tag = (img.tags && img.tags.length > 0) ? img.tags[0] : '';
-                    const fullLabel = tag ? `${productName} - ${tag}` : productName;
+                    const fullLabel = tag ? `${pName} - ${tag}` : pName;
                     return `
                         <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
                              id="thumb-${idx}"
@@ -1484,6 +1494,9 @@
 
                         // Update UI Visibility
                         if (window.updateUIVisibilityByTags) {
+                            const scrollLeft = mainCarousel.scrollLeft;
+                            const width = mainCarousel.clientWidth;
+                            const idx = Math.round(scrollLeft / width);
                             window.updateUIVisibilityByTags(idx);
                         }
                     }, 50);

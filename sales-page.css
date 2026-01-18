@@ -1110,13 +1110,23 @@ textarea {
     display: flex;
     gap: 12px;
     justify-content: flex-start;
-    /* Elegantly left-aligned per user request */
     flex-wrap: wrap;
-    padding: 10px 0;
-    /* Vertical breathing room only */
+    padding: 10px;
     background: transparent;
-    /* Removed heavy background for "floating" look */
     border-radius: 0;
+    z-index: 100;
+}
+
+@media (min-width: 1024px) {
+    .image-thumbnail-strip {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: auto;
+        max-width: calc(100% - 40px);
+        margin: 0 !important;
+        pointer-events: auto;
+    }
 }
 
 .image-thumb {
@@ -1153,37 +1163,35 @@ textarea {
 /* NUTRITION DOT MODE (DESKTOP) */
 @media (min-width: 1024px) {
     .image-thumbnail-strip.nutrition-active {
-        position: absolute;
+        top: 20px;
+        /* SAME unified point in space */
         left: 20px;
-        top: 50%;
-        transform: translateY(-50%);
+        transform: none;
         flex-direction: column;
-        z-index: 100;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        padding: 20px 10px;
-        border-radius: 40px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 15px 10px;
+        border-radius: 30px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         max-height: 80%;
-        width: auto;
-        gap: 15px;
     }
 
     .image-thumbnail-strip.nutrition-active .image-thumb {
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: rgba(0, 119, 182, 0.5);
-        border-color: white;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.5);
+        /* Lighter for visibility over image */
+        border: 2px solid white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .image-thumbnail-strip.nutrition-active .image-thumb.active {
         background: #f59e0b;
-        transform: scale(1.2);
-        box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        transform: scale(1.3);
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
     }
 
     .image-thumbnail-strip.nutrition-active .image-thumb img,
@@ -1195,33 +1203,35 @@ textarea {
     .image-thumbnail-strip.nutrition-active .image-thumb .dot-label {
         display: block;
         position: absolute;
-        left: 20px;
+        left: 25px;
+        /* Offset from dot */
         top: 50%;
-        transform: translateY(-50%) translateX(0px);
-        background: var(--color-primary-blue);
+        transform: translateY(-50%) translateX(10px);
+        background: rgba(0, 0, 0, 0.85);
+        /* Black for contrast */
         color: white;
-        padding: 8px 16px;
-        border-radius: 25px;
+        padding: 6px 14px;
+        border-radius: 6px;
         font-size: 0.85rem;
         font-weight: 600;
         white-space: nowrap;
         opacity: 0;
         pointer-events: none;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* Hover Expansion: Dot glows, Label pops out */
+    /* Hover Expansion: Label pops out */
     .image-thumbnail-strip.nutrition-active .image-thumb:hover {
-        transform: scale(1.5);
-        background: #f59e0b;
-        border-color: white;
+        transform: scale(1.3);
+        background: white;
         z-index: 1000;
     }
 
     .image-thumbnail-strip.nutrition-active .image-thumb:hover .dot-label {
         opacity: 1;
-        transform: translateY(-50%) translateX(20px);
+        transform: translateY(-50%) translateX(15px);
     }
 
     /* Arrow for the label */
@@ -4353,7 +4363,7 @@ textarea {
         align-items: stretch;
     }
 
-    /* 6. Gallery wrapper - scales within bounds */
+    /* 6. Gallery wrapper - constrained width for absolute positioning context */
     .gallery-wrapper {
         display: flex;
         flex-direction: column;
@@ -4361,8 +4371,10 @@ textarea {
         align-items: center;
         max-height: 100%;
         overflow: visible;
-        /* Changed from hidden to allow floating pill overlay */
         position: relative;
+        width: 100% !important;
+        max-width: 650px !important;
+        margin: 0 auto !important;
     }
 
     /* 7. Product gallery - removed constraints to use base 650px */
