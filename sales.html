@@ -1418,6 +1418,11 @@
                     const tags = (img.tags || []).map(t => t.toLowerCase().trim());
                     const isNutrition = tags.some(t => t.includes('nutrition'));
 
+                    // Toggle Dot Mode Class
+                    if (thumbnailStrip) {
+                        thumbnailStrip.classList.toggle('nutrition-active', isNutrition);
+                    }
+
                     // 1. Hide/Show Overlay Logo (Sub-brand text/logo)
                     const overlayLogo = document.querySelector('.overlay-logo');
                     if (overlayLogo) {
@@ -1432,10 +1437,10 @@
                         actionContainer.style.pointerEvents = isNutrition ? 'none' : 'auto';
                     }
 
-                    // 3. Desktop Thumbnails: Hidden ONLY for Nutrition
+                    // 3. Desktop Thumbnails: Always flex on desktop (Dot Mode handled by CSS)
                     const isDesktop = window.innerWidth >= 1024;
                     if (isDesktop && thumbnailStrip) {
-                        thumbnailStrip.style.display = isNutrition ? 'none' : 'flex';
+                        thumbnailStrip.style.display = 'flex';
                     } else if (thumbnailStrip) {
                         thumbnailStrip.style.display = 'none'; // Keep hidden on mobile
                     }

@@ -1128,9 +1128,10 @@ textarea {
     overflow: hidden;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     /* Soft floating shadow */
+    flex-shrink: 0;
 }
 
 .image-thumb:hover {
@@ -1143,6 +1144,75 @@ textarea {
 .image-thumb.active {
     border-color: #f59e0b;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* NUTRITION DOT MODE (DESKTOP) */
+@media (min-width: 1024px) {
+    .image-thumbnail-strip.nutrition-active {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        flex-direction: column;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 20px 10px;
+        border-radius: 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        max-height: 80%;
+        width: auto;
+        gap: 15px;
+    }
+
+    .image-thumbnail-strip.nutrition-active .image-thumb {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(0, 119, 182, 0.5);
+        border-color: white;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+
+    .image-thumbnail-strip.nutrition-active .image-thumb.active {
+        background: #f59e0b;
+        transform: scale(1.2);
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    .image-thumbnail-strip.nutrition-active .image-thumb img,
+    .image-thumbnail-strip.nutrition-active .image-thumb .thumb-tag {
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.3s ease;
+    }
+
+    /* Hover Expansion */
+    .image-thumbnail-strip.nutrition-active .image-thumb:hover {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        background: white;
+        transform: scale(1.1) translateX(10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    .image-thumbnail-strip.nutrition-active .image-thumb:hover img {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .image-thumbnail-strip.nutrition-active .image-thumb:hover .thumb-tag {
+        opacity: 1;
+        transform: scale(1);
+        bottom: 0;
+        font-size: 0.65rem;
+        padding: 4px;
+        background: rgba(0, 0, 0, 0.8);
+    }
 }
 
 .image-thumb img {
@@ -4268,7 +4338,9 @@ textarea {
         justify-content: center;
         align-items: center;
         max-height: 100%;
-        overflow: hidden;
+        overflow: visible;
+        /* Changed from hidden to allow floating pill overlay */
+        position: relative;
     }
 
     /* 7. Product gallery - removed constraints to use base 650px */
