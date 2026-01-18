@@ -514,7 +514,7 @@ textarea {
 .grid-layout {
     display: flex;
     flex-direction: column;
-    width: 95%;
+    width: 98%;
     margin: 0 auto;
     gap: 20px;
 }
