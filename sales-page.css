@@ -3620,10 +3620,7 @@ textarea {
         align-self: start;
     }
 
-    .main-product-area .product-gallery {
-        max-width: 100%;
-        width: 100%;
-    }
+    /* .main-product-area .product-gallery - removed max-width/width overrides to use base 650px */
 
     /* Product details - right column */
     .main-product-area .product-details {
@@ -4132,12 +4129,8 @@ textarea {
         overflow: hidden;
     }
 
-    /* 7. Product gallery - proportional scaling with max constraint */
+    /* 7. Product gallery - removed constraints to use base 650px */
     .product-gallery {
-        max-height: min(480px, calc(100vh - 220px)) !important;
-        height: auto !important;
-        width: auto !important;
-        max-width: 100%;
         aspect-ratio: 1 / 1;
     }
 
