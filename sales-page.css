@@ -1652,21 +1652,36 @@ textarea {
         position: relative;
         height: fit-content;
         display: grid;
+        grid-template-areas:
+            "thumbs gallery"
+            "thumbs toggle";
         grid-template-columns: 80px 1fr;
+        grid-template-rows: 1fr auto;
         gap: 12px;
         align-items: start;
     }
 
     /* Vertical thumbnail strip on desktop - left side */
     .gallery-wrapper .image-thumbnail-strip {
+        grid-area: thumbs;
+        display: flex !important;
         flex-direction: column;
         gap: 8px;
         padding: 0;
-        order: -1;
-        /* Ensure it appears first (left) */
+        margin: 0 !important;
         max-height: 520px;
         overflow-y: auto;
         overflow-x: hidden;
+    }
+
+    /* Product gallery - right side */
+    .gallery-wrapper .product-gallery {
+        grid-area: gallery;
+    }
+
+    /* Toggle button - below gallery */
+    .gallery-wrapper .toggle-btn-container {
+        grid-area: toggle;
     }
 
     .gallery-wrapper .image-thumb {
