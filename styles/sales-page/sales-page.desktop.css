@@ -1,7 +1,7 @@
 /* 
 ========================================
 TELUGU DELICACIES - SALES PAGE DESKTOP STYLES
-OPTION A: FULL-WIDTH HERO LAYOUT
+50/50 HERO LAYOUT with sidebar hidden
 ========================================
 */
 
@@ -72,12 +72,11 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   MAIN PRODUCT AREA - Flex Container
+   MAIN PRODUCT AREA - 50/50 Flex
 ======================================== */
 .main-product-area {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: wrap !important;
     gap: 40px;
     padding: 30px 40px;
     background: #FFFFFF;
@@ -114,8 +113,8 @@ body:has(.sales-page-container) {
    GALLERY - Left Side (50%)
 ======================================== */
 .gallery-wrapper {
-    flex: 0 0 calc(50% - 20px) !important;
-    max-width: calc(50% - 20px) !important;
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -165,8 +164,7 @@ body:has(.sales-page-container) {
    PRODUCT DETAILS - Right Side (50%)
 ======================================== */
 .product-details {
-    flex: 0 0 calc(50% - 20px) !important;
-    max-width: calc(50% - 20px) !important;
+    flex: 1 !important;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -180,91 +178,6 @@ body:has(.sales-page-container) {
     gap: 12px;
     overflow: visible !important;
     padding: 0 !important;
-}
-
-/* Hide info tabs inside details - will show separately */
-.product-details .info-tabs {
-    display: none !important;
-}
-
-/* ========================================
-   INFO TABS - Full Width (Below Hero)
-======================================== */
-.info-tabs {
-    flex: 0 0 100% !important;
-    width: 100% !important;
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 25px;
-    margin-top: 20px;
-    padding-top: 25px;
-    border-top: 1px solid var(--border-light);
-    min-height: 180px;
-}
-
-.info-btns-row {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap;
-    gap: 10px !important;
-    flex-shrink: 0;
-}
-
-.info-btn {
-    height: 45px !important;
-    padding: 0 20px !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    border-radius: 10px !important;
-    border: 1px solid var(--border-light) !important;
-    background: white !important;
-    color: var(--text-secondary) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    white-space: nowrap !important;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease !important;
-}
-
-.info-btn i {
-    display: none !important;
-}
-
-.info-btn:hover {
-    border-color: var(--color-primary-blue) !important;
-    color: var(--color-primary-blue) !important;
-}
-
-.info-btn.active {
-    background: var(--color-brand-blue-primary) !important;
-    color: white !important;
-    border: 2px solid var(--color-brand-blue-primary) !important;
-    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25) !important;
-}
-
-.info-content-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.info-content-block {
-    display: none;
-    flex: 1;
-    background: var(--bg-tertiary) !important;
-    border: 1px solid var(--border-light) !important;
-    border-radius: 12px !important;
-    padding: 20px 25px !important;
-    min-height: 120px;
-    overflow-y: auto;
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-.info-content-block.active {
-    display: block !important;
 }
 
 /* ========================================
@@ -403,6 +316,85 @@ body:has(.sales-page-container) {
     padding: 12px 32px !important;
     font-size: 1.1rem !important;
     box-shadow: 0 4px 15px rgba(0, 119, 182, 0.35) !important;
+}
+
+/* ========================================
+   INFO TABS - Horizontal in Right Column
+======================================== */
+.info-tabs {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 20px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-light);
+    min-height: 150px;
+}
+
+.info-btns-row {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 130px !important;
+    flex-shrink: 0;
+    gap: 8px !important;
+}
+
+.info-btn {
+    width: 100% !important;
+    height: 42px !important;
+    padding: 0 15px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-light) !important;
+    background: white !important;
+    color: var(--text-secondary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease !important;
+}
+
+.info-btn i {
+    display: none !important;
+}
+
+.info-btn:hover {
+    border-color: var(--color-primary-blue) !important;
+    color: var(--color-primary-blue) !important;
+}
+
+.info-btn.active {
+    background: var(--color-brand-blue-primary) !important;
+    color: white !important;
+    border: 2px solid var(--color-brand-blue-primary) !important;
+    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25) !important;
+}
+
+.info-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.info-content-block {
+    display: none;
+    flex: 1;
+    background: var(--bg-tertiary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 12px !important;
+    padding: 15px 20px !important;
+    min-height: 120px;
+    overflow-y: auto;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.info-content-block.active {
+    display: block !important;
 }
 
 /* ========================================
