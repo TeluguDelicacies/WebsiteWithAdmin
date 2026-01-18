@@ -903,6 +903,30 @@ textarea {
     transform: rotateY(180deg);
 }
 
+/* Hide overlays when gallery is flipped to show About Product */
+.gallery-inner.flipped~.image-thumbnail-strip,
+.product-gallery:has(.gallery-inner.flipped)~.image-thumbnail-strip {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.gallery-inner.flipped .card-action-container {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.gallery-inner.flipped .carousel-dots {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.gallery-inner.flipped .product-disclaimer-overlay {
+    opacity: 0;
+    visibility: hidden;
+}
+
 .gallery-front,
 .gallery-back {
     position: absolute;
