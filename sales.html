@@ -249,11 +249,11 @@
                         actionContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
                     }
 
-                    // Hide/Show mobile variant container
+                    // Mobile variant container remains visible during flip per user request
                     const mobileVariantContainer = document.getElementById('mobileVariantContainer');
                     if (mobileVariantContainer) {
-                        mobileVariantContainer.style.opacity = isFlipped ? '0' : '1';
-                        mobileVariantContainer.style.pointerEvents = isFlipped ? 'none' : 'auto';
+                        mobileVariantContainer.style.opacity = '1';
+                        mobileVariantContainer.style.pointerEvents = 'auto';
                     }
 
                     // Update button text based on state for all instances
