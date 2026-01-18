@@ -895,7 +895,7 @@ textarea {
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    /* No overflow:hidden - allow 3D flip to work properly */
 }
 
 /* Flipped State */
