@@ -1344,7 +1344,7 @@
                 let visibleImages = images.filter(img => img.tags && img.tags.length > 0);
 
                 // --- CUSTOM SORTING LOGIC ---
-                // Order: 1. fallbackImage (current display) 2. Default tag 3. Glass tag 4. Standup tag 5. Rest
+                // Order: 1. fallbackImage (current display) 2. Default tag 3. Glass tag 4. Standup tag 5. Nutrition tag 6. Rest
                 visibleImages.sort((a, b) => {
                     const getRank = (img) => {
                         if (img.image_url === fallbackImage) return -1;
@@ -1352,6 +1352,7 @@
                         if (tags.some(t => t === 'default')) return 0;
                         if (tags.some(t => t.includes('glass'))) return 1;
                         if (tags.some(t => t.includes('standup'))) return 2;
+                        if (tags.some(t => t.includes('nutrition'))) return 3;
                         return 10;
                     };
                     const rankA = getRank(a);
