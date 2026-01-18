@@ -1341,7 +1341,25 @@
                 }
 
                 // Filter: Only show images that have TAGS
-                const visibleImages = images.filter(img => img.tags && img.tags.length > 0);
+                let visibleImages = images.filter(img => img.tags && img.tags.length > 0);
+
+                // --- CUSTOM SORTING LOGIC ---
+                // Order: 1. fallbackImage (current display) 2. Default tag 3. Glass tag 4. Standup tag 5. Rest
+                visibleImages.sort((a, b) => {
+                    const getRank = (img) => {
+                        if (img.image_url === fallbackImage) return -1;
+                        const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                        if (tags.some(t => t === 'default')) return 0;
+                        if (tags.some(t => t.includes('glass'))) return 1;
+                        if (tags.some(t => t.includes('standup'))) return 2;
+                        return 10;
+                    };
+                    const rankA = getRank(a);
+                    const rankB = getRank(b);
+                    if (rankA !== rankB) return rankA - rankB;
+                    // Tie-breaker: use original display_order from DB
+                    return (a.display_order || 0) - (b.display_order || 0);
+                });
 
                 // If no visible images, keep default static image (already in HTML) but hide strips
                 if (!visibleImages || visibleImages.length === 0) {
