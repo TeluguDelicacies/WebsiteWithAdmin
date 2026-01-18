@@ -61,13 +61,45 @@ Changes that can't break functionality.
 | P2-A-002 | Document CSS variable system in comments | [ ] | 30min |
 | P2-A-003 | Add JSDoc comments to key functions | [ ] | 2hr |
 
-#### P2-B: CSS Cleanup (Non-Breaking)
-| Task ID | Task | Status | Effort |
-|---------|------|--------|--------|
-| P2-B-001 | Audit unused CSS with PurgeCSS (report only) | [ ] | 30min |
-| P2-B-002 | List all inline styles in HTML files | [ ] | 30min |
-| P2-B-003 | Create CSS class for each inline style pattern | [ ] | 1hr |
-| P2-B-004 | Replace inline styles with classes (one file at a time) | [ ] | 2hr |
+#### P2-B: CSS Cleanup using BEM Methodology
+
+**Problem:** "Specificity Wars" - generic class names (`.card`, `.btn`, `.container`) clash globally. `!important` used to override. Changing one element breaks unrelated elements.
+
+**Solution:** Refactor component-by-component using BEM (Block Element Modifier) naming.
+
+**BEM Naming Pattern:**
+```css
+/* Block */
+.product-card { }
+
+/* Element (part of block) */
+.product-card__title { }
+.product-card__image { }
+.product-card__price { }
+
+/* Modifier (variation) */
+.product-card--featured { }
+.product-card__price--discounted { }
+```
+
+| Task ID | Component | Status | Effort | Goal |
+|---------|-----------|--------|--------|------|
+| P2-B-001 | List all components using generic class names | [ ] | 30min | Inventory |
+| P2-B-002 | Refactor: Product Card → `.product-card__*` | [ ] | 1hr | Isolate |
+| P2-B-003 | Refactor: Info Tabs → `.info-tabs__*` | [ ] | 45min | Isolate |
+| P2-B-004 | Refactor: Add to Cart → `.add-cart__*` | [ ] | 45min | Isolate |
+| P2-B-005 | Refactor: Breadcrumbs → `.breadcrumb__*` | [ ] | 30min | Isolate |
+| P2-B-006 | Refactor: Sidebar → `.sidebar__*` | [ ] | 45min | Isolate |
+| P2-B-007 | Refactor: Header → `.sales-header__*` | [ ] | 30min | Isolate |
+| P2-B-008 | Remove all !important from refactored components | [ ] | 1hr | Cleanup |
+| P2-B-009 | Visual regression test (screenshot compare) | [ ] | 30min | Validate |
+
+**Per-Component Refactoring Checklist:**
+1. [ ] Identify current HTML classes
+2. [ ] Rename using BEM convention
+3. [ ] Write self-contained CSS (no global class reuse)
+4. [ ] Remove `!important` declarations
+5. [ ] Test visual output matches original
 
 ---
 
