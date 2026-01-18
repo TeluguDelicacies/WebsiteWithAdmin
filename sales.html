@@ -1216,33 +1216,34 @@
             ${!category?.sub_brand_logo_url && category?.sub_brand ? `<div
                 style="text-transform:uppercase; font-size:0.8rem; font-weight:700; color:var(--text-muted);">
                 ${category.sub_brand}</div>` : ''}
-            <div class="product-header-fields">
+            
+            <!-- GROUP 1: Name, Telugu Name, Tagline -->
+            <div class="detail-group detail-group-name">
                 <h1 class="product-title">${product.product_name}</h1>
                 <div class="telugu-title">${product.product_name_telugu || ''}</div>
                 ${product.product_tagline ? `<div class="product-tagline">${product.product_tagline}</div>` : ''}
+            </div>
 
-                <div class="price-row-container" style="display: flex; flex-direction: column; gap: 4px; margin: 12px 0;">
-                    <div class="price-row" style="display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;">
+            <!-- GROUP 2: Price, Variant Dropdown -->
+            <div class="detail-group detail-group-price">
+                <div class="price-row-container">
+                    <div class="price-row">
                         <span class="current-price" id="view-price">₹${defaultV.price}</span>
                         <span class="mrp-strike" id="view-mrp"
                             style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}">₹${defaultV.mrp}</span>
                         <span class="discount-badge" id="view-discount"
                             style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}"></span>
-                        
-                        <!-- Packaging Type (Conditional: Next to MRP if no discount on Mobile, usually block on Desktop) -->
                         <div class="packaging-type-inline" id="view-pkg-inline" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'none' : 'block'};">
                             (${defaultV.packaging_type || ''})
                         </div>
                     </div>
-
-                    <!-- Packaging Type (Conditional: Below MRP if discount exists) -->
                     <div class="packaging-type-block" id="view-pkg-block" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'block' : 'none'};">
                         (${defaultV.packaging_type || ''})
                     </div>
                 </div>
 
-                <!-- Mobile Variant Selector (Moved out of selection-area) -->
-                <div class="mobile-variant-container" id="mobileVariantContainer" style="display:none; margin-bottom: 12px;">
+                <!-- Mobile Variant Selector -->
+                <div class="mobile-variant-container" id="mobileVariantContainer" style="display:none;">
                     <div class="mobile-variant-trigger" id="mobileVariantTrigger" onclick="window.openMobileVariantDropdown(this)">
                         <span class="mv-label" id="mobileVariantLabel">Select Variant</span>
                         <i class="fas fa-caret-down"></i>
@@ -1253,28 +1254,30 @@
                 <div class="selection-area">
                     ${renderVariants(product)}
                 </div>
+            </div>
 
-                <!-- Repositioned Toggle Button (Desktop Only) -->
-                <div class="toggle-btn-container toggle-desktop" style="margin-top:20px;">
+            <!-- GROUP 3: About Product Button, Info Tabs -->
+            <div class="detail-group detail-group-actions">
+                <!-- About Product Toggle Button (Desktop Only) -->
+                <div class="toggle-btn-container toggle-desktop">
                     <button id="toggleDescriptionBtnDesktop" onclick="toggleFlip()" class="action-btn-pill outline toggleDescriptionBtn">
                         <i class="fas fa-info-circle"></i> About Product
                     </button>
                 </div>
-            </div>
 
-            <div class="info-tabs">
-                <div class="info-toggles" id="tabs-buttons">
-                    <!-- Buttons injected here -->
-                </div>
-                <div class="info-content-wrapper">
-                    <div id="ingredients-content" class="info-content-block"></div>
-                    <div id="nutrition-content" class="info-content-block"></div>
-                    <div id="usage-content" class="info-content-block"></div>
-                    <div id="shelf-life-content" class="info-content-block"></div>
+                <div class="info-tabs">
+                    <div class="info-toggles" id="tabs-buttons">
+                        <!-- Buttons injected here -->
+                    </div>
+                    <div class="info-content-wrapper">
+                        <div id="ingredients-content" class="info-content-block"></div>
+                        <div id="nutrition-content" class="info-content-block"></div>
+                        <div id="usage-content" class="info-content-block"></div>
+                        <div id="shelf-life-content" class="info-content-block"></div>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
     </article>
 

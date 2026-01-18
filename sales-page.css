@@ -1153,13 +1153,60 @@ textarea {
     padding: 12px 20px;
 }
 
-/* Container for uniform spacing of header fields */
-.product-header-fields {
+/* Visual Grouping System - minimal spacing within groups, larger gaps between */
+.details-body {
     display: flex;
     flex-direction: column;
-    gap: 11px;
-    /* Uniform spacing desktop */
-    margin-bottom: 20px;
+    gap: 20px;
+    /* Gap between groups */
+}
+
+.detail-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* Minimal spacing within group */
+}
+
+/* Group 1: Name, Telugu Name, Tagline */
+.detail-group-name .product-title {
+    margin-bottom: 0;
+}
+
+.detail-group-name .telugu-title {
+    margin-bottom: 0;
+}
+
+.detail-group-name .product-tagline {
+    margin-top: 2px;
+}
+
+/* Group 2: Price, Variant */
+.detail-group-price {
+    gap: 8px;
+    /* Slightly larger for price/variant separation */
+}
+
+.detail-group-price .price-row-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-group-price .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* Group 3: About button and Info tabs */
+.detail-group-actions {
+    gap: 12px;
+}
+
+.detail-group-actions .toggle-btn-container {
+    margin: 0;
 }
 
 @media (max-width: 767px) {
@@ -1167,10 +1214,14 @@ textarea {
         padding: 5px 10px;
     }
 
-    .product-header-fields {
-        gap: 2px;
-        /* Compact spacing mobile */
-        margin-bottom: 8px;
+    .details-body {
+        gap: 12px;
+        /* Smaller gap between groups on mobile */
+    }
+
+    .detail-group {
+        gap: 1px;
+        /* Even tighter on mobile */
     }
 
     /* Hide main variant selector on mobile - use image overlay dropdown instead */
