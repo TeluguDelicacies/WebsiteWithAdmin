@@ -1146,6 +1146,10 @@ textarea {
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.dot-label {
+    display: none;
+}
+
 /* NUTRITION DOT MODE (DESKTOP) */
 @media (min-width: 1024px) {
     .image-thumbnail-strip.nutrition-active {
@@ -1184,34 +1188,52 @@ textarea {
 
     .image-thumbnail-strip.nutrition-active .image-thumb img,
     .image-thumbnail-strip.nutrition-active .image-thumb .thumb-tag {
+        display: none !important;
+        /* Completely hide images and tags in dot mode */
+    }
+
+    .image-thumbnail-strip.nutrition-active .image-thumb .dot-label {
+        display: block;
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%) translateX(0px);
+        background: var(--color-primary-blue);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
         opacity: 0;
-        transform: scale(0.5);
-        transition: all 0.3s ease;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
 
-    /* Hover Expansion */
+    /* Hover Expansion: Dot glows, Label pops out */
     .image-thumbnail-strip.nutrition-active .image-thumb:hover {
-        width: 70px;
-        height: 70px;
-        border-radius: 12px;
-        background: white;
-        transform: scale(1.1) translateX(10px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        z-index: 10;
+        transform: scale(1.5);
+        background: #f59e0b;
+        border-color: white;
+        z-index: 1000;
     }
 
-    .image-thumbnail-strip.nutrition-active .image-thumb:hover img {
+    .image-thumbnail-strip.nutrition-active .image-thumb:hover .dot-label {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(-50%) translateX(20px);
     }
 
-    .image-thumbnail-strip.nutrition-active .image-thumb:hover .thumb-tag {
-        opacity: 1;
-        transform: scale(1);
-        bottom: 0;
-        font-size: 0.65rem;
-        padding: 4px;
-        background: rgba(0, 0, 0, 0.8);
+    /* Arrow for the label */
+    .image-thumbnail-strip.nutrition-active .image-thumb .dot-label::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+        border-right: 6px solid var(--color-primary-blue);
     }
 }
 

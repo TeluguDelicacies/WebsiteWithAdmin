@@ -1395,17 +1395,22 @@
 
                 // --- 3. POPULATE THUMBNAILS (Desktop) ---
                 thumbnailStrip.style.display = 'flex';
-                thumbnailStrip.innerHTML = visibleImages.map((img, idx) => `
-                    <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
-                         id="thumb-${idx}"
-                         onclick="window.scrollToSlide(${idx})"
-                         data-idx="${idx}"
-                         data-tags="${(img.tags || []).join(',')}">
-                        <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy"
-                             onerror="this.parentElement.style.display='none'">
-                        ${img.tags && img.tags.length > 0 ? `<span class="thumb-tag">${img.tags[0]}</span>` : ''}
-                    </div>
-                `).join('');
+                const productName = state.currentProduct?.product_name || '';
+                thumbnailStrip.innerHTML = visibleImages.map((img, idx) => {
+                    const tag = (img.tags && img.tags.length > 0) ? img.tags[0] : '';
+                    const fullLabel = tag ? `${productName} - ${tag}` : productName;
+                    return `
+                        <div class="image-thumb ${idx === 0 ? 'active' : ''}" 
+                             id="thumb-${idx}"
+                             onclick="window.scrollToSlide(${idx})"
+                             data-idx="${idx}">
+                            <img src="${img.image_url}" alt="Product view ${idx + 1}" loading="lazy"
+                                 onerror="this.parentElement.style.display='none'">
+                            <span class="thumb-tag">${tag}</span>
+                            <span class="dot-label">${fullLabel}</span>
+                        </div>
+                    `;
+                }).join('');
 
                 // Store global images for external logic
                 window._productImages = visibleImages;
