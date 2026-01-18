@@ -6,10 +6,8 @@ OPTION A: FULL-WIDTH HERO LAYOUT
 Features:
 - 50/50 image-details split (larger product image)
 - Sidebar hidden (similar products via tab)
-- Full-width layout with scrollable page
-- Better space utilization (~85%)
-========================================
-IMPORTANT: Each selector should only appear ONCE in this file
+- Full-width tab bar BELOW product card
+- Image maintains 1:1 aspect ratio
 ========================================
 */
 
@@ -44,7 +42,7 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   GRID LAYOUT - Full Width Hero
+   GRID LAYOUT - Full Width with Tabs Below
 ======================================== */
 .grid-layout {
     display: grid !important;
@@ -52,15 +50,12 @@ body:has(.sales-page-container) {
         "bread"
         "main";
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    gap: 10px;
+    grid-template-rows: auto auto;
+    gap: 15px;
     width: 95vw;
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
-    flex: 1 1 auto;
-    min-height: auto;
-    max-height: none;
     overflow: visible !important;
 }
 
@@ -72,7 +67,6 @@ body:has(.sales-page-container) {
     height: 50px !important;
     max-height: 50px !important;
     min-height: 50px !important;
-    flex-shrink: 0;
     overflow: hidden !important;
     padding: 0 10px !important;
     margin: 0 !important;
@@ -91,23 +85,69 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   MAIN PRODUCT AREA - 50/50 Split
+   MAIN PRODUCT AREA - Hero Section
 ======================================== */
 .main-product-area {
     grid-area: main;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    align-items: start;
-    padding: 25px 35px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0;
+    padding: 30px 40px;
     background: #FFFFFF;
     border-radius: 24px;
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.12);
     overflow: visible;
 }
 
+/* Hero Content - 50/50 Split */
+.main-product-area>.gallery-wrapper,
+.main-product-area>.product-details {
+    display: contents;
+}
+
+/* Create internal grid for image + details */
+.main-product-area {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 30px 40px;
+}
+
+/* Gallery in left column, row 1 */
+.gallery-wrapper {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Details in right column, row 1 */
+.product-details {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: visible !important;
+    padding: 0 !important;
+}
+
+/* Info tabs span FULL WIDTH - row 2 */
+.info-tabs {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 25px;
+    margin-top: 20px;
+    padding-top: 25px;
+    border-top: 1px solid var(--border-light);
+    min-height: 180px;
+}
+
 /* ========================================
-   HIDE MOBILE-ONLY ELEMENTS
+   HIDE MOBILE/SIDEBAR ELEMENTS
 ======================================== */
 .sidebar,
 .recent-section,
@@ -122,10 +162,9 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   SHOW DESKTOP-ONLY ELEMENTS
+   SHOW DESKTOP ELEMENTS
 ======================================== */
 .toggle-desktop,
-.sb-desktop-text,
 .desktop-brand-grid {
     display: flex !important;
 }
@@ -135,21 +174,13 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   GALLERY WRAPPER - Left Column
+   PRODUCT GALLERY - 1:1 Aspect Ratio
 ======================================== */
-.gallery-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    overflow: visible !important;
-}
-
 .product-gallery {
     width: 100% !important;
-    max-width: 100% !important;
-    aspect-ratio: 1 / 1;
-    max-height: 500px !important;
+    max-width: 500px !important;
+    aspect-ratio: 1 / 1 !important;
+    height: auto !important;
     perspective: 1500px;
     border-radius: 16px;
     overflow: hidden;
@@ -164,11 +195,8 @@ body:has(.sales-page-container) {
     justify-content: center;
     max-height: 80px !important;
     overflow-x: auto !important;
-    overflow-y: hidden !important;
-    flex-shrink: 0;
     margin-top: 15px !important;
     gap: 10px !important;
-    padding: 5px 0;
     width: 100%;
 }
 
@@ -190,16 +218,8 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   PRODUCT DETAILS - Right Column
+   PRODUCT DETAILS
 ======================================== */
-.product-details {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    overflow: visible !important;
-    padding: 0 10px !important;
-}
-
 .details-body {
     display: flex;
     flex-direction: column;
@@ -208,9 +228,6 @@ body:has(.sales-page-container) {
     padding: 0 !important;
 }
 
-/* ========================================
-   TYPOGRAPHY - Larger & Clearer
-======================================== */
 .product-header-fields {
     margin-bottom: 10px !important;
     gap: 6px !important;
@@ -346,7 +363,6 @@ body:has(.sales-page-container) {
     font-size: 1.1rem !important;
 }
 
-/* Gallery action container */
 .gallery-front .card-action-container {
     position: absolute;
     bottom: 20px !important;
@@ -360,34 +376,21 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   INFO TABS - Vertical Layout (Sidebar Style)
+   INFO TABS - Full Width Horizontal Bar
 ======================================== */
-.info-tabs {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: stretch;
-    gap: 20px;
-    margin-top: 20px;
-    border-top: 1px solid var(--border-light);
-    padding-top: 20px;
-    min-height: 150px;
-}
-
 .info-btns-row {
     display: flex !important;
-    flex-direction: column !important;
-    width: 140px !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 10px !important;
     flex-shrink: 0;
     margin: 0 !important;
-    gap: 8px !important;
 }
 
 .info-btn {
-    width: 100% !important;
-    height: auto !important;
-    min-height: 40px !important;
-    padding: 10px 16px !important;
-    font-size: 0.9rem !important;
+    height: 45px !important;
+    padding: 0 20px !important;
+    font-size: 0.95rem !important;
     font-weight: 600 !important;
     text-align: center !important;
     justify-content: center !important;
@@ -431,13 +434,12 @@ body:has(.sales-page-container) {
     background: var(--bg-tertiary) !important;
     border: 1px solid var(--border-light) !important;
     border-radius: 12px !important;
-    padding: 15px 20px !important;
+    padding: 20px 25px !important;
     margin: 0 !important;
-    height: auto !important;
     min-height: 120px;
     overflow-y: auto;
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
 .info-content-block.active {
