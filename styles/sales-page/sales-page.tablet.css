@@ -1,10 +1,9 @@
 /* 
 ========================================
 TELUGU DELICACIES - SALES PAGE TABLET STYLES
-OVERRIDES ONLY for viewport width 768px - 1023px
+OVERRIDES for 768px - 1023px
 ========================================
-Base styles are in sales-page.base.css
-This file contains ONLY tablet-specific overrides
+Matches the new Full-Width Hero design pattern
 ========================================
 */
 
@@ -20,12 +19,41 @@ This file contains ONLY tablet-specific overrides
 }
 
 /* ========================================
-   TABLET PRODUCT CARD LAYOUT
+   TABLET GRID LAYOUT
+======================================== */
+.grid-layout {
+    display: grid !important;
+    grid-template-areas:
+        "bread"
+        "main";
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 95vw;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* HIDE SIDEBAR on Tablet */
+.sidebar {
+    display: none !important;
+}
+
+.recent-section {
+    display: none !important;
+}
+
+/* ========================================
+   TABLET PRODUCT CARD - 50/50 Split
 ======================================== */
 .main-product-area {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
+    gap: 25px;
     align-items: start;
+    padding: 20px;
+    max-height: calc(100vh - 150px);
+    overflow: visible;
 }
 
 .gallery-wrapper {
@@ -34,52 +62,42 @@ This file contains ONLY tablet-specific overrides
 }
 
 .product-gallery {
-    border-right: 1px solid var(--border-light);
-    max-height: calc(100vh - var(--header-height) - 200px);
-    min-height: 350px;
+    width: 100%;
+    max-height: calc(100vh - 250px);
+    min-height: 300px;
     perspective: 1500px;
 }
 
 .product-details {
-    max-height: calc(100vh - var(--header-height) - 120px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     padding: 0;
-    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
 }
 
 /* ========================================
-   TABLET TYPOGRAPHY OVERRIDES
+   TABLET TYPOGRAPHY
 ======================================== */
 .product-title {
-    font-size: clamp(1.6rem, 4vw, 2rem) !important;
-    margin-top: 0 !important;
-    margin-bottom: 2px !important;
+    font-size: clamp(1.5rem, 3.5vw, 2rem) !important;
+    margin-bottom: 4px !important;
 }
 
 .telugu-title {
-    font-size: 1.2rem !important;
-    margin-bottom: 2px !important;
+    font-size: 1.1rem !important;
+    margin-bottom: 4px !important;
 }
 
 .product-tagline {
-    font-size: 1.2rem !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    font-size: 1rem !important;
 }
 
 .current-price {
-    font-size: 2rem !important;
+    font-size: 1.9rem !important;
 }
 
 .price-row {
-    margin-bottom: 8px !important;
-}
-
-.selection-area {
-    margin-bottom: 8px !important;
+    margin-bottom: 10px !important;
 }
 
 /* ========================================
@@ -89,37 +107,34 @@ This file contains ONLY tablet-specific overrides
     display: flex !important;
     flex-direction: row !important;
     align-items: stretch;
-    gap: 20px;
-    margin-top: 15px;
-    border-bottom: none !important;
-    min-height: 200px;
+    gap: 15px;
+    margin-top: 12px;
+    border-top: 1px solid var(--border-light);
+    padding-top: 12px;
+    min-height: 100px;
 }
 
 .info-btns-row {
     display: flex !important;
     flex-direction: column !important;
-    width: 120px !important;
+    width: 110px !important;
     flex-shrink: 0;
-    margin: 0 !important;
-    gap: 10px !important;
+    gap: 6px !important;
 }
 
 .info-btn {
     width: 100% !important;
-    height: 42px !important;
-    padding: 0 16px !important;
-    font-size: 0.9rem !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    font-size: 0.85rem !important;
     font-weight: 600 !important;
     text-align: center !important;
     justify-content: center !important;
     border-radius: 8px !important;
     border: 1px solid var(--border-light) !important;
     background: white !important;
-    color: var(--text-secondary) !important;
     display: flex !important;
     align-items: center !important;
-    white-space: nowrap !important;
-    box-shadow: var(--shadow-sm);
 }
 
 .info-btn i {
@@ -129,15 +144,7 @@ This file contains ONLY tablet-specific overrides
 .info-btn.active {
     background: var(--color-brand-blue-primary) !important;
     color: white !important;
-    border: 2px solid var(--color-brand-blue-primary) !important;
-    box-shadow: 0 6px 15px rgba(0, 119, 182, 0.3) !important;
-    transform: translateY(-1px);
-}
-
-.info-content-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    border-color: var(--color-brand-blue-primary) !important;
 }
 
 .info-content-block {
@@ -145,29 +152,23 @@ This file contains ONLY tablet-specific overrides
     flex: 1;
     background: white !important;
     border: 1px solid var(--border-light) !important;
-    border-radius: var(--radius-lg) !important;
-    padding: 20px !important;
-    margin: 0 !important;
-    height: auto !important;
-    min-height: 100%;
+    border-radius: 10px !important;
+    padding: 15px !important;
+    font-size: 0.9rem;
+    line-height: 1.5;
     overflow-y: auto;
-    font-size: 1rem;
-    line-height: 1.6;
-    box-shadow: var(--shadow-sm);
 }
 
 .info-content-block.active {
     display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
 }
 
 /* ========================================
-   TABLET TOGGLE BUTTON OVERRIDES
+   TABLET TOGGLE BUTTONS
 ======================================== */
 .toggle-btn-container {
     text-align: left !important;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .toggle-desktop {
@@ -179,76 +180,54 @@ This file contains ONLY tablet-specific overrides
 }
 
 /* ========================================
-   TABLET PRODUCT GRID OVERRIDES
-======================================== */
-.sales-product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 30px;
-}
-
-/* ========================================
-   TABLET DETAILS BODY OVERRIDES
+   TABLET DETAILS BODY
 ======================================== */
 .details-body {
     flex: 1;
     overflow: visible !important;
-    padding: 5px 25px;
+    padding: 0 10px;
 }
 
 .add-to-cart-section {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 5px 25px;
-    border-top: none !important;
-    box-shadow: none !important;
-    z-index: 10;
+    margin-top: auto;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-light);
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 #detailActionArea {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 12px;
     width: 100%;
 }
 
 /* ========================================
-   TABLET QUANTITY CONTROLS OVERRIDES
+   TABLET QUANTITY CONTROLS
 ======================================== */
 .qty-control-lg {
     background: #FFF9C4 !important;
     border: 1px solid #FBC02D !important;
-    border-radius: 20px !important;
-    padding: 4px 12px;
-    min-width: 120px;
-    gap: 8px;
-    margin: 0 auto;
+    border-radius: 12px !important;
+    padding: 6px 14px;
+    min-width: 130px;
+    gap: 10px;
 }
 
 .qty-btn-lg {
-    width: 28px;
-    height: 28px;
-    border: none !important;
-    background: transparent !important;
-    color: #333;
-    font-size: 1.1rem;
-}
-
-.qty-btn-lg:hover {
-    background: rgba(251, 192, 45, 0.3) !important;
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
 }
 
 .qty-input-lg {
-    width: 50px;
-    font-size: 1.25rem;
-    border: none;
-    background: transparent;
-    color: var(--color-primary-blue);
+    width: 45px;
+    font-size: 1.2rem;
 }
 
 /* ========================================
-   TABLET VISIBILITY OVERRIDES
+   TABLET VISIBILITY
 ======================================== */
 .sb-mobile-icon,
 .sb-mobile-text {
@@ -263,6 +242,32 @@ This file contains ONLY tablet-specific overrides
     display: none !important;
 }
 
+.swipe-hint-row {
+    display: none !important;
+}
+
 .image-carousel {
     overflow-x: hidden;
+}
+
+/* ========================================
+   TABLET PRODUCT GRID
+======================================== */
+.sales-product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+/* ========================================
+   TABLET IMAGE THUMBNAILS
+======================================== */
+.image-thumbnail-strip {
+    display: flex !important;
+    margin-top: 12px !important;
+    gap: 8px !important;
+}
+
+.image-thumb {
+    width: 55px !important;
+    height: 55px !important;
 }
