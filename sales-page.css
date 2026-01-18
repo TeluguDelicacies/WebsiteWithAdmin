@@ -1647,46 +1647,36 @@ textarea {
         align-items: start;
     }
 
-    /* Gallery column - Grid layout: thumbnails left, main image right */
+    /* Gallery column - single column, thumbnails overlay */
     .gallery-wrapper {
         position: relative;
         height: fit-content;
-        display: grid;
-        grid-template-areas:
-            "thumbs gallery"
-            "thumbs toggle";
-        grid-template-columns: 80px 1fr;
-        grid-template-rows: 1fr auto;
-        gap: 12px;
-        align-items: start;
     }
 
-    /* Vertical thumbnail strip on desktop - left side */
+    /* Vertical thumbnail strip - overlay on top-left of image */
     .gallery-wrapper .image-thumbnail-strip {
-        grid-area: thumbs;
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 50;
         display: flex !important;
         flex-direction: column;
         gap: 8px;
         padding: 0;
         margin: 0 !important;
-        max-height: 520px;
+        max-height: calc(100% - 80px);
         overflow-y: auto;
         overflow-x: hidden;
-    }
-
-    /* Product gallery - right side */
-    .gallery-wrapper .product-gallery {
-        grid-area: gallery;
-    }
-
-    /* Toggle button - below gallery */
-    .gallery-wrapper .toggle-btn-container {
-        grid-area: toggle;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        border-radius: 10px;
+        padding: 6px;
     }
 
     .gallery-wrapper .image-thumb {
-        width: 70px;
-        height: 70px;
+        width: 60px;
+        height: 60px;
         flex-shrink: 0;
     }
 
