@@ -3,16 +3,10 @@
 TELUGU DELICACIES - SALES PAGE DESKTOP STYLES
 OPTION A: FULL-WIDTH HERO LAYOUT
 ========================================
-Features:
-- 50/50 image-details split (larger product image)
-- Sidebar hidden (similar products via tab)
-- Full-width tab bar BELOW product card
-- Image maintains 1:1 aspect ratio
-========================================
 */
 
 /* ========================================
-   PAGE & BODY - Scrollable Desktop Layout
+   PAGE & BODY - Scrollable
 ======================================== */
 html:has(.sales-page-container),
 body:has(.sales-page-container) {
@@ -42,15 +36,11 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   GRID LAYOUT - Full Width with Tabs Below
+   GRID LAYOUT
 ======================================== */
 .grid-layout {
-    display: grid !important;
-    grid-template-areas:
-        "bread"
-        "main";
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 15px;
     width: 95vw;
     max-width: 1400px;
@@ -63,14 +53,11 @@ body:has(.sales-page-container) {
    BREADCRUMB SECTION
 ======================================== */
 .breadcrumb-section {
-    grid-area: bread;
     height: 50px !important;
     max-height: 50px !important;
-    min-height: 50px !important;
     overflow: hidden !important;
     padding: 0 10px !important;
     margin: 0 !important;
-    width: 100% !important;
     display: flex;
     align-items: center;
 }
@@ -85,65 +72,18 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   MAIN PRODUCT AREA - Hero Section
+   MAIN PRODUCT AREA - Flex Container
 ======================================== */
 .main-product-area {
-    grid-area: main;
     display: flex !important;
-    flex-direction: column !important;
-    gap: 0;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 40px;
     padding: 30px 40px;
     background: #FFFFFF;
     border-radius: 24px;
     box-shadow: 0 12px 30px rgba(220, 180, 0, 0.12);
     overflow: visible;
-}
-
-/* Hero Content - 50/50 Split */
-.main-product-area>.gallery-wrapper,
-.main-product-area>.product-details {
-    display: contents;
-}
-
-/* Create internal grid for image + details */
-.main-product-area {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 30px 40px;
-}
-
-/* Gallery in left column, row 1 */
-.gallery-wrapper {
-    grid-column: 1;
-    grid-row: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Details in right column, row 1 */
-.product-details {
-    grid-column: 2;
-    grid-row: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    overflow: visible !important;
-    padding: 0 !important;
-}
-
-/* Info tabs span FULL WIDTH - row 2 */
-.info-tabs {
-    grid-column: 1 / -1 !important;
-    grid-row: 2 !important;
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 25px;
-    margin-top: 20px;
-    padding-top: 25px;
-    border-top: 1px solid var(--border-light);
-    min-height: 180px;
 }
 
 /* ========================================
@@ -161,9 +101,6 @@ body:has(.sales-page-container) {
     display: none !important;
 }
 
-/* ========================================
-   SHOW DESKTOP ELEMENTS
-======================================== */
 .toggle-desktop,
 .desktop-brand-grid {
     display: flex !important;
@@ -174,8 +111,16 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   PRODUCT GALLERY - 1:1 Aspect Ratio
+   GALLERY - Left Side (50%)
 ======================================== */
+.gallery-wrapper {
+    flex: 0 0 calc(50% - 20px) !important;
+    max-width: calc(50% - 20px) !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .product-gallery {
     width: 100% !important;
     max-width: 500px !important;
@@ -194,7 +139,6 @@ body:has(.sales-page-container) {
     display: flex !important;
     justify-content: center;
     max-height: 80px !important;
-    overflow-x: auto !important;
     margin-top: 15px !important;
     gap: 10px !important;
     width: 100%;
@@ -218,8 +162,18 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   PRODUCT DETAILS
+   PRODUCT DETAILS - Right Side (50%)
 ======================================== */
+.product-details {
+    flex: 0 0 calc(50% - 20px) !important;
+    max-width: calc(50% - 20px) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: visible !important;
+    padding: 0 !important;
+}
+
 .details-body {
     display: flex;
     flex-direction: column;
@@ -228,9 +182,96 @@ body:has(.sales-page-container) {
     padding: 0 !important;
 }
 
+/* Hide info tabs inside details - will show separately */
+.product-details .info-tabs {
+    display: none !important;
+}
+
+/* ========================================
+   INFO TABS - Full Width (Below Hero)
+======================================== */
+.info-tabs {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 25px;
+    margin-top: 20px;
+    padding-top: 25px;
+    border-top: 1px solid var(--border-light);
+    min-height: 180px;
+}
+
+.info-btns-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 10px !important;
+    flex-shrink: 0;
+}
+
+.info-btn {
+    height: 45px !important;
+    padding: 0 20px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-light) !important;
+    background: white !important;
+    color: var(--text-secondary) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease !important;
+}
+
+.info-btn i {
+    display: none !important;
+}
+
+.info-btn:hover {
+    border-color: var(--color-primary-blue) !important;
+    color: var(--color-primary-blue) !important;
+}
+
+.info-btn.active {
+    background: var(--color-brand-blue-primary) !important;
+    color: white !important;
+    border: 2px solid var(--color-brand-blue-primary) !important;
+    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25) !important;
+}
+
+.info-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.info-content-block {
+    display: none;
+    flex: 1;
+    background: var(--bg-tertiary) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: 12px !important;
+    padding: 20px 25px !important;
+    min-height: 120px;
+    overflow-y: auto;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.info-content-block.active {
+    display: block !important;
+}
+
+/* ========================================
+   TYPOGRAPHY
+======================================== */
 .product-header-fields {
     margin-bottom: 10px !important;
-    gap: 6px !important;
 }
 
 .product-title {
@@ -247,9 +288,6 @@ body:has(.sales-page-container) {
 
 .product-tagline {
     font-size: clamp(1rem, 1.4vw, 1.2rem) !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
 }
 
 /* ========================================
@@ -274,13 +312,9 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   VARIANT SELECTION
+   VARIANT & TOGGLE
 ======================================== */
 .selection-area {
-    margin-bottom: 15px !important;
-}
-
-.variant-dropdown-wrapper {
     margin-bottom: 15px !important;
 }
 
@@ -291,9 +325,6 @@ body:has(.sales-page-container) {
     min-height: 50px;
 }
 
-/* ========================================
-   TOGGLE BUTTONS
-======================================== */
 .toggle-btn-container {
     text-align: left !important;
 }
@@ -305,7 +336,7 @@ body:has(.sales-page-container) {
 }
 
 /* ========================================
-   ADD TO CART SECTION
+   ADD TO CART
 ======================================== */
 .add-to-cart-section {
     margin-top: 20px;
@@ -322,7 +353,6 @@ body:has(.sales-page-container) {
     justify-content: flex-start;
     gap: 15px;
     align-items: center;
-    width: 100%;
 }
 
 .qty-control-lg {
@@ -373,79 +403,6 @@ body:has(.sales-page-container) {
     padding: 12px 32px !important;
     font-size: 1.1rem !important;
     box-shadow: 0 4px 15px rgba(0, 119, 182, 0.35) !important;
-}
-
-/* ========================================
-   INFO TABS - Full Width Horizontal Bar
-======================================== */
-.info-btns-row {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap;
-    gap: 10px !important;
-    flex-shrink: 0;
-    margin: 0 !important;
-}
-
-.info-btn {
-    height: 45px !important;
-    padding: 0 20px !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    text-align: center !important;
-    justify-content: center !important;
-    border-radius: 10px !important;
-    border: 1px solid var(--border-light) !important;
-    background: white !important;
-    color: var(--text-secondary) !important;
-    display: flex !important;
-    align-items: center !important;
-    white-space: nowrap !important;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease !important;
-}
-
-.info-btn i {
-    display: none !important;
-}
-
-.info-btn:hover {
-    border-color: var(--color-primary-blue) !important;
-    color: var(--color-primary-blue) !important;
-}
-
-.info-btn.active {
-    background: var(--color-brand-blue-primary) !important;
-    color: white !important;
-    border: 2px solid var(--color-brand-blue-primary) !important;
-    box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25) !important;
-}
-
-.info-content-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.info-content-block {
-    display: none;
-    flex: 1;
-    background: var(--bg-tertiary) !important;
-    border: 1px solid var(--border-light) !important;
-    border-radius: 12px !important;
-    padding: 20px 25px !important;
-    margin: 0 !important;
-    min-height: 120px;
-    overflow-y: auto;
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-.info-content-block.active {
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
 }
 
 /* ========================================
