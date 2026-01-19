@@ -133,26 +133,24 @@ async function ensureDir(dirPath) {
 function generateMetaDescription(product) {
     if (product.meta_description) return product.meta_description;
 
-    // Fallback: Generate from product data
-    const parts = [];
-    if (product.product_tagline) parts.push(product.product_tagline);
+    // Fallback: Use full product description (cleaned of HTML)
+    // We limit to 160 characters which is the standard SEO max length
     if (product.product_description) {
-        // Take first 150 chars of description
-        const desc = product.product_description.replace(/<[^>]*>/g, '').substring(0, 150);
-        parts.push(desc);
+        return product.product_description.replace(/<[^>]*>/g, '').substring(0, 160).trim();
     }
 
-    return parts.join(' - ') || `Order ${product.product_name} from Telugu Delicacies. Authentic South Indian flavors delivered to your doorstep.`;
+    // Backup fallback if description is missing
+    return `Order ${product.product_name} from Telugu Delicacies. Authentic South Indian flavors delivered to your doorstep.`;
 }
 
 /**
  * Generates SEO-friendly title
  */
 function generateMetaTitle(product) {
-    if (product.meta_title) return product.meta_title;
-
-    // Fallback: Generate from product name
-    return `${product.product_name} | Buy Online | Telugu Delicacies`;
+    // Format: Product Name - Tagline | Telugu Delicacies
+    // If tagline is missing, fallback to just Name | Telugu Delicacies
+    const tagline = product.product_tagline ? ` - ${product.product_tagline}` : '';
+    return `${product.product_name}${tagline} | Telugu Delicacies`;
 }
 
 /**
