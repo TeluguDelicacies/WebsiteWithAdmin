@@ -27,16 +27,16 @@ const __dirname = path.dirname(__filename);
 // CONFIGURATION & VALIDATION
 // =============================================================================
 
-// Validate required environment variables
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+// Validate required environment variables (supports standard or VITE_ prefix)
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.error('❌ FATAL ERROR: Missing required environment variables!');
     console.error('');
-    console.error('   Please create a .env file in the project root with:');
-    console.error('   SUPABASE_URL=https://your-project.supabase.co');
-    console.error('   SUPABASE_ANON_KEY=your-anon-key-here');
+    console.error('   Please ensure these are set in your .env file or Netlify dashboard:');
+    console.error('   - SUPABASE_URL (or VITE_SUPABASE_URL)');
+    console.error('   - SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY)');
     console.error('');
     process.exit(1);
 }
