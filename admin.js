@@ -740,6 +740,7 @@ async function fetchSettings() {
             document.getElementById('setPrivacyPolicy').value = data.privacy_policy || '';
             document.getElementById('setCookiePolicy').value = data.cookie_policy || '';
             document.getElementById('setTermsConditions').value = data.terms_conditions || '';
+            document.getElementById('setShippingReturnPolicy').value = data.shipping_return_policy || '';
 
             // Catalogue & Address Settings
             document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
@@ -799,6 +800,7 @@ window.cancelSettingsChanges = function () {
     document.getElementById('setPrivacyPolicy').value = data.privacy_policy || '';
     document.getElementById('setCookiePolicy').value = data.cookie_policy || '';
     document.getElementById('setTermsConditions').value = data.terms_conditions || '';
+    document.getElementById('setShippingReturnPolicy').value = data.shipping_return_policy || '';
 
     // Catalogue & Address
     document.getElementById('setCatalogueUrl').value = data.catalogue_image_url || '';
@@ -870,7 +872,10 @@ if (siteSettingsForm) {
             sales_mode_enabled: document.getElementById('setSalesMode').checked,
 
             // Sales Page Settings
-            all_products_tagline: document.getElementById('setAllProductsTagline').value
+            all_products_tagline: document.getElementById('setAllProductsTagline').value,
+
+            // Legal Documents
+            shipping_return_policy: document.getElementById('setShippingReturnPolicy').value
         };
 
         try {
@@ -917,7 +922,8 @@ if (siteSettingsForm) {
                     'quick_hero_image_url': 'setQuickHeroBg',
                     'show_mrp': 'setShowMrp',
                     'sales_mode_enabled': 'setSalesMode',
-                    'all_products_tagline': 'setAllProductsTagline'
+                    'all_products_tagline': 'setAllProductsTagline',
+                    'shipping_return_policy': 'setShippingReturnPolicy'
                 };
 
                 changedKeys.forEach(key => {
