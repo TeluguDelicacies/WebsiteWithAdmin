@@ -301,7 +301,7 @@
             // FSSAI
             if (data.fssai_number) {
                 const el = document.getElementById('contact-fssai');
-                if (el) el.innerText = `FSSAI License: ${data.fssai_number}`;
+                if (el) el.innerText = `FSSAI License No: ${data.fssai_number}`;
             }
 
             // Contact Info
@@ -370,6 +370,12 @@
                     }
                     mapContainer.innerHTML = `<iframe src="${mapSrc}" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
                 }
+            }
+
+            // Google Review URL
+            if (data.google_review_url) {
+                const writeReviewBtn = document.getElementById('writeReviewBtn');
+                if (writeReviewBtn) writeReviewBtn.href = data.google_review_url;
             }
         }
 
@@ -610,8 +616,8 @@
                     if (logoImg) logoImg.src = state.settings.logo_url;
 
                     // Also set favicon if available, otherwise use logo
-                    const faviconLink = document.getElementById('dynamic-favicon');
-                    if (faviconLink) faviconLink.href = state.settings.favicon_url || state.settings.logo_url;
+                    const faviconLink = document.querySelector("link[rel~='icon']");
+                    if (faviconLink) faviconLink.href = state.settings.fav_icon_url || state.settings.logo_url;
                 }
 
                 // Populate Telugu Brand Name in Header

@@ -105,6 +105,11 @@
             function populateUI(data) {
                 if (!data) return;
 
+                if (data.fav_icon_url) {
+                    const el = document.querySelector("link[rel~='icon']");
+                    if (el) el.href = data.fav_icon_url;
+                }
+
                 // Header
                 if (data.site_title) {
                     const el = document.getElementById('header-site-title');
@@ -123,7 +128,7 @@
                 // Footer - FSSAI
                 if (data.fssai_number) {
                     const el = document.getElementById('contact-fssai');
-                    if (el) el.innerText = `FSSAI License: ${data.fssai_number}`;
+                    if (el) el.innerText = `FSSAI License No: ${data.fssai_number}`;
                 }
 
                 // Footer - Contact Info
@@ -192,6 +197,12 @@
                         }
                         mapContainer.innerHTML = `<iframe src="${mapSrc}" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
                     }
+                }
+
+                // Google Review URL
+                if (data.google_review_url) {
+                    const writeReviewBtn = document.getElementById('writeReviewBtn');
+                    if (writeReviewBtn) writeReviewBtn.href = data.google_review_url;
                 }
             }
 
