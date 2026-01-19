@@ -1,11 +1,15 @@
 {
   "name": "telugu-delicacies-website",
   "version": "1.0.0",
+  "type": "module",
   "description": "A modern, responsive website for Telugu Delicacies - authentic South Indian food manufacturer",
   "main": "index.html",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.js",
+    "build:vite": "vite build",
+    "build:seo": "vite build && node scripts/prerender.js",
+    "prerender": "node scripts/prerender.js",
     "preview": "vite preview",
     "test": "echo \"No tests specified\" && exit 0"
   },
@@ -19,12 +23,17 @@
     "south-indian",
     "food",
     "website",
-    "static"
+    "static",
+    "seo"
   ],
   "author": "Telugu Delicacies",
   "license": "MIT",
   "devDependencies": {
     "vite": "^5.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1"
+  }
 }
