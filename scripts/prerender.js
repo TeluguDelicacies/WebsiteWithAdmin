@@ -58,26 +58,58 @@ console.log('');
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Test connection immediately
+// Test connection with retry logic for Netlify build environment
 async function validateSupabaseConnection() {
     console.log('🔌 Testing Supabase connection...');
-    try {
-        const { error } = await supabase.from('products').select('id').limit(1);
-        if (error) {
-            throw new Error(error.message);
+
+    const maxRetries = 3;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`   Attempt ${attempt}/${maxRetries}...`);
+            const { data, error } = await supabase.from('products').select('id').limit(1);
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            console.log('   ✅ Supabase connection successful\n');
+            return; // Success!
+
+        } catch (err) {
+            lastError = err;
+            console.error(`   ⚠️ Attempt ${attempt} failed: ${err.message}`);
+
+            // Log more details about the error
+            if (err.cause) {
+                console.error(`   Cause: ${err.cause.message || err.cause}`);
+            }
+
+            if (attempt < maxRetries) {
+                console.log(`   Retrying in 2 seconds...`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
         }
-        console.log('   ✅ Supabase connection successful\n');
-    } catch (err) {
-        console.error('❌ FATAL ERROR: Supabase connection failed!');
-        console.error(`   ${err.message}`);
-        console.error('');
-        console.error('   Please check:');
-        console.error('   1. Your SUPABASE_URL is correct');
-        console.error('   2. Your SUPABASE_ANON_KEY is valid');
-        console.error('   3. Your network connection is working');
-        console.error('');
-        process.exit(1);
     }
+
+    // All retries failed
+    console.error('');
+    console.error('❌ FATAL ERROR: Supabase connection failed after all retries!');
+    console.error(`   Error: ${lastError.message}`);
+    console.error('');
+    console.error('   Debug Info:');
+    console.error(`   - URL hostname: ${new URL(SUPABASE_URL).hostname}`);
+    console.error(`   - Key prefix: ${SUPABASE_ANON_KEY.substring(0, 10)}...`);
+    console.error('');
+    console.error('   Possible causes:');
+    console.error('   1. Supabase project may be paused (check dashboard)');
+    console.error('   2. Network issue from Netlify to Supabase');
+    console.error('   3. Invalid API credentials');
+    console.error('');
+
+    // Exit with error to fail the build
+    process.exit(1);
 }
 
 // =============================================================================
