@@ -41,9 +41,16 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     process.exit(1);
 }
 
-const SITE_URL = process.env.SITE_URL || 'https://telugudelicacies.com';
+const SITE_URL = process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://telugudelicacies.com';
 const DIST_DIR = path.resolve(__dirname, '../dist');
 const TEMPLATE_FILE = path.resolve(__dirname, '../dist/sales.html');
+
+// Debug: Show what we're connecting to (mask the key for security)
+console.log('🔧 Configuration:');
+console.log(`   SUPABASE_URL: ${SUPABASE_URL}`);
+console.log(`   SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 20) + '...' : 'NOT SET'}`);
+console.log(`   SITE_URL: ${SITE_URL}`);
+console.log('');
 
 // =============================================================================
 // SUPABASE CLIENT
