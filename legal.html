@@ -35,10 +35,113 @@
             loadLegalContent(type);
         };
 
-        // Separate loading logic
+        // Populate Footer & Header from Supabase data
+        function populateUI(data) {
+            if (!data) return;
+
+            if (data.fav_icon_url) {
+                const el = document.querySelector("link[rel~='icon']");
+                if (el) el.href = data.fav_icon_url;
+            }
+
+            // Header
+            if (data.site_title) {
+                const el = document.getElementById('header-site-title');
+                if (el) el.textContent = data.site_title;
+            }
+            if (data.site_title_telugu) {
+                const el = document.getElementById('header-site-title-telugu');
+                if (el) el.textContent = data.site_title_telugu;
+            }
+            if (data.logo_url) {
+                const el = document.querySelector('.logo');
+                if (el) el.src = data.logo_url;
+            }
+
+            // Footer - FSSAI
+            if (data.fssai_number) {
+                const el = document.getElementById('contact-fssai');
+                if (el) el.innerText = `FSSAI License No: ${data.fssai_number}`;
+            }
+
+            // Footer - Contact Info
+            if (data.contact_phone_primary) {
+                const el = document.getElementById('contact-phone-primary');
+                if (el) {
+                    el.innerText = data.contact_phone_primary;
+                    el.href = `tel:${data.contact_phone_primary.replace(/\s/g, '')}`;
+                }
+            }
+            if (data.contact_phone_secondary) {
+                const el = document.getElementById('contact-phone-secondary');
+                if (el) {
+                    el.innerText = data.contact_phone_secondary;
+                    el.href = `tel:${data.contact_phone_secondary.replace(/\s/g, '')}`;
+                }
+            }
+            if (data.contact_email) {
+                const el = document.getElementById('contact-email');
+                if (el) {
+                    el.innerText = data.contact_email;
+                    el.href = `mailto:${data.contact_email}`;
+                }
+            }
+
+            // Footer - Address
+            if (data.company_address) {
+                const el = document.getElementById('contact-address');
+                if (el) {
+                    el.innerHTML = `<p>${data.company_address}</p>`;
+                }
+            }
+
+            // Footer - Social Media links
+            const socialMap = [
+                { id: 'footer-facebook-link', url: data.facebook_url },
+                { id: 'footer-instagram-link', url: data.instagram_url },
+                { id: 'footer-whatsapp-link', url: data.whatsapp_url },
+                { id: 'footer-youtube-link', url: data.youtube_url }
+            ];
+
+            socialMap.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (el) {
+                    let url = item.url;
+                    if (url && item.id === 'footer-whatsapp-link' && /^\d+$/.test(url.replace(/[\s\+]/g, ''))) {
+                        url = `https://wa.me/${url.replace(/[\s\+]/g, '')}`;
+                    }
+                    if (url) {
+                        el.href = url;
+                        el.style.display = 'flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
+            });
+
+            // Footer - Map
+            if (data.map_embed_url) {
+                const mapContainer = document.getElementById('footer-map-container');
+                if (mapContainer) {
+                    let mapSrc = data.map_embed_url;
+                    if (mapSrc.includes('<iframe')) {
+                        const match = mapSrc.match(/src=["']([^"']+)["']/);
+                        if (match && match[1]) mapSrc = match[1];
+                    }
+                    mapContainer.innerHTML = `<iframe src="${mapSrc}" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                }
+            }
+
+            // Google Review URL
+            if (data.google_review_url) {
+                const writeReviewBtn = document.getElementById('writeReviewBtn');
+                if (writeReviewBtn) writeReviewBtn.href = data.google_review_url;
+            }
+        }
+
+        // Load legal content from Supabase
         async function loadLegalContent(type) {
             const contentContainer = document.getElementById('legal-body');
-            const mainTitle = document.title;
             const tabs = document.querySelectorAll('.legal-tab');
 
             // Update Tabs
@@ -95,124 +198,11 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const type = urlParams.get('type') || 'privacy'; // Default to privacy
-
-            // Initial Load
             loadLegalContent(type);
-
-            function populateUI(data) {
-                if (!data) return;
-
-                if (data.fav_icon_url) {
-                    const el = document.querySelector("link[rel~='icon']");
-                    if (el) el.href = data.fav_icon_url;
-                }
-
-                // Header
-                if (data.site_title) {
-                    const el = document.getElementById('header-site-title');
-                    if (el) el.textContent = data.site_title;
-                    document.title = document.title.includes(' - ') ? document.title : `${document.title} - ${data.site_title}`;
-                }
-                if (data.site_title_telugu) {
-                    const el = document.getElementById('header-site-title-telugu');
-                    if (el) el.textContent = data.site_title_telugu;
-                }
-                if (data.logo_url) {
-                    const el = document.querySelector('.logo');
-                    if (el) el.src = data.logo_url;
-                }
-
-                // Footer - FSSAI
-                if (data.fssai_number) {
-                    const el = document.getElementById('contact-fssai');
-                    if (el) el.innerText = `FSSAI License No: ${data.fssai_number}`;
-                }
-
-                // Footer - Contact Info
-                if (data.contact_phone_primary) {
-                    const el = document.getElementById('contact-phone-primary');
-                    if (el) {
-                        el.innerText = data.contact_phone_primary;
-                        el.href = `tel:${data.contact_phone_primary.replace(/\s/g, '')}`;
-                    }
-                }
-                if (data.contact_phone_secondary) {
-                    const el = document.getElementById('contact-phone-secondary');
-                    if (el) {
-                        el.innerText = data.contact_phone_secondary;
-                        el.href = `tel:${data.contact_phone_secondary.replace(/\s/g, '')}`;
-                    }
-                }
-                if (data.contact_email) {
-                    const el = document.getElementById('contact-email');
-                    if (el) {
-                        el.innerText = data.contact_email;
-                        el.href = `mailto:${data.contact_email}`;
-                    }
-                }
-
-                // Footer - Address
-                if (data.company_address) {
-                    const el = document.getElementById('contact-address');
-                    if (el) {
-                        el.innerHTML = `<p>${data.company_address}</p>`;
-                    }
-                }
-
-                // Footer - Social Media links
-                const socialMap = [
-                    { id: 'footer-facebook-link', url: data.facebook_url },
-                    { id: 'footer-instagram-link', url: data.instagram_url },
-                    { id: 'footer-whatsapp-link', url: data.whatsapp_url },
-                    { id: 'footer-youtube-link', url: data.youtube_url }
-                ];
-
-                socialMap.forEach(item => {
-                    const el = document.getElementById(item.id);
-                    if (el) {
-                        let url = item.url;
-                        if (url && item.id === 'footer-whatsapp-link' && /^\d+$/.test(url.replace(/[\s\+]/g, ''))) {
-                            url = `https://wa.me/${url.replace(/[\s\+]/g, '')}`;
-                        }
-                        if (url) {
-                            el.href = url;
-                            el.style.display = 'flex';
-                        } else {
-                            el.style.display = 'none';
-                        }
-                    }
-                });
-
-                // Footer - Map
-                if (data.map_embed_url) {
-                    const mapContainer = document.getElementById('footer-map-container');
-                    if (mapContainer) {
-                        let mapSrc = data.map_embed_url;
-                        if (mapSrc.includes('<iframe')) {
-                            const match = mapSrc.match(/src=["']([^"']+)["']/);
-                            if (match && match[1]) mapSrc = match[1];
-                        }
-                        mapContainer.innerHTML = `<iframe src="${mapSrc}" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
-                    }
-                }
-
-                // Google Review URL
-                if (data.google_review_url) {
-                    const writeReviewBtn = document.getElementById('writeReviewBtn');
-                    if (writeReviewBtn) writeReviewBtn.href = data.google_review_url;
-                }
-            }
-
-            document.addEventListener('DOMContentLoaded', async () => {
-                const urlParams = new URLSearchParams(window.location.search);
-                const type = urlParams.get('type') || 'privacy'; // Default to privacy
-
-                // Initial Load Content
-                loadLegalContent(type);
-            });
         });
     </script>
 

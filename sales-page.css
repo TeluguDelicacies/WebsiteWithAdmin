@@ -4315,22 +4315,21 @@ textarea {
 ======================================== */
 @media (min-width: 1024px) {
 
-    /* 1. Lock the page body to viewport height when on sales page */
+    /* Allow normal scrolling on desktop (removed viewport lock) */
     html:has(.sales-page-container),
     body:has(.sales-page-container) {
-        overflow: hidden;
-        height: 100vh;
+        overflow-y: auto;
+        height: auto;
     }
 
-    /* 2. Main container fills remaining height below header */
+    /* Main container with proper spacing */
     .sales-page-container {
-        height: calc(100vh - var(--header-height, 64px));
-        max-height: calc(100vh - var(--header-height, 64px));
+        min-height: calc(100vh - var(--header-height, 64px));
         display: flex !important;
         flex-direction: column !important;
-        overflow: hidden !important;
+        overflow: visible !important;
         padding-top: var(--header-height, 64px) !important;
-        padding-bottom: 10px !important;
+        padding-bottom: 20px !important;
     }
 
     /* 3. Grid layout takes all remaining space with proper distribution */
@@ -4338,8 +4337,8 @@ textarea {
         flex: 1 1 auto;
         min-height: 0;
         /* Critical: allows flex child to shrink below content size */
-        max-height: 100%;
-        overflow: hidden;
+        max-height: none;
+        overflow: visible;
         grid-template-rows: auto 1fr !important;
         /* Breadcrumb auto, main/side flex */
     }
@@ -4356,8 +4355,8 @@ textarea {
     /* 5. Main product area - constrained to available space */
     .main-product-area {
         min-height: 0;
-        max-height: 100%;
-        overflow: hidden;
+        max-height: none;
+        overflow: visible;
         display: grid !important;
         grid-template-columns: 1fr 1fr;
         align-items: stretch;
