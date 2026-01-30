@@ -4242,7 +4242,11 @@ window.orderOnWhatsApp = async function () {
     message += `\n\nPlease confirm availability and share payment details! ✅`;
 
     const phone = WHATSAPP_NUMBER || '919618519191';
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+
+    // Use web.whatsapp for desktop, api.whatsapp for mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
+    const whatsappUrl = `${baseUrl}?phone=${phone}&text=${encodeURIComponent(message)}`;
 
     window.open(whatsappUrl, '_blank');
 
