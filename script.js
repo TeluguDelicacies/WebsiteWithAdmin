@@ -357,13 +357,16 @@ window.showQuickPreview = function (product) {
     }
 
     // Variant selector
-    if (variantLabel) variantLabel.textContent = selectedVariant.quantity;
+    if (variantLabel) variantLabel.innerHTML = `<span class="variant-qty">${selectedVariant.quantity}</span>${selectedVariant.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${selectedVariant.packaging_type})</span>` : ''}`;
 
     // Populate variants list
     if (variantsList) {
         variantsList.innerHTML = sortedVariants.map((v, idx) => `
             <div class="quick-preview-variant-option ${idx === 0 ? 'active' : ''}" onclick="window.selectQuickPreviewVariant(${idx})">
-                <span>${v.quantity}${v.packaging_type ? ` (${v.packaging_type})` : ''}</span>
+                <div class="variant-info">
+                    <span class="variant-qty">${v.quantity}</span>
+                    ${v.packaging_type ? `<span class="variant-pkg">${v.packaging_type}</span>` : ''}
+                </div>
                 <span class="variant-price">₹${v.price}</span>
             </div>
         `).join('');
@@ -430,7 +433,7 @@ window.selectQuickPreviewVariant = function (index) {
 
     // Update variant label in selector
     const variantLabel = document.getElementById('quickPreviewVariantLabel');
-    if (variantLabel) variantLabel.textContent = variant.quantity;
+    if (variantLabel) variantLabel.innerHTML = `<span class="variant-qty">${variant.quantity}</span>${variant.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${variant.packaging_type})</span>` : ''}`;
 
     // Update price display
     const priceEl = document.getElementById('quickPreviewPrice');

@@ -1030,10 +1030,13 @@
                         <div class="variant-dropdown-list" id="var-list-${product.id}" style="display:none; position:absolute; bottom:50px; left:12px; background:white; border:1px solid #eee; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:20; width:150px; overflow:hidden;">
                             ${sortedVariants.map((v, idx) => `
                                 <div class="var-option" 
-                                     style="padding:10px 14px; font-size:0.85rem; cursor:pointer; color:#333; border-bottom:1px solid #f0f0f0;" 
+                                     style="padding:8px 14px; font-size:0.8rem; cursor:pointer; color:#333; border-bottom:1px solid #f0f0f0;" 
                                      onclick="window.selectGridVariant('${product.id}', ${idx})">
-                                    <div style="font-weight:600;">${v.quantity}${v.packaging_type ? ` (${v.packaging_type})` : ''}</div>
-                                    <div style="font-size:0.75rem; color:#666;">₹${v.price}</div>
+                                    <div class="variant-info">
+                                        <div class="variant-qty" style="font-weight:600; font-size:0.85rem;">${v.quantity}</div>
+                                        ${v.packaging_type ? `<div class="variant-pkg" style="font-size:0.7rem; color:#666;">${v.packaging_type}</div>` : ''}
+                                    </div>
+                                    <div style="font-size:0.75rem; color:#666; font-weight:700;">₹${v.price}</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -1747,14 +1750,15 @@
             if (variants.length === 0) return '';
 
             if (variants.length === 1) {
-                return `<div style="color:var(--text-secondary); font-size: 0.95rem;">
-                    <strong>Pack Size:</strong> ${variants[0].quantity}${variants[0].packaging_type ? ` (${variants[0].packaging_type})` : ''}
+                return `<div style="color:var(--text-secondary); font-size: 0.95rem; display:flex; flex-direction:column;">
+                    <strong>Pack Size:</strong> 
+                    <span style="font-size:0.9rem;">${variants[0].quantity} ${variants[0].packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${variants[0].packaging_type})</span>` : ''}</span>
                 </div>`;
             }
 
             // Default to first variant label
             const activeV = variants[0];
-            const label = `${activeV.quantity}${activeV.packaging_type ? ` (${activeV.packaging_type})` : ''} - ₹${activeV.price}`;
+            const label = `<span class="variant-qty">${activeV.quantity}</span>${activeV.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${activeV.packaging_type})</span>` : ''} - ₹${activeV.price}`;
 
             // Store variants in window for dropdown access
             window._currentVariants = variants;
@@ -1780,7 +1784,7 @@
             if (variants.length > 1 && mobileVariantLabel) {
                 // Multiple variants - show dropdown with first variant selected
                 const defaultV = variants[0];
-                mobileVariantLabel.innerText = `${defaultV.quantity}${defaultV.packaging_type ? ` (${defaultV.packaging_type})` : ''} (₹${defaultV.price})`;
+                mobileVariantLabel.innerHTML = `<span class="variant-qty">${defaultV.quantity}</span>${defaultV.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${defaultV.packaging_type})</span>` : ''} <span style="font-weight:700;">₹${defaultV.price}</span>`;
                 window._mobileActiveVariantIdx = 0;
                 window._currentVariants = variants;
 
@@ -1844,9 +1848,12 @@
 
                 menu.innerHTML = variants.map((v, i) => `
                     <div class="variant-portal-item ${i === activeVariantIdx ? 'active' : ''}" 
-                         onclick="window.handleVariantClick(${i})">
-                        <span>${v.quantity}${v.packaging_type ? ` (${v.packaging_type})` : ''}</span>
-                        <span class="var-price">₹${v.price}</span>
+                         onclick="window.handleVariantClick(${i})" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px;">
+                        <div class="variant-info">
+                            <span class="variant-qty">${v.quantity}</span>
+                            ${v.packaging_type ? `<span class="variant-pkg">${v.packaging_type}</span>` : ''}
+                        </div>
+                        <span class="var-price" style="font-weight:700;">₹${v.price}</span>
                     </div>
                 `).join('');
 
@@ -1876,7 +1883,7 @@
                 window._detailActiveVariantIdx = idx; // Update global state
                 const v = variants[idx];
                 const labelEl = document.getElementById('variantLabel');
-                if (labelEl) labelEl.innerText = `${v.quantity}${v.packaging_type ? ` (${v.packaging_type})` : ''} - ₹${v.price}`;
+                if (labelEl) labelEl.innerHTML = `<span class="variant-qty">${v.quantity}</span>${v.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${v.packaging_type})</span>` : ''} - ₹${v.price}`;
 
                 updatePrice(v);
                 window.syncDetailPageCart(v);
@@ -1921,9 +1928,12 @@
 
                 menu.innerHTML = variants.map((v, i) => `
                     <div class="mv-portal-item ${i === activeIdx ? 'active' : ''}" 
-                         onclick="window.handleMobileVariantSelect(${i})">
-                        <span>${v.quantity}${v.packaging_type ? ` (${v.packaging_type})` : ''}</span>
-                        <span class="mv-price">₹${v.price}</span>
+                         onclick="window.handleMobileVariantSelect(${i})" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px;">
+                        <div class="variant-info">
+                            <span class="variant-qty">${v.quantity}</span>
+                            ${v.packaging_type ? `<span class="variant-pkg">${v.packaging_type}</span>` : ''}
+                        </div>
+                        <span class="mv-price" style="font-weight:700;">₹${v.price}</span>
                     </div>
                 `).join('');
 
@@ -1955,7 +1965,7 @@
 
                 // Update mobile label
                 const label = document.getElementById('mobileVariantLabel');
-                if (label) label.innerText = `${v.quantity}${v.packaging_type ? ` (${v.packaging_type})` : ''} (₹${v.price})`;
+                if (label) label.innerHTML = `<span class="variant-qty">${v.quantity}</span>${v.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${v.packaging_type})</span>` : ''} <span style="font-weight:700;">₹${v.price}</span>`;
 
                 // Trigger the main variant click handler
                 window.handleVariantClick(idx);

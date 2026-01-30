@@ -6146,14 +6146,38 @@ Uses same card structure as sales page product grid
 }
 
 .quick-preview-variant-option {
-  padding: 10px 12px;
-  font-size: 0.85rem;
+  padding: 8px 12px;
+  font-size: 0.8rem;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: background 0.2s ease;
   border-bottom: 1px solid var(--color-gray-100);
+}
+
+.variant-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.variant-qty {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.variant-pkg {
+  font-size: 0.65rem;
+  color: var(--color-gray-500);
+  margin-top: -1px;
+}
+
+.variant-portal-item .variant-pkg,
+.quick-preview-variant-option .variant-pkg,
+.var-option .variant-pkg {
+  font-size: 0.7rem;
+  opacity: 0.8;
 }
 
 .quick-preview-variant-option:last-child {
