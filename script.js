@@ -363,7 +363,7 @@ window.showQuickPreview = function (product) {
     if (variantsList) {
         variantsList.innerHTML = sortedVariants.map((v, idx) => `
             <div class="quick-preview-variant-option ${idx === 0 ? 'active' : ''}" onclick="window.selectQuickPreviewVariant(${idx})">
-                <span>${v.quantity}</span>
+                <span>${v.quantity}${v.packaging_type ? ` (${v.packaging_type})` : ''}</span>
                 <span class="variant-price">₹${v.price}</span>
             </div>
         `).join('');
