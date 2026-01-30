@@ -4215,6 +4215,45 @@ window.clearMainCart = function () {
     window.showToast('Cart cleared', 'info');
 };
 
+// Order from WhatsApp
+window.orderOnWhatsApp = async function () {
+    const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+    if (cart.length === 0) {
+        window.showToast('Your cart is empty!', 'error');
+        return;
+    }
+
+    // Show loading state
+    window.showToast('Preparing your order...', 'info');
+
+    // optional: validation logic can be added here if needed, 
+    // but for the main page we keep it fast and simple.
+
+    // Construct Message
+    let message = `👋 Hi Telugu Delicacies! I would like to place an order.\n\n🛒 *ORDER SUMMARY*`;
+    let total = 0;
+    cart.forEach(item => {
+        const sub = (item.price || 0) * (item.qty || 0);
+        total += sub;
+        message += `\n▪️ ${item.name} ${item.variant ? '(' + item.variant.quantity + ')' : ''} x ${item.qty} = ₹${sub}`;
+    });
+
+    message += `\n\n💰 *Item Total: ₹${total}* (Shipping calculated later)`;
+    message += `\n\nPlease confirm availability and share payment details! ✅`;
+
+    const phone = WHATSAPP_NUMBER || '919618519191';
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank');
+
+    // Immediate Actions
+    window.clearMainCart(); // Handles reset and toast
+    window.showToast('Thanks for the order! Cart cleared.', 'success');
+
+    // Close the cart drawer
+    window.toggleMainCartDrawer();
+};
+
 // Initialize cart UI on page load (delegated to main init; only update UI here)
 document.addEventListener('DOMContentLoaded', function () {
     // Cart UI update is handled after products load in main init
