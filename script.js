@@ -302,6 +302,7 @@ window.showQuickPreview = function (product) {
     const variantSelector = document.getElementById('quickPreviewVariantSelector');
     const variantLabel = document.getElementById('quickPreviewVariantLabel');
     const variantsList = document.getElementById('quickPreviewVariantsList');
+    const packagingEl = document.getElementById('quickPreviewPackaging');
     const viewBtn = document.getElementById('quickPreviewViewBtn');
 
     // Image (optimized for popup display ~500px)
@@ -356,8 +357,20 @@ window.showQuickPreview = function (product) {
         }
     }
 
-    // Variant selector
-    if (variantLabel) variantLabel.innerHTML = `<span class="variant-qty">${selectedVariant.quantity}</span>${selectedVariant.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${selectedVariant.packaging_type})</span>` : ''}`;
+    // Packaging and Variant selector
+    if (packagingEl) {
+        packagingEl.textContent = selectedVariant.packaging_type || '';
+        packagingEl.style.display = selectedVariant.packaging_type ? 'block' : 'none';
+    }
+
+    if (variantLabel) {
+        variantLabel.innerHTML = `
+            <div class="variant-info" style="align-items: flex-start; text-align: left;">
+                <span class="variant-qty">${selectedVariant.quantity}</span>
+                ${selectedVariant.packaging_type ? `<span class="variant-pkg">(${selectedVariant.packaging_type})</span>` : ''}
+            </div>
+        `;
+    }
 
     // Populate variants list
     if (variantsList) {
@@ -433,7 +446,21 @@ window.selectQuickPreviewVariant = function (index) {
 
     // Update variant label in selector
     const variantLabel = document.getElementById('quickPreviewVariantLabel');
-    if (variantLabel) variantLabel.innerHTML = `<span class="variant-qty">${variant.quantity}</span>${variant.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${variant.packaging_type})</span>` : ''}`;
+    if (variantLabel) {
+        variantLabel.innerHTML = `
+            <div class="variant-info" style="align-items: flex-start; text-align: left;">
+                <span class="variant-qty">${variant.quantity}</span>
+                ${variant.packaging_type ? `<span class="variant-pkg">(${variant.packaging_type})</span>` : ''}
+            </div>
+        `;
+    }
+
+    // Update main packaging label
+    const packagingEl = document.getElementById('quickPreviewPackaging');
+    if (packagingEl) {
+        packagingEl.textContent = variant.packaging_type || '';
+        packagingEl.style.display = variant.packaging_type ? 'block' : 'none';
+    }
 
     // Update price display
     const priceEl = document.getElementById('quickPreviewPrice');
