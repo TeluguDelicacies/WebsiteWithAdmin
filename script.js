@@ -2556,6 +2556,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch and render products & testimonials (these already run in parallel)
     fetchAndRenderProducts();
     fetchAndRenderTestimonials();
+    fetchAndRenderCombos(); // Fetch combo offers
 
     // Setup form validation if contact form exists
     const contactForm = document.querySelector('.contact-form');
@@ -2918,6 +2919,292 @@ async function fetchCategories() {
         return [];
     }
 }
+
+/**
+ * Fetches active combo offers from Supabase and renders them to the homepage
+ */
+async function fetchAndRenderCombos() {
+    const container = document.getElementById('comboCardsContainer');
+    if (!container) return; // Not on homepage
+
+    try {
+        // Fetch active combos
+        const { data: combos, error } = await supabase
+            .from('combos')
+            .select('*')
+            .eq('is_active', true)
+            .order('display_order', { ascending: true });
+
+        if (error) throw error;
+
+        if (!combos || combos.length === 0) {
+            // Hide the section if no combos
+            const section = document.getElementById('sec-combos');
+            if (section) section.style.display = 'none';
+            return;
+        }
+
+        // For each combo, fetch its items with product info including images
+        for (let combo of combos) {
+            const { data: items } = await supabase
+                .from('combo_items')
+                .select(`
+                    *,
+                    products(
+                        id, 
+                        product_name, 
+                        quantity_variants, 
+                        showcase_image,
+                        product_images(image_url, tags, is_default)
+                    )
+                `)
+                .eq('combo_id', combo.id)
+                .order('display_order');
+            combo.items = items || [];
+        }
+
+        // Render combos
+        renderCombos(combos, container);
+
+    } catch (err) {
+        console.error('Error fetching combos:', err);
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Unable to load combo offers.</p>';
+    }
+}
+
+/**
+ * Renders combo cards to the container
+ * @param {Array} combos - Array of combo objects with items
+ * @param {HTMLElement} container - Container element
+ */
+function renderCombos(combos, container) {
+    if (!combos || combos.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1/-1;">No combo offers available.</p>';
+        return;
+    }
+
+    container.innerHTML = combos.map((combo, comboIndex) => {
+        // Calculate pricing and collect product info
+        let totalMrp = 0;
+        const productNames = [];
+        const productImages = [];
+        const variantImages = [];
+
+        (combo.items || []).forEach(item => {
+            if (item.products) {
+                productNames.push(item.products.product_name);
+
+                // 1. Look for variant-specific images first
+                const itemPack = item.packaging_type;
+                let foundVariantImg = false;
+
+                if (itemPack && item.products.product_images) {
+                    const vImgs = item.products.product_images.filter(img =>
+                        img.tags && img.tags.some(tag => tag.toLowerCase() === itemPack.toLowerCase())
+                    );
+                    if (vImgs.length > 0) {
+                        vImgs.forEach(img => variantImages.push({
+                            url: img.image_url,
+                            pack: itemPack,
+                            product: item.products.product_name
+                        }));
+                        foundVariantImg = true;
+                    }
+                }
+
+                // 2. Fallback to showcase or default images
+                if (!foundVariantImg) {
+                    if (item.products.showcase_image) {
+                        productImages.push(item.products.showcase_image);
+                    } else if (item.products.product_images) {
+                        const defaultImg = item.products.product_images.find(img => img.is_default);
+                        if (defaultImg) productImages.push(defaultImg.image_url);
+                        else if (item.products.product_images[0]) productImages.push(item.products.product_images[0].image_url);
+                    }
+                }
+
+                const variants = item.products.quantity_variants;
+                if (Array.isArray(variants)) {
+                    const variant = variants.find(v => {
+                        const matchesWeight = v.quantity === item.variant_quantity;
+                        const itemPackType = item.packaging_type || '';
+                        const varPackType = v.packaging_type || '';
+                        return matchesWeight && (itemPackType === '' || varPackType === '' || itemPackType === varPackType);
+                    });
+                    if (variant) totalMrp += parseFloat(variant.mrp || 0);
+                }
+            }
+        });
+
+        const discountAmt = totalMrp * (combo.discount_percent / 100);
+        const offerPrice = Math.round(totalMrp - discountAmt);
+
+        // Final image list: All available images for the carousel
+        let allImages = variantImages.length > 0 ? variantImages.map(vi => vi.url) : productImages;
+        allImages = [...new Set(allImages)];
+
+        const weightLabel = combo.items?.[0]?.variant_quantity || '100gms';
+        const packLabel = combo.items?.[0]?.packaging_type || '';
+        const savings = Math.round(totalMrp - offerPrice);
+
+        // Tags Overlay - Compact
+        const overlayTags = [];
+        if (weightLabel) overlayTags.push(`<span class="combo-tag"><i class="fas fa-weight-hanging"></i> ${weightLabel}</span>`);
+        if (packLabel) overlayTags.push(`<span class="combo-tag"><i class="fas fa-box"></i> ${packLabel}</span>`);
+
+        let visualHTML = '';
+        if (allImages.length > 0) {
+            visualHTML = `
+                <div class="combo-visual-container">
+                    <div class="combo-tag-overlay">${overlayTags.join('')}</div>
+                    <div class="combo-bundle-slots" data-images='${JSON.stringify(allImages)}'>
+                        <img src="${allImages[0]}" class="fan-slot-img fan-slot-front">
+                        <img src="${allImages[1] || allImages[0]}" class="fan-slot-img fan-slot-back-right">
+                        <img src="${allImages[2] || allImages[0]}" class="fan-slot-img fan-slot-back-left">
+                    </div>
+                </div>
+            `;
+        } else {
+            visualHTML = `
+                <div class="combo-visual-container">
+                    <div class="combo-image-placeholder"><i class="fas fa-gift"></i></div>
+                </div>
+            `;
+        }
+
+        const theme = combo.name.toLowerCase().includes('tiranga') ? 'tiranga' : 'default';
+
+        return `
+            <div class="combo-card" data-theme="${theme}" onclick="window.location.href='/sales/${combo.slug}'">
+                ${visualHTML}
+                <div class="combo-content">
+                    <div class="combo-header">
+                        <div class="combo-title-group">
+                            <h3 class="combo-title">${combo.name}</h3>
+                            <p class="combo-subtitle">${productNames.join(', ')}</p>
+                        </div>
+                        <div class="combo-price-block">
+                            <div class="combo-price-main">₹${offerPrice}</div>
+                            ${totalMrp > offerPrice ? `<div class="combo-price-mrp">₹${totalMrp}</div>` : ''}
+                            ${savings > 0 ? `<div class="combo-save-label">SAVE ₹${savings}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="combo-footer">
+                        <button class="combo-button" onclick="event.stopPropagation(); window.location.href='/sales/${combo.slug}'">
+                            <span>Order Bundle</span>
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Initialize Animated Fan Carousels
+    initComboFanCarousels();
+}
+
+/**
+ * Technical Implementation of the Slot-based Fan Carousel
+ * Cycles images through 3 CSS-positioned slots every 3 seconds
+ */
+function initComboFanCarousels() {
+    const containers = document.querySelectorAll('.combo-bundle-slots');
+
+    // Helper to preload images for a container
+    const preloadImages = (urls) => {
+        return Promise.all(urls.map(url => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = resolve; // Continue even if one fails
+                img.src = url;
+            });
+        }));
+    };
+
+    containers.forEach(async (container) => {
+        const images = JSON.parse(container.getAttribute('data-images') || '[]');
+        if (images.length === 0) return;
+
+        // Perform Preloading to prevent jitter
+        await preloadImages(images);
+
+        const total = images.length;
+        const slots = ['fan-slot-front', 'fan-slot-back-right', 'fan-slot-back-left'];
+
+        // Re-render elements only after preloading
+        container.innerHTML = images.map((img, i) => `
+            <img src="${img}" class="fan-slot-img ${i < 3 ? slots[i] : 'fan-slot-hidden'}">
+        `).join('');
+
+        if (total <= 1) return;
+
+        const imgElements = container.querySelectorAll('.fan-slot-img');
+        let activeIndex = 0;
+
+        // Start cycle
+        setInterval(() => {
+            activeIndex = (activeIndex + 1) % total;
+
+            imgElements.forEach((el, i) => {
+                el.classList.remove('fan-slot-front', 'fan-slot-back-right', 'fan-slot-back-left', 'fan-slot-hidden');
+
+                if (i === activeIndex) {
+                    el.classList.add('fan-slot-front');
+                } else if (i === (activeIndex + 1) % total) {
+                    el.classList.add('fan-slot-back-right');
+                } else if (i === (activeIndex + 2) % total) {
+                    el.classList.add('fan-slot-back-left');
+                } else {
+                    el.classList.add('fan-slot-hidden');
+                }
+            });
+        }, 3000);
+    });
+}
+
+/**
+ * Handle combo order via WhatsApp
+ * @param {string} comboId - Combo ID
+ * @param {string} comboName - Combo name
+ * @param {number} offerPrice - Final price after discount
+ * @param {number} discountPercent - Discount percentage
+ */
+window.addComboToOrder = async function (comboId, comboName, offerPrice, discountPercent) {
+    try {
+        // Fetch combo items for the message
+        const { data: items } = await supabase
+            .from('combo_items')
+            .select('variant_quantity, packaging_type, products(product_name)')
+            .eq('combo_id', comboId);
+
+        const productList = (items || []).map(i => i.products?.product_name).filter(Boolean).join(', ');
+
+        // Get weight and pack type from first item for message
+        const weight = items?.[0]?.variant_quantity || '100gms';
+        const pack = items?.[0]?.packaging_type ? ` (${items[0].packaging_type})` : '';
+
+        // Create WhatsApp message
+        let message = `🎁 *${comboName} Combo Order*\n\n`;
+        message += `Products: ${productList}\n`;
+        message += `Package: ${weight}${pack} each\n`;
+        message += `Discount: ${discountPercent}% OFF\n`;
+        message += `*Combo Price: ₹${offerPrice}*\n\n`;
+        message += `Please confirm my order!`;
+
+        // Get WhatsApp number from settings
+        const phone = window.currentSiteSettings?.contact_phone_primary?.replace(/\s/g, '') || '919876543210';
+        const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+        window.open(waUrl, '_blank');
+    } catch (err) {
+        console.error('Error creating combo order:', err);
+        // Fallback to basic WhatsApp
+        const phone = window.currentSiteSettings?.contact_phone_primary?.replace(/\s/g, '') || '919876543210';
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(`I'd like to order the ${comboName} combo!`)}`, '_blank');
+    }
+};
 
 /**
  * Fetches products from Supabase and renders them to the DOM
@@ -4314,21 +4601,21 @@ async function applySectionOrder() {
         const { data: settings, error } = await supabase.from('website_sections').select('section_order').single();
         if (error || !settings || !settings.section_order) return;
 
-        const order = settings.section_order;
+        let order = settings.section_order;
         if (!Array.isArray(order) || order.length === 0) return;
 
-        const heroSection = document.getElementById('sec-hero'); // Usually fixed at top, but let's allow reorder if requested
-        const parent = heroSection ? heroSection.parentNode : document.body;
+        // Ensure sec-combos is in the order if it exists in DOM but not in array
+        if (document.getElementById('sec-combos') && !order.includes('sec-combos')) {
+            // Find ideal position: after sec-ticker or at index 2
+            const tickerIndex = order.indexOf('sec-ticker');
+            if (tickerIndex !== -1) {
+                order.splice(tickerIndex + 1, 0, 'sec-combos');
+            } else {
+                order.splice(2, 0, 'sec-combos');
+            }
+        }
 
-        // We only want to reorder specific sections that are siblings in the main flow
-        // The main container in index.html is actually Body -> Header, Hero, Ticker, etc.
-        // So we can reorder children of Body or a Main wrapper if it existed.
-        // In current HTML, sections are direct children of Body (after Header).
-
-        // Identify the reference point (e.g., after Header)
         const header = document.querySelector('header');
-
-        // Create a fragment to hold ordered elements
         const fragment = document.createDocumentFragment();
 
         order.forEach(id => {
@@ -4336,7 +4623,7 @@ async function applySectionOrder() {
             if (el) fragment.appendChild(el);
         });
 
-        // Insert after header (or prepend if header missing)
+        // Insert after header
         if (header && header.nextSibling) {
             header.parentNode.insertBefore(fragment, header.nextSibling);
         } else {

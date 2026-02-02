@@ -208,7 +208,8 @@
             currentProduct: null,
             cart: [],
             detailQty: 1,
-            catalogueFile: null
+            catalogueFile: null,
+            allCombos: []
         };
 
         // Expose state for debugging
@@ -579,11 +580,12 @@
 
             try {
                 console.log('[Sales Init] Starting data fetch...');
-                const [settingsRes, productsRes, categoriesRes, imagesRes] = await Promise.all([
+                const [settingsRes, productsRes, categoriesRes, imagesRes, combosRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
                     supabase.from('products').select('*').order('display_order', { ascending: true }),
                     supabase.from('categories').select('*').order('display_order', { ascending: true }),
-                    supabase.from('product_images').select('product_id, image_url, tags, is_default')
+                    supabase.from('product_images').select('product_id, image_url, tags, is_default'),
+                    supabase.from('combos').select('*, combo_items(*, products(*))').eq('is_active', true).order('display_order', { ascending: true })
                 ]);
 
                 // Check for Supabase errors (these don't throw, they return .error)
@@ -605,11 +607,13 @@
                 console.log('[Sales Init] Data fetched:', {
                     settings: settingsRes.data ? 'OK' : 'Empty',
                     products: productsRes.data?.length || 0,
-                    categories: categoriesRes.data?.length || 0
+                    categories: categoriesRes.data?.length || 0,
+                    combos: combosRes.data?.length || 0
                 });
 
                 state.settings = settingsRes.data || {};
                 state.allProductImages = imagesRes.data || [];
+                state.allCombos = combosRes.data || [];
                 preloadCatalogue(); // Pre-load after settings
                 populateFooter(state.settings); // Populate rich footer
                 // Filter out hidden products
@@ -681,8 +685,13 @@
 
                 // Check if it's a category
                 const isCategory = state.categories.find(c => c.slug === lastPart);
+                // Check if it's a combo
+                const isCombo = state.allCombos.find(c => c.slug === lastPart);
+
                 if (isCategory) {
                     renderCategoryView(lastPart);
+                } else if (isCombo) {
+                    renderComboView(lastPart);
                 } else {
                     renderProductView(lastPart);
                 }
@@ -3181,6 +3190,112 @@
                     });
                 }
             }, 50); // Small delay for rendering
+        };
+
+        // --- View: Combo ---
+        async function renderComboView(slug) {
+            const combo = state.allCombos.find(c => c.slug === slug);
+            if (!combo) {
+                renderAllProductsView(); // Fallback
+                return;
+            }
+
+            // Update state context
+            state.currentCategory = 'all-products';
+            state.currentProduct = null;
+
+            const app = document.getElementById('app');
+            const totalMrp = combo.combo_items.reduce((sum, item) => sum + (item.products.quantity_variants?.[0]?.mrp || 0), 0);
+            const savings = Math.round(totalMrp - combo.offer_price);
+
+            app.innerHTML = `
+                <div class="breadcrumb-section">
+                    ${window.renderSmartBreadcrumbs('all-products', combo.name)}
+                </div>
+
+                <div class="combo-detail-page fade-in">
+                    <div class="combo-detail-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1200px; margin: 40px auto; padding: 20px;">
+                        
+                        <!-- Visual Area -->
+                        <div class="combo-visual-stack" style="position: relative;">
+                            <div class="main-combo-image" style="background: var(--color-gray-50); border-radius: 24px; padding: 40px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); border: 1px solid rgba(0, 119, 182, 0.05);">
+                                <img src="${combo.image_url || combo.combo_items[0]?.products?.showcase_image}" 
+                                     alt="${combo.name}"
+                                     style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                            
+                            <!-- Bundle Tag -->
+                            <div style="position: absolute; top: 20px; right: 20px; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 5px 15px; border-radius: 100px; font-weight: 800; font-size: 0.8rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                <i class="fas fa-gift"></i> GIFT BUNDLE
+                            </div>
+                        </div>
+
+                        <!-- Info Area -->
+                        <div class="combo-info-stack" style="display: flex; flex-direction: column; gap: 25px;">
+                            <div class="combo-page-header">
+                                <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--color-brand-blue-primary); margin-bottom: 10px;">${combo.name}</h1>
+                                <p style="font-size: 1.1rem; color: var(--color-gray-600); line-height: 1.6;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
+                            </div>
+
+                            <div class="combo-product-list" style="background: #ffffff; border-radius: 20px; padding: 25px; border: 1px solid rgba(0, 119, 182, 0.1);">
+                                <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: var(--color-brand-blue-primary);">What's in this Bundle:</h4>
+                                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
+                                    ${combo.combo_items.map(it => `
+                                        <li style="display: flex; align-items: center; gap: 15px; padding-bottom: 12px; border-bottom: 1px dashed #eee;">
+                                            <div style="width: 50px; height: 50px; background: #f8fafc; border-radius: 8px; flex-shrink: 0; padding: 5px; border: 1px solid #eee;">
+                                                <img src="${it.products.showcase_image}" style="width: 100%; height: 100%; object-fit: contain;">
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 700; color: var(--color-gray-800);">${it.products.product_name}</div>
+                                                <div style="font-size: 0.85rem; color: var(--color-gray-500);">${it.variant_quantity} (${it.packaging_type})</div>
+                                            </div>
+                                            <i class="fas fa-check-circle" style="color: var(--color-brand-yellow);"></i>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+
+                            <div class="combo-price-action-card" style="background: var(--color-brand-blue-primary); color: white; border-radius: 24px; padding: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0, 119, 182, 0.25);">
+                                <div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8; text-decoration: line-through;">Total MRP: ₹${totalMrp}</div>
+                                    <div style="font-size: 2.2rem; font-weight: 900;">₹${combo.offer_price}</div>
+                                    <div style="font-size: 0.85rem; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 4px 12px; border-radius: 100px; display: inline-block; font-weight: 800; margin-top: 8px;">YOU SAVE ₹${savings}</div>
+                                </div>
+                                <button class="action-btn-pill" style="background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; padding: 15px 40px; font-weight: 800; font-size: 1.1rem; border-radius: 100px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px;" onclick="window.orderComboWhatsApp('${combo.id}')">
+                                    Order Bundle <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    @media (max-width: 768px) {
+                        .combo-detail-layout { grid-template-columns: 1fr !important; gap: 20px !important; margin: 20px auto !important; }
+                        .combo-page-header h1 { font-size: 2rem !important; }
+                        .combo-price-action-card { flex-direction: column !important; gap: 20px !important; text-align: center !important; }
+                        .combo-visual-stack .main-combo-image { padding: 20px !important; }
+                    }
+                </style>
+            `;
+
+            app.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.orderComboWhatsApp = async function (comboId) {
+            const combo = state.allCombos.find(c => c.id === comboId);
+            if (!combo) return;
+
+            const itemList = combo.combo_items.map(it => `- ${it.products.product_name} (${it.variant_quantity} ${it.packaging_type})`).join('%0A');
+            const message = `Namaste! I would like to order the *${combo.name}* bundle.%0A%0A*Items in Bundle:*%0A${itemList}%0A%0A*Offer Price:* ₹${combo.offer_price}`;
+
+            const phone = state.settings.contact_phone_primary ? state.settings.contact_phone_primary.replace(/[\s\+]/g, '') : "919391102929";
+
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const baseUrl = isMobile ? "https://wa.me/" : "https://web.whatsapp.com/send";
+            const url = `${baseUrl}?phone=${phone}&text=${message}`;
+
+            window.open(url, '_blank');
         };
 
         window.initCart();

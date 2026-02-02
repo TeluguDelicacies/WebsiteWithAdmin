@@ -326,13 +326,14 @@ window.switchView = (view) => {
 
     // Hide all Containers
     if (productList) productList.style.display = 'none';
-    if (testimonialsTableContainer) testimonialsTableContainer.style.display = 'none'; // Name might change in refactor
-    if (categoriesTableContainer) categoriesTableContainer.style.display = 'none'; // Name might change
-    if (whyUsTableContainer) whyUsTableContainer.style.display = 'none'; // Name might change
-    if (settingsContainer) settingsContainer.style.display = 'none';
+    if (testimonialsTableContainer) testimonialsTableContainer.style.display = 'none';
+    if (categoriesTableContainer) categoriesTableContainer.style.display = 'none';
+    if (whyUsTableContainer) whyUsTableContainer.style.display = 'none';
     if (settingsContainer) settingsContainer.style.display = 'none';
     if (sectionsContainer) sectionsContainer.style.display = 'none';
-    if (imagesContainer) imagesContainer.style.display = 'none'; // Hide Images Container
+    if (imagesContainer) imagesContainer.style.display = 'none';
+    const combosContainer = document.getElementById('combosContainer');
+    if (combosContainer) combosContainer.style.display = 'none';
 
     // Reset Header Actions (Default Hidden)
     if (filterRow) filterRow.style.display = 'none';
@@ -346,7 +347,8 @@ window.switchView = (view) => {
     if (bulkSyncControls) bulkSyncControls.style.display = 'none';
 
     // Reset buttons active state
-    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
+    const viewCombosBtn = document.getElementById('viewCombosBtn');
+    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewCombosBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
         if (btn) btn.classList.remove('active');
     });
 
@@ -416,6 +418,12 @@ window.switchView = (view) => {
         activeStyle(viewSectionsBtn);
         fetchSectionSettings();
 
+    } else if (view === 'combos') {
+        const combosContainer = document.getElementById('combosContainer');
+        if (combosContainer) combosContainer.style.display = 'block';
+        activeStyle(viewCombosBtn);
+        fetchCombos();
+
     } else if (view === 'settings') {
         settingsContainer.style.display = 'block';
         activeStyle(viewSettingsBtn);
@@ -436,6 +444,7 @@ window.handleAddClick = () => {
     else if (currentView === 'testimonials') openTestimonialModal();
     else if (currentView === 'categories') openCategoryModal();
     else if (currentView === 'why-us') showWhyUsModal();
+    else if (currentView === 'combos') openComboModal();
 }
 
 // ----------------------------------------------------
@@ -702,6 +711,455 @@ window.deleteCategory = async (id) => {
         fetchCategories();
     } catch (e) { alert('Error: ' + e.message); }
 }
+
+// ----------------------------------------------------
+// COMBOS MANAGEMENT
+// ----------------------------------------------------
+
+let allCombos = [];
+let selectedComboProducts = []; // Track selected products in modal
+let cachedComboProducts = []; // Cache products for dynamic filtering by packaging
+
+async function fetchCombos() {
+    const comboList = document.getElementById('comboList');
+    if (!comboList) return;
+    comboList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px;"><i class="fas fa-spinner fa-spin"></i> Loading combos...</div>';
+
+    try {
+        // Fetch combos with their items
+        const { data: combos, error } = await supabase
+            .from('combos')
+            .select('*')
+            .order('display_order', { ascending: true });
+
+        if (error) throw error;
+
+        // For each combo, fetch its items
+        for (let combo of combos) {
+            const { data: items } = await supabase
+                .from('combo_items')
+                .select('*, products(id, product_name, quantity_variants)')
+                .eq('combo_id', combo.id)
+                .order('display_order');
+            combo.items = items || [];
+        }
+
+        allCombos = combos || [];
+        renderComboList(combos);
+    } catch (e) {
+        console.error('Error fetching combos:', e);
+        comboList.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: red;">Error: ${e.message}</div>`;
+    }
+}
+
+function renderComboList(combos) {
+    const comboList = document.getElementById('comboList');
+    if (!comboList) return;
+
+    if (!combos || combos.length === 0) {
+        comboList.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; background: white; border-radius: 12px; border: 2px dashed var(--border-medium);">
+                <i class="fas fa-gift" style="font-size: 3rem; color: var(--color-gray-300); margin-bottom: 15px;"></i>
+                <h3 style="margin: 0 0 10px; color: var(--text-secondary);">No Combo Offers Yet</h3>
+                <p style="margin: 0; color: var(--text-muted);">Create your first combo by clicking "Add Combo" above.</p>
+            </div>
+        `;
+        return;
+    }
+
+    comboList.innerHTML = combos.map(combo => {
+        // Calculate pricing
+        let totalMrp = 0;
+        const productNames = [];
+
+        (combo.items || []).forEach(item => {
+            if (item.products) {
+                productNames.push(item.products.product_name);
+                const variants = item.products.quantity_variants;
+                if (Array.isArray(variants)) {
+                    // Find the matching variant by quantity and packaging_type
+                    const variant = variants.find(v => {
+                        const matchesWeight = v.quantity === item.variant_quantity;
+                        const itemPack = item.packaging_type || '';
+                        const varPack = v.packaging_type || '';
+                        return matchesWeight && (itemPack === '' || varPack === '' || itemPack === varPack);
+                    });
+                    if (variant) totalMrp += parseFloat(variant.mrp || 0);
+                }
+            }
+        });
+
+        const discountAmt = totalMrp * (combo.discount_percent / 100);
+        const offerPrice = totalMrp - discountAmt;
+
+        return `
+            <div class="combo-card" style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-light); transition: all 0.2s; ${!combo.is_active ? 'opacity: 0.6;' : ''}">
+                <div style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="margin: 0 0 5px; color: var(--text-primary); font-size: 1.3rem;">${combo.name}</h3>
+                            ${combo.tagline ? `<p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">${combo.tagline}</p>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="openComboModal('${combo.id}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteCombo('${combo.id}')" class="admin-btn btn-sm" style="color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px;">
+                        ${productNames.map(name => `<span style="padding: 4px 10px; background: #f1f5f9; border-radius: 20px; font-size: 0.75rem; color: var(--text-secondary);">${name}</span>`).join('')}
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border-light);">
+                        <div>
+                            <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.9rem;">₹${totalMrp.toFixed(0)}</span>
+                            <span style="background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-left: 8px;">${combo.discount_percent}% OFF</span>
+                        </div>
+                        <span style="font-size: 1.4rem; font-weight: 700; color: #16a34a;">₹${offerPrice.toFixed(0)}</span>
+                    </div>
+                </div>
+                <div style="background: ${combo.is_active ? '#dcfce7' : '#f1f5f9'}; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: ${combo.is_active ? '#16a34a' : '#64748b'};">
+                        <i class="fas ${combo.is_active ? 'fa-check-circle' : 'fa-eye-slash'}"></i>
+                        ${combo.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">${combo.items?.length || 0} items</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.openComboModal = async (id = null) => {
+    const modal = document.getElementById('comboModal');
+    const form = document.getElementById('comboForm');
+    const title = document.getElementById('comboModalTitle');
+
+    modal.style.display = 'flex';
+    form.reset();
+    document.getElementById('comboId').value = '';
+    document.getElementById('comboWeight').value = '100gms'; // Reset to default
+    document.getElementById('comboPackType').value = ''; // Reset to any
+    selectedComboProducts = [];
+
+    // Fetch and cache all products first
+    await fetchProductsForComboPicker();
+
+    // Populate product picker based on selected packaging
+    renderComboProductPicker();
+
+    if (id) {
+        title.textContent = 'Edit Combo';
+        await loadComboData(id);
+    } else {
+        title.textContent = 'Add Combo';
+        document.getElementById('comboActive').checked = true;
+        updateComboPricePreview();
+    }
+};
+
+window.closeComboModal = () => {
+    document.getElementById('comboModal').style.display = 'none';
+    selectedComboProducts = [];
+};
+
+async function loadComboData(id) {
+    try {
+        const { data: combo, error } = await supabase
+            .from('combos')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+
+        // Fetch items with variant_quantity and packaging_type
+        const { data: items } = await supabase
+            .from('combo_items')
+            .select('product_id, variant_quantity, packaging_type')
+            .eq('combo_id', id);
+
+        document.getElementById('comboId').value = combo.id;
+        document.getElementById('comboName').value = combo.name;
+        document.getElementById('comboSlug').value = combo.slug;
+        document.getElementById('comboTagline').value = combo.tagline || '';
+        document.getElementById('comboDiscount').value = combo.discount_percent;
+        document.getElementById('comboDescription').value = combo.description || '';
+        document.getElementById('comboImageUrl').value = combo.image_url || '';
+        document.getElementById('comboOrder').value = combo.display_order || 0;
+        document.getElementById('comboActive').checked = combo.is_active !== false;
+
+        // Get the weight from first item (all items use same weight/packaging)
+        const weightType = items?.[0]?.variant_quantity || '100gms';
+        const packType = items?.[0]?.packaging_type || '';
+        document.getElementById('comboWeight').value = weightType;
+        document.getElementById('comboPackType').value = packType;
+
+        // Mark selected products
+        selectedComboProducts = (items || []).map(i => i.product_id);
+
+        // Re-render picker with correct weight/pack type and product selections
+        renderComboProductPicker();
+        updateComboPricePreview();
+
+    } catch (e) {
+        console.error('Error loading combo:', e);
+        showToast('Error loading combo: ' + e.message, 'error');
+    }
+}
+
+// Fetch all products and cache them for dynamic filtering
+async function fetchProductsForComboPicker() {
+    const picker = document.getElementById('comboProductPicker');
+    if (picker) picker.innerHTML = '<div style="text-align: center; padding: 20px; grid-column: 1/-1;"><i class="fas fa-spinner fa-spin"></i> Loading products...</div>';
+
+    try {
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('id, product_name, quantity_variants, product_category')
+            .order('product_name');
+
+        if (error) throw error;
+        cachedComboProducts = products || [];
+    } catch (e) {
+        console.error('Error fetching products for picker:', e);
+        cachedComboProducts = [];
+    }
+}
+
+// Render product picker based on selected weight and pack type
+function renderComboProductPicker() {
+    const picker = document.getElementById('comboProductPicker');
+    if (!picker) return;
+
+    const weightType = document.getElementById('comboWeight')?.value || '100gms';
+    const packType = document.getElementById('comboPackType')?.value || '';
+
+    // Filter to products that have matching variant
+    // Note: If product doesn't have packaging_type defined, treat it as compatible with any pack type
+    const eligibleProducts = cachedComboProducts.filter(p => {
+        if (!Array.isArray(p.quantity_variants)) return false;
+        return p.quantity_variants.some(v => {
+            const matchesWeight = v.quantity === weightType;
+            // If no pack type selected OR product has no packaging_type OR packaging_type matches
+            const productPackType = v.packaging_type || '';
+            const matchesPack = !packType || !productPackType || productPackType === packType;
+            return matchesWeight && matchesPack;
+        });
+    });
+
+    if (eligibleProducts.length === 0) {
+        const desc = packType ? `${weightType} + ${packType}` : weightType;
+        picker.innerHTML = `<div style="text-align: center; padding: 20px; grid-column: 1/-1; color: var(--text-muted);">No products with ${desc} variant found.</div>`;
+        return;
+    }
+
+    picker.innerHTML = eligibleProducts.map(p => {
+        const variant = p.quantity_variants.find(v => {
+            const matchesWeight = v.quantity === weightType;
+            const productPackType = v.packaging_type || '';
+            const matchesPack = !packType || !productPackType || productPackType === packType;
+            return matchesWeight && matchesPack;
+        });
+        const mrp = variant?.mrp || 0;
+        const pkgLabel = variant?.packaging_type ? ` (${variant.packaging_type})` : '';
+        const isSelected = selectedComboProducts.includes(p.id);
+
+        return `
+            <div class="combo-product-item" data-id="${p.id}" data-mrp="${mrp}" data-variants='${JSON.stringify(p.quantity_variants)}'
+                 onclick="toggleComboProduct('${p.id}')"
+                 style="padding: 12px; background: ${isSelected ? '#dcfce7' : 'white'}; border: 2px solid ${isSelected ? '#16a34a' : 'var(--border-light)'}; border-radius: 8px; cursor: pointer; transition: all 0.2s; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 500; font-size: 0.9rem;">${p.product_name}${pkgLabel}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;">₹${mrp}</span>
+                </div>
+                ${isSelected ? '<i class="fas fa-check-circle" style="color: #16a34a; position: absolute; top: 5px; right: 5px;"></i>' : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+// Called when weight or pack type dropdown changes - filters products and updates prices
+window.updateComboProductPrices = function () {
+    const weightType = document.getElementById('comboWeight')?.value || '100gms';
+    const packType = document.getElementById('comboPackType')?.value || '';
+
+    // Check if any selected products don't have the new variant and remove them
+    const productsLost = [];
+    selectedComboProducts = selectedComboProducts.filter(id => {
+        const prod = cachedComboProducts.find(p => p.id === id);
+        if (!prod) return false;
+        const hasVariant = Array.isArray(prod.quantity_variants) &&
+            prod.quantity_variants.some(v => {
+                const matchesWeight = v.quantity === weightType;
+                const productPackType = v.packaging_type || '';
+                const matchesPack = !packType || !productPackType || productPackType === packType;
+                return matchesWeight && matchesPack;
+            });
+        if (!hasVariant) productsLost.push(prod.product_name);
+        return hasVariant;
+    });
+
+    if (productsLost.length > 0) {
+        const desc = packType ? `${weightType} + ${packType}` : weightType;
+        showToast(`Removed ${productsLost.join(', ')} - no ${desc} variant`, 'warning');
+    }
+
+    // Re-render picker with new prices and filtering
+    renderComboProductPicker();
+    updateComboPricePreview();
+};
+
+window.toggleComboProduct = (productId, mrp) => {
+    const index = selectedComboProducts.indexOf(productId);
+    if (index > -1) {
+        selectedComboProducts.splice(index, 1);
+    } else {
+        selectedComboProducts.push(productId);
+    }
+    updateProductPickerSelection();
+    updateComboPricePreview();
+};
+
+function updateProductPickerSelection() {
+    const items = document.querySelectorAll('.combo-product-item');
+    items.forEach(item => {
+        const id = item.dataset.id;
+        const isSelected = selectedComboProducts.includes(id);
+        item.style.background = isSelected ? '#dcfce7' : 'white';
+        item.style.borderColor = isSelected ? '#16a34a' : 'var(--border-light)';
+    });
+}
+
+function updateComboPricePreview() {
+    const preview = document.getElementById('comboPricePreview');
+    const countEl = document.getElementById('comboItemCount');
+    const mrpEl = document.getElementById('comboTotalMrp');
+    const offerEl = document.getElementById('comboOfferPrice');
+    const discountInput = document.getElementById('comboDiscount');
+
+    if (selectedComboProducts.length === 0) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    preview.style.display = 'block';
+
+    // Calculate total MRP from selected items
+    let totalMrp = 0;
+    document.querySelectorAll('.combo-product-item').forEach(item => {
+        if (selectedComboProducts.includes(item.dataset.id)) {
+            totalMrp += parseFloat(item.dataset.mrp || 0);
+        }
+    });
+
+    const discountPercent = parseFloat(discountInput.value || 10);
+    const offerPrice = totalMrp * (1 - discountPercent / 100);
+
+    countEl.textContent = selectedComboProducts.length;
+    mrpEl.textContent = '₹' + totalMrp.toFixed(0);
+    offerEl.textContent = '₹' + offerPrice.toFixed(0);
+}
+
+// Listen for discount changes
+document.getElementById('comboDiscount')?.addEventListener('input', updateComboPricePreview);
+
+// Auto-generate slug from name
+document.getElementById('comboName')?.addEventListener('input', function () {
+    const slugInput = document.getElementById('comboSlug');
+    if (!slugInput.value || slugInput.dataset.autoGenerated === 'true') {
+        slugInput.value = generateSlug(this.value);
+        slugInput.dataset.autoGenerated = 'true';
+    }
+});
+document.getElementById('comboSlug')?.addEventListener('input', function () {
+    this.dataset.autoGenerated = 'false';
+});
+
+window.handleComboSubmit = async (e) => {
+    e.preventDefault();
+
+    if (selectedComboProducts.length === 0) {
+        showToast('Please select at least one product for the combo.', 'error');
+        return;
+    }
+
+    const btn = e.target.querySelector('button[type="submit"]');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    btn.disabled = true;
+
+    try {
+        const id = document.getElementById('comboId').value;
+
+        const comboData = {
+            name: document.getElementById('comboName').value,
+            slug: document.getElementById('comboSlug').value,
+            tagline: document.getElementById('comboTagline').value || null,
+            description: document.getElementById('comboDescription').value || null,
+            image_url: document.getElementById('comboImageUrl').value || null,
+            discount_percent: parseFloat(document.getElementById('comboDiscount').value),
+            display_order: parseInt(document.getElementById('comboOrder').value || 0),
+            is_active: document.getElementById('comboActive').checked
+        };
+
+        let comboId = id;
+
+        if (id) {
+            // Update existing
+            const { error } = await supabase.from('combos').update(comboData).eq('id', id);
+            if (error) throw error;
+        } else {
+            // Insert new
+            const { data, error } = await supabase.from('combos').insert([comboData]).select('id').single();
+            if (error) throw error;
+            comboId = data.id;
+        }
+
+        // Update combo items - delete existing and insert new
+        await supabase.from('combo_items').delete().eq('combo_id', comboId);
+
+        const selectedWeight = document.getElementById('comboWeight')?.value || '100gms';
+        const selectedPackType = document.getElementById('comboPackType')?.value || '';
+        const itemsToInsert = selectedComboProducts.map((productId, index) => ({
+            combo_id: comboId,
+            product_id: productId,
+            variant_quantity: selectedWeight,
+            packaging_type: selectedPackType,
+            display_order: index
+        }));
+
+        if (itemsToInsert.length > 0) {
+            const { error: itemsError } = await supabase.from('combo_items').insert(itemsToInsert);
+            if (itemsError) throw itemsError;
+        }
+
+        closeComboModal();
+        fetchCombos();
+        showToast(id ? 'Combo updated successfully!' : 'Combo created successfully!', 'success');
+
+    } catch (e) {
+        console.error('Error saving combo:', e);
+        showToast('Error: ' + e.message, 'error');
+    } finally {
+        btn.innerHTML = oldText;
+        btn.disabled = false;
+    }
+};
+
+window.deleteCombo = async (id) => {
+    if (!confirm('Delete this combo offer? This cannot be undone.')) return;
+
+    try {
+        const { error } = await supabase.from('combos').delete().eq('id', id);
+        if (error) throw error;
+        fetchCombos();
+        showToast('Combo deleted successfully.', 'success');
+    } catch (e) {
+        console.error('Error deleting combo:', e);
+        showToast('Error: ' + e.message, 'error');
+    }
+};
 
 // ----------------------------------------------------
 // SITE SETTINGS MANAGEMENT
@@ -3800,6 +4258,10 @@ async function fetchSectionSettings() {
             // Footer
             const footerToggle = document.getElementById('secShowFooter');
             if (footerToggle) footerToggle.checked = data.show_footer !== false;
+
+            // Special Combo Offers
+            const combosToggle = document.getElementById('secShowCombos');
+            if (combosToggle) combosToggle.checked = data.show_combos !== false;
         } else {
             // No data found - set all toggles to ON (default) with null checks
             const heroEl = document.getElementById('secShowHero');
@@ -3809,6 +4271,7 @@ async function fetchSectionSettings() {
             const testimonialsEl = document.getElementById('secShowTestimonials');
             const whyUsEl = document.getElementById('secShowWhyUs');
             const contactEl = document.getElementById('secShowContact');
+            const combosEl = document.getElementById('secShowCombos');
             const footerEl = document.getElementById('secShowFooter');
 
             if (heroEl) heroEl.checked = true;
@@ -3818,6 +4281,7 @@ async function fetchSectionSettings() {
             if (testimonialsEl) testimonialsEl.checked = true;
             if (whyUsEl) whyUsEl.checked = true;
             if (contactEl) contactEl.checked = true;
+            if (combosEl) combosEl.checked = true;
             if (footerEl) footerEl.checked = true;
         }
     } catch (e) {
@@ -3841,6 +4305,7 @@ window.cancelSectionChanges = function () {
         'secShowTestimonials': 'show_testimonials',
         'secShowWhyUs': 'show_why_us',
         'secShowContact': 'show_contact_form',
+        'secShowCombos': 'show_combos',
         'secShowFooter': 'show_footer'
     };
 
@@ -3873,6 +4338,7 @@ window.saveSectionSettings = async function () {
         'show_testimonials': 'secShowTestimonials',
         'show_why_us': 'secShowWhyUs',
         'show_contact_form': 'secShowContact',
+        'show_combos': 'secShowCombos',
         'show_footer': 'secShowFooter'
     };
 
@@ -3885,6 +4351,7 @@ window.saveSectionSettings = async function () {
         show_testimonials: document.getElementById('secShowTestimonials')?.checked ?? true,
         show_why_us: document.getElementById('secShowWhyUs')?.checked ?? true,
         show_contact_form: document.getElementById('secShowContact')?.checked ?? true,
+        show_combos: document.getElementById('secShowCombos')?.checked ?? true,
         show_footer: document.getElementById('secShowFooter')?.checked ?? true
     };
 
