@@ -2963,6 +2963,15 @@ async function saveProductImages(productId) {
                 .insert(imagesToInsert);
 
             if (insertError) throw insertError;
+
+            // SYNC: Update products.showcase_image with the MUST-HAVE default image for fallbacks
+            const defaultImg = currentProductImages.find(img => img.is_default) || currentProductImages[0];
+            if (defaultImg) {
+                await supabase
+                    .from('products')
+                    .update({ showcase_image: defaultImg.image_url })
+                    .eq('id', productId);
+            }
         }
 
         return true;
@@ -3496,6 +3505,14 @@ window.saveExistingImageChanges = async function () {
 
                 if (error) throw error;
                 saved++;
+
+                // SYNC: If this image was set as default, update products.showcase_image
+                if (updates.is_default === true) {
+                    const { data: imgData } = await supabase.from('product_images').select('product_id, image_url').eq('id', imageId).single();
+                    if (imgData) {
+                        await supabase.from('products').update({ showcase_image: imgData.image_url }).eq('id', imgData.product_id);
+                    }
+                }
             } catch (e) {
                 console.error('Error saving image:', e);
                 errors++;

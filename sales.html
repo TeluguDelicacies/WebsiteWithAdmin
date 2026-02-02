@@ -537,6 +537,8 @@
 
                 if (slug === 'all-products') {
                     renderAllProductsView();
+                } else if (slug === 'combo-offers') {
+                    renderAllCombosView();
                 } else {
                     renderCategoryView(slug);
                 }
@@ -584,8 +586,8 @@
                     supabase.from('site_settings').select('*').single(),
                     supabase.from('products').select('*').order('display_order', { ascending: true }),
                     supabase.from('categories').select('*').order('display_order', { ascending: true }),
-                    supabase.from('product_images').select('product_id, image_url, tags, is_default'),
-                    supabase.from('combos').select('*, combo_items(*, products(*))').eq('is_active', true).order('display_order', { ascending: true })
+                    supabase.from('product_images').select('product_id, image_url, tags, is_default').order('display_order', { ascending: true }),
+                    supabase.from('combos').select('*, combo_items(*, products(*, product_images(*)))').eq('is_active', true).order('display_order', { ascending: true })
                 ]);
 
                 // Check for Supabase errors (these don't throw, they return .error)
@@ -680,6 +682,12 @@
                 // Check if it's 'all-products'
                 if (lastPart === 'all-products') {
                     renderAllProductsView();
+                    return;
+                }
+
+                // Check if it's 'combo-offers'
+                if (lastPart === 'combo-offers') {
+                    renderAllCombosView();
                     return;
                 }
 
@@ -3088,8 +3096,12 @@
 
             // 2. Category Dropdown Trigger
             const categories = state.categories;
-            const activeCat = categories.find(c => c.slug === activeCategorySlug);
-            const label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'Select Category' : 'Select Category');
+            let activeCat = categories.find(c => c.slug === activeCategorySlug);
+            let label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'Select Category' : 'Select Category');
+
+            if (activeCategorySlug === 'combo-offers') {
+                label = 'Combo Offers';
+            }
 
             // Pass active slug to the opener to highlight it
             html += `
@@ -3134,6 +3146,15 @@
                     </div>
                 `;
             });
+
+            // Add Combo Offers to Dropdown
+            itemsHtml += `
+                <div class="sb-portal-item ${activeSlug === 'combo-offers' ? 'active' : ''}" 
+                     style="border-top: 1px solid #eee; margin-top: 5px; color: var(--color-primary-blue); font-weight: 700;"
+                     onclick="window.handlePortalClick('combo-offers')">
+                     <i class="fas fa-percent" style="margin-right: 8px; font-size: 0.8rem;"></i> Combo Offers
+                </div>
+            `;
             menu.innerHTML = itemsHtml;
 
             // Append to Body (Portal)
@@ -3192,6 +3213,57 @@
             }, 50); // Small delay for rendering
         };
 
+        // --- View: All Combos ---
+        window.renderAllCombosView = function () {
+            const app = document.getElementById('app');
+            state.currentCategory = 'combo-offers';
+            state.currentProduct = null;
+
+            app.innerHTML = `
+                <div class="breadcrumb-section">
+                    ${window.renderSmartBreadcrumbs('combo-offers', '')}
+                </div>
+                <section class="category-grid-container" style="width:95%; max-width:95%; margin:0 auto; padding-bottom:50px;">
+                    <div class="category-header-clean">
+                        <div class="cat-title-row">
+                            <h2 class="cat-title">Special Combo Offers</h2>
+                            <p class="cat-count">${state.allCombos.length} Bundles Available</p>
+                        </div>
+                        <p class="cat-desc">Hand-picked combinations for the ultimate Telugu flavor experience. Save more when you buy together!</p>
+                    </div>
+
+                    <div class="combo-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 30px;">
+                        ${state.allCombos.map(combo => {
+                // Simplified version of the home page card logic
+                const savings = combo.combo_items.reduce((sum, it) => sum + (it.products.mrp || 0), 0) - combo.offer_price;
+
+                return `
+                                <div class="combo-offer-card-new" onclick="location.href='/sales/${combo.slug}'" style="cursor: pointer; background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative;">
+                                    <div class="combo-card-img" style="height: 200px; padding: 20px; background: #fbfbfc;">
+                                        <img src="${combo.image_url || state.placeholder}" style="width: 100%; height: 100%; object-fit: contain;">
+                                    </div>
+                                    <div class="combo-card-content" style="padding: 20px;">
+                                        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--color-brand-blue-primary); margin-bottom: 8px;">${combo.name}</h3>
+                                        <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${combo.description}</p>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-brand-blue-primary);">₹${combo.offer_price}</div>
+                                                ${savings > 0 ? `<div style="font-size: 0.75rem; color: #10b981; font-weight: 700;">Save ₹${savings}</div>` : ''}
+                                            </div>
+                                            <div style="background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 8px 15px; border-radius: 100px; font-weight: 800; font-size: 0.85rem;">View Details</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+            }).join('')}
+                    </div>
+                </section>
+            `;
+
+            app.scrollIntoView({ behavior: 'smooth' });
+            window.updateBreadcrumbScroll();
+        }
+
         // --- View: Combo ---
         async function renderComboView(slug) {
             const combo = state.allCombos.find(c => c.slug === slug);
@@ -3205,16 +3277,35 @@
             state.currentProduct = null;
 
             const app = document.getElementById('app');
-            const totalMrp = combo.combo_items.reduce((sum, item) => sum + (item.products.quantity_variants?.[0]?.mrp || 0), 0);
-            const savings = Math.round(totalMrp - combo.offer_price);
+
+            // Calculate CORRECT Total MRP by matching specific variants
+            let calculatedTotalMrp = 0;
+            combo.combo_items.forEach(it => {
+                let variants = [];
+                try {
+                    variants = typeof it.products.quantity_variants === 'string'
+                        ? JSON.parse(it.products.quantity_variants)
+                        : (it.products.quantity_variants || []);
+                } catch (e) { console.error("Parse error", e); }
+
+                // Match by quantity AND packaging
+                const match = variants.find(v =>
+                    String(v.quantity) === String(it.variant_quantity) &&
+                    String(v.packaging_type || '') === String(it.packaging_type || '')
+                ) || variants[0];
+
+                calculatedTotalMrp += (match ? (match.mrp || match.price || 0) : 0);
+            });
+
+            const savings = Math.round(calculatedTotalMrp - combo.offer_price);
 
             app.innerHTML = `
                 <div class="breadcrumb-section">
-                    ${window.renderSmartBreadcrumbs('all-products', combo.name)}
+                    ${window.renderSmartBreadcrumbs('combo-offers', combo.name)}
                 </div>
 
                 <div class="combo-detail-page fade-in">
-                    <div class="combo-detail-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1200px; margin: 40px auto; padding: 20px;">
+                    <div class="combo-detail-layout" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; max-width: 1200px; margin: 40px auto; padding: 20px;">
                         
                         <!-- Visual Area -->
                         <div class="combo-visual-stack" style="position: relative;">
@@ -3240,26 +3331,43 @@
                             <div class="combo-product-list" style="background: #ffffff; border-radius: 20px; padding: 25px; border: 1px solid rgba(0, 119, 182, 0.1);">
                                 <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: var(--color-brand-blue-primary);">What's in this Bundle:</h4>
                                 <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
-                                    ${combo.combo_items.map(it => `
+                                    ${combo.combo_items.map(it => {
+                // 2. Fallback to product_images table (Default first), then showcase image
+                // The `foundVariantImg` variable is not defined in this scope, so the `if` condition is removed.
+                // The sorting logic is applied directly to `pImages`.
+                const pImages = [...(it.products.product_images || [])];
+                // Sort by display_order
+                pImages.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+
+                const defaultImg = pImages.find(img => img.is_default)?.image_url || pImages[0]?.image_url || it.products.showcase_image;
+
+                return `
                                         <li style="display: flex; align-items: center; gap: 15px; padding-bottom: 12px; border-bottom: 1px dashed #eee;">
                                             <div style="width: 50px; height: 50px; background: #f8fafc; border-radius: 8px; flex-shrink: 0; padding: 5px; border: 1px solid #eee;">
-                                                <img src="${it.products.showcase_image}" style="width: 100%; height: 100%; object-fit: contain;">
+                                                <img src="${defaultImg}" style="width: 100%; height: 100%; object-fit: contain;">
                                             </div>
                                             <div style="flex: 1;">
-                                                <div style="font-weight: 700; color: var(--color-gray-800);">${it.products.product_name}</div>
+                                                <div style="font-weight: 700; color: var(--color-gray-800); display: flex; align-items: center; gap: 8px;">
+                                                    ${it.products.product_name}
+                                                    <button onclick="window.showProductQuickInfo('${it.products.id}')" 
+                                                            style="background: none; border: none; color: var(--color-primary-blue); cursor: pointer; font-size: 0.8rem; opacity: 0.6; padding: 4px;"
+                                                            title="View Product Details">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </button>
+                                                </div>
                                                 <div style="font-size: 0.85rem; color: var(--color-gray-500);">${it.variant_quantity} (${it.packaging_type})</div>
                                             </div>
                                             <i class="fas fa-check-circle" style="color: var(--color-brand-yellow);"></i>
-                                        </li>
-                                    `).join('')}
+                                        </li>`;
+            }).join('')}
                                 </ul>
                             </div>
 
                             <div class="combo-price-action-card" style="background: var(--color-brand-blue-primary); color: white; border-radius: 24px; padding: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0, 119, 182, 0.25);">
                                 <div>
-                                    <div style="font-size: 0.9rem; opacity: 0.8; text-decoration: line-through;">Total MRP: ₹${totalMrp}</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8; text-decoration: line-through;">Total MRP: ₹${calculatedTotalMrp}</div>
                                     <div style="font-size: 2.2rem; font-weight: 900;">₹${combo.offer_price}</div>
-                                    <div style="font-size: 0.85rem; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 4px 12px; border-radius: 100px; display: inline-block; font-weight: 800; margin-top: 8px;">YOU SAVE ₹${savings}</div>
+                                    ${savings > 0 ? `<div style="font-size: 0.85rem; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 4px 12px; border-radius: 100px; display: inline-block; font-weight: 800; margin-top: 8px;">YOU SAVE ₹${savings}</div>` : ''}
                                 </div>
                                 <button class="action-btn-pill" style="background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; padding: 15px 40px; font-weight: 800; font-size: 1.1rem; border-radius: 100px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px;" onclick="window.orderComboWhatsApp('${combo.id}')">
                                     Order Bundle <i class="fab fa-whatsapp"></i>
@@ -3270,17 +3378,67 @@
                 </div>
 
                 <style>
-                    @media (max-width: 768px) {
-                        .combo-detail-layout { grid-template-columns: 1fr !important; gap: 20px !important; margin: 20px auto !important; }
-                        .combo-page-header h1 { font-size: 2rem !important; }
-                        .combo-price-action-card { flex-direction: column !important; gap: 20px !important; text-align: center !important; }
-                        .combo-visual-stack .main-combo-image { padding: 20px !important; }
+                    @media (max-width: 992px) {
+                        .combo-detail-layout { grid-template-columns: 1fr !important; gap: 30px !important; margin: 10px auto !important; padding: 10px !important; }
+                        .combo-page-header h1 { font-size: 1.8rem !important; }
+                        .combo-visual-stack .main-combo-image { padding: 25px !important; border-radius: 16px !important; }
+                        .combo-price-action-card { flex-direction: column !important; gap: 20px !important; text-align: center !important; padding: 20px !important; }
+                        .combo-price-action-card button { width: 100% !important; justify-content: center !important; }
                     }
                 </style>
             `;
 
             app.scrollIntoView({ behavior: 'smooth' });
         }
+
+        window.showProductQuickInfo = function (productId) {
+            const product = state.allProducts.find(p => String(p.id) === String(productId));
+            if (!product) return;
+
+            // Remove existing
+            const existing = document.getElementById('product-quick-info-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'product-quick-info-overlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center;
+                z-index: 10000; backdrop-filter: blur(5px); padding: 20px;
+            `;
+
+            overlay.innerHTML = `
+                <div style="background: white; border-radius: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; animation: slideIn 0.3s ease-out;">
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="position: absolute; top: 15px; right: 15px; background: #f0f0f0; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div style="padding: 30px;">
+                        <h2 style="color: var(--color-brand-blue-primary); font-weight: 800; margin-bottom: 5px;">${product.product_name}</h2>
+                        <p style="color: var(--color-gray-500); font-size: 0.9rem; margin-bottom: 20px;">${product.product_name_telugu || ''}</p>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <h4 style="font-weight: 700; color: var(--color-gray-800); margin-bottom: 8px;">About this product:</h4>
+                            <p style="color: var(--color-gray-600); line-height: 1.6; font-size: 0.95rem;">${product.product_description || 'No description available.'}</p>
+                        </div>
+
+                        ${product.ingredients ? `
+                        <div style="margin-bottom: 25px; background: #f8fafc; padding: 15px; border-radius: 12px;">
+                            <h4 style="font-weight: 700; color: var(--color-gray-800); margin-bottom: 5px; font-size: 0.9rem;">Ingredients:</h4>
+                            <p style="color: var(--color-gray-600); font-size: 0.85rem; line-height: 1.5;">${product.ingredients}</p>
+                        </div>` : ''}
+
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                style="width: 100%; background: var(--color-brand-blue-primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer;">
+                            Got it
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+        };
 
         window.orderComboWhatsApp = async function (comboId) {
             const combo = state.allCombos.find(c => c.id === comboId);

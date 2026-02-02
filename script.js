@@ -3012,14 +3012,20 @@ function renderCombos(combos, container) {
                     }
                 }
 
-                // 2. Fallback to showcase or default images
+                // 2. Fallback to product_images table (Default first), then showcase image
                 if (!foundVariantImg) {
-                    if (item.products.showcase_image) {
+                    const pImages = [...(item.products.product_images || [])];
+                    // Sort by display_order
+                    pImages.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+
+                    const defaultImg = pImages.find(img => img.is_default);
+
+                    if (defaultImg) {
+                        productImages.push(defaultImg.image_url);
+                    } else if (pImages.length > 0) {
+                        productImages.push(pImages[0].image_url);
+                    } else if (item.products.showcase_image) {
                         productImages.push(item.products.showcase_image);
-                    } else if (item.products.product_images) {
-                        const defaultImg = item.products.product_images.find(img => img.is_default);
-                        if (defaultImg) productImages.push(defaultImg.image_url);
-                        else if (item.products.product_images[0]) productImages.push(item.products.product_images[0].image_url);
                     }
                 }
 
@@ -3219,7 +3225,7 @@ async function fetchAndRenderProducts() {
                 .order('display_order', { ascending: true })
                 .order('created_at', { ascending: false }),
             fetchCategories(),
-            supabase.from('product_images').select('product_id, image_url, tags, is_default')
+            supabase.from('product_images').select('product_id, image_url, tags, is_default').order('display_order', { ascending: true })
         ]);
 
         const products = productsResp.data;
