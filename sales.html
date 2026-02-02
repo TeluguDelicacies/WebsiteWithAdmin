@@ -3266,7 +3266,8 @@
                                         <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${combo.description}</p>
                                         <div style="display: flex; justify-content: space-between; align-items: center;">
                                             <div>
-                                                <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-brand-blue-primary);">₹${offerPrice}</div>
+                                                <div style="font-size: 0.8rem; color: #64748b; text-decoration: line-through; margin-bottom: 2px;">MRP: ₹${calculatedTotalMrp || 0}</div>
+                                                <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-brand-blue-primary);">₹${offerPrice || 0}</div>
                                                 ${savings > 0 ? `<div style="font-size: 0.75rem; color: #10b981; font-weight: 700;">Save ₹${savings}</div>` : ''}
                                             </div>
                                             <div style="background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 8px 15px; border-radius: 100px; font-weight: 800; font-size: 0.85rem;">View Details</div>
@@ -3330,10 +3331,18 @@
                         
                         <!-- Visual Area -->
                         <div class="combo-visual-stack" style="position: relative;">
-                            <div class="main-combo-image" style="background: var(--color-gray-50); border-radius: 24px; padding: 40px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); border: 1px solid rgba(0, 119, 182, 0.05);">
-                                <img src="${combo.image_url || combo.combo_items[0]?.products?.showcase_image}" 
-                                     alt="${combo.name}"
-                                     style="width: 100%; height: 100%; object-fit: contain;">
+                            <div id="combo-main-gallery" class="main-combo-image" style="background: var(--color-gray-50); border-radius: 24px; padding: 40px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); border: 1px solid rgba(0, 119, 182, 0.05); overflow: hidden; position: relative;">
+                                <!-- Gallery images will be inserted here -->
+                                <div id="combo-gallery-inner" style="width:100%; height:100%; position:relative;">
+                                    <img id="combo-active-img" src="${combo.image_url || combo.combo_items[0]?.products?.showcase_image}" 
+                                         alt="${combo.name}"
+                                         style="width: 100%; height: 100%; object-fit: contain; transition: opacity 0.5s ease-in-out;">
+                                </div>
+
+                                <!-- Gallery Controls -->
+                                <div style="position: absolute; bottom: 20px; left: 0; width: 100%; display: flex; justify-content: center; gap: 8px; z-index: 10;">
+                                    <div id="combo-gallery-dots"></div>
+                                </div>
                             </div>
                             
                             <!-- Bundle Tag -->
@@ -3408,6 +3417,55 @@
                     }
                 </style>
             `;
+
+            // --- GALLERY LOGIC ---
+            const allGalleryImages = [combo.image_url];
+            combo.combo_items.forEach(it => {
+                const pImgs = (it.products.product_images || []).map(pi => pi.image_url);
+                if (it.products.showcase_image) pImgs.push(it.products.showcase_image);
+                allGalleryImages.push(...pImgs);
+            });
+            // Filter out nulls/placeholders and deduplicate
+            const galleryList = [...new Set(allGalleryImages.filter(img => img && img !== state.placeholder))];
+
+            if (galleryList.length > 1) {
+                const dotsContainer = document.getElementById('combo-gallery-dots');
+                const activeImg = document.getElementById('combo-active-img');
+                let currentIndex = 0;
+
+                // Create dots
+                galleryList.forEach((_, idx) => {
+                    const dot = document.createElement('div');
+                    dot.style.cssText = `width: 8px; height: 8px; border-radius: 50%; background: ${idx === 0 ? 'var(--color-brand-blue-primary)' : '#cbd5e1'}; cursor: pointer; transition: all 0.3s;`;
+                    dot.onclick = () => updateGallery(idx);
+                    dotsContainer.appendChild(dot);
+                });
+
+                function updateGallery(idx) {
+                    currentIndex = idx;
+                    activeImg.style.opacity = '0';
+                    setTimeout(() => {
+                        activeImg.src = galleryList[currentIndex];
+                        activeImg.style.opacity = '1';
+                    }, 300);
+
+                    // Update dots
+                    Array.from(dotsContainer.children).forEach((dot, i) => {
+                        dot.style.background = (i === currentIndex) ? 'var(--color-brand-blue-primary)' : '#cbd5e1';
+                        dot.style.width = (i === currentIndex) ? '20px' : '8px';
+                        dot.style.borderRadius = (i === currentIndex) ? '4px' : '50%';
+                    });
+                }
+
+                // Auto-play
+                const timer = setInterval(() => {
+                    if (!document.getElementById('combo-main-gallery')) {
+                        clearInterval(timer);
+                        return;
+                    }
+                    updateGallery((currentIndex + 1) % galleryList.length);
+                }, 4000);
+            }
 
             app.scrollIntoView({ behavior: 'smooth' });
         }
