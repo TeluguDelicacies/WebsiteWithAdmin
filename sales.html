@@ -40,6 +40,12 @@
 
     <!-- Isolated Page Styles -->
     <link rel="stylesheet" href="sales-page.css?v=2.0">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0077b6">
+    <link rel="apple-touch-icon"
+        href="https://pfffotghmcofyrvqynbl.supabase.co/storage/v1/object/public/site-assets/1767276219672_20aiu9.png">
 </head>
 
 <body>
@@ -3382,10 +3388,12 @@
 
             const app = document.getElementById('app');
 
-            // 1. Logic: Calculate Total MRP and Select Images
+            // 1. Logic: Calculate Total MRP, Select Images, and Pre-render Bundle List
             let calculatedTotalMrp = 0;
             const galleryList = [combo.image_url];
-            combo.combo_items.forEach(it => {
+            let bundleItemsHtml = '';
+
+            combo.combo_items.forEach((it, index) => {
                 if (!it.products) return;
 
                 // Price matching
@@ -3409,6 +3417,7 @@
                     const tags = (img.tags || []).map(t => t.toLowerCase().trim());
                     return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
                 });
+
                 if (variantImg) galleryList.push(variantImg.image_url);
                 else if (it.products.showcase_image) galleryList.push(it.products.showcase_image);
 
@@ -3417,22 +3426,9 @@
                     return tags.some(tag => tag.includes('nutrition'));
                 });
                 if (nutritionImg) galleryList.push(nutritionImg.image_url);
-            });
 
-            // 2. Pre-render Bundle Items List (Robust Approach)
-            let bundleItemsHtml = '';
-            combo.combo_items.forEach((it, index) => {
-                if (!it.products) return;
-
-                const pImgs = (state.allProductImages || []).filter(pi => String(pi.product_id) === String(it.products.id));
-                const pkg = (it.packaging_type || '').toLowerCase().trim();
-                const variantImg = pImgs.find(img => {
-                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
-                    return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
-                });
-
+                // Bundle Item HTML
                 const displayImg = variantImg?.image_url || it.products.showcase_image || pImgs[0]?.image_url || state.placeholder;
-
                 bundleItemsHtml += `
                     <li style="display: flex; align-items: flex-start; gap: 20px; padding-bottom: 20px; border-bottom: ${index < combo.combo_items.length - 1 ? '1px solid #eef2f6' : 'none'};">
                         <div style="width: 70px; height: 70px; background: #fff; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9;">
@@ -3497,7 +3493,7 @@
                                     <i class="fas fa-box-open" style="font-size: 1rem; opacity: 0.8;"></i> Bundle Includes:
                                 </h4>
                                 <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
-                                    ${bundleItemsHtml}
+                                    ${bundleItemsHtml || '<li style="color: #64748b; font-size: 0.95rem; padding: 20px; text-align: center; background: #f8fafc; border-radius: 12px; border: 1px dashed #e2e8f0;">No items found in this bundle</li>'}
                                 </ul>
                             </div>
 
@@ -3712,6 +3708,22 @@
                 window.renderCartItems?.();
             }
         };
+
+        // --- PWA Installation Logic ---
+        window.deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.deferredPrompt = e;
+            console.log('PWA Installable');
+            // We could show an install button here if desired
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
 
         window.initCart();
 

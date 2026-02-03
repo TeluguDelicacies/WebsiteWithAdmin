@@ -1,0 +1,17 @@
+{
+    "name": "Telugu Delicacies",
+    "short_name": "Telugu Delicacies",
+    "description": "Authentic Telugu Podis, Chapati & Parota Online",
+    "start_url": "/sales.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0077b6",
+    "icons": [
+        {
+            "src": "https://pfffotghmcofyrvqynbl.supabase.co/storage/v1/object/public/site-assets/1767276219672_20aiu9.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
