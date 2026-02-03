@@ -3077,7 +3077,7 @@ function renderCombos(combos, container) {
         const theme = combo.name.toLowerCase().includes('tiranga') ? 'tiranga' : 'default';
 
         return `
-            <div class="combo-card" data-theme="${theme}" onclick="window.location.href='/sales/${combo.slug}'">
+            <div class="combo-card" data-theme="${theme}" onclick="window.openComboDetail(event, '${combo.slug}')">
                 ${visualHTML}
                 <div class="combo-content">
                     <h3 class="combo-title">${combo.name}</h3>
@@ -3089,10 +3089,10 @@ function renderCombos(combos, container) {
                         ${combo.discount_percent > 0 ? `<div class="combo-save-label">${combo.discount_percent}% OFF</div>` : ''}
                     </div>
                     <div class="combo-buttons-row">
-                        <button class="combo-button-buy" onclick="event.stopPropagation(); window.location.href='/sales/${combo.slug}'">
+                        <button class="combo-button-buy" onclick="event.stopPropagation(); buyComboViaWhatsApp('${combo.name}', ${offerPrice}, '${productListDisplay.replace(/'/g, "\\'")}')">
                             Buy Bundle
                         </button>
-                        <button class="combo-button-cart" onclick="event.stopPropagation(); addComboToCart('${combo.id}')" title="Add to Cart">
+                        <button class="combo-button-cart" onclick="event.stopPropagation(); quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice})" title="Add to Cart">
                             <i class="fas fa-cart-plus"></i>
                         </button>
                     </div>
@@ -3137,6 +3137,96 @@ async function addComboToCart(comboId) {
 }
 // Make function globally accessible for inline onclick
 window.addComboToCart = addComboToCart;
+
+/**
+ * Buy Combo via WhatsApp - opens WhatsApp with order message
+ * @param {string} comboName - Name of the combo
+ * @param {number} price - Offer price
+ * @param {string} products - Product list
+ */
+function buyComboViaWhatsApp(comboName, price, products) {
+    const message = `Hi! I'd like to order the "${comboName}" combo bundle.\n\nItems: ${products}\nPrice: ₹${price}\n\nPlease confirm availability.`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+}
+// Make function globally accessible
+window.buyComboViaWhatsApp = buyComboViaWhatsApp;
+
+/**
+ * View combo details - navigate to combo sales page
+ * @param {string} slug - Combo URL slug
+ */
+function viewComboDetails(slug) {
+    window.location.href = `/sales/${slug}`;
+}
+window.viewComboDetails = viewComboDetails;
+
+/**
+ * Defensive opener for combo detail page
+ */
+window.openComboDetail = function (event, slug) {
+    // If user clicked a button or icon inside a button, don't navigate
+    if (event.target.closest('button')) {
+        return;
+    }
+    window.location.href = `/sales/${slug}`;
+};
+
+/**
+ * Quick add combo to cart - uses td_cart (same as main cart)
+ * @param {string} comboId - Combo UUID
+ * @param {string} comboName - Combo name
+ * @param {number} price - Offer price
+ */
+function quickAddComboToCart(comboId, comboName, price) {
+    try {
+        // Get existing cart from localStorage (same key as main cart)
+        let cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+
+        // Check if combo already in cart (combos have type: 'combo')
+        const existingIndex = cart.findIndex(item => item.id === comboId && item.type === 'combo');
+
+        if (existingIndex >= 0) {
+            // Increment quantity
+            cart[existingIndex].qty += 1;
+            showToast(`Added another "${comboName}" to cart!`, 'success');
+        } else {
+            // Add new combo item matching cart structure
+            cart.push({
+                id: comboId,
+                name: comboName,
+                telugu_name: '',
+                price: price,
+                image: '', // Combo image will be loaded dynamically if needed
+                variant: { quantity: 'Bundle', packaging_type: 'Combo' },
+                qty: 1,
+                type: 'combo' // Mark as combo for differentiation
+            });
+            showToast(`"${comboName}" added to cart!`, 'success');
+        }
+
+        // Save to localStorage
+        localStorage.setItem('td_cart', JSON.stringify(cart));
+
+        // Update cart UI (badge and drawer)
+        if (window.updateMainCartUI) {
+            window.updateMainCartUI();
+        }
+
+        // Animate cart button
+        const cartBtn = document.getElementById('mainCartBtn') || document.getElementById('mobileCartBtn');
+        if (cartBtn) {
+            cartBtn.classList.add('cart-pop');
+            setTimeout(() => cartBtn.classList.remove('cart-pop'), 400);
+        }
+
+    } catch (err) {
+        console.error('Error adding combo to cart:', err);
+        showToast('Failed to add to cart', 'error');
+    }
+}
+window.quickAddComboToCart = quickAddComboToCart;
 
 /**
  * Technical Implementation of the Slot-based Fan Carousel
@@ -4509,7 +4599,13 @@ window.updateMainCartUI = function () {
 
             return `
                 <div class="cart-item">
-                    <img src="${item.image || ''}" alt="${item.name || 'Product'}" onerror="this.style.display='none'">
+                    ${item.type === 'combo' ?
+                    `<div class="cart-item-combo-placeholder">
+                            <i class="fas fa-gift"></i>
+                            <span>Combo</span>
+                        </div>` :
+                    `<img src="${item.image || ''}" alt="${item.name || 'Product'}" onerror="this.style.display='none'">`
+                }
                     <div class="cart-item-details">
                         <h4>${item.name || 'Product'}</h4>
                         ${variantLabel}

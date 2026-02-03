@@ -2939,7 +2939,13 @@
 
                     return `
                         <div class="cart-item">
-                            <img src="${imgSrc}" alt="${item.name}" onerror="this.src='${state.placeholder}'">
+                            ${item.type === 'combo' ?
+                            `<div class="cart-item-combo-placeholder">
+                                    <i class="fas fa-gift"></i>
+                                    <span>Combo</span>
+                                </div>` :
+                            `<img src="${imgSrc}" alt="${item.name}" onerror="this.src='${state.placeholder}'">`
+                        }
                             <div class="cart-item-details">
                                 <h4>${item.name}</h4>
                                 ${variantLabel}

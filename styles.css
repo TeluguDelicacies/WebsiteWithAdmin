@@ -6956,6 +6956,33 @@ Uses same card structure as sales page product grid
   font-size: 1rem;
 }
 
+/* Combo placeholder in cart drawer */
+.cart-item-combo-placeholder {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  background: #FFF9DC;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  color: #5d4e37;
+}
+
+.cart-item-combo-placeholder i {
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.cart-item-combo-placeholder span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 /* Combo Detail Modal Base Styles (Internal) */
 #comboDetailModal .modal-dialog {
   max-width: 800px;
