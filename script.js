@@ -2986,8 +2986,9 @@ function renderCombos(combos, container) {
                         <button class="combo-button-buy" onclick="event.stopPropagation(); buyComboViaWhatsApp('${combo.name}', ${offerPrice}, '${productListDisplay.replace(/'/g, "\\'")}')">
                             Buy Bundle
                         </button>
-                        <button class="combo-button-cart" onclick="event.stopPropagation(); quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice})" title="Add to Cart">
+                        <button class="combo-button-cart combo-cart-btn" data-combo-id="${combo.id}" onclick="event.stopPropagation(); quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice})" title="Add to Cart">
                             <i class="fas fa-cart-plus"></i>
+                            <span class="combo-cart-qty" style="margin-left: 4px; display: none;"></span>
                         </button>
                     </div>
                 </div>

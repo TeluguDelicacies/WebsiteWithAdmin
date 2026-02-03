@@ -3484,10 +3484,11 @@
                                             ${totalMrp > offerPrice ? `<div class="combo-price-mrp">₹${totalMrp}</div>` : ''}
                                             ${discountPercent > 0 ? `<div class="combo-save-label">${discountPercent}% OFF</div>` : ''}
                                         </div>
-                                            <button class="combo-button-buy" onclick="event.stopPropagation(); window.orderComboWhatsApp('${combo.id}')">
+                                        <div class="combo-buttons-row" style="display: flex; gap: 8px; margin-top: 12px;">
+                                            <button class="combo-button-buy" onclick="event.stopPropagation(); window.orderComboWhatsApp('${combo.id}')" style="flex: 1;">
                                                 Buy Bundle
                                             </button>
-                                            <button class="combo-button-cart combo-cart-btn" data-combo-id="${combo.id}" onclick="event.stopPropagation(); window.addComboToCartWithSync('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || allImages[0] || ''}')" title="Add to Cart">
+                                            <button class="combo-button-cart combo-cart-btn" data-combo-id="${combo.id}" onclick="event.stopPropagation(); window.addComboToCartWithSync('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || allImages[0] || ''}')" title="Add to Cart" style="flex: 0 0 auto; padding: 0 14px;">
                                                 <i class="fas fa-cart-plus"></i>
                                                 <span class="combo-cart-qty" style="margin-left: 4px; display: none;"></span>
                                             </button>
