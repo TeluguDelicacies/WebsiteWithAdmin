@@ -3419,6 +3419,40 @@
                 if (nutritionImg) galleryList.push(nutritionImg.image_url);
             });
 
+            // 2. Pre-render Bundle Items List (Robust Approach)
+            let bundleItemsHtml = '';
+            combo.combo_items.forEach((it, index) => {
+                if (!it.products) return;
+
+                const pImgs = (state.allProductImages || []).filter(pi => String(pi.product_id) === String(it.products.id));
+                const pkg = (it.packaging_type || '').toLowerCase().trim();
+                const variantImg = pImgs.find(img => {
+                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                    return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
+                });
+
+                const displayImg = variantImg?.image_url || it.products.showcase_image || pImgs[0]?.image_url || state.placeholder;
+
+                bundleItemsHtml += `
+                    <li style="display: flex; align-items: flex-start; gap: 20px; padding-bottom: 20px; border-bottom: ${index < combo.combo_items.length - 1 ? '1px solid #eef2f6' : 'none'};">
+                        <div style="width: 70px; height: 70px; background: #fff; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9;">
+                            <img src="${displayImg}" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 700; color: #1e293b; font-size: 1.05rem; line-height: 1.3;">
+                                ${it.products.product_name}
+                            </div>
+                            <div style="margin-top: 6px; color: #64748b; font-size: 0.9rem;">
+                                ${it.variant_quantity} ${it.packaging_type}
+                            </div>
+                        </div>
+                        <button onclick="event.stopPropagation(); window.showProductQuickInfo('${it.products.id}')" 
+                                style="flex-shrink: 0; background: #f0f9ff; border: none; color: #0077B6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                            <i class="fas fa-info" style="font-size: 0.8rem;"></i>
+                        </button>
+                    </li>`;
+            });
+
             const discountPercent = combo.discount_percent || 10;
             const offerPrice = Math.round(calculatedTotalMrp * (1 - discountPercent / 100));
             const savings = Math.round(calculatedTotalMrp - offerPrice);
@@ -3463,38 +3497,7 @@
                                     <i class="fas fa-box-open" style="font-size: 1rem; opacity: 0.8;"></i> Bundle Includes:
                                 </h4>
                                 <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
-                                    ${combo.combo_items.map((it, index) => {
-                if (!it.products) return '';
-                const pImages = [...(it.products.product_images || [])];
-                pImages.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
-
-                const variantImg = pImages.find(img => {
-                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
-                    const pkg = (it.packaging_type || '').toLowerCase().trim();
-                    return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
-                });
-
-                const displayImg = variantImg?.image_url || it.products.showcase_image || pImages[0]?.image_url || state.placeholder;
-
-                return `
-                                        <li style="display: flex; align-items: flex-start; gap: 20px; padding-bottom: 20px; border-bottom: ${index < combo.combo_items.length - 1 ? '1px solid #eef2f6' : 'none'};">
-                                            <div style="width: 70px; height: 70px; background: #fff; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9;">
-                                                <img src="${displayImg}" style="width: 100%; height: 100%; object-fit: contain;">
-                                            </div>
-                                            <div style="flex: 1; min-width: 0;">
-                                                <div style="font-weight: 700; color: #1e293b; font-size: 1.05rem; line-height: 1.3;">
-                                                    ${it.products.product_name}
-                                                </div>
-                                                <div style="margin-top: 6px; color: #64748b; font-size: 0.9rem;">
-                                                    ${it.variant_quantity} ${it.packaging_type}
-                                                </div>
-                                            </div>
-                                            <button onclick="event.stopPropagation(); window.showProductQuickInfo('${it.products.id}')" 
-                                                    style="flex-shrink: 0; background: #f0f9ff; border: none; color: #0077B6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                                                <i class="fas fa-info" style="font-size: 0.8rem;"></i>
-                                            </button>
-                                        </li>`;
-            }).join('')}
+                                    ${bundleItemsHtml}
                                 </ul>
                             </div>
 
