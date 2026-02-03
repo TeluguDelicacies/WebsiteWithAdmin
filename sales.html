@@ -3248,7 +3248,7 @@
                 <div class="breadcrumb-section">
                     ${window.renderSmartBreadcrumbs('combo-offers', '')}
                 </div>
-                <section class="category-grid-container" style="width:95%; max-width:1200px; margin:0 auto; padding-bottom:50px;">
+                <section class="category-grid-container" style="width:95%; max-width:1200px; margin:0 auto; padding-bottom:100px;">
                     <div class="category-header-clean">
                         <div class="cat-title-row">
                             <h2 class="cat-title">Special Combo Offers</h2>
@@ -3259,66 +3259,113 @@
 
                     <div class="combo-cards-grid">
                         ${state.allCombos.map(combo => {
-                // Calculate TRUE Total MRP and Offer Price
-                let calculatedTotalMrp = 0;
+                let totalMrp = 0;
                 const productNames = [];
-                combo.combo_items.forEach(it => {
-                    productNames.push(it.products.product_name);
-                    let variants = [];
-                    try {
-                        variants = typeof it.products.quantity_variants === 'string'
-                            ? JSON.parse(it.products.quantity_variants)
-                            : (it.products.quantity_variants || []);
-                    } catch (e) { }
+                const variantImages = [];
+                const productImages = [];
 
-                    const match = variants.find(v =>
-                        String(v.quantity) === String(it.variant_quantity) &&
-                        String(v.packaging_type || '') === String(it.packaging_type || '')
-                    ) || variants[0];
+                (combo.combo_items || []).forEach(it => {
+                    if (it.products) {
+                        productNames.push(it.products.product_name);
 
-                    calculatedTotalMrp += (match ? (match.mrp || match.price || 0) : 0);
+                        const pImgs = (state.allProductImages || []).filter(pi => String(pi.product_id) === String(it.products.id));
+                        const pkg = (it.packaging_type || '').toLowerCase().trim();
+                        const variantImg = pImgs.find(img => {
+                            const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                            return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
+                        });
+
+                        if (variantImg) variantImages.push(variantImg.image_url);
+                        else if (it.products.showcase_image) productImages.push(it.products.showcase_image);
+
+                        let variants = [];
+                        try {
+                            variants = typeof it.products.quantity_variants === 'string' ? JSON.parse(it.products.quantity_variants) : (it.products.quantity_variants || []);
+                        } catch (e) { }
+
+                        const match = variants.find(v =>
+                            String(v.quantity) === String(it.variant_quantity) &&
+                            String(v.packaging_type || '') === String(it.packaging_type || '')
+                        ) || variants[0];
+                        totalMrp += (match ? (match.mrp || match.price || 0) : 0);
+                    }
                 });
 
                 const discountPercent = combo.discount_percent || 10;
-                const offerPrice = Math.round(calculatedTotalMrp * (1 - discountPercent / 100));
-                const savings = Math.round(calculatedTotalMrp - offerPrice);
+                const offerPrice = Math.round(totalMrp * (1 - discountPercent / 100));
+                const savings = Math.round(totalMrp - offerPrice);
+                const productListDisplay = productNames.join(', ');
 
-                // Visual Component for All Combos View (Static Image for now as per plan, but using class)
-                return `
-                                <div class="combo-card" onclick="location.href='/sales/${combo.slug}'">
+                let allImages = variantImages.length > 0 ? variantImages : productImages;
+                allImages = [...new Set(allImages.filter(img => img && img !== state.placeholder))];
+
+                let visualHTML = '';
+                if (allImages.length > 0) {
+                    visualHTML = `
                                     <div class="combo-visual-container">
-                                        <div class="combo-tag-overlay">
-                                            <span class="combo-tag"><i class="fas fa-gift"></i> GIFT BUNDLE</span>
-                                            ${combo.discount_percent ? `<span class="combo-tag" style="background: var(--color-brand-yellow);">${combo.discount_percent}% OFF</span>` : ''}
+                                        <div class="combo-bundle-slots" data-images='${JSON.stringify(allImages)}'>
+                                            <img src="${allImages[0]}" class="fan-slot-img fan-slot-front">
+                                            <img src="${allImages[1] || allImages[0]}" class="fan-slot-img fan-slot-back-right">
+                                            <img src="${allImages[2] || allImages[0]}" class="fan-slot-img fan-slot-back-left">
                                         </div>
-                                        <img src="${combo.image_url || state.placeholder}" style="width: 80%; height: 80%; object-fit: contain;">
                                     </div>
+                                `;
+                } else {
+                    visualHTML = `
+                                    <div class="combo-visual-container">
+                                        <div class="combo-image-placeholder"><i class="fas fa-gift"></i></div>
+                                    </div>
+                                `;
+                }
+
+                const theme = combo.name.toLowerCase().includes('tiranga') ? 'tiranga' : 'default';
+
+                return `
+                                <div class="combo-card" data-theme="${theme}" onclick="window.location.href='/sales/${combo.slug}'">
+                                    ${visualHTML}
                                     <div class="combo-content">
-                                        <div class="combo-header">
-                                            <div class="combo-title-group">
-                                                <h3 class="combo-title">${combo.name}</h3>
-                                                <p class="combo-subtitle">${productNames.join(', ')}</p>
-                                            </div>
-                                            <div class="combo-price-block">
-                                                <div class="combo-price-main">₹${offerPrice || 0}</div>
-                                                <div class="combo-price-mrp">₹${calculatedTotalMrp || 0}</div>
-                                                ${savings > 0 ? `<div class="combo-save-label">SAVE ₹${savings}</div>` : ''}
-                                            </div>
+                                        <h3 class="combo-title">${combo.name}</h3>
+                                        ${combo.tagline ? `<p class="combo-descriptor">${combo.tagline}</p>` : ''}
+                                        <p class="combo-product-list">${productListDisplay}</p>
+                                        <div class="combo-price-row">
+                                            <div class="combo-price-main">₹${offerPrice}</div>
+                                            ${totalMrp > offerPrice ? `<div class="combo-price-mrp">₹${totalMrp}</div>` : ''}
+                                            ${discountPercent > 0 ? `<div class="combo-save-label">${discountPercent}% OFF</div>` : ''}
                                         </div>
-                                        <button class="combo-button">
-                                            <span>View Details</span>
-                                            <i class="fas fa-arrow-right"></i>
-                                        </button>
+                                        <div class="combo-buttons-row">
+                                            <button class="combo-button-buy" onclick="event.stopPropagation(); window.orderComboWhatsApp('${combo.id}')">
+                                                Buy Bundle
+                                            </button>
+                                            <button class="combo-button-cart" onclick="event.stopPropagation(); window.quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || allImages[0] || ''}')" title="Add to Cart">
+                                                <i class="fas fa-cart-plus"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             `;
             }).join('')}
                     </div>
                 </section>
+                <style>
+                    /* Mobile Stacking for Combo Offers Page */
+                    @media (max-width: 767px) {
+                        .combo-cards-grid {
+                            display: flex !important;
+                            flex-direction: column !important;
+                            gap: 20px !important;
+                            padding: 10px !important;
+                        }
+                        .combo-card {
+                            max-width: none !important;
+                            width: 100% !important;
+                        }
+                    }
+                </style>
             `;
 
             app.scrollIntoView({ behavior: 'smooth' });
             window.updateBreadcrumbScroll();
+            if (typeof window.initComboFanCarousels === 'function') window.initComboFanCarousels();
         }
 
         // --- View: Combo ---
@@ -3335,43 +3382,36 @@
 
             const app = document.getElementById('app');
 
-            // Calculate CORRECT Total MRP by matching specific variants
+            // 1. Logic: Calculate Total MRP and Select Images
             let calculatedTotalMrp = 0;
+            const galleryList = [combo.image_url];
             combo.combo_items.forEach(it => {
+                if (!it.products) return;
+
+                // Price matching
                 let variants = [];
                 try {
                     variants = typeof it.products.quantity_variants === 'string'
                         ? JSON.parse(it.products.quantity_variants)
                         : (it.products.quantity_variants || []);
-                } catch (e) { console.error("Parse error", e); }
+                } catch (e) { }
 
-                // Match by quantity AND packaging
                 const match = variants.find(v =>
                     String(v.quantity) === String(it.variant_quantity) &&
                     String(v.packaging_type || '') === String(it.packaging_type || '')
                 ) || variants[0];
-
                 calculatedTotalMrp += (match ? (match.mrp || match.price || 0) : 0);
-            });
 
-            const discountPercent = combo.discount_percent || 10;
-            const offerPrice = Math.round(calculatedTotalMrp * (1 - discountPercent / 100));
-            const savings = Math.round(calculatedTotalMrp - offerPrice);
-
-            // --- REFINED GALLERY LOGIC ---
-            const galleryList = [combo.image_url];
-            combo.combo_items.forEach(it => {
-                const pImgs = (it.products.product_images || []);
-                // 1. Variant image (packaging match)
+                // Image Selection (Packaging/Nutrition)
+                const pImgs = (state.allProductImages || []).filter(pi => String(pi.product_id) === String(it.products.id));
+                const pkg = (it.packaging_type || '').toLowerCase().trim();
                 const variantImg = pImgs.find(img => {
                     const tags = (img.tags || []).map(t => t.toLowerCase().trim());
-                    const pkg = (it.packaging_type || '').toLowerCase().trim();
                     return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
                 });
                 if (variantImg) galleryList.push(variantImg.image_url);
                 else if (it.products.showcase_image) galleryList.push(it.products.showcase_image);
 
-                // 2. Nutrition image
                 const nutritionImg = pImgs.find(img => {
                     const tags = (img.tags || []).map(t => t.toLowerCase().trim());
                     return tags.some(tag => tag.includes('nutrition'));
@@ -3379,7 +3419,9 @@
                 if (nutritionImg) galleryList.push(nutritionImg.image_url);
             });
 
-            // Filter out nulls/placeholders and deduplicate
+            const discountPercent = combo.discount_percent || 10;
+            const offerPrice = Math.round(calculatedTotalMrp * (1 - discountPercent / 100));
+            const savings = Math.round(calculatedTotalMrp - offerPrice);
             const finalGallery = [...new Set(galleryList.filter(img => img && img !== state.placeholder))];
 
             app.innerHTML = `
@@ -3392,10 +3434,9 @@
                         
                         <!-- Visual Area -->
                         <div class="combo-visual-stack" style="position: relative;">
-                            <div id="combo-main-gallery" class="main-combo-image" style="background: var(--color-gray-50); border-radius: 24px; padding: 40px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); border: 1px solid rgba(0, 119, 182, 0.05); overflow: hidden; position: relative;">
-                                <!-- Gallery images will be inserted here -->
+                            <div id="combo-main-gallery" class="main-combo-image" style="background: #ffffff; border-radius: 24px; padding: 40px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); border: 1px solid rgba(0, 119, 182, 0.05); overflow: hidden; position: relative;">
                                 <div id="combo-gallery-inner" style="width:100%; height:100%; position:relative;">
-                                    <img id="combo-active-img" src="${combo.image_url || combo.combo_items[0]?.products?.showcase_image}" 
+                                    <img id="combo-active-img" src="${finalGallery[0] || combo.image_url}" 
                                          alt="${combo.name}"
                                          style="width: 100%; height: 100%; object-fit: contain; transition: opacity 0.5s ease-in-out;">
                                 </div>
@@ -3457,21 +3498,18 @@
                                 </ul>
                             </div>
 
-                            <div class="combo-price-action-card" style="background: var(--color-brand-blue-primary); color: white; border-radius: 24px; padding: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0, 119, 182, 0.25);">
-                                <div style="flex-shrink: 0;">
-                                    <div style="font-size: 0.85rem; opacity: 0.8; text-decoration: line-through;">Total MRP: ₹${calculatedTotalMrp}</div>
-                                    <div style="font-size: 2rem; font-weight: 900; letter-spacing: -1px; margin: 2px 0;">₹${offerPrice}</div>
-                                    ${savings > 0 ? `<div style="font-size: 0.75rem; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 3px 10px; border-radius: 100px; display: inline-block; font-weight: 800; box-shadow: 0 2px 10px rgba(255, 193, 7, 0.2);">SAVE ₹${savings}</div>` : ''}
+                            <!-- Desktop Action Card -->
+                            <div class="combo-price-action-card" style="background: var(--color-brand-blue-primary); color: white; border-radius: 24px; padding: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0, 119, 182, 0.25);">
+                                <div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8; text-decoration: line-through;">Total MRP: ₹${calculatedTotalMrp}</div>
+                                    <div style="font-size: 2.2rem; font-weight: 900; letter-spacing: -1px;">₹${offerPrice}</div>
+                                    ${savings > 0 ? `<div style="font-size: 0.8rem; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 4px 12px; border-radius: 100px; display: inline-block; font-weight: 800; margin-top: 8px;">SAVE ₹${savings}</div>` : ''}
                                 </div>
-                                <div style="display: flex; gap: 10px; flex-grow: 1; margin-left: 20px; height: 54px;">
-                                    <button class="action-btn-pill" style="flex: 0 0 75%; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; font-weight: 800; font-size: 0.95rem; border-radius: 14px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);" onclick="window.orderComboWhatsApp('${combo.id}')">
+                                <div style="display: flex; gap: 10px; flex-grow: 1; margin-left: 30px; height: 55px;">
+                                    <button style="flex: 0 0 75%; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; font-weight: 800; font-size: 1rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.orderComboWhatsApp('${combo.id}')">
                                         Buy the Bundle <i class="fab fa-whatsapp"></i>
                                     </button>
-                                    <button class="action-btn-pill" style="flex: 0 0 25%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); font-weight: 700; font-size: 1.1rem; border-radius: 14px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center;" 
-                                            onmouseover="this.style.background='rgba(255,255,255,0.25)'" 
-                                            onmouseout="this.style.background='rgba(255,255,255,0.15)'"
-                                            title="Add to Cart"
-                                            onclick="window.quickAddComboToCart('${combo.id}', '${combo.name}', ${offerPrice}, '${combo.image_url || (finalGallery && finalGallery[0]) || ''}')">
+                                    <button style="flex: 0 0 25%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); font-weight: 700; font-size: 1.2rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || finalGallery[0] || ''}')">
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
                                 </div>
@@ -3480,14 +3518,28 @@
                     </div>
                 </div>
 
+                <!-- Sticky Mobile Action Bar -->
+                <div class="sticky-mobile-action">
+                    <div style="flex-shrink: 0; color: white;">
+                        <div style="font-size: 0.75rem; opacity: 0.7; text-decoration: line-through;">₹${calculatedTotalMrp}</div>
+                        <div style="font-size: 1.4rem; font-weight: 900;">₹${offerPrice}</div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-grow: 1; height: 48px;">
+                        <button style="flex: 0 0 75%; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; font-weight: 800; font-size: 0.9rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.orderComboWhatsApp('${combo.id}')">
+                            Buy Bundle <i class="fab fa-whatsapp"></i>
+                        </button>
+                        <button style="flex: 0 0 25%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;" onclick="window.quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || finalGallery[0] || ''}')">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <style>
                     @media (max-width: 992px) {
                         .combo-detail-layout { grid-template-columns: 1fr !important; gap: 30px !important; margin: 0 auto !important; padding: 15px !important; }
                         .combo-page-header h1 { font-size: 2rem !important; }
                         .combo-visual-stack .main-combo-image { padding: 30px !important; border-radius: 20px !important; }
-                        .combo-price-action-card { flex-direction: column !important; gap: 20px !important; text-align: center !important; padding: 25px !important; }
-                        .combo-price-action-card > div:last-child { width: 100%; margin-left: 0 !important; }
-                        .combo-price-action-card button { height: 50px !important; }
+                        .combo-price-action-card { display: none !important; }
                     }
                     @keyframes slideIn {
                         from { opacity: 0; transform: translateY(15px); }
@@ -3629,6 +3681,33 @@
             const url = `${baseUrl}?phone=${phone}&text=${message}`;
 
             window.open(url, '_blank');
+        };
+
+        window.quickAddComboToCart = function (id, name, price, image) {
+            let cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+
+            const existingIndex = cart.findIndex(item => item.id === id && item.isCombo);
+            if (existingIndex > -1) {
+                cart[existingIndex].qty += 1;
+            } else {
+                cart.push({
+                    id: id,
+                    name: name,
+                    price: price,
+                    image: image,
+                    qty: 1,
+                    isCombo: true
+                });
+            }
+
+            localStorage.setItem('td_cart', JSON.stringify(cart));
+            window.initHeaderCartButton();
+            window.showToast?.(`${name} added to cart!`, 'success');
+
+            // Refresh cart drawer if open
+            if (document.getElementById('cartDrawer').classList.contains('open')) {
+                window.renderCartItems?.();
+            }
         };
 
         window.initCart();

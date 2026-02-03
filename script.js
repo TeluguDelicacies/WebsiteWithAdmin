@@ -3121,7 +3121,7 @@ window.quickAddComboToCart = quickAddComboToCart;
  * Technical Implementation of the Slot-based Fan Carousel
  * Cycles images through 3 CSS-positioned slots every 3 seconds
  */
-function initComboFanCarousels() {
+window.initComboFanCarousels = function () {
     const containers = document.querySelectorAll('.combo-bundle-slots');
 
     // Helper to preload images for a container
