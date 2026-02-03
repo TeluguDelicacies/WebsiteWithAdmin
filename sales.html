@@ -3500,13 +3500,13 @@
                                 <p style="font-size: 1.1rem; color: var(--color-gray-600); line-height: 1.6;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
                             </div>
 
-                            <!-- Bundle Items Section - Robust List -->
+                            <!-- Bundle Items Section - Robust Container -->
                             <div class="combo-product-list" style="padding: 10px 0;">
                                 <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 25px; color: #0077B6; display: flex; align-items: center; gap: 10px;">
                                     <i class="fas fa-box-open" style="font-size: 1rem; opacity: 0.8;"></i> Bundle Includes:
                                 </h4>
-                                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
-                                    ${bundleItemsHtml || '<li style="color: #64748b; font-size: 0.95rem; padding: 20px; text-align: center; background: #f8fafc; border-radius: 12px; border: 1px dashed #e2e8f0;">No items found in this bundle</li>'}
+                                <ul id="bundle-items-list-target" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px; border: 2px dashed #0077B610; border-radius: 16px; min-height: 50px;">
+                                    <li style="color: #64748b; font-size: 0.9rem; padding: 20px; text-align: center;">Loading bundle items...</li>
                                 </ul>
                             </div>
 
@@ -3559,6 +3559,17 @@
                     }
                 </style>
             `;
+
+            // 3. Post-Render: Inject Bundle List & Initialize Gallery
+            setTimeout(() => {
+                const target = document.getElementById('bundle-items-list-target');
+                if (target) {
+                    target.innerHTML = bundleItemsHtml || '<li style="color: #64748b; font-size: 0.95rem; padding: 20px; text-align: center;">No items found in this bundle</li>';
+                    console.log('[ComboDebug] Successfully injected HTML into DOM target.');
+                } else {
+                    console.error('[ComboDebug] FAILED to find bundle-items-list-target in DOM!');
+                }
+            }, 0);
 
             if (finalGallery.length > 1) {
                 const dotsContainer = document.getElementById('combo-gallery-dots');
