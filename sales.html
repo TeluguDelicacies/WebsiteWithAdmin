@@ -3358,6 +3358,30 @@
             const offerPrice = Math.round(calculatedTotalMrp * (1 - discountPercent / 100));
             const savings = Math.round(calculatedTotalMrp - offerPrice);
 
+            // --- REFINED GALLERY LOGIC ---
+            const galleryList = [combo.image_url];
+            combo.combo_items.forEach(it => {
+                const pImgs = (it.products.product_images || []);
+                // 1. Variant image (packaging match)
+                const variantImg = pImgs.find(img => {
+                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                    const pkg = (it.packaging_type || '').toLowerCase().trim();
+                    return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
+                });
+                if (variantImg) galleryList.push(variantImg.image_url);
+                else if (it.products.showcase_image) galleryList.push(it.products.showcase_image);
+
+                // 2. Nutrition image
+                const nutritionImg = pImgs.find(img => {
+                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                    return tags.some(tag => tag.includes('nutrition'));
+                });
+                if (nutritionImg) galleryList.push(nutritionImg.image_url);
+            });
+
+            // Filter out nulls/placeholders and deduplicate
+            const finalGallery = [...new Set(galleryList.filter(img => img && img !== state.placeholder))];
+
             app.innerHTML = `
                 <div class="breadcrumb-section">
                     ${window.renderSmartBreadcrumbs('combo-offers', combo.name)}
@@ -3474,30 +3498,6 @@
                     }
                 </style>
             `;
-
-            // --- REFINED GALLERY LOGIC ---
-            const galleryList = [combo.image_url];
-            combo.combo_items.forEach(it => {
-                const pImgs = (it.products.product_images || []);
-                // 1. Variant image (packaging match)
-                const variantImg = pImgs.find(img => {
-                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
-                    const pkg = (it.packaging_type || '').toLowerCase().trim();
-                    return tags.some(tag => tag.includes(pkg) || pkg.includes(tag));
-                });
-                if (variantImg) galleryList.push(variantImg.image_url);
-                else if (it.products.showcase_image) galleryList.push(it.products.showcase_image);
-
-                // 2. Nutrition image
-                const nutritionImg = pImgs.find(img => {
-                    const tags = (img.tags || []).map(t => t.toLowerCase().trim());
-                    return tags.some(tag => tag.includes('nutrition'));
-                });
-                if (nutritionImg) galleryList.push(nutritionImg.image_url);
-            });
-
-            // Filter out nulls/placeholders and deduplicate
-            const finalGallery = [...new Set(galleryList.filter(img => img && img !== state.placeholder))];
 
             if (finalGallery.length > 1) {
                 const dotsContainer = document.getElementById('combo-gallery-dots');
