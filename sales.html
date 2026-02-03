@@ -3699,14 +3699,14 @@
                             </div>
                         </div>
 
+                        <!-- Mobile Header - Direct grid child for proper ordering -->
+                        <div class="combo-page-header mobile-only-header">
+                            <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand-blue-primary); margin-bottom: 10px;">${combo.name}</h1>
+                            <p style="font-size: 1rem; color: var(--color-gray-600); line-height: 1.5;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
+                        </div>
+
                         <!-- Right Column: What's Inside + Action Card -->
                         <div class="combo-info-stack" style="display: flex; flex-direction: column; gap: 25px;">
-                            
-                            <!-- Title Section - Mobile Only (shows at top on mobile) -->
-                            <div class="combo-page-header mobile-only-header">
-                                <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand-blue-primary); margin-bottom: 10px;">${combo.name}</h1>
-                                <p style="font-size: 1rem; color: var(--color-gray-600); line-height: 1.5;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
-                            </div>
 
                             <!-- Bundle Items Section -->
                             <div class="combo-bundle-items-section" style="
@@ -3793,11 +3793,30 @@
                         .desktop-only-header { display: block !important; }
                     }
                     
-                    /* Mobile: Single column, title at top */
+                    /* Mobile: Single column, title at top, then image, then whats inside */
                     @media (max-width: 992px) {
-                        .combo-detail-layout { grid-template-columns: 1fr !important; gap: 20px !important; margin: 0 auto !important; padding: 15px !important; }
-                        .combo-left-column { order: 2; }
-                        .combo-info-stack { order: 1; }
+                        .combo-detail-layout { 
+                            grid-template-columns: 1fr !important; 
+                            gap: 20px !important; 
+                            margin: 0 auto !important; 
+                            padding: 15px !important; 
+                        }
+                        /* On mobile: make info-stack a flex column and reorder children */
+                        .combo-info-stack {
+                            order: 2;
+                        }
+                        .combo-left-column { 
+                            order: 1; 
+                        }
+                        /* Mobile header goes before image via negative margin trick */
+                        .mobile-only-header {
+                            position: relative;
+                            order: -1;
+                            margin-bottom: 0;
+                        }
+                        .combo-bundle-items-section {
+                            order: 3;
+                        }
                         .desktop-only-header { display: none !important; }
                         .mobile-only-header { display: block !important; }
                         .combo-page-header h1 { font-size: 1.8rem !important; }
