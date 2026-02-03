@@ -4482,21 +4482,21 @@ textarea {
         gap: 25px !important;
     }
 
-    .combo-product-list {
+    .combo-bundle-items-section {
         padding: 15px !important;
     }
 
-    .combo-product-list li {
+    .combo-bundle-items-section li {
         padding: 10px !important;
         gap: 12px !important;
     }
 
-    .combo-product-list li div:first-child {
+    .combo-bundle-items-section li div:first-child {
         width: 45px !important;
         height: 45px !important;
     }
 
-    .combo-product-list li div:nth-child(2) div:first-child {
+    .combo-bundle-items-section li div:nth-child(2) div:first-child {
         font-size: 0.9rem !important;
     }
 }
