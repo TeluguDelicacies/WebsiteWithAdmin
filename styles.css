@@ -6982,6 +6982,7 @@ Uses same card structure as sales page product grid
   line-height: 1.1;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   word-break: break-word;
 }
