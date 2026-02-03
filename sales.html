@@ -611,6 +611,14 @@
                 if (imagesRes.error) {
                     console.warn('[Sales Init] Images Error:', imagesRes.error);
                 }
+                if (combosRes.error) {
+                    console.error('[Sales Init] Combos Error:', combosRes.error);
+                } else {
+                    console.log('[Sales Init] Combos loaded:', combosRes.data?.length || 0, 'combos');
+                    if (combosRes.data && combosRes.data.length > 0) {
+                        console.log('[Sales Init] Sample combo structure:', JSON.stringify(combosRes.data[0], null, 2).substring(0, 500));
+                    }
+                }
 
                 console.log('[Sales Init] Data fetched:', {
                     settings: settingsRes.data ? 'OK' : 'Empty',
@@ -3386,6 +3394,14 @@
             state.currentCategory = 'all-products';
             state.currentProduct = null;
 
+            // DEBUG: Log combo structure
+            console.log('[ComboView] Rendering combo:', combo.name);
+            console.log('[ComboView] combo_items:', combo.combo_items);
+            console.log('[ComboView] combo_items length:', combo.combo_items?.length || 0);
+            if (combo.combo_items && combo.combo_items.length > 0) {
+                console.log('[ComboView] First item structure:', JSON.stringify(combo.combo_items[0], null, 2).substring(0, 500));
+            }
+
             const app = document.getElementById('app');
 
             // 1. Logic: Calculate Total MRP, Select Images, and Pre-render Bundle List
@@ -3393,7 +3409,8 @@
             const galleryList = [combo.image_url];
             let bundleItemsHtml = '';
 
-            combo.combo_items.forEach((it, index) => {
+            (combo.combo_items || []).forEach((it, index) => {
+                console.log(`[ComboView] Processing item ${index}:`, it ? 'exists' : 'null', 'products:', it?.products ? 'exists' : 'null');
                 if (!it.products) return;
 
                 // Price matching
