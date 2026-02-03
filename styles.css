@@ -6590,8 +6590,15 @@ Uses same card structure as sales page product grid
 }
 
 .combo-section {
-  background: var(--combo-bg-gradient);
+  /* Smooth gradient that transitions well with adjacent sections */
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 252, 240, 1) 15%,
+      rgba(255, 249, 220, 1) 50%,
+      rgba(255, 252, 240, 1) 85%,
+      rgba(255, 255, 255, 1) 100%);
   padding: 50px 0;
+  position: relative;
 }
 
 .combo-cards-grid {
@@ -6623,57 +6630,87 @@ Uses same card structure as sales page product grid
   }
 }
 
-/* 1. Compact Square Card Container */
+/* 1. Card matching uploaded image - soft yellow #FFF9DC */
 .combo-card {
   --card-accent: var(--combo-accent);
-  background: #ffffff;
+  /* Exact color from uploaded image */
+  background: #FFF9DC;
   border-radius: var(--combo-radius);
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--combo-shadow-idle);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(0, 119, 182, 0.08);
+  box-shadow:
+    0 4px 20px rgba(0, 51, 102, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Subtle yellow border matching image */
+  border: 2px solid rgba(255, 220, 100, 0.6);
   height: 100%;
   cursor: pointer;
   padding: 0;
-  /* Let content handle padding */
 }
 
+/* Mobile: 95% of users - optimized card sizing */
 @media (max-width: 768px) {
   .combo-card {
-    min-width: 85vw !important;
-    max-width: 85vw !important;
+    min-width: 75vw !important;
+    max-width: 75vw !important;
     scroll-snap-align: center;
     flex-shrink: 0;
+    border-radius: 14px;
   }
+}
+
+/* Shimmer effect on hover */
+.combo-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      transparent);
+  transition: left 0.6s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.combo-card:hover::before {
+  left: 150%;
 }
 
 .combo-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--combo-shadow-hover);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 12px 35px rgba(0, 51, 102, 0.12),
+    0 4px 12px rgba(255, 184, 0, 0.15);
+  border-color: rgba(255, 184, 0, 0.4);
 }
 
-/* 3. Image Section: Strict 4:3 Aspect Ratio (Compact) */
+/* 3. Image Section: Square container - 10% BIGGER */
+/* Mobile-first: 95% of users are on mobile */
 .combo-visual-container {
+  /* Square, capped at 200px (10% bigger than 180px) */
   width: 100%;
-  aspect-ratio: 4 / 3;
-  max-height: 220px;
+  max-width: 200px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
   position: relative;
-  background: var(--color-gray-50);
+  /* Clean white background against yellow card */
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  /* Reduced for tighter look */
+  padding: 10px;
   overflow: hidden;
-}
-
-@media (max-height: 800px) and (max-width: 768px) {
-  .combo-visual-container {
-    max-height: 25vh;
-  }
+  border-radius: 12px;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* 3.1 Overlay Tags - More Compact */
@@ -6702,52 +6739,60 @@ Uses same card structure as sales page product grid
   border: 1px solid rgba(0, 119, 182, 0.05);
 }
 
-/* 3.2 Animated Slot System - Adjusted for smaller width */
+/* 3.2 Animated Slot System - Square cards, prominent back images */
 .combo-bundle-slots {
   position: relative;
-  width: 85%;
-  height: 85%;
+  width: 90%;
+  height: 90%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* SQUARE image cards - not stretched rectangles */
 .fan-slot-img {
   position: absolute;
-  width: 80%;
-  height: 80%;
+  /* Square dimensions */
+  width: 70%;
+  aspect-ratio: 1 / 1;
+  height: auto;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
   object-fit: contain;
-  padding: 8px;
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  padding: 6px;
+  /* Smoother transition - less bounce for desktop, reduces jitter */
+  transition: transform 0.5s ease-out, opacity 0.4s ease-out;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  /* GPU acceleration - smoother on desktop */
+  will-change: transform, opacity;
+  transform-origin: center center;
+  backface-visibility: hidden;
 }
 
+/* Front/Main card */
 .fan-slot-front {
   z-index: 5;
-  transform: scale(1);
+  transform: scale(1) translateZ(0);
   opacity: 1;
 }
 
+/* MORE PROMINENT back cards - wider spread, larger scale */
 .fan-slot-back-right {
   z-index: 3;
-  transform: scale(0.85) translateX(15px) rotate(8deg);
-  /* Tighter spread as requested */
-  opacity: 0.9;
+  transform: scale(0.88) translateX(28px) rotate(10deg) translateZ(0);
+  opacity: 0.95;
 }
 
 .fan-slot-back-left {
   z-index: 2;
-  transform: scale(0.85) translateX(-15px) rotate(-8deg);
-  /* Tighter spread as requested */
-  opacity: 0.9;
+  transform: scale(0.88) translateX(-28px) rotate(-10deg) translateZ(0);
+  opacity: 0.95;
 }
 
 .fan-slot-hidden {
   z-index: 1;
-  transform: scale(0.5) translateY(30px);
+  transform: scale(0.5) translateY(30px) translateZ(0);
   opacity: 0;
   visibility: hidden;
 }
@@ -6761,26 +6806,53 @@ Uses same card structure as sales page product grid
   gap: clamp(0.5rem, 2vw, 0.8rem);
 }
 
-.combo-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
+/* Combo title - consistent across cards */
 .combo-title {
-  font-size: clamp(1.05rem, 4vw, 1.35rem);
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--color-brand-blue-primary);
-  margin: 0;
+  margin: 0 0 2px 0;
   line-height: 1.2;
+  text-align: center;
 }
 
-.combo-subtitle {
-  font-size: 0.8rem;
+/* Combo descriptor/tagline - BIGGER with more apparent animation */
+.combo-descriptor {
+  font-size: 0.85rem;
   color: var(--color-gray-600);
   font-weight: 500;
-  margin-top: 4px;
+  margin: 0 0 6px 0;
+  text-align: center;
+  font-style: italic;
+  line-height: 1.3;
+  /* More apparent animation - size pulse + color shift */
+  animation: descriptorPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes descriptorPulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.98);
+    color: var(--color-gray-500);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    color: var(--color-brand-blue-primary);
+  }
+}
+
+/* Product list - show 2 lines with ellipsis, no truncation */
+.combo-product-list {
+  font-size: 0.78rem;
+  color: var(--color-gray-600);
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  text-align: center;
+  min-height: 32px;
+  max-height: 2.6em;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -6789,60 +6861,99 @@ Uses same card structure as sales page product grid
   text-overflow: ellipsis;
 }
 
-.combo-price-block {
-  text-align: right;
+/* Price row - ALL elements bottom aligned */
+.combo-price-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 32px;
+  margin-bottom: 10px;
 }
 
 .combo-price-main {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: var(--color-brand-blue-primary);
+  line-height: 1;
 }
 
 .combo-price-mrp {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--color-gray-400);
   text-decoration: line-through;
 }
 
 .combo-save-label {
-  background: var(--color-brand-yellow-light);
-  color: var(--color-brand-blue-primary);
-  font-size: 0.65rem;
+  /* Vibrant % savings badge */
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-size: 0.7rem;
   font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 4px;
-  margin-top: 2px;
-  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+  text-transform: uppercase;
 }
 
-/* 4. Spacing & Button */
-.combo-button {
+/* 4. Split CTA Buttons: Softer colors */
+.combo-buttons-row {
+  display: flex;
+  gap: 4px;
   width: 100%;
-  padding: 10px;
-  /* Tighter button */
-  background: var(--color-brand-blue-primary);
+}
+
+.combo-button-buy {
+  flex: 3;
+  padding: 12px 14px;
+  /* Softer blue - not as intense */
+  background: #4a90b8;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 10px 0 0 10px;
   font-size: 0.85rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: all 0.2s;
-  box-shadow: 0 3px 10px rgba(0, 119, 182, 0.15);
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(74, 144, 184, 0.2);
+  min-height: 42px;
 }
 
-.combo-button:hover {
-  background: var(--color-primary-dark);
+.combo-button-buy:hover {
+  background: #3d7a9e;
   transform: translateY(-1px);
 }
 
-.combo-button i {
-  color: var(--color-brand-yellow);
+.combo-button-cart {
+  flex: 1;
+  padding: 12px 10px;
+  /* Softer yellow/cream */
+  background: #ffe082;
+  color: #5d4e37;
+  border: none;
+  border-radius: 0 10px 10px 0;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(255, 224, 130, 0.3);
+  min-height: 42px;
+}
+
+.combo-button-cart:hover {
+  background: #ffd54f;
+  transform: translateY(-1px);
+}
+
+.combo-button-cart i {
+  font-size: 1rem;
 }
 
 /* Combo Detail Modal Base Styles (Internal) */

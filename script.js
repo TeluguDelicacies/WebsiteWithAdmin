@@ -3049,20 +3049,16 @@ function renderCombos(combos, container) {
         let allImages = variantImages.length > 0 ? variantImages.map(vi => vi.url) : productImages;
         allImages = [...new Set(allImages)];
 
-        const weightLabel = combo.items?.[0]?.variant_quantity || '100gms';
-        const packLabel = combo.items?.[0]?.packaging_type || '';
         const savings = Math.round(totalMrp - offerPrice);
 
-        // Tags Overlay - Compact
-        const overlayTags = [];
-        if (weightLabel) overlayTags.push(`<span class="combo-tag"><i class="fas fa-weight-hanging"></i> ${weightLabel}</span>`);
-        if (packLabel) overlayTags.push(`<span class="combo-tag"><i class="fas fa-box"></i> ${packLabel}</span>`);
+        // Show full product list - CSS will handle 2-line clamp
+        const productListDisplay = productNames.join(', ');
 
+        // No overlay tags on image - cleaner look
         let visualHTML = '';
         if (allImages.length > 0) {
             visualHTML = `
                 <div class="combo-visual-container">
-                    <div class="combo-tag-overlay">${overlayTags.join('')}</div>
                     <div class="combo-bundle-slots" data-images='${JSON.stringify(allImages)}'>
                         <img src="${allImages[0]}" class="fan-slot-img fan-slot-front">
                         <img src="${allImages[1] || allImages[0]}" class="fan-slot-img fan-slot-back-right">
@@ -3084,21 +3080,20 @@ function renderCombos(combos, container) {
             <div class="combo-card" data-theme="${theme}" onclick="window.location.href='/sales/${combo.slug}'">
                 ${visualHTML}
                 <div class="combo-content">
-                    <div class="combo-header">
-                        <div class="combo-title-group">
-                            <h3 class="combo-title">${combo.name}</h3>
-                            <p class="combo-subtitle">${productNames.join(', ')}</p>
-                        </div>
-                        <div class="combo-price-block">
-                            <div class="combo-price-main">₹${offerPrice}</div>
-                            ${totalMrp > offerPrice ? `<div class="combo-price-mrp">₹${totalMrp}</div>` : ''}
-                            ${savings > 0 ? `<div class="combo-save-label">SAVE ₹${savings}</div>` : ''}
-                        </div>
+                    <h3 class="combo-title">${combo.name}</h3>
+                    ${combo.tagline ? `<p class="combo-descriptor">${combo.tagline}</p>` : ''}
+                    <p class="combo-product-list">${productListDisplay}</p>
+                    <div class="combo-price-row">
+                        <div class="combo-price-main">₹${offerPrice}</div>
+                        ${totalMrp > offerPrice ? `<div class="combo-price-mrp">₹${totalMrp}</div>` : ''}
+                        ${combo.discount_percent > 0 ? `<div class="combo-save-label">${combo.discount_percent}% OFF</div>` : ''}
                     </div>
-                    <div class="combo-footer">
-                        <button class="combo-button" onclick="event.stopPropagation(); window.location.href='/sales/${combo.slug}'">
-                            <span>Order Bundle</span>
-                            <i class="fas fa-shopping-cart"></i>
+                    <div class="combo-buttons-row">
+                        <button class="combo-button-buy" onclick="event.stopPropagation(); window.location.href='/sales/${combo.slug}'">
+                            Buy Bundle
+                        </button>
+                        <button class="combo-button-cart" onclick="event.stopPropagation(); addComboToCart('${combo.id}')" title="Add to Cart">
+                            <i class="fas fa-cart-plus"></i>
                         </button>
                     </div>
                 </div>
@@ -3109,6 +3104,39 @@ function renderCombos(combos, container) {
     // Initialize Animated Fan Carousels
     initComboFanCarousels();
 }
+
+/**
+ * Add combo to cart - redirects to combo page for item selection
+ * @param {string} comboId - The combo UUID
+ */
+async function addComboToCart(comboId) {
+    try {
+        // Fetch combo details to get slug for redirect
+        const { data: combo, error } = await supabase
+            .from('combos')
+            .select('slug, name')
+            .eq('id', comboId)
+            .single();
+
+        if (error || !combo) {
+            console.error('Error fetching combo:', error);
+            showToast('Unable to add combo. Please try again.', 'error');
+            return;
+        }
+
+        // Show feedback toast
+        showToast(`Adding "${combo.name}" to cart...`, 'info');
+
+        // Redirect to combo page where user can configure and add to cart
+        window.location.href = `/sales/${combo.slug}?addToCart=true`;
+
+    } catch (err) {
+        console.error('Error adding combo to cart:', err);
+        showToast('Something went wrong. Please try again.', 'error');
+    }
+}
+// Make function globally accessible for inline onclick
+window.addComboToCart = addComboToCart;
 
 /**
  * Technical Implementation of the Slot-based Fan Carousel
