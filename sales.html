@@ -2924,8 +2924,114 @@
 
             // 6. Sync current detail page
             if (window.syncDetailPageCart) window.syncDetailPageCart();
+            // Also sync combo buttons
+            if (window.syncAllComboCartButtons) window.syncAllComboCartButtons();
 
             window.showToast('Cart cleared', 'info');
+        };
+
+        // ===== COMBO CART FUNCTIONS =====
+
+        // Add combo to cart and sync all combo buttons across the page
+        window.addComboToCartWithSync = function (comboId, comboName, price, imageUrl) {
+            // Find existing combo in cart
+            const existingIndex = state.cart.findIndex(item =>
+                item.type === 'combo' && item.id === comboId
+            );
+
+            if (existingIndex >= 0) {
+                // Increment quantity
+                state.cart[existingIndex].qty += 1;
+            } else {
+                // Add new combo to cart
+                state.cart.push({
+                    id: comboId,
+                    name: comboName,
+                    price: price,
+                    qty: 1,
+                    type: 'combo',
+                    image: imageUrl || ''
+                });
+            }
+
+            window.saveCart();
+            window.updateCartUI();
+            window.syncAllComboCartButtons();
+            window.showToast(`${comboName} added to cart!`, 'success');
+        };
+
+        // Sync all combo cart buttons across the page (main page, grid, detail)
+        window.syncAllComboCartButtons = function () {
+            // Find all combo cart buttons with data-combo-id
+            const comboButtons = document.querySelectorAll('.combo-cart-btn[data-combo-id]');
+
+            comboButtons.forEach(btn => {
+                const comboId = btn.getAttribute('data-combo-id');
+                const qtySpan = btn.querySelector('.combo-cart-qty');
+
+                // Find combo in cart
+                const cartItem = state.cart.find(item =>
+                    item.type === 'combo' && String(item.id) === String(comboId)
+                );
+
+                if (cartItem && cartItem.qty > 0) {
+                    // Show quantity
+                    if (qtySpan) {
+                        qtySpan.textContent = cartItem.qty;
+                        qtySpan.style.display = 'inline';
+                    }
+                    // Add visual indicator that item is in cart
+                    btn.classList.add('in-cart');
+                } else {
+                    // Hide quantity
+                    if (qtySpan) {
+                        qtySpan.textContent = '';
+                        qtySpan.style.display = 'none';
+                    }
+                    btn.classList.remove('in-cart');
+                }
+            });
+        };
+
+        // Order combo via WhatsApp
+        window.orderComboWhatsApp = function (comboId) {
+            const combo = state.allCombos.find(c => String(c.id) === String(comboId));
+            if (!combo) {
+                window.showToast('Combo not found', 'error');
+                return;
+            }
+
+            // Calculate price
+            let totalMrp = 0;
+            (combo.combo_items || []).forEach(it => {
+                if (!it.products) return;
+                let variants = [];
+                try {
+                    variants = typeof it.products.quantity_variants === 'string'
+                        ? JSON.parse(it.products.quantity_variants)
+                        : (it.products.quantity_variants || []);
+                } catch (e) { }
+                const match = variants.find(v =>
+                    String(v.quantity) === String(it.variant_quantity) &&
+                    String(v.packaging_type || '') === String(it.packaging_type || '')
+                ) || variants[0];
+                totalMrp += (match ? (match.mrp || match.price || 0) : 0);
+            });
+
+            const discountPercent = combo.discount_percent || 10;
+            const offerPrice = Math.round(totalMrp * (1 - discountPercent / 100));
+
+            let message = `👋 Hi! I'm interested in ordering the *${combo.name}* bundle.\n\n`;
+            message += `🎁 *Bundle Price:* ₹${offerPrice}\n`;
+            message += `📦 *Includes:* ${(combo.combo_items || []).length} items\n\n`;
+            message += `Please confirm availability and share payment details! ✅`;
+
+            const phone = '919618519191';
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
+            const whatsappUrl = `${baseUrl}?phone=${phone}&text=${encodeURIComponent(message)}`;
+
+            window.open(whatsappUrl, '_blank');
         };
 
         window.updateCartUI = function () {
@@ -3000,6 +3106,8 @@
 
             // Sync detail page quantity if on product view
             if (window.syncDetailPageCart) window.syncDetailPageCart();
+            // Sync combo cart buttons across all instances
+            if (window.syncAllComboCartButtons) window.syncAllComboCartButtons();
         };
 
         window.sendToWhatsApp = async function () {
@@ -3705,6 +3813,9 @@
                     updateGallery((currentIndex + 1) % finalGallery.length);
                 }, 4000);
             }
+
+            // Sync combo cart buttons to show quantity if already in cart
+            if (window.syncAllComboCartButtons) window.syncAllComboCartButtons();
 
             app.scrollIntoView({ behavior: 'smooth' });
         }
