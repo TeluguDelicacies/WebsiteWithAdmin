@@ -3447,143 +3447,66 @@
                 // Get pricing info
                 const itemMrp = match ? (match.mrp || match.price || 0) : 0;
                 const itemPrice = match ? (match.price || match.mrp || 0) : 0;
-                const hasDiscount = itemMrp > itemPrice;
+                const variantText = it.variant_quantity + (it.packaging_type ? ` - ${it.packaging_type}` : '');
 
-                // Bundle Item HTML - Modern Card Design
+                // Bundle Item HTML - Clean Minimal Design
                 const displayImg = variantImg?.image_url || it.products.showcase_image || pImgs[0]?.image_url || state.placeholder;
                 const bundleItem = `
-                    <li class="bundle-item-card" style="
+                    <li class="bundle-item-row" style="
                         display: flex; 
                         align-items: center; 
-                        gap: 16px; 
-                        padding: 16px;
-                        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-                        border-radius: 16px;
-                        border: 1px solid rgba(0, 119, 182, 0.08);
-                        box-shadow: 0 2px 8px rgba(0, 51, 102, 0.04);
-                        transition: all 0.3s ease;
+                        gap: 14px; 
+                        padding: 12px 0;
+                        border-bottom: 1px solid rgba(0, 119, 182, 0.06);
                     ">
-                        <!-- Product Image -->
-                        <div style="
-                            width: 75px; 
-                            height: 75px; 
-                            background: #ffffff; 
-                            border-radius: 14px; 
-                            flex-shrink: 0; 
-                            display: flex; 
-                            align-items: center; 
-                            justify-content: center; 
-                            border: 1px solid #e2e8f0;
-                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-                            overflow: hidden;
-                        ">
-                            <img src="${displayImg}" 
-                                 alt="${it.products.product_name}"
-                                 style="width: 100%; height: 100%; object-fit: contain; padding: 4px;"
-                                 onerror="this.src='${state.placeholder}'">
-                        </div>
+                        <!-- Product Image - Clean 1:1 -->
+                        <img src="${displayImg}" 
+                             alt="${it.products.product_name}"
+                             style="
+                                width: 56px; 
+                                height: 56px; 
+                                object-fit: contain;
+                                flex-shrink: 0;
+                                border-radius: 8px;
+                             "
+                             onclick="window.showProductQuickInfo('${it.products.id}')"
+                             onerror="this.src='${state.placeholder}'">
                         
-                        <!-- Product Info -->
-                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px;">
-                            <!-- Product Name -->
+                        <!-- Product Info - Compact -->
+                        <div style="flex: 1; min-width: 0;">
+                            <!-- Product Name with Variant -->
                             <div style="
-                                font-weight: 700; 
-                                color: var(--color-brand-blue-primary, #0077B6); 
-                                font-size: 1rem; 
-                                line-height: 1.3;
-                                display: -webkit-box;
-                                -webkit-line-clamp: 2;
-                                -webkit-box-orient: vertical;
+                                font-weight: 600; 
+                                color: #1e293b; 
+                                font-size: 0.95rem; 
+                                white-space: nowrap;
                                 overflow: hidden;
+                                text-overflow: ellipsis;
                             ">
-                                ${it.products.product_name}
+                                ${it.products.product_name} <span style="color: #64748b; font-weight: 500;">(${variantText})</span>
                             </div>
                             
-                            <!-- Variant Info -->
-                            <div style="
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                                flex-wrap: wrap;
-                            ">
-                                <span style="
-                                    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-                                    color: #0369a1;
-                                    font-size: 0.75rem;
-                                    font-weight: 600;
-                                    padding: 4px 10px;
-                                    border-radius: 6px;
-                                    border: 1px solid rgba(3, 105, 161, 0.1);
-                                ">
-                                    ${it.variant_quantity}
-                                </span>
-                                ${it.packaging_type ? `
-                                <span style="
-                                    background: #f1f5f9;
-                                    color: #64748b;
-                                    font-size: 0.7rem;
-                                    font-weight: 500;
-                                    padding: 3px 8px;
-                                    border-radius: 5px;
-                                ">
-                                    ${it.packaging_type}
-                                </span>` : ''}
-                            </div>
-                            
-                            <!-- Price Row -->
+                            <!-- Price Row - Always show both -->
                             <div style="
                                 display: flex;
                                 align-items: baseline;
                                 gap: 8px;
-                                margin-top: 2px;
+                                margin-top: 4px;
                             ">
                                 <span style="
-                                    font-size: 1.1rem;
-                                    font-weight: 800;
+                                    font-size: 1rem;
+                                    font-weight: 700;
                                     color: #059669;
                                 ">₹${itemPrice}</span>
-                                ${hasDiscount ? `
                                 <span style="
                                     font-size: 0.85rem;
                                     color: #94a3b8;
                                     text-decoration: line-through;
                                 ">₹${itemMrp}</span>
-                                <span style="
-                                    font-size: 0.7rem;
-                                    font-weight: 700;
-                                    color: #10b981;
-                                    background: rgba(16, 185, 129, 0.1);
-                                    padding: 2px 6px;
-                                    border-radius: 4px;
-                                ">${Math.round((1 - itemPrice / itemMrp) * 100)}% OFF</span>
-                                ` : ''}
                             </div>
                         </div>
-                        
-                        <!-- Info Button -->
-                        <button onclick="event.stopPropagation(); window.showProductQuickInfo('${it.products.id}')" 
-                                style="
-                                    flex-shrink: 0; 
-                                    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-                                    border: 1px solid rgba(0, 119, 182, 0.15);
-                                    color: #0077B6; 
-                                    width: 36px; 
-                                    height: 36px; 
-                                    border-radius: 10px; 
-                                    display: flex; 
-                                    align-items: center; 
-                                    justify-content: center; 
-                                    cursor: pointer;
-                                    transition: all 0.2s ease;
-                                    box-shadow: 0 2px 4px rgba(0, 119, 182, 0.1);
-                                "
-                                onmouseover="this.style.background='#0077B6'; this.style.color='white'; this.style.transform='scale(1.05)';"
-                                onmouseout="this.style.background='linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)'; this.style.color='#0077B6'; this.style.transform='scale(1)';">
-                            <i class="fas fa-info" style="font-size: 0.85rem;"></i>
-                        </button>
                     </li>`;
                 bundleItemsHtml += bundleItem;
-                console.log(`[ComboDebug] Item ${index} rendered:`, it.products.product_name);
             });
 
             console.log('[ComboDebug] Total HTML length:', bundleItemsHtml.length);
@@ -3601,11 +3524,18 @@
                     ${window.renderSmartBreadcrumbs('combo-offers', combo.name)}
                 </div>
 
-                <div class="combo-detail-page fade-in" style="background: ${themeColor}; min-height: 100vh;">
-                    <div class="combo-detail-layout" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; max-width: 1200px; margin: 40px auto; padding: 20px;">
+                <div class="combo-detail-page fade-in" style="background: ${themeColor}; min-height: 100vh; padding-bottom: 120px;">
+                    <div class="combo-detail-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 1200px; margin: 40px auto; padding: 20px;">
                         
-                        <!-- Visual Area -->
-                        <div class="combo-visual-stack" style="position: relative;">
+                        <!-- Left Column: Title + Image (Desktop) -->
+                        <div class="combo-left-column">
+                            <!-- Title Section - Desktop Only (above image) -->
+                            <div class="combo-page-header desktop-only-header" style="margin-bottom: 20px;">
+                                <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--color-brand-blue-primary); margin-bottom: 10px;">${combo.name}</h1>
+                                <p style="font-size: 1.1rem; color: var(--color-gray-600); line-height: 1.6;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
+                            </div>
+                            
+                            <!-- Image Gallery -->
                             <div id="combo-main-gallery" class="main-combo-image" style="background: #ffffff; border-radius: 24px; padding: 40px; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); border: 1px solid rgba(0, 119, 182, 0.05); overflow: hidden; position: relative;">
                                 <div id="combo-gallery-inner" style="width:100%; height:100%; position:relative;">
                                     <img id="combo-active-img" src="${finalGallery[0] || combo.image_url}" 
@@ -3620,14 +3550,16 @@
                             </div>
                         </div>
 
-                        <!-- Info Area -->
+                        <!-- Right Column: What's Inside + Action Card -->
                         <div class="combo-info-stack" style="display: flex; flex-direction: column; gap: 25px;">
-                            <div class="combo-page-header">
-                                <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--color-brand-blue-primary); margin-bottom: 10px;">${combo.name}</h1>
-                                <p style="font-size: 1.1rem; color: var(--color-gray-600); line-height: 1.6;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
+                            
+                            <!-- Title Section - Mobile Only (shows at top on mobile) -->
+                            <div class="combo-page-header mobile-only-header">
+                                <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand-blue-primary); margin-bottom: 10px;">${combo.name}</h1>
+                                <p style="font-size: 1rem; color: var(--color-gray-600); line-height: 1.5;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
                             </div>
 
-                            <!-- Bundle Items Section - Modern Design -->
+                            <!-- Bundle Items Section -->
                             <div class="combo-bundle-items-section" style="
                                 padding: 20px; 
                                 background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
@@ -3638,7 +3570,7 @@
                                 <h4 style="
                                     font-size: 1.15rem; 
                                     font-weight: 800; 
-                                    margin-bottom: 20px; 
+                                    margin-bottom: 16px; 
                                     color: var(--color-brand-blue-primary, #0077B6); 
                                     display: flex; 
                                     align-items: center; 
@@ -3658,7 +3590,7 @@
                                         border-radius: 20px;
                                     ">${(combo.combo_items || []).length} items</span>
                                 </h4>
-                                <ul id="bundle-items-list-target" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px;">
+                                <ul id="bundle-items-list-target" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0;">
                                     ${bundleItemsHtml || '<li style="color: #64748b; font-size: 0.95rem; padding: 20px; text-align: center;">No items found.</li>'}
                                 </ul>
                             </div>
@@ -3668,14 +3600,15 @@
                                 <div>
                                     <div style="font-size: 0.9rem; opacity: 0.8; text-decoration: line-through;">Total MRP: ₹${calculatedTotalMrp}</div>
                                     <div style="font-size: 2.2rem; font-weight: 900; letter-spacing: -1px;">₹${offerPrice}</div>
-                                    ${savings > 0 ? `<div style="font-size: 0.8rem; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 4px 12px; border-radius: 100px; display: inline-block; font-weight: 800; margin-top: 8px;">SAVE ₹${savings}</div>` : ''}
+                                    ${savings > 0 ? `<div style="font-size: 0.8rem; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 4px 12px; border-radius: 100px; display: inline-block; font-weight: 800; margin-top: 8px;">SAVE ₹${savings} (${discountPercent}% OFF)</div>` : ''}
                                 </div>
                                 <div style="display: flex; gap: 10px; flex-grow: 1; margin-left: 30px; height: 55px;">
                                     <button style="flex: 0 0 75%; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; font-weight: 800; font-size: 1rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="window.orderComboWhatsApp('${combo.id}')">
                                         Buy the Bundle <i class="fab fa-whatsapp"></i>
                                     </button>
-                                    <button style="flex: 0 0 25%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); font-weight: 700; font-size: 1.2rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || finalGallery[0] || ''}')">
+                                    <button class="combo-cart-btn" data-combo-id="${combo.id}" style="flex: 0 0 25%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); font-weight: 700; font-size: 1.2rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.addComboToCartWithSync('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || finalGallery[0] || ''}')">
                                         <i class="fas fa-shopping-cart"></i>
+                                        <span class="combo-cart-qty" style="margin-left: 6px; display: none;"></span>
                                     </button>
                                 </div>
                             </div>
@@ -3683,29 +3616,46 @@
                     </div>
                 </div>
 
-                <!-- Sticky Mobile Action Bar -->
-                <div class="sticky-mobile-action">
-                    <div style="flex-shrink: 0; color: white;">
-                        <div style="font-size: 0.75rem; opacity: 0.7; text-decoration: line-through;">₹${calculatedTotalMrp}</div>
-                        <div style="font-size: 1.4rem; font-weight: 900;">₹${offerPrice}</div>
+                <!-- Sticky Mobile Action Bar - Two Line Layout -->
+                <div class="sticky-mobile-action" style="flex-direction: column; gap: 10px; padding: 12px 20px;">
+                    <!-- Line 1: Price Info -->
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+                        <span style="font-size: 1.5rem; font-weight: 900; color: white;">₹${offerPrice}</span>
+                        <span style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-decoration: line-through;">₹${calculatedTotalMrp}</span>
+                        <span style="font-size: 0.75rem; font-weight: 700; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); padding: 3px 8px; border-radius: 6px;">${discountPercent}% OFF</span>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-grow: 1; height: 48px;">
-                        <button style="flex: 0 0 75%; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; font-weight: 800; font-size: 0.9rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.orderComboWhatsApp('${combo.id}')">
+                    <!-- Line 2: Buttons -->
+                    <div style="display: flex; gap: 8px; width: 100%; height: 48px;">
+                        <button style="flex: 3; background: var(--color-brand-yellow); color: var(--color-brand-blue-primary); border: none; font-weight: 800; font-size: 0.9rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.orderComboWhatsApp('${combo.id}')">
                             Buy Bundle <i class="fab fa-whatsapp"></i>
                         </button>
-                        <button style="flex: 0 0 25%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;" onclick="window.quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || finalGallery[0] || ''}')">
+                        <button class="combo-cart-btn" data-combo-id="${combo.id}" style="flex: 1; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700;" onclick="window.addComboToCartWithSync('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || finalGallery[0] || ''}')">
                             <i class="fas fa-shopping-cart"></i>
+                            <span class="combo-cart-qty" style="margin-left: 6px; display: none;"></span>
                         </button>
                     </div>
                 </div>
 
                 <style>
+                    /* Desktop: Two-column layout, title above image on left */
+                    @media (min-width: 993px) {
+                        .combo-detail-layout { grid-template-columns: 1fr 1fr !important; }
+                        .mobile-only-header { display: none !important; }
+                        .desktop-only-header { display: block !important; }
+                    }
+                    
+                    /* Mobile: Single column, title at top */
                     @media (max-width: 992px) {
-                        .combo-detail-layout { grid-template-columns: 1fr !important; gap: 30px !important; margin: 0 auto !important; padding: 15px !important; }
-                        .combo-page-header h1 { font-size: 2rem !important; }
-                        .combo-visual-stack .main-combo-image { padding: 30px !important; border-radius: 20px !important; }
+                        .combo-detail-layout { grid-template-columns: 1fr !important; gap: 20px !important; margin: 0 auto !important; padding: 15px !important; }
+                        .combo-left-column { order: 2; }
+                        .combo-info-stack { order: 1; }
+                        .desktop-only-header { display: none !important; }
+                        .mobile-only-header { display: block !important; }
+                        .combo-page-header h1 { font-size: 1.8rem !important; }
+                        .main-combo-image { padding: 20px !important; border-radius: 16px !important; }
                         .combo-price-action-card { display: none !important; }
                     }
+                    
                     @keyframes slideIn {
                         from { opacity: 0; transform: translateY(15px); }
                         to { opacity: 1; transform: translateY(0); }
