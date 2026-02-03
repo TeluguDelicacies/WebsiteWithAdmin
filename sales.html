@@ -3457,13 +3457,13 @@
                                 <p style="font-size: 1.1rem; color: var(--color-gray-600); line-height: 1.6;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
                             </div>
 
-                            <!-- Rewritten 'In this Bundle' Section -->
-                            <div class="combo-product-list" style="background: #ffffff; border-radius: 20px; padding: 20px; border: 1px solid rgba(0, 119, 182, 0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
-                                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; color: var(--color-brand-blue-primary); display: flex; align-items: center; gap: 10px;">
-                                    <i class="fas fa-layer-group" style="font-size: 0.9rem; opacity: 0.8;"></i> Bundle Contains:
+                            <!-- Rewritten 'In this Bundle' Section - Elegant List -->
+                            <div class="combo-product-list" style="padding: 10px 0;">
+                                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 25px; color: var(--color-brand-blue-primary); display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-box-open" style="font-size: 1rem; opacity: 0.8;"></i> Bundle Includes:
                                 </h4>
                                 <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
-                                    ${combo.combo_items.map(it => {
+                                    ${combo.combo_items.map((it, index) => {
                 if (!it.products) return '';
                 const pImages = [...(it.products.product_images || [])];
                 pImages.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
@@ -3478,10 +3478,10 @@
                 const displayImg = variantImg?.image_url || it.products.showcase_image || pImages[0]?.image_url || state.placeholder;
 
                 return `
-                                        <li style="display: flex; align-items: flex-start; gap: 15px; padding: 12px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9;">
+                                        <li style="display: flex; align-items: flex-start; gap: 20px; padding-bottom: 20px; border-bottom: ${index < combo.combo_items.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none'};">
                                             <!-- Thumb -->
-                                            <div style="width: 60px; height: 60px; background: #fff; border-radius: 12px; flex-shrink: 0; padding: 5px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
-                                                <img src="${displayImg}" style="width: 100%; height: 100%; object-fit: contain;">
+                                            <div style="width: 70px; height: 70px; background: transparent; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                                                <img src="${displayImg}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));">
                                             </div>
                                             
                                             <!-- Details -->
