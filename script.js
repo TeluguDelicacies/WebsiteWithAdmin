@@ -980,117 +980,11 @@ function showErrorMessage(message) {
     showToast(message, 'error');
 }
 
+// Toast styles are now in styles.css or handled by the unified showToast above
 /**
- * Creates and displays a toast notification
- * @param {string} message - The message to display
- * @param {string} type - The type of toast ('success' or 'error')
+ * Unifying showToast - this function is now handled by window.showToast at line 753
  */
-function showToast(message, type = 'success') {
-    // Remove any existing toasts
-    const existingToast = document.querySelector('.toast-notification');
-    if (existingToast) {
-        existingToast.remove();
-    }
 
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast-notification toast-${type}`;
-    toast.innerHTML = `
-        <div class="toast-content">
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-            <span>${message}</span>
-        </div>
-        <button class="toast-close" onclick="this.parentElement.remove()">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-
-    // Add toast styles if not already added
-    if (!document.querySelector('#toast-styles')) {
-        const styles = document.createElement('style');
-        styles.id = 'toast-styles';
-        styles.textContent = `
-            .toast-notification {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                padding: 1rem;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                z-index: 10000;
-                max-width: 400px;
-                animation: slideInRight 0.3s ease;
-                border-left: 4px solid;
-            }
-            
-            .toast-success {
-                border-left-color: #228B22;
-                color: #228B22;
-            }
-            
-            .toast-error {
-                border-left-color: #dc3545;
-                color: #dc3545;
-            }
-            
-            .toast-content {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                flex: 1;
-            }
-            
-            .toast-close {
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: #666;
-                padding: 0.25rem;
-                border-radius: 4px;
-                transition: background-color 0.2s ease;
-            }
-            
-            .toast-close:hover {
-                background-color: rgba(0,0,0,0.1);
-            }
-            
-            @keyframes slideInRight {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @media (max-width: 768px) {
-                .toast-notification {
-                    left: 20px;
-                    right: 20px;
-                    max-width: none;
-                }
-            }
-        `;
-        document.head.appendChild(styles);
-    }
-
-    // Add toast to page
-    document.body.appendChild(toast);
-
-    // Auto-remove toast after 5 seconds
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.style.animation = 'slideInRight 0.3s ease reverse';
-            setTimeout(() => toast.remove(), 300);
-        }
-    }, 5000);
-}
 
 /*
 ========================================
@@ -3214,12 +3108,7 @@ function quickAddComboToCart(comboId, comboName, price) {
             window.updateMainCartUI();
         }
 
-        // Animate cart button
-        const cartBtn = document.getElementById('mainCartBtn') || document.getElementById('mobileCartBtn');
-        if (cartBtn) {
-            cartBtn.classList.add('cart-pop');
-            setTimeout(() => cartBtn.classList.remove('cart-pop'), 400);
-        }
+        // REFINEMENT: Removed cart-pop animation to prevent "flash" reported by user
 
     } catch (err) {
         console.error('Error adding combo to cart:', err);
@@ -4601,8 +4490,7 @@ window.updateMainCartUI = function () {
                 <div class="cart-item">
                     ${item.type === 'combo' ?
                     `<div class="cart-item-combo-placeholder">
-                            <i class="fas fa-gift"></i>
-                            <span>Combo</span>
+                            <span>${item.name}</span>
                         </div>` :
                     `<img src="${item.image || ''}" alt="${item.name || 'Product'}" onerror="this.style.display='none'">`
                 }
