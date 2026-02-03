@@ -3454,12 +3454,12 @@
                                             ${totalMrp > offerPrice ? `<div class="combo-price-mrp">₹${totalMrp}</div>` : ''}
                                             ${discountPercent > 0 ? `<div class="combo-save-label">${discountPercent}% OFF</div>` : ''}
                                         </div>
-                                        <div class="combo-buttons-row">
                                             <button class="combo-button-buy" onclick="event.stopPropagation(); window.orderComboWhatsApp('${combo.id}')">
                                                 Buy Bundle
                                             </button>
-                                            <button class="combo-button-cart" onclick="event.stopPropagation(); window.quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || allImages[0] || ''}')" title="Add to Cart">
+                                            <button class="combo-button-cart combo-cart-btn" data-combo-id="${combo.id}" onclick="event.stopPropagation(); window.addComboToCartWithSync('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${combo.image_url || allImages[0] || ''}')" title="Add to Cart">
                                                 <i class="fas fa-cart-plus"></i>
+                                                <span class="combo-cart-qty" style="margin-left: 4px; display: none;"></span>
                                             </button>
                                         </div>
                                     </div>
@@ -3488,6 +3488,8 @@
             app.scrollIntoView({ behavior: 'smooth' });
             window.updateBreadcrumbScroll();
             if (typeof window.initComboFanCarousels === 'function') window.initComboFanCarousels();
+            // Sync combo cart buttons to show quantity if already in cart
+            if (window.syncAllComboCartButtons) window.syncAllComboCartButtons();
         }
 
         // --- View: Combo ---
@@ -3501,14 +3503,6 @@
             // Update state context
             state.currentCategory = 'all-products';
             state.currentProduct = null;
-
-            // DEBUG: Log combo structure
-            console.log('[ComboView] Rendering combo:', combo.name);
-            console.log('[ComboView] combo_items:', combo.combo_items);
-            console.log('[ComboView] combo_items length:', combo.combo_items?.length || 0);
-            if (combo.combo_items && combo.combo_items.length > 0) {
-                console.log('[ComboView] First item structure:', JSON.stringify(combo.combo_items[0], null, 2).substring(0, 500));
-            }
 
             const app = document.getElementById('app');
 
@@ -3613,6 +3607,24 @@
                                 ">₹${itemMrp}</span>
                             </div>
                         </div>
+                        
+                        <!-- Info Button -->
+                        <button onclick="event.stopPropagation(); window.showProductQuickInfo('${it.products.id}')" 
+                                style="
+                                    flex-shrink: 0; 
+                                    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+                                    border: 1px solid rgba(0, 119, 182, 0.15);
+                                    color: #0077B6; 
+                                    width: 32px; 
+                                    height: 32px; 
+                                    border-radius: 8px; 
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    cursor: pointer;
+                                ">
+                            <i class="fas fa-info" style="font-size: 0.75rem;"></i>
+                        </button>
                     </li>`;
                 bundleItemsHtml += bundleItem;
             });
