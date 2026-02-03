@@ -3457,11 +3457,12 @@
                                 <p style="font-size: 1.1rem; color: var(--color-gray-600); line-height: 1.6;">${combo.description || 'Experience the perfect blend of tradition and taste with our curated bundle.'}</p>
                             </div>
 
-                            <div class="combo-product-list" style="background: #ffffff; border-radius: 20px; padding: 25px; border: 1px solid rgba(0, 119, 182, 0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.02); min-height: 100px;">
-                                <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: var(--color-brand-blue-primary); display: flex; align-items: center; gap: 10px;">
-                                    <i class="fas fa-list-ul" style="font-size: 0.9rem; opacity: 0.7;"></i> In this Bundle:
+                            <!-- Rewritten 'In this Bundle' Section -->
+                            <div class="combo-product-list" style="background: #ffffff; border-radius: 20px; padding: 20px; border: 1px solid rgba(0, 119, 182, 0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; color: var(--color-brand-blue-primary); display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-layer-group" style="font-size: 0.9rem; opacity: 0.8;"></i> Bundle Contains:
                                 </h4>
-                                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px;">
+                                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px;">
                                     ${combo.combo_items.map(it => {
                 if (!it.products) return '';
                 const pImages = [...(it.products.product_images || [])];
@@ -3477,24 +3478,31 @@
                 const displayImg = variantImg?.image_url || it.products.showcase_image || pImages[0]?.image_url || state.placeholder;
 
                 return `
-                                        <li style="display: flex; align-items: center; gap: 15px; padding: 12px; background: #fafafa; border-radius: 12px; transition: all 0.3s; border: 1px solid transparent;" onmouseover="this.style.background='#fff'; this.style.borderColor='rgba(0,119,182,0.1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';" onmouseout="this.style.background='#fafafa'; this.style.borderColor='transparent'; this.style.boxShadow='none'">
-                                            <div style="width: 55px; height: 55px; background: #fff; border-radius: 10px; flex-shrink: 0; padding: 5px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                        <li style="display: flex; align-items: flex-start; gap: 15px; padding: 12px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9;">
+                                            <!-- Thumb -->
+                                            <div style="width: 60px; height: 60px; background: #fff; border-radius: 12px; flex-shrink: 0; padding: 5px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
                                                 <img src="${displayImg}" style="width: 100%; height: 100%; object-fit: contain;">
                                             </div>
-                                            <div style="flex: 1;">
-                                                <div style="font-weight: 700; color: var(--color-gray-800); display: flex; align-items: center; gap: 8px; font-size: 0.95rem;">
-                                                    ${it.products.product_name}
-                                                    <button onclick="window.showProductQuickInfo('${it.products.id}')" 
-                                                            style="background: #e0f2fe; border: none; color: var(--color-primary-blue); cursor: pointer; font-size: 0.75rem; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
-                                                            onmouseover="this.style.background='var(--color-brand-blue-primary)'; this.style.color='white'"
-                                                            onmouseout="this.style.background='#e0f2fe'; this.style.color='var(--color-primary-blue)'"
-                                                            title="View Product Details">
-                                                        <i class="fas fa-info" style="font-size: 0.65rem;"></i>
+                                            
+                                            <!-- Details -->
+                                            <div style="flex: 1; min-width: 0; padding-top: 2px;">
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                                                    <div style="font-weight: 700; color: var(--color-gray-800); font-size: 0.95rem; line-height: 1.3;">
+                                                        ${it.products.product_name}
+                                                    </div>
+                                                    <button onclick="event.stopPropagation(); window.showProductQuickInfo('${it.products.id}')" 
+                                                            style="flex-shrink: 0; background: #e0f2fe; border: none; color: var(--color-brand-blue-primary); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                                        <i class="fas fa-info" style="font-size: 0.75rem;"></i>
                                                     </button>
                                                 </div>
-                                                <div style="font-size: 0.8rem; color: var(--color-gray-500); font-weight: 500;">${it.variant_quantity} <span style="background: #f1f5f9; padding: 1px 5px; border-radius: 4px; margin-left: 3px; font-size: 0.75rem;">${it.packaging_type}</span></div>
+                                                
+                                                <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                    <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-gray-600); background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 6px;">
+                                                        ${it.variant_quantity}
+                                                    </span>
+                                                    <span style="font-size: 0.8rem; color: var(--color-gray-500);">${it.packaging_type}</span>
+                                                </div>
                                             </div>
-                                            <i class="fas fa-check-circle" style="color: #10b981; font-size: 1rem; opacity: 0.8;"></i>
                                         </li>`;
             }).join('')}
                                 </ul>
