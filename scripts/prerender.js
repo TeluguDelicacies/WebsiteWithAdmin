@@ -153,6 +153,24 @@ function generateMetaTitle(product) {
 }
 
 /**
+ * Generates SEO-friendly title for combos
+ */
+function generateComboMetaTitle(combo) {
+    const tagline = combo.tagline ? ` - ${combo.tagline}` : '';
+    return `${combo.name}${tagline} | Combo Bundle`;
+}
+
+/**
+ * Generates SEO-friendly meta description for combos
+ */
+function generateComboMetaDescription(combo) {
+    if (combo.description) {
+        return combo.description.substring(0, 160).trim();
+    }
+    return `Save more with the ${combo.name} bundle from Telugu Delicacies. Authentic traditional flavors at the best price.`;
+}
+
+/**
  * Gets the best image URL for a product
  */
 function getProductImage(product, defaultImages) {
@@ -273,9 +291,35 @@ function injectMetaTags($, product, imageUrl) {
 }
 
 /**
+ * Injects combo meta tags into HTML template
+ */
+function injectComboMetaTags($, combo) {
+    const title = generateComboMetaTitle(combo);
+    const description = generateComboMetaDescription(combo);
+    const productUrl = `${SITE_URL}/sales/${combo.slug}`;
+    const imageUrl = combo.image_url || `${SITE_URL}/images/placeholder-combo.jpg`;
+
+    $('title').text(title);
+    $('meta[name="description"]').attr('content', description);
+    $('meta[property="og:title"]').attr('content', title);
+    $('meta[property="og:description"]').attr('content', description);
+    $('meta[property="og:url"]').attr('content', productUrl);
+    $('meta[property="og:image"]').attr('content', imageUrl);
+
+    if ($('link[rel="canonical"]').length === 0) {
+        $('head').append(`<link rel="canonical" href="${productUrl}" />`);
+    } else {
+        $('link[rel="canonical"]').attr('href', productUrl);
+    }
+
+    fixAssetPaths($);
+    return $;
+}
+
+/**
  * Generates sitemap.xml content
  */
-function generateSitemap(products, categories) {
+function generateSitemap(products, categories, combos) {
     const today = new Date().toISOString().split('T')[0];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -316,6 +360,17 @@ function generateSitemap(products, categories) {
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
+    </url>`;
+    }
+
+    // Add combo pages
+    for (const combo of combos || []) {
+        xml += `
+    <url>
+        <loc>${SITE_URL}/sales/${combo.slug}</loc>
+        <lastmod>${today}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
     </url>`;
     }
 
@@ -404,6 +459,19 @@ async function prerender() {
             console.warn(`   ⚠️ Warning: Could not fetch categories: ${categoriesError.message}`);
         }
 
+        // Fetch combos
+        console.log('🎁 Fetching combos from Supabase...');
+        const { data: combos, error: combosError } = await supabase
+            .from('combos')
+            .select('id, slug, name, tagline, description, image_url')
+            .eq('is_active', true);
+
+        if (combosError) {
+            console.warn(`   ⚠️ Warning: Could not fetch combos: ${combosError.message}`);
+        } else {
+            console.log(`   ✅ Found ${combos.length} combos\n`);
+        }
+
         // ---------------------------------------------------------------------
         // Step 2: Read the template HTML
         // ---------------------------------------------------------------------
@@ -457,6 +525,30 @@ async function prerender() {
         console.log(`\n   📊 Generated ${pagesGenerated} product pages\n`);
 
         // ---------------------------------------------------------------------
+        // Step 3b: Generate static pages for each combo
+        // ---------------------------------------------------------------------
+        console.log('🎁 Generating static combo pages...\n');
+        let comboPagesGenerated = 0;
+
+        for (const combo of combos || []) {
+            if (!combo.slug) continue;
+
+            const $ = cheerio.load(templateHtml);
+            injectComboMetaTags($, combo);
+
+            const outputDir = path.join(DIST_DIR, 'sales', combo.slug);
+            await ensureDir(outputDir);
+
+            const outputFile = path.join(outputDir, 'index.html');
+            await fs.writeFile(outputFile, $.html(), 'utf-8');
+
+            comboPagesGenerated++;
+            console.log(`   ✅ Generated: /sales/${combo.slug}/index.html`);
+        }
+
+        console.log(`\n   📊 Generated ${comboPagesGenerated} combo pages\n`);
+
+        // ---------------------------------------------------------------------
         // Step 4: Generate category pages
         // ---------------------------------------------------------------------
         console.log('📁 Generating category pages...\n');
@@ -507,7 +599,7 @@ async function prerender() {
         // ---------------------------------------------------------------------
         console.log('🗺️  Generating sitemap.xml...');
 
-        const sitemapContent = generateSitemap(products, categories || []);
+        const sitemapContent = generateSitemap(products, categories || [], combos || []);
         const sitemapPath = path.join(DIST_DIR, 'sitemap.xml');
         await fs.writeFile(sitemapPath, sitemapContent, 'utf-8');
 
@@ -533,6 +625,7 @@ async function prerender() {
         console.log('✨ PRERENDER COMPLETE!');
         console.log('═'.repeat(60));
         console.log(`   📄 Product Pages: ${pagesGenerated}`);
+        console.log(`   🎁 Combo Pages: ${comboPagesGenerated}`);
         console.log(`   📁 Category Pages: ${(categories || []).length + 1}`);
         console.log(`   🗺️  Sitemap: dist/sitemap.xml`);
         console.log(`   🤖 Robots: dist/robots.txt`);
