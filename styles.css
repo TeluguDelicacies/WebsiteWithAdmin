@@ -6956,6 +6956,28 @@ Uses same card structure as sales page product grid
   font-size: 1rem;
 }
 
+.combo-button-cart.in-cart {
+  background: var(--color-brand-yellow) !important;
+  color: var(--color-brand-blue-primary) !important;
+  font-weight: 800;
+}
+
+.combo-cart-qty {
+  background: white;
+  color: var(--color-brand-blue-primary);
+  border-radius: 50%;
+  padding: 0 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-left: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+}
+
 /* Combo placeholder in cart drawer */
 .cart-item-combo-placeholder {
   width: 50px;

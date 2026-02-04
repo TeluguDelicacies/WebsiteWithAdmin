@@ -2986,7 +2986,7 @@ function renderCombos(combos, container) {
                         <button class="combo-button-buy" onclick="event.stopPropagation(); buyComboViaWhatsApp('${combo.name}', ${offerPrice}, '${productListDisplay.replace(/'/g, "\\'")}')">
                             Buy Bundle
                         </button>
-                        <button class="combo-button-cart combo-cart-btn" data-combo-id="${combo.id}" onclick="event.stopPropagation(); quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice})" title="Add to Cart">
+                        <button class="combo-button-cart combo-cart-btn" data-combo-id="${combo.id}" onclick="event.stopPropagation(); quickAddComboToCart('${combo.id}', '${combo.name.replace(/'/g, "\\'")}', ${offerPrice}, '${(allImages[0] || combo.image_url || '').replace(/'/g, "\\'")}')" title="Add to Cart">
                             <i class="fas fa-cart-plus"></i>
                             <span class="combo-cart-qty" style="margin-left: 4px; display: none;"></span>
                         </button>
@@ -2998,6 +2998,9 @@ function renderCombos(combos, container) {
 
     // Initialize Animated Fan Carousels
     initComboFanCarousels();
+
+    // Sync combo cart buttons to reflect current cart state on page load
+    syncComboCartButtons();
 }
 
 /**
@@ -3070,11 +3073,13 @@ window.openComboDetail = function (event, slug) {
 
 /**
  * Quick add combo to cart - uses td_cart (same as main cart)
+ * Updated to sync button states and include combo image
  * @param {string} comboId - Combo UUID
  * @param {string} comboName - Combo name
  * @param {number} price - Offer price
+ * @param {string} imageUrl - Combo image URL for cart display
  */
-function quickAddComboToCart(comboId, comboName, price) {
+function quickAddComboToCart(comboId, comboName, price, imageUrl) {
     try {
         // Get existing cart from localStorage (same key as main cart)
         let cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
@@ -3093,7 +3098,7 @@ function quickAddComboToCart(comboId, comboName, price) {
                 name: comboName,
                 telugu_name: '',
                 price: price,
-                image: '', // Combo image will be loaded dynamically if needed
+                image: imageUrl || '', // Include combo image for cart display
                 variant: { quantity: 'Bundle', packaging_type: 'Combo' },
                 qty: 1,
                 type: 'combo' // Mark as combo for differentiation
@@ -3109,7 +3114,8 @@ function quickAddComboToCart(comboId, comboName, price) {
             window.updateMainCartUI();
         }
 
-        // REFINEMENT: Removed cart-pop animation to prevent "flash" reported by user
+        // Sync all combo cart buttons to show current quantity
+        syncComboCartButtons();
 
     } catch (err) {
         console.error('Error adding combo to cart:', err);
@@ -3117,6 +3123,50 @@ function quickAddComboToCart(comboId, comboName, price) {
     }
 }
 window.quickAddComboToCart = quickAddComboToCart;
+
+/**
+ * Sync all combo cart buttons on the main page to reflect current cart state
+ * Shows quantity badge on buttons when combo is in cart
+ */
+function syncComboCartButtons() {
+    try {
+        // Get current cart from localStorage
+        const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+
+        // Find all combo cart buttons with data-combo-id
+        const comboButtons = document.querySelectorAll('.combo-cart-btn[data-combo-id]');
+
+        comboButtons.forEach(btn => {
+            const comboId = btn.getAttribute('data-combo-id');
+            const qtySpan = btn.querySelector('.combo-cart-qty');
+
+            // Find combo in cart
+            const cartItem = cart.find(item =>
+                item.type === 'combo' && String(item.id) === String(comboId)
+            );
+
+            if (cartItem && cartItem.qty > 0) {
+                // Show quantity
+                if (qtySpan) {
+                    qtySpan.textContent = cartItem.qty;
+                    qtySpan.style.display = 'inline';
+                }
+                // Add visual indicator that item is in cart
+                btn.classList.add('in-cart');
+            } else {
+                // Hide quantity
+                if (qtySpan) {
+                    qtySpan.textContent = '';
+                    qtySpan.style.display = 'none';
+                }
+                btn.classList.remove('in-cart');
+            }
+        });
+    } catch (err) {
+        console.error('Error syncing combo cart buttons:', err);
+    }
+}
+window.syncComboCartButtons = syncComboCartButtons;
 
 /**
  * Technical Implementation of the Slot-based Fan Carousel
@@ -4417,6 +4467,11 @@ window.toggleMainCartDrawer = function () {
 // Update Main Cart UI from localStorage
 window.updateMainCartUI = function () {
     const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
+
+    // Sync all combo cart buttons on the main page to reflect current cart state
+    if (typeof window.syncComboCartButtons === 'function') {
+        window.syncComboCartButtons();
+    }
 
     // Update Badges
     const totalQty = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
