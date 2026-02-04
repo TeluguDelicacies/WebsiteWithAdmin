@@ -207,22 +207,26 @@ function fixAssetPaths($) {
     // Fix <script src="./..."> and <script src="relative/...">
     $('script[src]').each((_, el) => {
         const src = $(el).attr('src');
-        if (src && (src.startsWith('./') || src.startsWith('../'))) {
-            const absolutePath = '/' + src.replace(/^\.\.?\//, '');
-            $(el).attr('src', absolutePath);
-        } else if (src && !src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) {
-            $(el).attr('src', '/' + src);
+        if (src) {
+            if (src.startsWith('./') || src.startsWith('../')) {
+                const absolutePath = '/' + src.replace(/^\.*\/+/, '');
+                $(el).attr('src', absolutePath);
+            } else if (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) {
+                $(el).attr('src', '/' + src);
+            }
         }
     });
 
     // Fix <img src="./..."> for local images
     $('img[src]').each((_, el) => {
         const src = $(el).attr('src');
-        if (src && (src.startsWith('./') || src.startsWith('../'))) {
-            const absolutePath = '/' + src.replace(/^\.\.?\//, '');
-            $(el).attr('src', absolutePath);
-        } else if (src && !src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) {
-            $(el).attr('src', '/' + src);
+        if (src) {
+            if (src.startsWith('./') || src.startsWith('../')) {
+                const absolutePath = '/' + src.replace(/^\.*\/+/, '');
+                $(el).attr('src', absolutePath);
+            } else if (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) {
+                $(el).attr('src', '/' + src);
+            }
         }
     });
 
@@ -510,6 +514,34 @@ async function prerender() {
             // Inject meta tags AND fix asset paths
             injectMetaTags($, product, imageUrl);
 
+            // Inject Body Content for SEO (Google Indexing)
+            const productHtml = `
+                <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+                    <nav style="margin-bottom: 20px;">
+                        <a href="/">Home</a> &gt; <a href="/sales/all-products">Products</a> &gt; ${product.product_name}
+                    </nav>
+                    <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
+                        <div style="flex: 1; min-width: 300px;">
+                             <img src="${imageUrl}" alt="${product.product_name}" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        </div>
+                        <div style="flex: 1.5; min-width: 300px;">
+                            <h1 style="font-size: 2.5rem; margin: 0 0 10px; color: #1e293b;">${product.product_name}</h1>
+                            ${product.product_tagline ? `<p style="font-size: 1.2rem; color: #64748b; font-style: italic; margin-bottom: 20px;">${product.product_tagline}</p>` : ''}
+                            <div style="font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 30px;">
+                                ${product.product_description || ''}
+                            </div>
+                            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <p style="font-weight: bold; margin: 0;">Order Authentic Telugu Flavors</p>
+                                <p style="margin: 5px 0 0; color: #64748b;">Available in various sizes with traditional recipes and modern hygiene.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Replace the loader in #app with the prerendered HTML
+            $('#app').html(productHtml);
+
             // Create output directory
             const outputDir = path.join(DIST_DIR, 'sales', product.slug);
             await ensureDir(outputDir);
@@ -535,6 +567,32 @@ async function prerender() {
 
             const $ = cheerio.load(templateHtml);
             injectComboMetaTags($, combo);
+
+            // Inject Body Content for SEO (Combos)
+            const comboHtml = `
+                <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+                    <nav style="margin-bottom: 20px;">
+                        <a href="/">Home</a> &gt; <a href="/sales/all-products">Products</a> &gt; ${combo.name}
+                    </nav>
+                    <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
+                        <div style="flex: 1; min-width: 300px;">
+                             <img src="${combo.image_url || '/images/placeholder-combo.jpg'}" alt="${combo.name}" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        </div>
+                        <div style="flex: 1.5; min-width: 300px;">
+                            <h1 style="font-size: 2.5rem; margin: 0 0 10px; color: #1e293b;">${combo.name}</h1>
+                            ${combo.tagline ? `<p style="font-size: 1.2rem; color: #64748b; font-style: italic; margin-bottom: 20px;">${combo.tagline}</p>` : ''}
+                            <div style="font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 30px;">
+                                ${combo.description || ''}
+                            </div>
+                            <div style="background: #fff7ed; padding: 20px; border-radius: 8px; border: 1px solid #ffedd5;">
+                                <p style="font-weight: bold; margin: 0; color: #9a3412;">Special Combo Offer</p>
+                                <p style="margin: 5px 0 0; color: #c2410c;">Save more with our curated traditional bundles.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#app').html(comboHtml);
 
             const outputDir = path.join(DIST_DIR, 'sales', combo.slug);
             await ensureDir(outputDir);
@@ -569,6 +627,24 @@ async function prerender() {
 
             // Fix asset paths for category pages too
             fixAssetPaths($);
+
+            // Inject Body Content for SEO (Categories)
+            const categoryHtml = `
+                <div class="prerendered-content" style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+                    <nav style="margin-bottom: 20px;">
+                        <a href="/">Home</a> &gt; <a href="/sales/all-products">Categories</a> &gt; ${category.title}
+                    </nav>
+                    <h1 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 10px;">${category.title}</h1>
+                    <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 30px;">Explore our authentic ${category.title} collection, made with traditional recipes and love.</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+                        <!-- Static list of products is loaded via JavaScript for interactivity -->
+                        <div style="padding: 40px; text-align: center; background: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 12px; grid-column: 1/-1;">
+                            <p style="color: #64748b;">Loading authentic Telugu delicacies...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#app').html(categoryHtml);
 
             const outputDir = path.join(DIST_DIR, 'sales', category.slug);
             await ensureDir(outputDir);

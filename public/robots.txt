@@ -1,0 +1,11 @@
+# Robots.txt for Telugu Delicacies
+User-agent: *
+Allow: /
+
+# Disallow admin and internal pages
+Disallow: /admin.html
+Disallow: /admin
+Disallow: /logochanger
+
+# Sitemap location
+Sitemap: https://telugudelicacies.com/sitemap.xml
