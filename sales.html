@@ -1540,21 +1540,21 @@
                     return;
                 }
 
-                // Filter: Only show images that have TAGS
-                let visibleImages = images.filter(img => img.tags && img.tags.length > 0);
+                // Show ALL images (tagged and untagged)
+                let visibleImages = images || [];
 
                 // --- CUSTOM SORTING LOGIC ---
-                // Order: 1. fallbackImage (current display) 2. Default tag 3. Glass tag 4. Standup tag 5. Nutrition tag 6. Rest
+                // Order: 1. fallbackImage (current display) 2. Glass tag 3. Standup tag 4. PET Jar tag 5. Nutrition tag 6. Default tag 7. Untagged (last)
                 visibleImages.sort((a, b) => {
                     const getRank = (img) => {
                         if (img.image_url === fallbackImage) return -1;
                         const tags = (img.tags || []).map(t => t.toLowerCase().trim());
+                        if (!tags.length) return 20; // Untagged images go last
                         if (tags.some(t => t.includes('glass jar'))) return 0;
                         if (tags.some(t => t.includes('standup'))) return 1;
                         if (tags.some(t => t.includes('pet jar'))) return 2;
                         if (tags.some(t => t.includes('nutrition'))) return 3;
                         if (tags.some(t => t === 'default')) return 4;
-                        return 10;
                         return 10;
                     };
                     const rankA = getRank(a);

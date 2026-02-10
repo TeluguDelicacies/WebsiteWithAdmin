@@ -4125,36 +4125,12 @@ function renderQuickProductsHTML(products, showMrp) {
         if (!localImage || localImage.trim() === '') localImage = window.currentSiteSettings?.product_placeholder_url;
         const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
 
-        let variants = [];
-        try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
-
-        let priceDisplay = product.price || 0;
-        let mrpDisplay = product.mrp || 0;
-        let qtyDisplay = product.net_weight || '';
-
-        if (variants && variants.length > 0) {
-            // Find the default variant based on the default image's tag (matching sales page logic)
-            const defaultImg = productImages.find(img => img.is_default) || productImages[0];
-            const activeTags = (defaultImg?.tags || []).map(t => t.toLowerCase().trim());
-
-            let defaultVariant = null;
-            if (activeTags.length > 0) {
-                defaultVariant = variants.find(v => {
-                    const pkg = (v.packaging_type || '').toLowerCase().trim();
-                    return pkg && activeTags.some(tag => tag.includes(pkg) || pkg.includes(tag));
-                });
-            }
-
-            // Fallback: cheapest variant if no tag match
-            if (!defaultVariant) {
-                variants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
-                defaultVariant = variants[0];
-            }
-
-            priceDisplay = defaultVariant.price; // Sales Price
-            mrpDisplay = defaultVariant.mrp || 0; // Variant-level MRP
-            qtyDisplay = defaultVariant.quantity;
-        }
+        // Use global getSortedVariants for consistent tag-aware default variant selection
+        const sortedVariants = window.getSortedVariants(product);
+        const defaultVariant = sortedVariants[0];
+        const priceDisplay = defaultVariant.price || 0;
+        const mrpDisplay = defaultVariant.mrp || 0;
+        const qtyDisplay = defaultVariant.quantity || product.net_weight || '';
 
         // Escape single quotes in product name for the argument
         const pId = product.id;
