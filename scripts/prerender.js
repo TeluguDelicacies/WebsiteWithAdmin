@@ -539,8 +539,8 @@ async function prerender() {
                 </div>
             `;
 
-            // Replace the loader in #app with the prerendered HTML
-            $('#app').html(productHtml);
+            // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
+            $('#app').append(productHtml);
 
             // Create output directory
             const outputDir = path.join(DIST_DIR, 'sales', product.slug);
@@ -592,7 +592,8 @@ async function prerender() {
                     </div>
                 </div>
             `;
-            $('#app').html(comboHtml);
+            // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
+            $('#app').append(comboHtml);
 
             const outputDir = path.join(DIST_DIR, 'sales', combo.slug);
             await ensureDir(outputDir);
@@ -644,7 +645,8 @@ async function prerender() {
                     </div>
                 </div>
             `;
-            $('#app').html(categoryHtml);
+            // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
+            $('#app').append(categoryHtml);
 
             const outputDir = path.join(DIST_DIR, 'sales', category.slug);
             await ensureDir(outputDir);

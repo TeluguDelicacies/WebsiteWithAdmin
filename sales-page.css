@@ -5,6 +5,14 @@ Mobile-First, Robust, Modern CSS
 ========================================
 */
 
+/* Hide pre-rendered SEO content immediately.
+   The prerender script injects static HTML into #app for search engine indexing.
+   Real users should see the SPA spinner/loader, not the static pre-rendered page.
+   This rule loads before JS, preventing the pre-rendered layout from flashing. */
+.prerendered-content {
+    display: none !important;
+}
+
 /* Prevent layout shift from scrollbar toggle */
 html {
     overflow-y: scroll;
