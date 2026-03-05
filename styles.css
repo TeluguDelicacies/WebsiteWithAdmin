@@ -235,12 +235,12 @@ Modern color palette with semantic naming
    Single source of truth for all section spacing
    =========================================== */
 
-/* All main sections get bottom spacing */
-.hero,
-.product-showcase,
-.section,
-.testimonials-showcase,
-.contact-form-section {
+/* All main sections get bottom spacing (home page only) */
+.page-home .hero,
+.page-home .product-showcase,
+.page-home .section,
+.page-home .testimonials-showcase,
+.page-home .contact-form-section {
   padding-bottom: var(--section-spacing);
   margin-bottom: 0 !important;
   /* Force override any legacy margins */
@@ -252,9 +252,9 @@ Modern color palette with semantic naming
   margin-top: 0 !important;
 }
 
-/* Full-height sections with vertical centering */
-.hero,
-.product-showcase {
+/* Full-height sections with vertical centering (home page only) */
+.page-home .hero,
+.page-home .product-showcase {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -264,7 +264,7 @@ Modern color palette with semantic naming
 
 /* Hero needs more height on desktop */
 @media (min-width: 768px) {
-  .hero {
+  .page-home .hero {
     min-height: 60vh;
   }
 }
@@ -1007,7 +1007,7 @@ HERO SECTION - REDESIGNED
 Enhanced visual appeal with modern design
 ========================================
 */
-.hero {
+.page-home .hero {
   position: relative;
 
   /* 1. Layout Engine */
@@ -1041,7 +1041,7 @@ Enhanced visual appeal with modern design
 
 /* Desktop Adjustment */
 @media (min-width: 1024px) {
-  .hero {
+  .page-home .hero {
     /* Desktop Header is approx 100px */
     padding-top: 180px;
     /* 100px Header + 80px Space */
@@ -1051,7 +1051,7 @@ Enhanced visual appeal with modern design
 }
 
 
-.hero::before {
+.page-home .hero::before {
   content: '';
   position: absolute;
   top: 0;
@@ -1066,12 +1066,12 @@ Enhanced visual appeal with modern design
 
 /* Mobile specific overlay for full-width readability - simplified */
 @media (max-width: 768px) {
-  .hero::before {
+  .page-home .hero::before {
     background: rgba(0, 0, 0, 0.5);
   }
 }
 
-.hero-container {
+.page-home .hero-container {
   position: relative;
   z-index: 2;
   width: 100%;
@@ -1081,7 +1081,7 @@ Enhanced visual appeal with modern design
   justify-content: center;
 }
 
-.hero-content {
+.page-home .hero-content {
   text-align: center;
   /* Center all text */
   margin: 0;
@@ -1090,7 +1090,7 @@ Enhanced visual appeal with modern design
 }
 
 /* Container to center and constrain text */
-.hero-text-container {
+.page-home .hero-text-container {
   width: 100%;
   max-width: 95%;
   /* Keep off the absolute edges */
@@ -1099,7 +1099,7 @@ Enhanced visual appeal with modern design
 }
 
 /* 1. English Title ("Modern Yet Traditional") - Fluid Scaling, Single Line */
-.hero-title {
+.page-home .hero-title {
   white-space: nowrap !important;
   /* Force single line */
   overflow: visible;
@@ -1117,7 +1117,7 @@ Enhanced visual appeal with modern design
 }
 
 /* 2. Hero Subtitle (description text) - Normal wrapping allowed */
-.hero-subtitle {
+.page-home .hero-subtitle {
   font-size: clamp(1.1rem, 2.5vw, 1.4rem);
   font-weight: 500;
   line-height: 1.5;
@@ -1130,7 +1130,7 @@ Enhanced visual appeal with modern design
 }
 
 /* 3. Telugu Subtitle ("సాంప్రదాయ రుచులు, ఆధునిక శైలి") - Fluid Scaling, Single Line */
-.telugu-subtitle {
+.page-home .telugu-subtitle {
   display: block;
   white-space: nowrap !important;
   /* Force single line */
@@ -1147,7 +1147,7 @@ Enhanced visual appeal with modern design
   text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
 }
 
-.hero-cta {
+.page-home .hero-cta {
   display: none;
   align-items: center;
   gap: var(--space-3);
@@ -1164,21 +1164,21 @@ Enhanced visual appeal with modern design
   box-shadow: 0 4px 15px rgba(251, 192, 45, 0.4);
 }
 
-.hero-cta:hover {
+.page-home .hero-cta:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-xl);
 }
 
-.hero-cta i {
+.page-home .hero-cta i {
   transition: transform var(--transition-fast);
 }
 
-.hero-cta:hover i {
+.page-home .hero-cta:hover i {
   transform: translateX(4px);
 }
 
 @media (max-width: 767px) {
-  .hero-cta {
+  .page-home .hero-cta {
     font-size: var(--font-base);
     padding: var(--space-3) var(--space-6);
   }
@@ -1197,7 +1197,7 @@ Enhanced product cards and modern styling
 ========================================
 */
 /* Adjusted for speed and spacing */
-.product-showcase {
+.page-home .product-showcase {
   padding: 15px 0;
   /* Reduced padding to ensure section is only ~10% taller than cards */
   background: #FFFFFF;
@@ -1221,13 +1221,13 @@ Enhanced product cards and modern styling
 
 /* Mobile Scroll Speed Adjustment */
 @media (max-width: 768px) {
-  .product-track {
+  .page-home .product-track {
     animation-duration: 40s !important;
     /* Double speed for mobile */
   }
 }
 
-.product-scroll {
+.page-home .product-scroll {
   display: flex;
   gap: var(--space-3);
   /* Reduced gap */
@@ -1238,11 +1238,11 @@ Enhanced product cards and modern styling
   /* Prevent collapsing */
 }
 
-.product-scroll:hover {
+.page-home .product-scroll:hover {
   animation-play-state: paused;
 }
 
-.product-item {
+.page-home .product-item {
   flex-shrink: 0;
   width: 220px;
   /* Desktop Width */
@@ -1266,7 +1266,7 @@ Enhanced product cards and modern styling
   transform: translateZ(0);
 }
 
-.product-image-wrapper {
+.page-home .product-image-wrapper {
   width: 100%;
   aspect-ratio: 1 / 1;
   /* Square Image Area */
@@ -1279,7 +1279,7 @@ Enhanced product cards and modern styling
   /* Clean background */
 }
 
-.product-info {
+.page-home .product-info {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -1291,12 +1291,12 @@ Enhanced product cards and modern styling
   text-align: center;
 }
 
-.product-item:hover {
+.page-home .product-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.product-item img {
+.page-home .product-item img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -1306,11 +1306,11 @@ Enhanced product cards and modern styling
   border-radius: var(--radius-lg);
 }
 
-.product-item:hover img {
+.page-home .product-item:hover img {
   transform: scale(1.08);
 }
 
-.product-item h3 {
+.page-home .product-item h3 {
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
   font-weight: 700;
@@ -1326,7 +1326,7 @@ Enhanced product cards and modern styling
   overflow: hidden;
 }
 
-.product-item .telugu-name {
+.page-home .product-item .telugu-name {
   font-family: var(--font-telugu);
   font-size: 0.9rem;
   font-weight: 500;
@@ -1340,14 +1340,14 @@ Enhanced product cards and modern styling
 
 /* Mobile Overrides for Compact Carousel */
 @media (max-width: 768px) {
-  .product-showcase {
+  .page-home .product-showcase {
     padding: 10px 0;
     /* Minimal padding on mobile */
   }
 
   /* ... */
 
-  .product-item {
+  .page-home .product-item {
     width: 160px;
     padding: 6px 6px 8px 6px;
     /* Optimized padding: 6px top, 8px bottom */
@@ -1363,19 +1363,19 @@ Enhanced product cards and modern styling
     justify-content: flex-start;
   }
 
-  .product-image-wrapper {
+  .page-home .product-image-wrapper {
     padding: 5px;
     /* Minimal padding around image */
     aspect-ratio: 1/0.85;
     /* Slightly shorter image area to save space */
   }
 
-  .product-item h3 {
+  .page-home .product-item h3 {
     font-size: 0.9rem;
     margin-bottom: 2px;
   }
 
-  .product-item .telugu-name {
+  .page-home .product-item .telugu-name {
     font-size: 0.85rem;
     white-space: normal;
     /* Allow wrapping */
@@ -1386,13 +1386,13 @@ Enhanced product cards and modern styling
     /* Ensure it takes space */
   }
 
-  .product-info {
+  .page-home .product-info {
     padding: 0 5px;
     /* Remove top/bottom padding from info wrapper */
   }
 
   /* Hide progress dots on mobile per user request (iOS issue) */
-  .carousel-progress {
+  .page-home .carousel-progress {
     display: none !important;
   }
 }
@@ -1403,7 +1403,7 @@ PRODUCT CATEGORIES SECTION
 Modern card design with enhanced styling
 ========================================
 */
-.products-section {
+.page-home .products-section {
   padding: 30px 0;
   /* Reduced top padding */
   /* Seamless flow: White -> Light Yellow */
@@ -1425,20 +1425,20 @@ TESTIMONIALS SECTION
 Styled exactly like product showcase
 ========================================
 */
-.testimonials-showcase {
+.page-home .testimonials-showcase {
   padding: var(--space-16) 0;
   /* Seamless flow: Light Gray-Blue -> White */
   background: linear-gradient(180deg, #E6EEF8 0%, #FFFFFF 100%);
 }
 
-.testimonials-showcase .container {
+.page-home .testimonials-showcase .container {
   max-width: 95% !important;
   /* User requested 95% viewport width */
   width: 95%;
 }
 
 /* Quick Commerce Mode: Expand Product Categories to 95% width (all screens) */
-.quick-commerce-mode #product-categories .container {
+.page-home .quick-commerce-mode #product-categories .container {
   max-width: 95vw !important;
   width: 95vw !important;
   padding-left: 2.5vw !important;
@@ -1447,7 +1447,7 @@ Styled exactly like product showcase
 
 /* Ensure 95vw on mobile too */
 @media (max-width: 768px) {
-  .quick-commerce-mode #product-categories .container {
+  .page-home .quick-commerce-mode #product-categories .container {
     max-width: 95vw !important;
     width: 95vw !important;
     padding-left: 2.5vw !important;
@@ -1457,14 +1457,14 @@ Styled exactly like product showcase
 
 /* Left align title specifically for testimonials on desktop */
 @media (min-width: 768px) {
-  .testimonials-showcase .section-title {
+  .page-home .testimonials-showcase .section-title {
     text-align: left;
     margin-bottom: var(--space-8);
     padding-left: var(--space-4);
   }
 }
 
-.testimonial-scroll-wrapper {
+.page-home .testimonial-scroll-wrapper {
   overflow-x: auto;
   overflow-y: hidden;
   /* Prevent vertical scroll */
@@ -1481,11 +1481,11 @@ Styled exactly like product showcase
   /* GPU acceleration hint */
 }
 
-.testimonial-scroll-wrapper::-webkit-scrollbar {
+.page-home .testimonial-scroll-wrapper::-webkit-scrollbar {
   display: none;
 }
 
-.testimonials-scroll {
+.page-home .testimonials-scroll {
   display: flex;
   gap: var(--space-6);
   padding: var(--space-4);
@@ -1495,12 +1495,12 @@ Styled exactly like product showcase
 }
 
 /* Pause on hover */
-.testimonials-scroll:hover {
+.page-home .testimonials-scroll:hover {
   animation-play-state: paused;
 }
 
 /* .testimonial-item */
-.testimonial-item {
+.page-home .testimonial-item {
   flex-shrink: 0;
   width: 320px;
   min-height: 280px;
@@ -1521,7 +1521,7 @@ Styled exactly like product showcase
 
 /* REMOVED ::before thick top border as requested */
 
-.testimonial-item:hover {
+.page-home .testimonial-item:hover {
   box-shadow: 0 8px 24px rgba(0, 119, 182, 0.15);
   border-color: var(--color-secondary-blue);
   /* Keep blue outline color */
@@ -1529,7 +1529,7 @@ Styled exactly like product showcase
   /* Add subtle lift */
 }
 
-.testimonial-content {
+.page-home .testimonial-content {
   text-align: center;
   flex-grow: 1;
   /* Allow content to fill space */
@@ -1538,14 +1538,14 @@ Styled exactly like product showcase
   justify-content: center;
 }
 
-.stars {
+.page-home .stars {
   font-size: 1.3rem;
   color: #FFD700;
   margin-bottom: var(--space-4);
   letter-spacing: 3px;
 }
 
-.testimonial-content p {
+.page-home .testimonial-content p {
   font-size: var(--font-base);
   line-height: 1.6;
   color: var(--text-primary);
@@ -1564,7 +1564,7 @@ Styled exactly like product showcase
   /* ~5 lines at 1.6 line-height */
 }
 
-.testimonial-author {
+.page-home .testimonial-author {
   border-top: 1px solid var(--border-light);
   padding-top: var(--space-4);
   margin-top: auto;
@@ -1574,7 +1574,7 @@ Styled exactly like product showcase
   gap: 2px;
 }
 
-.testimonial-author strong {
+.page-home .testimonial-author strong {
   display: block;
   font-size: var(--font-xs);
   font-weight: var(--weight-medium);
@@ -1582,14 +1582,14 @@ Styled exactly like product showcase
   margin-bottom: 0;
 }
 
-.testimonial-author span {
+.page-home .testimonial-author span {
   font-size: 0.7rem;
   color: var(--text-muted);
   font-weight: var(--weight-normal);
 }
 
 /* Related Product Tag */
-.testimonial-product {
+.page-home .testimonial-product {
   margin-top: var(--space-3);
   padding-top: var(--space-2);
   font-size: var(--font-xs);
@@ -1600,14 +1600,14 @@ Styled exactly like product showcase
   gap: 6px;
 }
 
-.testimonial-product i {
+.page-home .testimonial-product i {
   font-size: 0.7rem;
   color: var(--color-accent-blue);
 }
 
 /* Mobile: Compact Testimonials */
 @media (max-width: 768px) {
-  .testimonial-item {
+  .page-home .testimonial-item {
     width: 270px;
     /* Reduced from 320px by ~15% */
     min-width: 270px;
@@ -1615,31 +1615,31 @@ Styled exactly like product showcase
     min-height: 240px;
   }
 
-  .testimonial-content p {
+  .page-home .testimonial-content p {
     font-size: 0.9rem;
     /* Slightly smaller text */
     line-height: 1.4;
     margin-bottom: var(--space-3);
   }
 
-  .testimonial-content .stars {
+  .page-home .testimonial-content .stars {
     font-size: 1.1rem;
     margin-bottom: var(--space-2);
   }
 
-  .testimonial-author {
+  .page-home .testimonial-author {
     padding-top: var(--space-2);
   }
 
-  .testimonial-author strong {
+  .page-home .testimonial-author strong {
     font-size: var(--font-sm);
   }
 
-  .testimonial-author span {
+  .page-home .testimonial-author span {
     font-size: var(--font-xs);
   }
 
-  .testimonial-product {
+  .page-home .testimonial-product {
     font-size: 0.65rem;
     margin-top: var(--space-2);
     padding-top: var(--space-1);
@@ -1647,7 +1647,7 @@ Styled exactly like product showcase
 }
 
 /* Write a Review Button */
-.write-review-btn {
+.page-home .write-review-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1663,47 +1663,47 @@ Styled exactly like product showcase
   white-space: nowrap;
 }
 
-.write-review-btn:hover {
+.page-home .write-review-btn:hover {
   background: var(--color-accent-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.write-review-btn i {
+.page-home .write-review-btn i {
   font-size: 0.9rem;
 }
 
 /* Hide full text on mobile, show short text */
-.write-review-btn .btn-text-full {
+.page-home .write-review-btn .btn-text-full {
   display: inline;
 }
 
-.write-review-btn .btn-text-short {
+.page-home .write-review-btn .btn-text-short {
   display: none;
 }
 
 @media (max-width: 480px) {
-  .write-review-btn {
+  .page-home .write-review-btn {
     padding: 6px 12px;
     font-size: 0.75rem;
     gap: 4px;
   }
 
-  .write-review-btn .btn-text-full {
+  .page-home .write-review-btn .btn-text-full {
     display: none;
   }
 
-  .write-review-btn .btn-text-short {
+  .page-home .write-review-btn .btn-text-short {
     display: inline;
   }
 
-  .write-review-btn i {
+  .page-home .write-review-btn i {
     font-size: 0.85rem;
   }
 }
 
 /* Testimonial Source Link Icon (Inside Card) */
-.testimonial-source-icon {
+.page-home .testimonial-source-icon {
   position: absolute;
   bottom: 10px;
   right: 10px;
@@ -1721,7 +1721,7 @@ Styled exactly like product showcase
   text-decoration: none;
 }
 
-.testimonial-source-icon:hover {
+.page-home .testimonial-source-icon:hover {
   background: #4285f4;
   color: white;
   border-color: #4285f4;
@@ -1729,7 +1729,7 @@ Styled exactly like product showcase
 }
 
 /* Testimonial Detail Modal */
-.testimonial-modal-overlay {
+.page-home .testimonial-modal-overlay {
   display: none;
   position: fixed;
   top: 0;
@@ -1741,11 +1741,11 @@ Styled exactly like product showcase
   z-index: 9999;
 }
 
-.testimonial-modal-overlay.active {
+.page-home .testimonial-modal-overlay.active {
   display: block;
 }
 
-.testimonial-detail-modal {
+.page-home .testimonial-detail-modal {
   display: none;
   position: fixed;
   top: 50%;
@@ -1762,7 +1762,7 @@ Styled exactly like product showcase
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
 
-.testimonial-detail-modal.active {
+.page-home .testimonial-detail-modal.active {
   display: block;
   animation: modalSlideIn 0.3s ease;
 }
@@ -1779,7 +1779,7 @@ Styled exactly like product showcase
   }
 }
 
-.testimonial-modal-close {
+.page-home .testimonial-modal-close {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -1796,22 +1796,22 @@ Styled exactly like product showcase
   transition: all 0.2s;
 }
 
-.testimonial-modal-close:hover {
+.page-home .testimonial-modal-close:hover {
   background: #ef4444;
   color: white;
 }
 
-.testimonial-modal-content {
+.page-home .testimonial-modal-content {
   text-align: center;
 }
 
-.testimonial-modal-content .stars {
+.page-home .testimonial-modal-content .stars {
   font-size: 1.5rem;
   color: #FFD700;
   margin-bottom: 20px;
 }
 
-.testimonial-modal-message {
+.page-home .testimonial-modal-message {
   font-size: 1.1rem;
   line-height: 1.7;
   color: var(--text-primary);
@@ -1819,7 +1819,7 @@ Styled exactly like product showcase
   margin-bottom: 25px;
 }
 
-.testimonial-modal-footer {
+.page-home .testimonial-modal-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1827,22 +1827,22 @@ Styled exactly like product showcase
   padding-top: 15px;
 }
 
-.testimonial-modal-author {
+.page-home .testimonial-modal-author {
   text-align: left;
 }
 
-.testimonial-modal-author strong {
+.page-home .testimonial-modal-author strong {
   display: block;
   font-size: 1rem;
   color: var(--text-primary);
 }
 
-.testimonial-modal-author span {
+.page-home .testimonial-modal-author span {
   font-size: 0.85rem;
   color: var(--text-secondary);
 }
 
-.testimonial-source-link {
+.page-home .testimonial-source-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1857,14 +1857,14 @@ Styled exactly like product showcase
   transition: all 0.2s;
 }
 
-.testimonial-source-link:hover {
+.page-home .testimonial-source-link:hover {
   background: #4285f4;
   color: white;
   border-color: #4285f4;
 }
 
 /* Make testimonial card clickable */
-.testimonial-item {
+.page-home .testimonial-item {
   cursor: pointer;
 }
 
@@ -1874,14 +1874,14 @@ CONTACT FORM SECTION
 Modern form design with enhanced UX
 ========================================
 */
-.contact-form-section {
+.page-home .contact-form-section {
   padding: var(--space-24) 0;
   /* Seamless flow: White -> Butter Yellow */
   background: linear-gradient(180deg, #FFFFFF 0%, #FFF9C4 100%);
   position: relative;
 }
 
-.contact-form-section::before {
+.page-home .contact-form-section::before {
   content: '';
   position: absolute;
   top: 0;
@@ -1894,7 +1894,7 @@ Modern form design with enhanced UX
   pointer-events: none;
 }
 
-.contact-form-content {
+.page-home .contact-form-content {
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
@@ -1902,36 +1902,36 @@ Modern form design with enhanced UX
 
 .contact-form-content,
 .product-categories,
-.scroll-container {
+.page-home .scroll-container {
   position: relative;
   z-index: 1;
 }
 
 /* Enhanced section transitions - Yellow Theme */
-.hero+.product-showcase {
+.page-home .hero+.product-showcase {
   border-top: 5px solid var(--color-primary-yellow);
   box-shadow: 0 -10px 30px rgba(251, 192, 45, 0.15);
 }
 
-.product-showcase+.products-section {
+.page-home .product-showcase+.products-section {
   border-top: 5px solid var(--color-secondary-yellow);
 }
 
 /* Unified Yellow Theme Sections */
-.testimonials-showcase {
+.page-home .testimonials-showcase {
   background: linear-gradient(180deg, #FFFFFF 0%, #FFF9C4 100%);
   padding-bottom: 0 !important;
   /* Merge with next section */
 }
 
-#why-us-section {
+.page-home #why-us-section {
   background: #FFF9C4;
   /* Solid middle */
   padding-top: var(--space-8);
   padding-bottom: var(--space-8);
 }
 
-.contact-form-section {
+.page-home .contact-form-section {
   background: linear-gradient(180deg, #FFF9C4 0%, #FFF176 100%);
   /* Deepens to darker yellow */
   border-top: none;
@@ -1940,14 +1940,14 @@ Modern form design with enhanced UX
   /* Space for transition */
 }
 
-.form-subtitle {
+.page-home .form-subtitle {
   font-size: var(--font-lg);
   color: #444444;
   /* Darker text */
   margin-bottom: var(--space-12);
 }
 
-.contact-form {
+.page-home .contact-form {
   background: #ffffff;
   /* Crisp white card */
   padding: var(--space-12);
@@ -1961,7 +1961,7 @@ Modern form design with enhanced UX
 /* ... existing form styles ... */
 
 
-.form-row {
+.page-home .form-row {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-6);
@@ -1969,17 +1969,17 @@ Modern form design with enhanced UX
 }
 
 @media (min-width: 768px) {
-  .form-row {
+  .page-home .form-row {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.form-group {
+.page-home .form-group {
   display: flex;
   flex-direction: column;
 }
 
-.form-group label {
+.page-home .form-group label {
   font-size: var(--font-sm);
   font-weight: var(--weight-semibold);
   color: var(--text-primary);
@@ -1988,7 +1988,7 @@ Modern form design with enhanced UX
 
 .form-group input,
 .form-group select,
-.form-group textarea {
+.page-home .form-group textarea {
   width: 100%;
   padding: var(--space-4);
   background: var(--bg-secondary);
@@ -2003,7 +2003,7 @@ Modern form design with enhanced UX
 
 .form-group input:hover,
 .form-group select:hover,
-.form-group textarea:hover {
+.page-home .form-group textarea:hover {
   border-color: var(--color-brand-yellow);
   /* Brand yellow hover */
   background-color: var(--bg-primary);
@@ -2011,7 +2011,7 @@ Modern form design with enhanced UX
 
 .form-group input:focus,
 .form-group select:focus,
-.form-group textarea:focus {
+.page-home .form-group textarea:focus {
   outline: none;
   border-color: var(--color-brand-yellow);
   /* Brand yellow focus */
@@ -2020,7 +2020,7 @@ Modern form design with enhanced UX
   background-color: var(--bg-primary);
 }
 
-.form-group select {
+.page-home .form-group select {
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -2029,31 +2029,31 @@ Modern form design with enhanced UX
   padding-right: var(--space-12);
 }
 
-.form-group textarea {
+.page-home .form-group textarea {
   resize: vertical;
   min-height: 120px;
 }
 
-.form-group textarea::placeholder {
+.page-home .form-group textarea::placeholder {
   color: var(--text-muted);
 }
 
 /* Form validation styles */
 .form-group input.error,
 .form-group select.error,
-.form-group textarea.error {
+.page-home .form-group textarea.error {
   border-color: var(--color-error);
   background-color: rgba(239, 68, 68, 0.05);
 }
 
-.error-message {
+.page-home .error-message {
   font-size: var(--font-xs);
   color: var(--color-error);
   margin-top: var(--space-1);
   font-weight: var(--weight-medium);
 }
 
-.submit-btn {
+.page-home .submit-btn {
   width: 100%;
   background: var(--bg-gradient-primary);
   /* Uses --color-accent gradient */
@@ -2075,13 +2075,13 @@ Modern form design with enhanced UX
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.submit-btn:hover {
+.page-home .submit-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 100%);
 }
 
-.submit-btn:disabled {
+.page-home .submit-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
@@ -4585,25 +4585,25 @@ Navigation arrows, progress dots, and drag-to-scroll
 }
 
 /* Product Showcase - Edge to Edge */
-.product-showcase {
+.page-home .product-showcase {
   width: 100%;
   padding: 0;
 }
 
-.product-showcase>.container {
+.page-home .product-showcase>.container {
   max-width: 95% !important;
   width: 95%;
   padding-left: 0;
   padding-right: 0;
 }
 
-.product-showcase .carousel-wrapper {
+.page-home .product-showcase .carousel-wrapper {
   padding-left: 0;
   padding-right: 0;
 }
 
 /* Why Us Section Styles */
-.why-us-grid {
+.page-home .why-us-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   /* Force 4 columns on desktop */
@@ -4611,7 +4611,7 @@ Navigation arrows, progress dots, and drag-to-scroll
   margin-top: 2rem;
 }
 
-.why-feature-card {
+.page-home .why-feature-card {
   text-align: center;
   padding: 1.5rem;
   /* Reduced padding for compactness */
@@ -4625,13 +4625,13 @@ Navigation arrows, progress dots, and drag-to-scroll
   align-items: center;
 }
 
-.why-feature-card:hover {
+.page-home .why-feature-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-md);
   border-color: var(--color-accent-blue);
 }
 
-.why-feature-img {
+.page-home .why-feature-img {
   width: 50px;
   /* Smaller icons */
   height: 50px;
@@ -5544,7 +5544,7 @@ Hardware-accelerated smooth scrolling
 }
 
 /* Product Showcase Carousel */
-.product-scroll-wrapper {
+.page-home .product-scroll-wrapper {
   overflow: hidden !important;
   position: relative;
   width: 100%;
@@ -5552,11 +5552,11 @@ Hardware-accelerated smooth scrolling
   /* Allow vertical page scroll */
 }
 
-.product-scroll-wrapper::-webkit-scrollbar {
+.page-home .product-scroll-wrapper::-webkit-scrollbar {
   display: none;
 }
 
-.product-scroll {
+.page-home .product-scroll {
   display: flex;
   gap: var(--space-4);
   will-change: transform;
@@ -5570,7 +5570,7 @@ Hardware-accelerated smooth scrolling
 }
 
 /* Testimonials Carousel */
-.testimonials-scroll {
+.page-home .testimonials-scroll {
   display: flex;
   gap: var(--space-6);
   will-change: transform;
@@ -5585,7 +5585,7 @@ Hardware-accelerated smooth scrolling
 
 /* JS now handles hover pause via requestAnimationFrame */
 .product-showcase,
-.testimonials-showcase {
+.page-home .testimonials-showcase {
   overflow: hidden;
   width: 100%;
   position: relative;
@@ -6412,13 +6412,13 @@ Uses same card structure as sales page product grid
    SPECIAL COMBO OFFERS SECTION
    Enhanced Visuals
    ======================================== */
-.combo-section {
+.page-home .combo-section {
   background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
   position: relative;
   overflow: hidden;
 }
 
-.combo-section::before {
+.page-home .combo-section::before {
   content: '';
   position: absolute;
   top: -100px;
@@ -6429,7 +6429,7 @@ Uses same card structure as sales page product grid
   z-index: 0;
 }
 
-.combo-cards-grid {
+.page-home .combo-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 30px;
@@ -6439,7 +6439,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Base Card Style */
-.combo-card {
+.page-home .combo-card {
   background: white;
   border-radius: 24px;
   overflow: hidden;
@@ -6451,13 +6451,13 @@ Uses same card structure as sales page product grid
   height: 100%;
 }
 
-.combo-card:hover {
+.page-home .combo-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* Image Section with Layered Visuals */
-.combo-card-image {
+.page-home .combo-card-image {
   height: 280px;
   position: relative;
   overflow: hidden;
@@ -6465,7 +6465,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Blurred background layer for depth */
-.combo-image-bg {
+.page-home .combo-image-bg {
   position: absolute;
   top: -10%;
   left: -10%;
@@ -6478,7 +6478,7 @@ Uses same card structure as sales page product grid
   transition: background-image 0.8s ease;
 }
 
-.combo-image-carousel {
+.page-home .combo-image-carousel {
   position: relative;
   width: 100%;
   height: 100%;
@@ -6488,7 +6488,7 @@ Uses same card structure as sales page product grid
   justify-content: center;
 }
 
-.combo-image-slide {
+.page-home .combo-image-slide {
   position: absolute;
   top: 0;
   left: 0;
@@ -6502,20 +6502,20 @@ Uses same card structure as sales page product grid
   transform: scale(0.95);
 }
 
-.combo-image-slide.active {
+.page-home .combo-image-slide.active {
   opacity: 1;
   visibility: visible;
   transform: scale(1);
 }
 
-.combo-image-slide.main-image {
+.page-home .combo-image-slide.main-image {
   opacity: 1;
   visibility: visible;
   transform: scale(1);
 }
 
 /* Labels & Badges */
-.combo-discount-badge {
+.page-home .combo-discount-badge {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -6531,7 +6531,7 @@ Uses same card structure as sales page product grid
   letter-spacing: 0.5px;
 }
 
-.combo-pack-badge {
+.page-home .combo-pack-badge {
   position: absolute;
   top: 15px;
   left: 15px;
@@ -6550,13 +6550,13 @@ Uses same card structure as sales page product grid
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.combo-pack-badge i {
+.page-home .combo-pack-badge i {
   color: var(--color-brand-yellow);
   font-size: 0.8rem;
 }
 
 /* Carousel Control Dots */
-.combo-carousel-dots {
+.page-home .combo-carousel-dots {
   position: absolute;
   bottom: 12px;
   left: 50%;
@@ -6566,7 +6566,7 @@ Uses same card structure as sales page product grid
   z-index: 10;
 }
 
-.combo-carousel-dot {
+.page-home .combo-carousel-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -6589,7 +6589,7 @@ Uses same card structure as sales page product grid
   --combo-text-muted: var(--color-gray-600);
 }
 
-.combo-section {
+.page-home .combo-section {
   /* Smooth gradient that transitions well with adjacent sections */
   background: linear-gradient(180deg,
       rgba(255, 255, 255, 1) 0%,
@@ -6601,7 +6601,7 @@ Uses same card structure as sales page product grid
   position: relative;
 }
 
-.combo-cards-grid {
+.page-home .combo-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
@@ -6609,7 +6609,7 @@ Uses same card structure as sales page product grid
 }
 
 @media (max-width: 768px) {
-  .combo-cards-grid {
+  .page-home .combo-cards-grid {
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
@@ -6624,14 +6624,14 @@ Uses same card structure as sales page product grid
     width: 110%;
   }
 
-  .combo-cards-grid::-webkit-scrollbar {
+  .page-home .combo-cards-grid::-webkit-scrollbar {
     display: none;
     /* Hide scrollbar for cleaner look */
   }
 }
 
 /* 1. Card matching uploaded image - soft yellow #FFF9DC */
-.combo-card {
+.page-home .combo-card {
   --card-accent: var(--combo-accent);
   /* Exact color from uploaded image */
   background: #FFF9DC;
@@ -6653,7 +6653,7 @@ Uses same card structure as sales page product grid
 
 /* Mobile: 95% of users - optimized card sizing */
 @media (max-width: 768px) {
-  .combo-card {
+  .page-home .combo-card {
     min-width: 75vw !important;
     max-width: 75vw !important;
     scroll-snap-align: center;
@@ -6663,7 +6663,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Shimmer effect on hover */
-.combo-card::before {
+.page-home .combo-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -6679,11 +6679,11 @@ Uses same card structure as sales page product grid
   pointer-events: none;
 }
 
-.combo-card:hover::before {
+.page-home .combo-card:hover::before {
   left: 150%;
 }
 
-.combo-card:hover {
+.page-home .combo-card:hover {
   transform: translateY(-6px) scale(1.01);
   box-shadow:
     0 12px 35px rgba(0, 51, 102, 0.12),
@@ -6693,7 +6693,7 @@ Uses same card structure as sales page product grid
 
 /* 3. Image Section: Square container - 10% BIGGER */
 /* Mobile-first: 95% of users are on mobile */
-.combo-visual-container {
+.page-home .combo-visual-container {
   /* Square, capped at 200px (10% bigger than 180px) */
   width: 100%;
   max-width: 200px;
@@ -6714,7 +6714,7 @@ Uses same card structure as sales page product grid
 }
 
 /* 3.1 Overlay Tags - More Compact */
-.combo-tag-overlay {
+.page-home .combo-tag-overlay {
   position: absolute;
   top: 10px;
   left: 10px;
@@ -6724,7 +6724,7 @@ Uses same card structure as sales page product grid
   gap: 6px;
 }
 
-.combo-tag {
+.page-home .combo-tag {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(8px);
   color: var(--color-brand-blue-primary);
@@ -6740,7 +6740,7 @@ Uses same card structure as sales page product grid
 }
 
 /* 3.2 Animated Slot System - Square cards, prominent back images */
-.combo-bundle-slots {
+.page-home .combo-bundle-slots {
   position: relative;
   width: 90%;
   height: 90%;
@@ -6750,7 +6750,7 @@ Uses same card structure as sales page product grid
 }
 
 /* SQUARE image cards - not stretched rectangles */
-.fan-slot-img {
+.page-home .fan-slot-img {
   position: absolute;
   /* Square dimensions */
   width: 70%;
@@ -6771,26 +6771,26 @@ Uses same card structure as sales page product grid
 }
 
 /* Front/Main card */
-.fan-slot-front {
+.page-home .fan-slot-front {
   z-index: 5;
   transform: scale(1) translateZ(0);
   opacity: 1;
 }
 
 /* MORE PROMINENT back cards - wider spread, larger scale */
-.fan-slot-back-right {
+.page-home .fan-slot-back-right {
   z-index: 3;
   transform: scale(0.88) translateX(28px) rotate(10deg) translateZ(0);
   opacity: 0.95;
 }
 
-.fan-slot-back-left {
+.page-home .fan-slot-back-left {
   z-index: 2;
   transform: scale(0.88) translateX(-28px) rotate(-10deg) translateZ(0);
   opacity: 0.95;
 }
 
-.fan-slot-hidden {
+.page-home .fan-slot-hidden {
   z-index: 1;
   transform: scale(0.5) translateY(30px) translateZ(0);
   opacity: 0;
@@ -6798,7 +6798,7 @@ Uses same card structure as sales page product grid
 }
 
 /* 2. Content: Higher Density Padding with clamp() */
-.combo-content {
+.page-home .combo-content {
   padding: clamp(0.75rem, 3vw, 1.25rem);
   flex-grow: 1;
   display: flex;
@@ -6807,7 +6807,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Combo title - consistent across cards */
-.combo-title {
+.page-home .combo-title {
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--color-brand-blue-primary);
@@ -6817,7 +6817,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Combo descriptor/tagline - BIGGER with more apparent animation */
-.combo-descriptor {
+.page-home .combo-descriptor {
   font-size: 0.85rem;
   color: var(--color-gray-600);
   font-weight: 500;
@@ -6844,7 +6844,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Product list - show 2 lines with ellipsis, no truncation */
-.combo-product-list {
+.page-home .combo-product-list {
   font-size: 0.78rem;
   color: var(--color-gray-600);
   font-weight: 500;
@@ -6862,7 +6862,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Price row - ALL elements bottom aligned */
-.combo-price-row {
+.page-home .combo-price-row {
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -6872,20 +6872,20 @@ Uses same card structure as sales page product grid
   margin-bottom: 10px;
 }
 
-.combo-price-main {
+.page-home .combo-price-main {
   font-size: 1.5rem;
   font-weight: 900;
   color: var(--color-brand-blue-primary);
   line-height: 1;
 }
 
-.combo-price-mrp {
+.page-home .combo-price-mrp {
   font-size: 0.85rem;
   color: var(--color-gray-400);
   text-decoration: line-through;
 }
 
-.combo-save-label {
+.page-home .combo-save-label {
   /* Vibrant % savings badge */
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
@@ -6899,13 +6899,13 @@ Uses same card structure as sales page product grid
 }
 
 /* 4. Split CTA Buttons: Softer colors */
-.combo-buttons-row {
+.page-home .combo-buttons-row {
   display: flex;
   gap: 4px;
   width: 100%;
 }
 
-.combo-button-buy {
+.page-home .combo-button-buy {
   flex: 3;
   padding: 12px 14px;
   /* Softer blue - not as intense */
@@ -6924,12 +6924,12 @@ Uses same card structure as sales page product grid
   min-height: 42px;
 }
 
-.combo-button-buy:hover {
+.page-home .combo-button-buy:hover {
   background: #3d7a9e;
   transform: translateY(-1px);
 }
 
-.combo-button-cart {
+.page-home .combo-button-cart {
   flex: 1;
   padding: 12px 10px;
   /* Softer yellow/cream */
@@ -6947,22 +6947,22 @@ Uses same card structure as sales page product grid
   min-height: 42px;
 }
 
-.combo-button-cart:hover {
+.page-home .combo-button-cart:hover {
   background: #ffd54f;
   transform: translateY(-1px);
 }
 
-.combo-button-cart i {
+.page-home .combo-button-cart i {
   font-size: 1rem;
 }
 
-.combo-button-cart.in-cart {
+.page-home .combo-button-cart.in-cart {
   background: var(--color-brand-yellow) !important;
   color: var(--color-brand-blue-primary) !important;
   font-weight: 800;
 }
 
-.combo-cart-qty {
+.page-home .combo-cart-qty {
   background: white;
   color: var(--color-brand-blue-primary);
   border-radius: 50%;
@@ -6979,7 +6979,7 @@ Uses same card structure as sales page product grid
 }
 
 /* Combo placeholder in cart drawer */
-.cart-item-combo-placeholder {
+.page-home .cart-item-combo-placeholder {
   width: 50px;
   height: 50px;
   min-width: 50px;
@@ -6997,7 +6997,7 @@ Uses same card structure as sales page product grid
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
 }
 
-.cart-item-combo-placeholder span {
+.page-home .cart-item-combo-placeholder span {
   font-size: 0.55rem;
   font-weight: 800;
   text-transform: uppercase;
