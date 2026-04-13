@@ -109,18 +109,13 @@
                 Order on WhatsApp
             </a>
         </div>
-    </section>
 
-    <!-- ========================================
-         TRENDING PRODUCTS — Below the fold
-         ======================================== -->
-    <section class="ty-reorder" id="ty-reorder">
-        <div class="ty-reorder-inner">
-            <h2 class="ty-reorder-title">🔥 Trending Now</h2>
+        <!-- Trending products — inside hero, in initial viewport -->
+        <div class="ty-trending-strip" id="ty-reorder">
+            <p class="ty-trending-label">🔥 Trending</p>
             <div class="ty-products-scroll" id="productScroll">
                 <!-- Populated by JS — trending products only -->
             </div>
-            <a href="/sales/all-products" class="ty-view-all">View All Products →</a>
         </div>
     </section>
 
@@ -287,23 +282,36 @@
             if (!scroll) return;
 
             scroll.innerHTML = trending.map(p => {
-                const img = images.find(i => i.product_id === p.id && i.is_default)
-                    || images.find(i => i.product_id === p.id);
-                const imageUrl = optimizeImage(img?.image_url || p.showcase_image || placeholder, { width: 300 });
-                const slug = p.slug || p.id;
-
-                // Get cheapest variant price
-                let price = '';
+                // Get cheapest variant first
+                let cheapestVariant = null;
                 try {
                     const variants = typeof p.quantity_variants === 'string'
                         ? JSON.parse(p.quantity_variants)
                         : (p.quantity_variants || []);
                     if (variants.length > 0) {
-                        const cheapest = variants.reduce((min, v) =>
+                        cheapestVariant = variants.reduce((min, v) =>
                             (Number(v.price) < Number(min.price)) ? v : min, variants[0]);
-                        price = cheapest.price;
                     }
                 } catch (e) { }
+
+                const variantType = cheapestVariant?.packaging_type || '';
+                
+                // Find image matching packaging type tags
+                let img = null;
+                const productImages = images.filter(i => i.product_id === p.id);
+                
+                if (variantType && productImages.length > 0) {
+                    img = productImages.find(i => (i.tags || []).includes(variantType));
+                }
+                
+                // Fallback to default or first image
+                if (!img) {
+                    img = productImages.find(i => i.is_default) || productImages[0];
+                }
+
+                const imageUrl = optimizeImage(img?.image_url || p.showcase_image || placeholder, { width: 300 });
+                const slug = p.slug || p.id;
+                const price = cheapestVariant?.price || '';
 
                 return `
                     <a href="/sales/${slug}" class="ty-product-card">
@@ -323,7 +331,7 @@
                 const [settingsRes, productsRes, imagesRes] = await Promise.all([
                     supabase.from('site_settings').select('*').single(),
                     supabase.from('products').select('*').eq('is_visible', true).order('display_order', { ascending: true }),
-                    supabase.from('product_images').select('product_id, image_url, is_default').order('display_order', { ascending: true })
+                    supabase.from('product_images').select('product_id, image_url, is_default, tags').order('display_order', { ascending: true })
                 ]);
 
                 const settings = settingsRes.data || {};
