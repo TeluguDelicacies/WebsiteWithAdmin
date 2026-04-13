@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZKZ2D4B6MC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-ZKZ2D4B6MC');
+    </script>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You | Telugu Delicacies</title>
+    <meta name="description"
+        content="Thank you for choosing Telugu Delicacies! Explore our full range of authentic Telugu podis, chapatis, and parotas. Reorder your favorites today.">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://telugudelicacies.com/thankyou" />
+    <meta property="og:title" content="Thank You | Telugu Delicacies" />
+    <meta property="og:description"
+        content="Thank you for choosing Telugu Delicacies! Explore our full range of authentic Telugu podis, chapatis, and parotas." />
+    <meta property="og:image"
+        content="https://pfffotghmcofyrvqynbl.supabase.co/storage/v1/object/public/site-assets/1767276219672_20aiu9.png" />
+    <meta property="og:image:width" content="600" />
+    <meta property="og:image:height" content="600" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png"
+        href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="thankyou.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Mallanna&family=Montserrat:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="page-thankyou">
+    <!-- ========================================
+         HEADER — Minimal for mobile
+         ======================================== -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo-section">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        id="headerLogo" alt="Telugu Delicacies Logo" class="logo"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="logo-fallback" style="display: none;">TD</div>
+                    <div class="logo-text">
+                        <h1 class="brand-name" id="header-site-title">Telugu Delicacies</h1>
+                        <span id="header-telugu-brand" class="telugu-brand"></span>
+                    </div>
+                </a>
+                <nav class="desktop-nav">
+                    <a href="/sales/all-products" class="nav-btn" data-tooltip="Our Products">
+                        <i class="fas fa-utensils"></i>
+                    </a>
+                </nav>
+                <div class="mobile-actions">
+                    <a href="/sales/all-products" class="nav-btn" data-tooltip="Our Products">
+                        <i class="fas fa-utensils"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================
+         ABOVE THE FOLD: Thank You + Reorder CTAs
+         Everything key fits in one mobile screen
+         ======================================== -->
+    <section class="ty-hero" id="ty-hero">
+        <div class="ty-particles">
+            <div class="ty-particle"></div>
+            <div class="ty-particle"></div>
+            <div class="ty-particle"></div>
+            <div class="ty-particle"></div>
+            <div class="ty-particle"></div>
+        </div>
+
+        <div class="ty-icon">
+            <i class="fas fa-heart"></i>
+        </div>
+
+        <!-- Dynamic text from site_settings -->
+        <h2 class="ty-hero-title" id="tyTitle">Thank You for Choosing Us!</h2>
+        <p class="ty-hero-telugu" id="tyTitleTelugu">మీ విశ్వాసానికి ధన్యవాదాలు</p>
+        <p class="ty-hero-sub" id="tySubtitle">Every order means the world to us.</p>
+
+        <!-- CTAs right in the hero — visible in first viewport -->
+        <div class="ty-cta-group">
+            <a href="/sales/all-products" class="ty-cta-btn ty-cta-primary" id="browseProductsBtn">
+                <i class="fas fa-utensils"></i>
+                Browse Products
+            </a>
+            <a href="#" class="ty-cta-btn ty-cta-whatsapp" id="whatsappOrderBtn" target="_blank"
+                rel="noopener noreferrer">
+                <i class="fab fa-whatsapp"></i>
+                Order on WhatsApp
+            </a>
+        </div>
+    </section>
+
+    <!-- ========================================
+         TRENDING PRODUCTS — Below the fold
+         ======================================== -->
+    <section class="ty-reorder" id="ty-reorder">
+        <div class="ty-reorder-inner">
+            <h2 class="ty-reorder-title">🔥 Trending Now</h2>
+            <div class="ty-products-scroll" id="productScroll">
+                <!-- Populated by JS — trending products only -->
+            </div>
+            <a href="/sales/all-products" class="ty-view-all">View All Products →</a>
+        </div>
+    </section>
+
+    <!-- ========================================
+         GOOGLE REVIEW — Subtle secondary
+         ======================================== -->
+    <section class="ty-review" id="ty-review">
+        <div class="ty-review-inner">
+            <div class="ty-review-card">
+                <div class="ty-review-stars">★★★★★</div>
+                <p class="ty-review-text">Loved our product?</p>
+                <p class="ty-review-sub">Your review helps other food lovers discover authentic Telugu flavors!</p>
+                <a href="https://g.page/r/CRR2Dyrv0BMvEBM/review" class="ty-review-btn" id="googleReviewBtn"
+                    target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-google"></i>
+                    Write a Google Review
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         FOOTER
+         ======================================== -->
+    <div class="ty-footer-sep"></div>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h2>Telugu Delicacies</h2>
+                    <p class="footer-tagline">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
+                    <p class="fssai-license" id="contact-fssai">FSSAI License: 13623999000239</p>
+                    <div class="footer-social-icons">
+                        <a href="#" id="footer-facebook-link" target="_blank" aria-label="Facebook"><i
+                                class="fab fa-facebook"></i></a>
+                        <a href="#" id="footer-instagram-link" target="_blank" aria-label="Instagram"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" id="footer-whatsapp-link" target="_blank" aria-label="WhatsApp"><i
+                                class="fab fa-whatsapp"></i></a>
+                        <a href="#" id="footer-youtube-link" target="_blank" aria-label="YouTube"><i
+                                class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section footer-contact" id="footer-contact">
+                    <h4>Contact Us</h4>
+                    <p><a href="#" id="contact-phone-primary">Loading...</a></p>
+                    <p><a href="#" id="contact-phone-secondary"></a></p>
+                    <p><a href="#" id="contact-email">Loading...</a></p>
+                </div>
+
+                <div class="footer-section footer-address">
+                    <h4>Our Location</h4>
+                    <div id="contact-address">
+                        <p>Loading address...</p>
+                    </div>
+                    <div class="footer-legal-links">
+                        <a href="legal.html?type=privacy">Privacy Policy</a>
+                        <a href="legal.html?type=cookie">Cookie Policy</a>
+                        <a href="legal.html?type=terms">Terms of Use</a>
+                        <a href="legal.html?type=shipping_returns">Shipping &amp; Returns</a>
+                    </div>
+                </div>
+
+                <div class="footer-map">
+                    <h4>Find Us</h4>
+                    <div class="map-container" id="footer-map-container">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3805.8428871601745!2d78.60164107521217!3d17.46723238343367!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9d007f562aaf%3A0x2f13d0ef2a0f7614!2sTelugu%20Delicacies!5e0!3m2!1sen!2sin!4v1756361897165!5m2!1sen!2sin"
+                            width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Telugu Delicacies. All rights reserved. | Crafted with ❤️ for authentic
+                    South Indian Taste</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================
+         PAGE SCRIPT
+         ======================================== -->
+    <script type="module">
+        import { supabase } from './lib/supabase.js';
+
+        // ── Helpers ──────────────────────────────────
+        function optimizeImage(url, opts = {}) {
+            if (!url || (!url.includes('cloudinary.com') && !url.includes('res.cloudinary'))) return url;
+            const { width = 400, quality = 'auto', format = 'auto' } = opts;
+            if (url.includes('/upload/w_') || url.includes('/upload/q_')) return url;
+            return url.replace('/upload/', `/upload/w_${width},q_${quality},f_${format}/`);
+        }
+
+        // ── Populate Footer ─────────────────────────
+        function populateFooter(data) {
+            if (!data) return;
+
+            if (data.fssai_number) {
+                const el = document.getElementById('contact-fssai');
+                if (el) el.innerText = `FSSAI License No: ${data.fssai_number}`;
+            }
+            if (data.contact_phone_primary) {
+                const el = document.getElementById('contact-phone-primary');
+                if (el) { el.innerText = data.contact_phone_primary; el.href = `tel:${data.contact_phone_primary.replace(/\s/g, '')}`; }
+            }
+            if (data.contact_phone_secondary) {
+                const el = document.getElementById('contact-phone-secondary');
+                if (el) { el.innerText = data.contact_phone_secondary; el.href = `tel:${data.contact_phone_secondary.replace(/\s/g, '')}`; }
+            }
+            if (data.contact_email) {
+                const el = document.getElementById('contact-email');
+                if (el) { el.innerText = data.contact_email; el.href = `mailto:${data.contact_email}`; }
+            }
+            if (data.company_address) {
+                const el = document.getElementById('contact-address');
+                if (el) el.innerHTML = `<p>${data.company_address}</p>`;
+            }
+
+            // Social links
+            [
+                { id: 'footer-facebook-link', url: data.facebook_url },
+                { id: 'footer-instagram-link', url: data.instagram_url },
+                { id: 'footer-whatsapp-link', url: data.whatsapp_url },
+                { id: 'footer-youtube-link', url: data.youtube_url }
+            ].forEach(item => {
+                const el = document.getElementById(item.id);
+                if (!el) return;
+                let url = item.url;
+                if (url && item.id === 'footer-whatsapp-link' && /^\d+$/.test(url.replace(/[\s\+]/g, ''))) {
+                    url = `https://wa.me/${url.replace(/[\s\+]/g, '')}`;
+                }
+                if (url) { el.href = url; el.style.display = 'flex'; }
+                else { el.style.display = 'none'; }
+            });
+
+            // Map
+            if (data.map_embed_url) {
+                const mapContainer = document.getElementById('footer-map-container');
+                if (mapContainer) {
+                    let mapSrc = data.map_embed_url;
+                    if (mapSrc.includes('<iframe')) {
+                        const match = mapSrc.match(/src=["']([^"']+)["']/);
+                        if (match && match[1]) mapSrc = match[1];
+                    }
+                    mapContainer.innerHTML = `<iframe src="${mapSrc}" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                }
+            }
+        }
+
+        // ── Render Trending Products ─────────────────
+        function renderTrendingProducts(products, images, placeholder) {
+            // Filter to only trending products
+            const trending = products.filter(p => p.is_trending);
+            if (trending.length === 0) {
+                document.getElementById('ty-reorder').style.display = 'none';
+                return;
+            }
+
+            const scroll = document.getElementById('productScroll');
+            if (!scroll) return;
+
+            scroll.innerHTML = trending.map(p => {
+                const img = images.find(i => i.product_id === p.id && i.is_default)
+                    || images.find(i => i.product_id === p.id);
+                const imageUrl = optimizeImage(img?.image_url || p.showcase_image || placeholder, { width: 300 });
+                const slug = p.slug || p.id;
+
+                // Get cheapest variant price
+                let price = '';
+                try {
+                    const variants = typeof p.quantity_variants === 'string'
+                        ? JSON.parse(p.quantity_variants)
+                        : (p.quantity_variants || []);
+                    if (variants.length > 0) {
+                        const cheapest = variants.reduce((min, v) =>
+                            (Number(v.price) < Number(min.price)) ? v : min, variants[0]);
+                        price = cheapest.price;
+                    }
+                } catch (e) { }
+
+                return `
+                    <a href="/sales/${slug}" class="ty-product-card">
+                        <img src="${imageUrl}" alt="${p.product_name}" loading="lazy">
+                        <div class="ty-product-card-info">
+                            <div class="ty-product-card-name">${p.product_name}</div>
+                            ${price ? `<div class="ty-product-card-price">₹${price}</div>` : ''}
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // ── Initialize ──────────────────────────────
+        async function init() {
+            try {
+                const [settingsRes, productsRes, imagesRes] = await Promise.all([
+                    supabase.from('site_settings').select('*').single(),
+                    supabase.from('products').select('*').eq('is_visible', true).order('display_order', { ascending: true }),
+                    supabase.from('product_images').select('product_id, image_url, is_default').order('display_order', { ascending: true })
+                ]);
+
+                const settings = settingsRes.data || {};
+                const products = productsRes.data || [];
+                const images = imagesRes.data || [];
+
+                // ── Logo & Favicon ──
+                if (settings.logo_url) {
+                    const logoImg = document.getElementById('headerLogo');
+                    if (logoImg) logoImg.src = settings.logo_url;
+                    const faviconLink = document.querySelector("link[rel~='icon']");
+                    if (faviconLink) faviconLink.href = settings.fav_icon_url || settings.logo_url;
+                }
+
+                // ── Telugu Brand Name ──
+                if (settings.site_title_telugu) {
+                    const el = document.getElementById('header-telugu-brand');
+                    if (el) el.textContent = settings.site_title_telugu;
+                }
+
+                // ── Thank You Text (from settings) ──
+                const titleEl = document.getElementById('tyTitle');
+                const teluguEl = document.getElementById('tyTitleTelugu');
+                const subEl = document.getElementById('tySubtitle');
+                if (titleEl && settings.thankyou_title) titleEl.textContent = settings.thankyou_title;
+                if (teluguEl && settings.thankyou_title_telugu) teluguEl.textContent = settings.thankyou_title_telugu;
+                if (subEl && settings.thankyou_subtitle) subEl.textContent = settings.thankyou_subtitle;
+
+                // ── WhatsApp Order Button ──
+                const whatsappBtn = document.getElementById('whatsappOrderBtn');
+                if (whatsappBtn) {
+                    let waUrl = settings.whatsapp_url || '919618519191';
+                    if (/^\d+$/.test(waUrl.replace(/[\s\+]/g, ''))) {
+                        waUrl = `https://wa.me/${waUrl.replace(/[\s\+]/g, '')}`;
+                    }
+                    whatsappBtn.href = waUrl;
+                }
+
+                // ── Google Review URL ──
+                if (settings.google_review_url) {
+                    const reviewBtn = document.getElementById('googleReviewBtn');
+                    if (reviewBtn) reviewBtn.href = settings.google_review_url;
+                }
+
+                // ── Footer ──
+                populateFooter(settings);
+
+                // ── Trending Products ──
+                const placeholder = settings.product_placeholder_url || './images/placeholder-product.jpg';
+                renderTrendingProducts(products, images, placeholder);
+
+                // ── Track QR scan in Analytics ──
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('utm_source') === 'packaging') {
+                    gtag('event', 'qr_scan', {
+                        event_category: 'engagement',
+                        event_label: 'product_packaging'
+                    });
+                }
+
+            } catch (err) {
+                console.error('[ThankYou] Init error:', err);
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

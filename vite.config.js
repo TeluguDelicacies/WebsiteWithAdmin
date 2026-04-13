@@ -15,7 +15,8 @@ export default defineConfig({
         admin: 'admin.html',
         sales: 'sales.html',
         legal: 'legal.html',
-        logochanger: 'logochanger/index.html'
+        logochanger: 'logochanger/index.html',
+        thankyou: 'thankyou.html'
       }
     }
   }

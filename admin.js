@@ -1216,6 +1216,11 @@ async function fetchSettings() {
 
             // Sales Page Settings
             document.getElementById('setAllProductsTagline').value = data.all_products_tagline || 'Featuring our premium brands';
+
+            // Thank You Page Settings
+            document.getElementById('setThankyouTitle').value = data.thankyou_title || 'Thank You for Choosing Us!';
+            document.getElementById('setThankyouTitleTelugu').value = data.thankyou_title_telugu || 'మీ విశ్వాసానికి ధన్యవాదాలు';
+            document.getElementById('setThankyouSubtitle').value = data.thankyou_subtitle || 'Every order means the world to us. We craft each product with love, tradition, and the finest ingredients — just for you.';
         }
     } catch (e) {
         console.error('Settings fetch error:', e);
@@ -1277,6 +1282,11 @@ window.cancelSettingsChanges = function () {
     // Sales Page Settings
     document.getElementById('setAllProductsTagline').value = data.all_products_tagline || 'Featuring our premium brands';
 
+    // Thank You Page Settings
+    document.getElementById('setThankyouTitle').value = data.thankyou_title || 'Thank You for Choosing Us!';
+    document.getElementById('setThankyouTitleTelugu').value = data.thankyou_title_telugu || 'మీ విశ్వాసానికి ధన్యవాదాలు';
+    document.getElementById('setThankyouSubtitle').value = data.thankyou_subtitle || 'Every order means the world to us. We craft each product with love, tradition, and the finest ingredients — just for you.';
+
     showToast('Settings changes cancelled', 'info');
 };
 
@@ -1331,6 +1341,11 @@ if (siteSettingsForm) {
 
             // Sales Page Settings
             all_products_tagline: document.getElementById('setAllProductsTagline').value,
+
+            // Thank You Page Settings
+            thankyou_title: document.getElementById('setThankyouTitle').value,
+            thankyou_title_telugu: document.getElementById('setThankyouTitleTelugu').value,
+            thankyou_subtitle: document.getElementById('setThankyouSubtitle').value,
 
             // Legal Documents
             shipping_return_policy: document.getElementById('setShippingReturnPolicy').value
@@ -1388,6 +1403,9 @@ if (siteSettingsForm) {
                     'show_mrp': 'setShowMrp',
                     'sales_mode_enabled': 'setSalesMode',
                     'all_products_tagline': 'setAllProductsTagline',
+                    'thankyou_title': 'setThankyouTitle',
+                    'thankyou_title_telugu': 'setThankyouTitleTelugu',
+                    'thankyou_subtitle': 'setThankyouSubtitle',
                     'shipping_return_policy': 'setShippingReturnPolicy'
                 };
 
