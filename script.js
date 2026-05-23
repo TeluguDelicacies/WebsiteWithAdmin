@@ -9,6 +9,18 @@ Author: Telugu Delicacies
 Description: Interactive functionality for responsive Telugu Delicacies website
 */
 
+// Helper: Escape HTML to prevent XSS attacks
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+window.escapeHTML = escapeHTML;
+
 window.td_catalogueFile = null;
 const WHATSAPP_NUMBER = '919618519191';
 const WHATSAPP_CATALOG_URL = `https://wa.me/c/${WHATSAPP_NUMBER}`;
@@ -3462,29 +3474,29 @@ function renderProducts(products, categories) {
             card.innerHTML = `
                 <div class="card-face card-front">
                     <div class="card-hero-image" style="position: relative;">
-                        <img src="${cardImage}" alt="${category.title}" onerror="this.src='./images/placeholder-product-portrait.jpg'">
+                        <img src="${escapeHTML(cardImage)}" alt="${escapeHTML(category.title)}" onerror="this.src='./images/placeholder-product-portrait.jpg'">
                         
                         <!-- Sub-brand Overlay -->
                         <div class="sub-brand-overlay">
                              ${category.sub_brand_logo_url
-                    ? `<img src="${category.sub_brand_logo_url}" class="sub-brand-logo-overlay-img" alt="${category.sub_brand || 'Sub Brand'}">`
-                    : (category.sub_brand ? `<span class="sub-brand-text">${category.sub_brand}</span>` : '')}
+                    ? `<img src="${escapeHTML(category.sub_brand_logo_url)}" class="sub-brand-logo-overlay-img" alt="${escapeHTML(category.sub_brand || 'Sub Brand')}">`
+                    : (category.sub_brand ? `<span class="sub-brand-text">${escapeHTML(category.sub_brand)}</span>` : '')}
                         </div>
                     </div>
                     
                     <div class="card-body">
                         <div style="margin-bottom: 0.5rem;">
-                            <h3 class="card-title">${category.title}</h3>
-                            <p class="telugu-subtitle category-short-desc">${category.short_description || ''}</p>
+                            <h3 class="card-title">${escapeHTML(category.title)}</h3>
+                            <p class="telugu-subtitle category-short-desc">${escapeHTML(category.short_description || '')}</p>
                         </div>
                         
-                        <p class="card-desc">${category.description || ''}</p>
+                        <p class="card-desc">${escapeHTML(category.description || '')}</p>
                         <div class="dropdown-wrapper">
                             <div class="custom-dropdown-container">
-                                <button class="custom-dropdown-trigger" id="trigger-${category.slug}" onclick="toggleCardDropdown('${category.slug}')">
-                                    <span id="label-${category.slug}">Select Product</span> <i class="fas fa-chevron-down"></i>
+                                <button class="custom-dropdown-trigger" id="trigger-${escapeHTML(category.slug)}" onclick="toggleCardDropdown('${escapeHTML(category.slug)}')">
+                                    <span id="label-${escapeHTML(category.slug)}">Select Product</span> <i class="fas fa-chevron-down"></i>
                                 </button>
-                                <div class="custom-dropdown-menu" id="dropdown-${category.slug}">
+                                <div class="custom-dropdown-menu" id="dropdown-${escapeHTML(category.slug)}">
                                     <!-- Options populated via JS -->
                                 </div>
                             </div>
@@ -3492,7 +3504,7 @@ function renderProducts(products, categories) {
                     </div>
                 </div>
                 <!-- Back Face (Overlay) -->
-                <div class="card-face card-back" id="view-${category.slug}"></div>
+                <div class="card-face card-back" id="view-${escapeHTML(category.slug)}"></div>
             `;
 
             categoriesContainer.appendChild(card);
@@ -3508,8 +3520,8 @@ function renderProducts(products, categories) {
                     const option = document.createElement('div');
                     option.className = 'custom-option';
 
-                    const telugu = product.product_name_telugu ? ` <span style="font-size:0.85em; opacity:0.8;">(${product.product_name_telugu})</span>` : '';
-                    option.innerHTML = `<span>${product.product_name}</span>${telugu}`;
+                    const telugu = product.product_name_telugu ? ` <span style="font-size:0.85em; opacity:0.8;">(${escapeHTML(product.product_name_telugu)})</span>` : '';
+                    option.innerHTML = `<span>${escapeHTML(product.product_name)}</span>${telugu}`;
 
                     option.onclick = (e) => {
                         // Close all dropdowns
@@ -3608,49 +3620,49 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
     // HTML Structure for BACK face
     container.innerHTML = `
         <div class="back-btn-wrapper">
-             <button class="back-btn" onclick="closeOverlay('${cardElement.dataset.category}')">
-                <i class="fas fa-arrow-left"></i> Back to ${cardElement.querySelector('.card-title').innerText}
+             <button class="back-btn" onclick="closeOverlay('${escapeHTML(cardElement.dataset.category)}')">
+                <i class="fas fa-arrow-left"></i> Back to ${escapeHTML(cardElement.querySelector('.card-title').innerText)}
             </button>
         </div>
         <div class="revealed-product">
-            <img src="${localImage}" class="revealed-img" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
+            <img src="${escapeHTML(localImage)}" class="revealed-img" alt="${escapeHTML(product.product_name)}" onerror="this.src='${escapeHTML(window.currentSiteSettings?.product_placeholder_url || '')}'">
             <div class="revealed-info">
-                <h4>${product.product_name}</h4>
-                <p class="revealed-tagline">${product.product_tagline || ''}</p>
-                <p class="card-desc" style="margin-bottom: 15px;">${product.product_description || ''}</p>
+                <h4>${escapeHTML(product.product_name)}</h4>
+                <p class="revealed-tagline">${escapeHTML(product.product_tagline || '')}</p>
+                <p class="card-desc" style="margin-bottom: 15px;">${escapeHTML(product.product_description || '')}</p>
                 
                 <div class="info-toggles">
-                    ${product.ingredients ? `<button class="toggle-btn" onclick="switchInfoTab('${contentIngId}', this)">Ingredients</button>` : ''}
-                    ${Object.keys(nutInfo).length >= 3 ? `<button class="toggle-btn" onclick="switchInfoTab('${contentNutId}', this)">Nutrition</button>` : ''}
-                    ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('content-usage-${product.id}', this)">Usage</button>` : ''}
+                    ${product.ingredients ? `<button class="toggle-btn" onclick="switchInfoTab('${escapeHTML(contentIngId)}', this)">Ingredients</button>` : ''}
+                    ${Object.keys(nutInfo).length >= 3 ? `<button class="toggle-btn" onclick="switchInfoTab('${escapeHTML(contentNutId)}', this)">Nutrition</button>` : ''}
+                    ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('content-usage-${escapeHTML(product.id)}', this)">Usage</button>` : ''}
                 </div>
 
-                <div id="${contentIngId}" class="info-content-box" style="display: none;">
+                <div id="${escapeHTML(contentIngId)}" class="info-content-box" style="display: none;">
                     <strong>Ingredients:</strong><br>
-                    ${product.ingredients || ''}
+                    ${escapeHTML(product.ingredients || '')}
                 </div>
 
-                <div id="${contentNutId}" class="info-content-box" style="display: none;">
+                <div id="${escapeHTML(contentNutId)}" class="info-content-box" style="display: none;">
                     <strong>Nutrition (per serving):</strong><br>
-                    ${nutInfo.details ? `<em>${nutInfo.details}</em><br>` : ''}
-                    ${nutInfo.calories ? `Calories: ${nutInfo.calories}<br>` : ''}
-                    ${nutInfo.protein ? `Protein: ${nutInfo.protein}<br>` : ''}
-                    ${nutInfo.satFat ? `Saturated Fat: ${nutInfo.satFat}<br>` : ''}
-                    ${nutInfo.fat ? `Total Fat: ${nutInfo.fat}<br>` : ''}
-                    ${nutInfo.carbs ? `Carbs: ${nutInfo.carbs}<br>` : ''}
-                    ${nutInfo.fiber ? `Fiber: ${nutInfo.fiber}<br>` : ''}
-                    ${nutInfo.sugars ? `Sugars: ${nutInfo.sugars}<br>` : ''}
-                    ${nutInfo.sodium ? `Sodium: ${nutInfo.sodium}<br>` : ''}
+                    ${nutInfo.details ? `<em>${escapeHTML(nutInfo.details)}</em><br>` : ''}
+                    ${nutInfo.calories ? `Calories: ${escapeHTML(nutInfo.calories)}<br>` : ''}
+                    ${nutInfo.protein ? `Protein: ${escapeHTML(nutInfo.protein)}<br>` : ''}
+                    ${nutInfo.satFat ? `Saturated Fat: ${escapeHTML(nutInfo.satFat)}<br>` : ''}
+                    ${nutInfo.fat ? `Total Fat: ${escapeHTML(nutInfo.fat)}<br>` : ''}
+                    ${nutInfo.carbs ? `Carbs: ${escapeHTML(nutInfo.carbs)}<br>` : ''}
+                    ${nutInfo.fiber ? `Fiber: ${escapeHTML(nutInfo.fiber)}<br>` : ''}
+                    ${nutInfo.sugars ? `Sugars: ${escapeHTML(nutInfo.sugars)}<br>` : ''}
+                    ${nutInfo.sodium ? `Sodium: ${escapeHTML(nutInfo.sodium)}<br>` : ''}
                 </div>
 
-                <div id="content-usage-${product.id}" class="info-content-box" style="display: none;">
+                <div id="content-usage-${escapeHTML(product.id)}" class="info-content-box" style="display: none;">
                     <strong>Usage Instructions:</strong><br>
-                    ${product.serving_suggestion || ''}
+                    ${escapeHTML(product.serving_suggestion || '')}
                 </div>
 
                 <div class="variant-info" style="margin-bottom: 20px;">
                     <span style="font-weight: 600; color: var(--text-primary);">Available From: </span>
-                    <span style="color: var(--text-secondary);">${quantitiesText}</span>
+                    <span style="color: var(--text-secondary);">${escapeHTML(quantitiesText)}</span>
                 </div>
 
                 <button class="add-btn" onclick="window.openWhatsAppCatalog()">
@@ -3762,14 +3774,14 @@ async function fetchAndRenderTestimonials() {
             div.innerHTML = `
                 <div class="testimonial-content">
                     <div class="stars">${'★'.repeat(t.rating)}</div>
-                    <p>"${t.message}"</p>
+                    <p>"${escapeHTML(t.message)}"</p>
                     <div class="testimonial-author">
-                        <strong>${t.name}</strong>
-                        <span>${t.location || ''}</span>
+                        <strong>${escapeHTML(t.name)}</strong>
+                        <span>${escapeHTML(t.location || '')}</span>
                     </div>
-                    ${t.product_name ? `<div class="testimonial-product"><i class="fas fa-tag"></i> ${t.product_name}</div>` : ''}
+                    ${t.product_name ? `<div class="testimonial-product"><i class="fas fa-tag"></i> ${escapeHTML(t.product_name)}</div>` : ''}
                 </div>
-                ${t.review_url ? `<a href="${t.review_url}" target="_blank" rel="noopener noreferrer" class="testimonial-source-icon" onclick="event.stopPropagation()" title="View original review"><i class="fab fa-google"></i></a>` : ''}
+                ${t.review_url ? `<a href="${escapeHTML(t.review_url)}" target="_blank" rel="noopener noreferrer" class="testimonial-source-icon" onclick="event.stopPropagation()" title="View original review"><i class="fab fa-google"></i></a>` : ''}
              `;
 
             // Add click handler to open modal
@@ -4138,21 +4150,21 @@ function renderQuickProductsHTML(products, showMrp) {
         const extraClass = showMrp ? '' : 'no-price';
 
         return `
-        <div class="quick-product-item ${extraClass}" onclick="window.openQuickProductModal('${pId}')">
+        <div class="quick-product-item ${extraClass}" onclick="window.openQuickProductModal('${escapeHTML(pId)}')">
             <div class="quick-product-image-wrapper">
-                <img src="${localImage}" 
-                        alt="${product.product_name}" 
+                <img src="${escapeHTML(localImage)}" 
+                        alt="${escapeHTML(product.product_name)}" 
                         loading="lazy"
-                        onerror="this.onerror=null; this.src='${fallbackImg}';">
+                        onerror="this.onerror=null; this.src='${escapeHTML(fallbackImg)}';">
             </div>
             
             <div class="quick-product-item-info">
-                <h4>${product.product_name}</h4>
-                <p class="telugu-name">${product.product_name_telugu || ''}</p>
-                <div class="weight">${qtyDisplay}</div>
+                <h4>${escapeHTML(product.product_name)}</h4>
+                <p class="telugu-name">${escapeHTML(product.product_name_telugu || '')}</p>
+                <div class="weight">${escapeHTML(qtyDisplay)}</div>
                 ${showMrp ? `<div class="price-row">
                     <span class="price">₹${priceDisplay}</span>
-                    ${qtyDisplay ? `<span class="variant-qty">(${qtyDisplay})</span>` : ''}
+                    ${qtyDisplay ? `<span class="variant-qty">(${escapeHTML(qtyDisplay)})</span>` : ''}
                     ${mrpDisplay && mrpDisplay > priceDisplay ? `<span class="mrp-strike">₹${mrpDisplay}</span>` : ''}
                 </div>` : ''}
             </div>
