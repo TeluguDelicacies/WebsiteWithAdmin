@@ -58,5 +58,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 3. Grant execute permission to everyone
-GRANT EXECUTE ON FUNCTION process_order_stock(UUID, TEXT, INTEGER) TO anon, authenticated;
+-- 3. Grant execute permission to authenticated users only
+-- SECURITY FIX (Audit Task 2): Removed 'anon' access to prevent
+-- anonymous visitors from draining product inventory via browser console.
+-- Future: Move this call entirely to a Supabase Edge Function triggered
+-- by verified payment webhooks (Razorpay) for maximum security.
+GRANT EXECUTE ON FUNCTION process_order_stock(UUID, TEXT, INTEGER) TO authenticated;
+
+-- Explicitly revoke anonymous access (idempotent safety net)
+REVOKE EXECUTE ON FUNCTION process_order_stock(UUID, TEXT, INTEGER) FROM anon;

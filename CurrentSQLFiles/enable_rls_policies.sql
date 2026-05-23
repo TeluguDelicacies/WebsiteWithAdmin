@@ -91,52 +91,62 @@ USING (true);
 
 
 -- =====================================================
--- STEP 4: CREATE WRITE POLICIES (Admin Only)
+-- STEP 4: CREATE WRITE POLICIES (Admin Only — Email Whitelisted)
 -- =====================================================
--- These policies allow only AUTHENTICATED (logged-in) users to modify data
--- Your admin panel users will be authenticated via Supabase Auth
+-- SECURITY FIX (Audit Task 1): These policies restrict write access to
+-- ONLY the whitelisted admin email(s). Previously, ANY authenticated user
+-- (including self-registered accounts) had full write/delete permissions.
+--
+-- To add more admins, add their email to each IN (...) list below.
+-- Future: Migrate to a profiles/roles table for scalable RBAC.
 
--- Products: Only authenticated users can insert, update, delete
+-- Products: Only whitelisted admin can insert, update, delete
 CREATE POLICY "Admin write access"
 ON public.products
 FOR ALL
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated');
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'))
+WITH CHECK (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'));
 
--- Categories: Only authenticated users can modify
+-- Categories: Only whitelisted admin can modify
 CREATE POLICY "Admin write access"
 ON public.categories
 FOR ALL
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated');
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'))
+WITH CHECK (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'));
 
--- Testimonials: Only authenticated users can modify
+-- Testimonials: Only whitelisted admin can modify
 CREATE POLICY "Admin write access"
 ON public.testimonials
 FOR ALL
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated');
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'))
+WITH CHECK (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'));
 
--- Site Settings: Only authenticated users can modify
+-- Site Settings: Only whitelisted admin can modify
 CREATE POLICY "Admin write access"
 ON public.site_settings
 FOR ALL
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated');
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'))
+WITH CHECK (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'));
 
--- Why Us Features: Only authenticated users can modify
+-- Why Us Features: Only whitelisted admin can modify
 CREATE POLICY "Admin write access"
 ON public.why_us_features
 FOR ALL
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated');
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'))
+WITH CHECK (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'));
 
--- Website Sections: Only authenticated users can modify
+-- Website Sections: Only whitelisted admin can modify
 CREATE POLICY "Admin write access"
 ON public.website_sections
 FOR ALL
-USING (auth.role() = 'authenticated')
-WITH CHECK (auth.role() = 'authenticated');
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'))
+WITH CHECK (auth.jwt() ->> 'email' IN ('ceo@telugudelicacies.com'));
 
 
 -- =====================================================
@@ -152,5 +162,6 @@ WITH CHECK (auth.role() = 'authenticated');
 
 -- Done! Your website should work exactly as before, but now:
 -- ✅ Anonymous visitors can READ all data (website works)
--- ✅ Only logged-in admins can MODIFY data (admin panel works)
+-- ✅ Only ceo@telugudelicacies.com can MODIFY data (admin panel works)
+-- ❌ Self-registered users CANNOT modify your database (protected!)
 -- ❌ Anonymous users CANNOT modify your database (protected!)

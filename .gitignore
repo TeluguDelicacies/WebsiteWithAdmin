@@ -96,3 +96,10 @@ e2e-results/
 # Temporary Folders
 temp/
 tmp/
+
+# Marketing and Catalog feeds
+facebook/
+*.csv
+
+# Local security audit reports
+Audit/

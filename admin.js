@@ -1,6 +1,19 @@
 
 import { supabase } from './lib/supabase.js';
+import DOMPurify from 'https://cdn.jsdelivr.net/npm/dompurify@3.0.9/+esm';
 window.supabase = supabase; // Expose globally for other scripts (like csv_manager.js)
+
+// Helper: Escape HTML to prevent XSS attacks
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+window.escapeHTML = escapeHTML; // Expose globally just in case
 
 // Helper: Generate URL-friendly slug from product name
 function generateSlug(name) {
@@ -96,11 +109,13 @@ function isLooseEqual(v1, v2) {
 
         // Check if all keys in v1 exist in v2 and match
         for (const key of keys1) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
             if (!isLooseEqual(v1[key], v2[key])) return false;
         }
 
         // Check if all keys in v2 exist in v1 (to catch extra keys in current)
         for (const key of keys2) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
             if (!isLooseEqual(v1[key], v2[key])) return false;
         }
 
@@ -115,6 +130,7 @@ function getChanges(original, current) {
     if (!original) return ['Created New Item'];
     const changes = [];
     for (const key in current) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
         if (!isLooseEqual(original[key], current[key])) {
             // Format key for display
             const label = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
@@ -137,10 +153,10 @@ window.showToast = (message, type = 'success') => {
     if (type === 'error') icon = 'fa-exclamation-circle';
 
     toast.innerHTML = `
-        <i class="fas ${icon} toast-icon"></i>
+        <i class="fas ${escapeHTML(icon)} toast-icon"></i>
         <div>
             <div class="toast-top-text">${type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info'}</div>
-            <div class="toast-body">${message}</div>
+            <div class="toast-body">${escapeHTML(message)}</div>
         </div>
     `;
 
@@ -283,9 +299,18 @@ async function handleLogout() {
     } catch (error) {
         console.error('Logout failed:', error);
     } finally {
-        // Force local state cleanup regardless of server response
+        // SECURITY FIX (Audit Task 5): Clear ALL sensitive in-memory state
+        // to prevent data leakage on shared/unattended browsers.
         currentUser = null;
-        showLogin();
+        allProducts = [];
+        allCategories = [];
+        allTestimonials = [];
+        allCombos = [];
+        editSnapshot = {};
+        
+        // Force full page reload to wipe any remaining JS memory state
+        // This is more thorough than just calling showLogin()
+        window.location.reload();
     }
 }
 
@@ -472,7 +497,7 @@ function renderCategoryList(categories) {
     categoryList.innerHTML = categories.map(cat => `
         <div class="admin-product-card draggable-item" 
              draggable="true" 
-             data-id="${cat.id}" 
+             data-id="${escapeHTML(cat.id)}" 
              data-type="category"
              data-order="${cat.display_order || 0}"
              style="cursor: move;"
@@ -482,40 +507,40 @@ function renderCategoryList(categories) {
              ondragenter="handleDragEnter(event)"
              ondragleave="handleDragLeave(event)">
 
-             <div class="card-row" onclick="toggleCardDetails('${cat.id}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
+             <div class="card-row" onclick="toggleCardDetails('${escapeHTML(cat.id)}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
                   <!-- Grip -->
                   <div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>
                   
-                  <img src="${cat.image_url || PLACEHOLDER_IMAGE}" 
+                  <img src="${escapeHTML(cat.image_url) || PLACEHOLDER_IMAGE}" 
                        onerror="this.src=PLACEHOLDER_IMAGE"
                        style="margin-left: 15px;">
 
                   <div class="row-info">
                        <h3 ${!cat.is_visible ? 'style="opacity: 0.5;"' : ''}>
-                           ${cat.title} 
+                           ${escapeHTML(cat.title)} 
                            ${!cat.is_visible ? '<i class="fas fa-eye-slash" title="Hidden" style="color: #64748b; margin-left: 5px;"></i>' : ''}
                        </h3>
-                       <div class="tagline">/${cat.slug}</div>
-                       ${cat.sub_brand ? `<span class="category-badge">${cat.sub_brand}</span>` : ''}
+                       <div class="tagline">/${escapeHTML(cat.slug)}</div>
+                       ${cat.sub_brand ? `<span class="category-badge">${escapeHTML(cat.sub_brand)}</span>` : ''}
                   </div>
 
                   <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
-                       ${cat.display_order}
+                       ${escapeHTML(cat.display_order)}
                   </div>
 
                   <div class="row-actions" onclick="event.stopPropagation()">
-                      <button onclick="editCategory('${cat.id}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
-                      <button onclick="deleteCategory('${cat.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                      <button onclick="editCategory('${escapeHTML(cat.id)}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteCategory('${escapeHTML(cat.id)}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
                   </div>
 
-                  <i class="fas fa-chevron-down" id="chevron-${cat.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+                  <i class="fas fa-chevron-down" id="chevron-${escapeHTML(cat.id)}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
              </div>
 
-             <div class="card-expanded-details" id="details-${cat.id}">
+             <div class="card-expanded-details" id="details-${escapeHTML(cat.id)}">
                  <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
                      <div>
                          <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Description</h4>
-                         <p style="margin: 0; color: var(--text-secondary);">${cat.description || 'No description found.'}</p>
+                         <p style="margin: 0; color: var(--text-secondary);">${escapeHTML(cat.description) || 'No description found.'}</p>
                      </div>
                  </div>
              </div>
@@ -1363,6 +1388,7 @@ if (siteSettingsForm) {
                 const changedKeys = [];
                 if (editSnapshot) {
                     for (const key in settingsData) {
+                        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
                         if (!isLooseEqual(editSnapshot[key], settingsData[key])) {
                             changedKeys.push(key);
                         }
@@ -1410,6 +1436,7 @@ if (siteSettingsForm) {
                 };
 
                 changedKeys.forEach(key => {
+                    if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
                     const inputId = fieldIdMap[key];
                     if (inputId) {
                         const el = document.getElementById(inputId);
@@ -1490,7 +1517,7 @@ async function populateCategoryOptions() {
     try {
         const { data } = await supabase.from('categories').select('title, slug').order('display_order');
         if (data && productCategorySelect) {
-            productCategorySelect.innerHTML = data.map(c => `<option value="${c.slug}">${c.title}</option>`).join('');
+            productCategorySelect.innerHTML = data.map(c => `<option value="${escapeHTML(c.slug)}">${escapeHTML(c.title)}</option>`).join('');
         }
     } catch (e) { console.error('Error loading cats for dropdown', e); }
 }
@@ -1575,7 +1602,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
     } else {
         // All categories or trending: sort by category order first, then product display_order
         // Build a category order map from allCategories
-        const categoryOrderMap = {};
+        const categoryOrderMap = Object.create(null);
         allCategories.forEach((cat, index) => {
             categoryOrderMap[cat.slug] = cat.display_order || index;
         });
@@ -1611,20 +1638,13 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
         // Variants Grid
         const variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
 
-        // Ensure at least 3 slots for grid consistency if we want fixed columns, 
-        // OR just render what we have. Design plan said "rows for variants" or "up to 3". 
-        // Let's render up to 3 columns if available, or just empty slots?
-        // The CSS grid is repeat(3, 1fr). So we should fill 3 slots to maintain layout structure or just let them auto-flow?
-        // Let's stick to filling 3 slots for alignment if possible, or just rendering valid ones.
-        // Actually best to just render available ones.
-
         let variantsHtml = '';
         if (variants.length > 0) {
             variantsHtml = variants.slice(0, 3).map(v => `
                 <div class="mini-variant">
-                    <div class="v-qty">${v.quantity}</div>
-                    <div class="v-price">₹${v.price}</div>
-                    ${(v.global_sold || v.total_sold) ? `<div class="v-sold" title="Lifetime Global Sales"><i class="fas fa-shopping-bag"></i> ${v.global_sold || v.total_sold}</div>` : ''}
+                    <div class="v-qty">${escapeHTML(v.quantity)}</div>
+                    <div class="v-price">₹${escapeHTML(v.price)}</div>
+                    ${(v.global_sold || v.total_sold) ? `<div class="v-sold" title="Lifetime Global Sales"><i class="fas fa-shopping-bag"></i> ${escapeHTML(v.global_sold || v.total_sold)}</div>` : ''}
                 </div>
             `).join('');
 
@@ -1643,7 +1663,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
         return `
         <div class="admin-product-card draggable-item" 
              draggable="${isDragEnabled}" 
-             data-id="${product.id}"
+             data-id="${escapeHTML(product.id)}"
              data-order="${product.display_order || 0}"
              ${isDragEnabled ? `
              ondragstart="handleDragStart(event)"
@@ -1652,22 +1672,22 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
              ondragenter="handleDragEnter(event)"
              ondragleave="handleDragLeave(event)"` : ''}>
             
-            <div class="card-row" onclick="toggleCardDetails('${product.id}')">
+            <div class="card-row" onclick="toggleCardDetails('${escapeHTML(product.id)}')">
                 <!-- Grip for Drag -->
                 ${isDragEnabled ? '<div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>' : ''}
                 
-                <img src="${defaultImg}" 
+                <img src="${escapeHTML(defaultImg)}" 
                      onerror="this.src=PLACEHOLDER_IMAGE"
                      style="${isDragEnabled ? 'margin-left: 15px;' : ''}">
                 
                 <div class="row-info">
                     <h3 ${!product.is_visible ? 'style="opacity: 0.5;"' : ''}>
-                        ${product.product_name}
+                        ${escapeHTML(product.product_name)}
                         ${product.is_trending ? '<i class="fas fa-fire" title="Trending Item" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
                         ${product.is_visible === false ? '<i class="fas fa-eye-slash" title="Hidden on Site" style="color: #64748b; margin-left: 5px;"></i>' : ''}
                     </h3>
-                    <div class="tagline">${product.product_tagline || ''}</div>
-                    <span class="category-badge">${product.product_category.replace(/-/g, ' ')}</span>
+                    <div class="tagline">${escapeHTML(product.product_tagline || '')}</div>
+                    <span class="category-badge">${escapeHTML(product.product_category).replace(/-/g, ' ')}</span>
                 </div>
 
                 <div class="row-variants">
@@ -1675,33 +1695,33 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                 </div>
 
                 <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
-                    ${product.display_order || 0}
+                    ${escapeHTML(product.display_order || 0)}
                 </div>
 
                 <div class="row-actions" onclick="event.stopPropagation()">
-                    <button onclick="editProduct('${product.id}')" class="admin-btn btn-sm" title="Edit">
+                    <button onclick="editProduct('${escapeHTML(product.id)}')" class="admin-btn btn-sm" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button onclick="deleteProduct('${product.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete">
+                    <button onclick="deleteProduct('${escapeHTML(product.id)}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
 
-                <i class="fas fa-chevron-down" id="chevron-${product.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+                <i class="fas fa-chevron-down" id="chevron-${escapeHTML(product.id)}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
             </div>
 
-            <div class="card-expanded-details" id="details-${product.id}">
+            <div class="card-expanded-details" id="details-${escapeHTML(product.id)}">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
                         <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Description</h4>
-                        <p style="margin: 0 0 10px; color: var(--text-secondary);">${product.product_description || 'None'}</p>
+                        <p style="margin: 0 0 10px; color: var(--text-secondary);">${product.product_description ? DOMPurify.sanitize(product.product_description) : 'None'}</p>
                         
                         <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Ingredients</h4>
-                        <p style="margin: 0; color: var(--text-secondary);">${product.ingredients || 'None'}</p>
+                        <p style="margin: 0; color: var(--text-secondary);">${escapeHTML(product.ingredients) || 'None'}</p>
                     </div>
                     <div>
                         <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Usage Instructions</h4>
-                        <p style="margin: 0 0 10px; color: var(--text-secondary);">${product.serving_suggestion || 'None'}</p>
+                        <p style="margin: 0 0 10px; color: var(--text-secondary);">${escapeHTML(product.serving_suggestion) || 'None'}</p>
 
                         <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Nutrition Info</h4>
                         <p style="margin: 0; color: var(--text-secondary);">${product.nutrition_info ? 'Available (Check Edit Mode)' : 'None'}</p>
@@ -1934,7 +1954,7 @@ async function fetchTestimonials() {
         renderTestimonialList(testimonials);
     } catch (error) {
         console.error('Fetch error:', error);
-        testimonialList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${error.message}</td></tr>`;
+        testimonialList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${escapeHTML(error.message)}</td></tr>`;
     }
 }
 
@@ -1947,7 +1967,7 @@ function renderTestimonialList(testimonials) {
     testimonialList.innerHTML = testimonials.map(t => `
         <div class="admin-product-card draggable-item" 
              draggable="true" 
-             data-id="${t.id}" 
+             data-id="${escapeHTML(t.id)}" 
              data-type="testimonial"
              data-order="${t.display_order || 0}"
              style="cursor: move;"
@@ -1957,37 +1977,37 @@ function renderTestimonialList(testimonials) {
              ondragenter="handleDragEnter(event)"
              ondragleave="handleDragLeave(event)">
 
-             <div class="card-row" onclick="toggleCardDetails('${t.id}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
+             <div class="card-row" onclick="toggleCardDetails('${escapeHTML(t.id)}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
                   <!-- Grip -->
                   <div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>
 
                   <!-- Avatar -->
                   <div style="margin-left: 15px; width: 60px; height: 60px; background: var(--bg-secondary); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--color-primary-blue); border: 1px solid var(--border-light); font-size: 1.5rem;">
-                        ${t.name.charAt(0).toUpperCase()}
+                        ${escapeHTML(t.name.charAt(0).toUpperCase())}
                   </div>
 
                   <div class="row-info">
-                       <h3>${t.name} <span style="font-size: 0.8rem; color: #f59e0b; margin-left: 8px;">${'★'.repeat(t.rating)}</span></h3>
-                       <div class="tagline">${t.location || 'No Location'}</div>
-                       <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">"${t.message}"</div>
+                       <h3>${escapeHTML(t.name)} <span style="font-size: 0.8rem; color: #f59e0b; margin-left: 8px;">${'★'.repeat(t.rating)}</span></h3>
+                       <div class="tagline">${escapeHTML(t.location || 'No Location')}</div>
+                       <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">"${escapeHTML(t.message)}"</div>
                   </div>
 
                   <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
-                       ${t.display_order}
+                       ${escapeHTML(t.display_order)}
                   </div>
 
                   <div class="row-actions" onclick="event.stopPropagation()">
-                      <button onclick="editTestimonial('${t.id}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
-                      <button onclick="deleteTestimonial('${t.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                      <button onclick="editTestimonial('${escapeHTML(t.id)}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteTestimonial('${escapeHTML(t.id)}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
                   </div>
 
-                  <i class="fas fa-chevron-down" id="chevron-${t.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+                  <i class="fas fa-chevron-down" id="chevron-${escapeHTML(t.id)}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
              </div>
 
-             <div class="card-expanded-details" id="details-${t.id}">
-                 <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Full Review</h4>
-                 <p style="margin: 0; color: var(--text-secondary); font-style: italic;">"${t.message}"</p>
-                 ${t.product_name ? `<p style="margin: 10px 0 0; font-size: 0.8rem; color: var(--text-tertiary);">Review for: <strong>${t.product_name}</strong></p>` : ''}
+             <div class="card-expanded-details" id="details-${escapeHTML(t.id)}">
+                  <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Full Review</h4>
+                  <p style="margin: 0; color: var(--text-secondary); font-style: italic;">"${escapeHTML(t.message)}"</p>
+                  ${t.product_name ? `<p style="margin: 10px 0 0; font-size: 0.8rem; color: var(--text-tertiary);">Review for: <strong>${escapeHTML(t.product_name)}</strong></p>` : ''}
              </div>
         </div>
     `).join('');
@@ -2698,7 +2718,7 @@ window.migrateProductsTableToCloudinary = async function () {
                 const newUrl = await uploadImageToStorage(file);
 
                 // Update DB
-                const updateObj = {};
+                const updateObj = Object.create(null);
                 updateObj[item.field] = newUrl;
 
                 const { error: updateError } = await supabase
@@ -3167,7 +3187,7 @@ window.handleBulkSyncDefault = async () => {
         if (error) throw error;
 
         // Group by product
-        const productsImages = {};
+        const productsImages = Object.create(null);
         allImages.forEach(img => {
             if (!productsImages[img.product_id]) productsImages[img.product_id] = [];
             productsImages[img.product_id].push(img);
@@ -3271,7 +3291,7 @@ window.closeBulkImagesModal = function () {
     document.getElementById('bulkImagesModal').style.display = 'none';
     document.body.style.overflow = '';
     pendingBulkImages = [];
-    existingImagesEdits = {};
+    existingImagesEdits = Object.create(null);
 };
 
 // Tab switching
@@ -3299,7 +3319,7 @@ window.switchBulkTab = function (tab) {
 };
 
 // Track edits to existing images
-let existingImagesEdits = {};
+let existingImagesEdits = Object.create(null);
 let existingImagesData = [];
 
 // Populate product filter dropdown
@@ -3341,7 +3361,7 @@ window.loadExistingImages = async function () {
         }
 
         existingImagesData = images;
-        existingImagesEdits = {};
+        existingImagesEdits = Object.create(null);
 
         const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
 
@@ -3539,7 +3559,7 @@ window.saveExistingImageChanges = async function () {
 
         if (saved > 0) {
             showToast(`Saved ${saved} image(s)${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
-            existingImagesEdits = {};
+            existingImagesEdits = Object.create(null);
         } else if (errors > 0) {
             showToast('Failed to save changes', 'error');
         }
@@ -4103,7 +4123,7 @@ async function fetchWhyUsFeatures() {
         renderWhyUsFeatures(data);
     } catch (e) {
         console.error(e);
-        whyUsFeatureList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${e.message}</td></tr>`;
+        whyUsFeatureList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${escapeHTML(e.message)}</td></tr>`;
     }
 }
 
@@ -4116,7 +4136,7 @@ function renderWhyUsFeatures(features) {
     whyUsFeatureList.innerHTML = features.map(f => `
         <div class="admin-product-card draggable-item" 
              draggable="true" 
-             data-id="${f.id}" 
+             data-id="${escapeHTML(f.id)}" 
              data-type="why-us"
              data-order="${f.order_index}"
              style="cursor: move;"
@@ -4126,32 +4146,32 @@ function renderWhyUsFeatures(features) {
              ondragenter="handleDragEnter(event)"
              ondragleave="handleDragLeave(event)">
 
-             <div class="card-row" onclick="toggleCardDetails('${f.id}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
+             <div class="card-row" onclick="toggleCardDetails('${escapeHTML(f.id)}')" style="grid-template-columns: 80px 1fr 60px 100px 30px;">
                   <!-- Grip -->
                   <div style="position: absolute; left: 5px; color: #ccc;"><i class="fas fa-grip-vertical"></i></div>
 
-                  <img src="${f.image_url || PLACEHOLDER_IMAGE}" style="margin-left: 15px;">
+                  <img src="${escapeHTML(f.image_url) || PLACEHOLDER_IMAGE}" style="margin-left: 15px;">
 
                   <div class="row-info">
-                       <h3>${f.title}</h3>
-                       <div class="tagline" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${f.description || 'No description'}</div>
+                       <h3>${escapeHTML(f.title)}</h3>
+                       <div class="tagline" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(f.description) || 'No description'}</div>
                   </div>
 
                   <div class="display-order-cell" style="text-align: center; font-weight: bold; color: var(--text-secondary);">
-                       ${f.order_index}
+                       ${escapeHTML(f.order_index)}
                   </div>
 
                   <div class="row-actions" onclick="event.stopPropagation()">
-                      <button onclick="editWhyUsFeature('${f.id}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
-                      <button onclick="deleteWhyUsFeature('${f.id}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
+                      <button onclick="editWhyUsFeature('${escapeHTML(f.id)}')" class="admin-btn btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteWhyUsFeature('${escapeHTML(f.id)}')" class="admin-btn btn-sm" style="color: var(--color-error); border-color: var(--color-error);" title="Delete"><i class="fas fa-trash"></i></button>
                   </div>
 
-                  <i class="fas fa-chevron-down" id="chevron-${f.id}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
+                  <i class="fas fa-chevron-down" id="chevron-${escapeHTML(f.id)}" style="color: var(--text-secondary); transition: transform 0.2s;"></i>
              </div>
 
-             <div class="card-expanded-details" id="details-${f.id}">
-                 <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Description</h4>
-                 <p style="margin: 0; color: var(--text-secondary);">${f.description || ''}</p>
+             <div class="card-expanded-details" id="details-${escapeHTML(f.id)}">
+                  <h4 style="margin: 0 0 5px; color: var(--color-secondary-blue);">Description</h4>
+                  <p style="margin: 0; color: var(--text-secondary);">${escapeHTML(f.description) || ''}</p>
              </div>
         </div>
     `).join('');
@@ -4402,6 +4422,7 @@ window.saveSectionSettings = async function () {
             const changedFields = [];
             if (editSnapshot) {
                 for (const key in sectionData) {
+                    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
                     if (!isLooseEqual(editSnapshot[key], sectionData[key])) {
                         changedFields.push(key);
                     }
@@ -4410,6 +4431,7 @@ window.saveSectionSettings = async function () {
 
             // Highlight the changed toggle cards
             changedFields.forEach(field => {
+                if (field === '__proto__' || field === 'constructor' || field === 'prototype') return;
                 const toggleId = fieldToToggleMap[field];
                 if (toggleId) {
                     const toggleEl = document.getElementById(toggleId);
@@ -4477,19 +4499,21 @@ const createShim = (name) => {
     // We define them here. csv_manager.js (loading second) will overwrite them if it uses window.name = ...
     // OR if we use CsvManager pattern, we rely on these shims to proxy.
     // Let's implement Proxy Shim Pattern.
-    window[name] = (...args) => {
-        if (window.CsvManager && typeof window.CsvManager[name] === 'function') {
-            return window.CsvManager[name](...args);
-        }
+    if (name !== '__proto__' && name !== 'constructor' && name !== 'prototype') {
+        window[name] = (...args) => {
+            if (window.CsvManager && typeof window.CsvManager[name] === 'function') {
+                return window.CsvManager[name](...args);
+            }
 
-        // Backward compatibility: If csv_manager.js still uses window.openCsvModal (old way)
-        // Then these shims would have been overwritten. 
-        // IF we are here, it means they were NOT overwritten OR we are using CsvManager pattern 
-        // but CsvManager is missing.
+            // Backward compatibility: If csv_manager.js still uses window.openCsvModal (old way)
+            // Then these shims would have been overwritten. 
+            // IF we are here, it means they were NOT overwritten OR we are using CsvManager pattern 
+            // but CsvManager is missing.
 
-        console.warn(`Shim: ${name} called but CSV Manager not ready.`);
-        alert('CSV Manager functionality is not loaded. Please check console for errors or refresh.');
-    };
+            console.warn(`Shim: ${name} called but CSV Manager not ready.`);
+            alert('CSV Manager functionality is not loaded. Please check console for errors or refresh.');
+        };
+    }
 };
 
 [
