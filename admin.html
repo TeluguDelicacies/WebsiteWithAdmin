@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin-mobile.css" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="admin-desktop.css" media="screen and (min-width: 769px)">
     <!-- SheetJS for Excel file support -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -1334,20 +1335,24 @@
 
         <!-- Content Area (88% width centered) -->
         <div class="admin-content-area">
+            <!-- FUTURE: remove inline style -->
             <div class="dashboard-header"
                 style="margin-bottom: 10px; padding: 12px 15px; background: white; border-bottom: 1px solid var(--border-light); border-radius: var(--radius-lg);">
 
                 <!-- ROW 1: Title (Left) | Tabs (Center) | Logout (Right) -->
-                <div
+                <!-- FUTURE: remove inline style -->
+                <div class="dashboard-header__row1"
                     style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
 
                     <!-- LEFT: Admin Dashboard Title -->
+                    <!-- FUTURE: remove inline style -->
                     <h2
                         style="color: var(--color-primary-blue); margin: 0; font-size: 1.4rem; font-weight: 600; flex-shrink: 0;">
                         Admin Dashboard</h2>
 
                     <!-- CENTER: Navigation Tabs -->
                     <!-- MODIFIED: flex-wrap: nowrap to force single line, gap reduced, added overflow handling if extremely small -->
+                    <!-- FUTURE: remove inline style -->
                     <div class="view-toggle"
                         style="display: flex; gap: 5px; flex-wrap: nowrap; justify-content: center; flex: 1; margin: 0 10px; overflow-x: auto;">
                         <button id="viewProductsBtn" class="admin-btn active"
@@ -1366,7 +1371,11 @@
                     </div>
 
                     <!-- RIGHT: Actions -->
+                    <!-- FUTURE: remove inline style -->
                     <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+                        <button id="adminThemeToggle" class="admin-theme-toggle" onclick="toggleAdminTheme()" title="Toggle Dark Mode">
+                            <i class="fas fa-moon"></i>
+                        </button>
                         <a href="index.html" class="admin-btn" title="Back to Website" style="padding: 8px 12px;">
                             <i class="fas fa-home" style="font-size: 1.1rem;"></i>
                         </a>
@@ -1378,6 +1387,7 @@
                 </div>
 
                 <!-- ROW 2: Tab-Specific Actions -->
+                <!-- FUTURE: remove inline style -->
                 <div id="actionRow" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
 
                     <!-- LEFT: Product Filters (only for Products tab) -->
@@ -1626,11 +1636,13 @@
                     </button>
                 </div>
 
+                <!-- FUTURE: remove inline style -->
                 <div class="sections-grid"
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
 
                     <!-- Hero Section -->
-                    <div class="section-toggle-card"
+                    <!-- FUTURE: remove inline style -->
+                    <div class="section-toggle-card section-card--hero"
                         style="background: linear-gradient(135deg, #f8fafc, #e2e8f0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1651,7 +1663,8 @@
                     </div>
 
                     <!-- Product Carousel -->
-                    <div class="section-toggle-card"
+                    <!-- FUTURE: remove inline style -->
+                    <div class="section-toggle-card section-card--carousel"
                         style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #fbbf24;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1671,7 +1684,8 @@
                     </div>
 
                     <!-- Our Collections -->
-                    <div class="section-toggle-card"
+                    <!-- FUTURE: remove inline style -->
+                    <div class="section-toggle-card section-card--collections"
                         style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #38bdf8;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1707,7 +1721,8 @@
                     </div>
 
                     <!-- Testimonials -->
-                    <div class="section-toggle-card"
+                    <!-- FUTURE: remove inline style -->
+                    <div class="section-toggle-card section-card--testimonials"
                         style="background: linear-gradient(135deg, #fce7f3, #fbcfe8); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #f472b6;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1727,7 +1742,8 @@
                     </div>
 
                     <!-- Why Us -->
-                    <div class="section-toggle-card"
+                    <!-- FUTURE: remove inline style -->
+                    <div class="section-toggle-card section-card--whyus"
                         style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #34d399;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1766,7 +1782,8 @@
                     </div>
 
                     <!-- Get In Touch -->
-                    <div class="section-toggle-card"
+                    <!-- FUTURE: remove inline style -->
+                    <div class="section-toggle-card section-card--contact"
                         style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #818cf8;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1786,7 +1803,8 @@
                     </div>
 
                     <!-- Footer -->
-                    <div class="section-toggle-card"
+                    <!-- FUTURE: remove inline style -->
+                    <div class="section-toggle-card section-card--footer"
                         style="background: linear-gradient(135deg, #f1f5f9, #cbd5e1); padding: 20px; border-radius: var(--radius-lg); border: 1px solid #94a3b8;">
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
@@ -2941,6 +2959,33 @@
                     class="fas fa-cog"></i><span>Settings</span></button>
         </nav>
         <script type="module" src="csv_manager.js"></script>
+
+        <!-- Dark Mode Toggle Script -->
+        <script>
+            function toggleAdminTheme() {
+                const html = document.documentElement;
+                const current = html.getAttribute('data-admin-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-admin-theme', next);
+                localStorage.setItem('admin-theme', next);
+                // Update icon
+                const icon = document.querySelector('#adminThemeToggle i');
+                if (icon) {
+                    icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                }
+            }
+            // Restore saved theme on load
+            (function() {
+                const saved = localStorage.getItem('admin-theme');
+                if (saved) {
+                    document.documentElement.setAttribute('data-admin-theme', saved);
+                    const icon = document.querySelector('#adminThemeToggle i');
+                    if (icon) {
+                        icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                    }
+                }
+            })();
+        </script>
 
 </body>
 

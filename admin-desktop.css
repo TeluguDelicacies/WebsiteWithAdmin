@@ -1,0 +1,1413 @@
+/*
+==========================================
+ADMIN PANEL — DESKTOP-ONLY STYLES
+==========================================
+Flat, Android-inspired design system.
+Loads only on screens >= 769px via media query on <link>.
+Provides: design tokens, unified components, layout,
+sticky action bars, dark mode toggle.
+==========================================
+*/
+
+/* ==========================================
+   1. DESIGN TOKENS — LIGHT THEME (default)
+   ========================================== */
+:root {
+    /* Surface & Background */
+    --admin-bg: #f0f2f5;
+    --admin-surface: #ffffff;
+    --admin-surface-hover: #f5f6f8;
+    --admin-surface-alt: #f7f8fa;
+
+    /* Borders */
+    --admin-border: #e0e3e8;
+    --admin-border-strong: #cdd1d8;
+
+    /* Text */
+    --admin-text-primary: #1a1c1e;
+    --admin-text-secondary: #5f6368;
+    --admin-text-tertiary: #9aa0a6;
+    --admin-text-inverse: #ffffff;
+
+    /* Brand / Accent */
+    --admin-accent: #1a73e8;
+    --admin-accent-hover: #1557b0;
+    --admin-accent-subtle: #e8f0fe;
+    --admin-accent-text: #1a73e8;
+
+    /* Semantic */
+    --admin-success: #1e8e3e;
+    --admin-success-subtle: #e6f4ea;
+    --admin-success-hover: #137333;
+    --admin-danger: #d93025;
+    --admin-danger-subtle: #fce8e6;
+    --admin-danger-hover: #b3261e;
+    --admin-warning: #e8710a;
+    --admin-warning-subtle: #fef7e0;
+    --admin-info: #1a73e8;
+    --admin-info-subtle: #e8f0fe;
+
+    /* Sizing */
+    --admin-radius: 8px;
+    --admin-radius-sm: 6px;
+    --admin-radius-lg: 12px;
+    --admin-radius-xl: 16px;
+    --admin-input-height: 40px;
+    --admin-btn-height: 40px;
+
+    /* Shadows — very minimal for flat look */
+    --admin-shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+    --admin-shadow-md: 0 2px 6px rgba(0,0,0,0.08);
+    --admin-shadow-lg: 0 4px 12px rgba(0,0,0,0.10);
+    --admin-shadow-none: none;
+
+    /* Transitions */
+    --admin-transition: 200ms cubic-bezier(0.2, 0, 0, 1);
+
+    /* Toggle */
+    --admin-toggle-off: #dadce0;
+    --admin-toggle-on: var(--admin-accent);
+    --admin-toggle-thumb: #ffffff;
+
+    /* Layout */
+    --admin-header-height: 60px;
+    --admin-content-max-width: 1400px;
+    --admin-sticky-bar-height: 64px;
+}
+
+/* ==========================================
+   2. DARK MODE TOKENS
+   ========================================== */
+[data-admin-theme="dark"] {
+    --admin-bg: #1a1c1e;
+    --admin-surface: #252628;
+    --admin-surface-hover: #2e3033;
+    --admin-surface-alt: #2e3033;
+
+    --admin-border: #3c4043;
+    --admin-border-strong: #5f6368;
+
+    --admin-text-primary: #e8eaed;
+    --admin-text-secondary: #bdc1c6;
+    --admin-text-tertiary: #9aa0a6;
+    --admin-text-inverse: #1a1c1e;
+
+    --admin-accent: #8ab4f8;
+    --admin-accent-hover: #aecbfa;
+    --admin-accent-subtle: #1e3a5f;
+    --admin-accent-text: #8ab4f8;
+
+    --admin-success: #81c995;
+    --admin-success-subtle: #1b3626;
+    --admin-success-hover: #5bb974;
+    --admin-danger: #f28b82;
+    --admin-danger-subtle: #3c2020;
+    --admin-danger-hover: #ee675c;
+    --admin-warning: #fdd663;
+    --admin-warning-subtle: #3e3215;
+    --admin-info: #8ab4f8;
+    --admin-info-subtle: #1e3a5f;
+
+    --admin-shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --admin-shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+    --admin-shadow-lg: 0 4px 16px rgba(0,0,0,0.5);
+
+    --admin-toggle-off: #5f6368;
+    --admin-toggle-on: var(--admin-accent);
+    --admin-toggle-thumb: #e8eaed;
+}
+
+/* ==========================================
+   3. BASE OVERRIDES
+   ========================================== */
+body {
+    background-color: var(--admin-bg) !important;
+    color: var(--admin-text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+html {
+    background-color: var(--admin-bg) !important;
+}
+
+/* ==========================================
+   4. DASHBOARD LAYOUT
+   ========================================== */
+.admin-container.dashboard {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--admin-bg);
+}
+
+/* Remove warning sidebars on desktop — clean look */
+.warning-sidebar {
+    display: none !important;
+}
+
+/* Content area */
+.admin-content-area {
+    width: 100%;
+    max-width: var(--admin-content-max-width);
+    margin: 0 auto;
+    padding: 0 24px !important;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* ==========================================
+   5. DASHBOARD HEADER BAR
+   ========================================== */
+.dashboard-header {
+    background: var(--admin-surface) !important;
+    border-bottom: 1px solid var(--admin-border) !important;
+    border-radius: 0 !important;
+    padding: 0 24px !important;
+    margin-bottom: 24px !important;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Row 1: Title | Tabs | Actions */
+.dashboard-header__row1,
+.dashboard-header > div:first-child {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    min-height: var(--admin-header-height);
+    flex-wrap: nowrap !important;
+}
+
+/* Title */
+.dashboard-header__row1 > h2,
+.dashboard-header > div:first-child > h2 {
+    color: var(--admin-text-primary) !important;
+    font-size: 1.25rem !important;
+    font-weight: 600;
+    margin: 0 !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   6. NAVIGATION TABS (horizontal, pill-style)
+   ========================================== */
+.view-toggle {
+    display: flex !important;
+    gap: 4px !important;
+    align-items: center;
+    background: var(--admin-surface-alt);
+    border-radius: var(--admin-radius);
+    padding: 4px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+}
+
+.view-toggle .admin-btn {
+    height: 36px !important;
+    padding: 0 16px !important;
+    border-radius: var(--admin-radius-sm) !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--admin-text-secondary) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    white-space: nowrap;
+    box-shadow: none !important;
+}
+
+.view-toggle .admin-btn:hover:not(.active) {
+    background: var(--admin-surface-hover) !important;
+    color: var(--admin-text-primary) !important;
+    transform: none !important;
+}
+
+.view-toggle .admin-btn.active {
+    background: var(--admin-accent) !important;
+    color: var(--admin-text-inverse) !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================
+   7. ACTION ROW (Row 2)
+   ========================================== */
+#actionRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 8px 0;
+    flex-wrap: wrap;
+}
+
+/* ==========================================
+   8. UNIFIED BUTTONS
+   ========================================== */
+
+/* Base button reset */
+.admin-btn,
+.header-action-btn,
+button[class*="fab-"],
+.modal-actions button,
+.floating-actions button {
+    height: var(--admin-btn-height) !important;
+    padding: 0 16px !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    border: 1px solid var(--admin-border) !important;
+    background: var(--admin-surface) !important;
+    color: var(--admin-text-secondary) !important;
+    white-space: nowrap;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    line-height: 1 !important;
+}
+
+.admin-btn:hover,
+.header-action-btn:hover {
+    background: var(--admin-surface-hover) !important;
+    color: var(--admin-text-primary) !important;
+    border-color: var(--admin-border-strong) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Active/Primary button */
+.admin-btn.active:not(.view-toggle .admin-btn) {
+    background: var(--admin-accent) !important;
+    color: var(--admin-text-inverse) !important;
+    border-color: var(--admin-accent) !important;
+}
+
+/* Danger button */
+.admin-btn.btn-danger {
+    color: var(--admin-danger) !important;
+    border-color: var(--admin-danger) !important;
+}
+
+.admin-btn.btn-danger:hover {
+    background: var(--admin-danger-subtle) !important;
+    color: var(--admin-danger) !important;
+}
+
+/* Header action buttons */
+.header-action-btn {
+    color: var(--admin-accent-text) !important;
+    border-color: var(--admin-accent) !important;
+    min-width: auto !important;
+}
+
+.header-action-btn:hover {
+    background: var(--admin-accent-subtle) !important;
+    color: var(--admin-accent-text) !important;
+    border-color: var(--admin-accent) !important;
+}
+
+/* ==========================================
+   9. UNIFIED FORM CONTROLS
+   ========================================== */
+
+/* Text inputs & textareas */
+.admin-container input[type="text"],
+.admin-container input[type="email"],
+.admin-container input[type="password"],
+.admin-container input[type="number"],
+.admin-container input[type="url"],
+.admin-container input[type="tel"],
+.admin-container textarea,
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="password"],
+.modal-content input[type="number"],
+.modal-content input[type="url"],
+.modal-content input[type="tel"],
+.modal-content textarea,
+.login-box input[type="email"],
+.login-box input[type="password"] {
+    height: var(--admin-input-height);
+    padding: 8px 14px !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.875rem !important;
+    font-family: inherit !important;
+    color: var(--admin-text-primary) !important;
+    background: var(--admin-surface) !important;
+    transition: border-color var(--admin-transition);
+    box-shadow: none !important;
+    outline: none !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.admin-container textarea,
+.modal-content textarea {
+    height: auto !important;
+    min-height: 80px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+/* Focus state — flat blue outline */
+.admin-container input:focus,
+.admin-container textarea:focus,
+.admin-container select:focus,
+.modal-content input:focus,
+.modal-content textarea:focus,
+.modal-content select:focus,
+.login-box input:focus {
+    border-color: var(--admin-accent) !important;
+    box-shadow: 0 0 0 2px var(--admin-accent-subtle) !important;
+    outline: none !important;
+}
+
+/* Placeholder */
+.admin-container input::placeholder,
+.admin-container textarea::placeholder,
+.modal-content input::placeholder,
+.modal-content textarea::placeholder {
+    color: var(--admin-text-tertiary) !important;
+    font-weight: 400;
+}
+
+/* Select dropdowns */
+.admin-container select,
+.modal-content select {
+    height: var(--admin-input-height);
+    padding: 8px 36px 8px 14px !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.875rem !important;
+    font-family: inherit !important;
+    color: var(--admin-text-primary) !important;
+    background: var(--admin-surface) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4L6 8L10 4' stroke='%235f6368' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: border-color var(--admin-transition);
+}
+
+/* Labels */
+.admin-container label,
+.modal-content label,
+.admin-container .form-group > label {
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    color: var(--admin-text-secondary) !important;
+    margin-bottom: 6px !important;
+    display: block;
+}
+
+/* Form group spacing */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row > .form-group {
+    flex: 1;
+}
+
+/* Upload group */
+.upload-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.upload-group input[type="text"] {
+    flex: 1;
+}
+
+.upload-btn {
+    height: var(--admin-input-height) !important;
+    width: var(--admin-input-height) !important;
+    min-width: var(--admin-input-height) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    background: var(--admin-surface) !important;
+    color: var(--admin-text-secondary) !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+}
+
+.upload-btn:hover {
+    background: var(--admin-accent-subtle) !important;
+    color: var(--admin-accent-text) !important;
+    border-color: var(--admin-accent) !important;
+}
+
+/* ==========================================
+   10. UNIFIED TOGGLE SWITCHES
+   ========================================== */
+.toggle-switch {
+    position: relative;
+    width: 44px !important;
+    height: 24px !important;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch .toggle-slider,
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--admin-toggle-off) !important;
+    transition: var(--admin-transition);
+    border-radius: 24px !important;
+    box-shadow: none !important;
+}
+
+.toggle-switch .toggle-slider:before,
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px !important;
+    width: 18px !important;
+    left: 3px !important;
+    bottom: 3px !important;
+    background-color: var(--admin-toggle-thumb) !important;
+    transition: var(--admin-transition);
+    border-radius: 50% !important;
+    box-shadow: none !important;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--admin-toggle-on) !important;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px) !important;
+}
+
+/* Small toggle */
+.toggle-switch-sm {
+    position: relative;
+    width: 36px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.toggle-switch-sm input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch-sm .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--admin-toggle-off) !important;
+    transition: var(--admin-transition);
+    border-radius: 20px !important;
+    box-shadow: none !important;
+}
+
+.toggle-switch-sm .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px !important;
+    width: 14px !important;
+    left: 3px !important;
+    bottom: 3px !important;
+    background-color: var(--admin-toggle-thumb) !important;
+    transition: var(--admin-transition);
+    border-radius: 50% !important;
+    box-shadow: none !important;
+}
+
+.toggle-switch-sm input:checked + .toggle-slider {
+    background-color: var(--admin-toggle-on) !important;
+}
+
+.toggle-switch-sm input:checked + .toggle-slider:before {
+    transform: translateX(16px) !important;
+}
+
+/* ==========================================
+   11. UNIFIED CHECKBOXES
+   ========================================== */
+.admin-container input[type="checkbox"],
+.modal-content input[type="checkbox"] {
+    accent-color: var(--admin-accent);
+}
+
+/* ==========================================
+   12. VIEW CONTAINERS
+   ========================================== */
+.view-container {
+    background: var(--admin-surface) !important;
+    padding: 24px !important;
+    border-radius: var(--admin-radius-lg) !important;
+    border: 1px solid var(--admin-border) !important;
+    box-shadow: none !important;
+    flex-grow: 1;
+}
+
+/* Product list container override */
+#productListContainer {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* ==========================================
+   13. PRODUCT CARDS — FLAT
+   ========================================== */
+.admin-product-card {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    box-shadow: none !important;
+    transition: var(--admin-transition);
+    overflow: hidden;
+}
+
+.admin-product-card:hover {
+    border-color: var(--admin-border-strong) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    background: var(--admin-surface) !important;
+}
+
+.card-row {
+    display: grid;
+    grid-template-columns: 80px 2fr 3fr 60px 100px 30px;
+    gap: 15px;
+    align-items: center;
+    padding: 12px 16px !important;
+    cursor: pointer;
+    background: var(--admin-surface) !important;
+    transition: var(--admin-transition);
+}
+
+.card-row:hover {
+    background: var(--admin-surface-hover) !important;
+}
+
+.card-row img {
+    width: 56px !important;
+    height: 56px !important;
+    object-fit: cover;
+    border-radius: var(--admin-radius) !important;
+    border: 1px solid var(--admin-border) !important;
+}
+
+.row-info h3 {
+    margin: 0 !important;
+    font-size: 0.9375rem !important;
+    font-weight: 500 !important;
+    color: var(--admin-text-primary) !important;
+}
+
+.row-info .tagline {
+    font-size: 0.8125rem !important;
+    color: var(--admin-text-secondary) !important;
+}
+
+.row-info .category-badge {
+    display: inline-block;
+    font-size: 0.75rem !important;
+    padding: 2px 8px !important;
+    background: var(--admin-surface-alt) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: 100px !important;
+    color: var(--admin-text-secondary) !important;
+    margin-top: 4px;
+}
+
+/* Mini variants */
+.mini-variant {
+    text-align: center;
+    padding: 4px !important;
+    background: var(--admin-surface-alt) !important;
+    border-radius: var(--admin-radius-sm) !important;
+    border: 1px solid var(--admin-border) !important;
+}
+
+.mini-variant .v-price {
+    color: var(--admin-accent-text) !important;
+}
+
+.mini-variant .v-sold {
+    color: var(--admin-success) !important;
+}
+
+.mini-variant .v-mrp {
+    color: var(--admin-danger) !important;
+}
+
+/* Row actions */
+.row-actions button {
+    width: 32px !important;
+    height: 32px !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--admin-text-tertiary) !important;
+    border-radius: var(--admin-radius-sm) !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-actions button:hover {
+    background: var(--admin-surface-alt) !important;
+    color: var(--admin-text-primary) !important;
+}
+
+/* Expanded details */
+.card-expanded-details {
+    padding: 16px 20px !important;
+    background: var(--admin-surface-alt) !important;
+    border-top: 1px solid var(--admin-border) !important;
+    border-left: 3px solid var(--admin-accent) !important;
+}
+
+/* ==========================================
+   14. SECTION TOGGLE CARDS — FLAT
+   ========================================== */
+.section-toggle-card,
+.sections-grid .section-toggle-card {
+    background: var(--admin-surface) !important;
+    padding: 20px !important;
+    border-radius: var(--admin-radius) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-left: 4px solid var(--admin-border-strong) !important;
+    box-shadow: none !important;
+    transition: var(--admin-transition);
+}
+
+.section-toggle-card:hover {
+    border-color: var(--admin-border-strong) !important;
+}
+
+/* Colored left borders per section type */
+.section-card--hero { border-left-color: var(--admin-accent) !important; }
+.section-card--carousel { border-left-color: var(--admin-warning) !important; }
+.section-card--collections { border-left-color: #0284c7 !important; }
+.section-card--testimonials { border-left-color: #db2777 !important; }
+.section-card--whyus { border-left-color: var(--admin-success) !important; }
+.section-card--contact { border-left-color: #6366f1 !important; }
+.section-card--footer { border-left-color: var(--admin-text-tertiary) !important; }
+
+/* Section card inner text */
+.section-toggle-card h4 {
+    color: var(--admin-text-primary) !important;
+    font-size: 0.9375rem !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+}
+
+.section-toggle-card p {
+    color: var(--admin-text-secondary) !important;
+    font-size: 0.8125rem !important;
+    margin: 2px 0 0 !important;
+}
+
+.section-toggle-card i {
+    color: var(--admin-text-secondary) !important;
+    font-size: 1.25rem !important;
+}
+
+/* Sections grid */
+.sections-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 12px !important;
+}
+
+/* ==========================================
+   15. SETTINGS FORM
+   ========================================== */
+#settingsContainer {
+    position: relative;
+}
+
+/* Settings section headings */
+#settingsContainer h3 {
+    color: var(--admin-text-primary) !important;
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid var(--admin-border) !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 20px !important;
+}
+
+#settingsContainer h4,
+.settings-section-title {
+    color: var(--admin-text-primary) !important;
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+    margin: 24px 0 12px !important;
+    padding-top: 16px;
+    border-top: 1px solid var(--admin-border);
+}
+
+#settingsContainer h4:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Details/summary in settings */
+#settingsContainer details {
+    background: var(--admin-surface-alt) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+}
+
+#settingsContainer details summary {
+    color: var(--admin-accent-text) !important;
+    font-weight: 500 !important;
+    padding: 12px !important;
+    cursor: pointer;
+}
+
+/* ==========================================
+   16. STICKY SAVE/CANCEL BARS
+   ========================================== */
+
+/* Floating actions → sticky bottom bar */
+.floating-actions {
+    position: sticky !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    padding: 16px 24px !important;
+    background: var(--admin-surface) !important;
+    border-top: 1px solid var(--admin-border) !important;
+    border-radius: 0 !important;
+    z-index: 50;
+    margin: 24px -24px -24px -24px !important;
+    box-shadow: 0 -1px 4px rgba(0,0,0,0.05) !important;
+}
+
+.floating-actions .fab-save {
+    flex: 1 !important;
+    height: var(--admin-btn-height) !important;
+    background: var(--admin-success) !important;
+    color: var(--admin-text-inverse) !important;
+    border: none !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: none !important;
+    padding: 0 16px !important;
+}
+
+.floating-actions .fab-save:hover {
+    background: var(--admin-success-hover) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.floating-actions .fab-cancel {
+    flex: 1 !important;
+    height: var(--admin-btn-height) !important;
+    background: var(--admin-surface) !important;
+    color: var(--admin-danger) !important;
+    border: 1px solid var(--admin-danger) !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: none !important;
+    padding: 0 16px !important;
+}
+
+.floating-actions .fab-cancel:hover {
+    background: var(--admin-danger-subtle) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Make the settings and sections containers scroll with sticky actions */
+#settingsContainer,
+#sectionsContainer {
+    max-height: calc(100vh - var(--admin-header-height) - 80px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#settingsContainer form,
+#sectionsContainer > div:first-child {
+    flex: 1;
+}
+
+/* ==========================================
+   17. MODALS — FLAT
+   ========================================== */
+.modal {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+.modal-content {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius-lg) !important;
+    padding: 0 !important;
+    box-shadow: var(--admin-shadow-lg) !important;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh !important;
+    overflow: hidden;
+}
+
+.modal-content > h2,
+.modal-content > form > h2 {
+    padding: 20px 24px !important;
+    margin: 0 !important;
+    border-bottom: 1px solid var(--admin-border) !important;
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: var(--admin-text-primary) !important;
+    flex-shrink: 0;
+}
+
+/* Modal body — scrollable */
+.modal-content > form {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px !important;
+    padding-bottom: 0 !important;
+}
+
+.modal-content > div:not(.modal-actions):not(:first-child) {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 24px;
+}
+
+/* Modal actions — sticky at bottom */
+.modal-actions {
+    display: flex !important;
+    gap: 12px !important;
+    padding: 16px 24px !important;
+    border-top: 1px solid var(--admin-border) !important;
+    background: var(--admin-surface) !important;
+    margin: 0 !important;
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+}
+
+.modal-actions .btn-save {
+    flex: 1 !important;
+    height: var(--admin-btn-height) !important;
+    background: var(--admin-success) !important;
+    color: var(--admin-text-inverse) !important;
+    border: none !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    box-shadow: none !important;
+}
+
+.modal-actions .btn-save:hover {
+    background: var(--admin-success-hover) !important;
+    transform: none !important;
+}
+
+.modal-actions .btn-cancel {
+    flex: 1 !important;
+    height: var(--admin-btn-height) !important;
+    background: var(--admin-surface) !important;
+    color: var(--admin-danger) !important;
+    border: 1px solid var(--admin-danger) !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+    box-shadow: none !important;
+}
+
+.modal-actions .btn-cancel:hover {
+    background: var(--admin-danger-subtle) !important;
+    transform: none !important;
+}
+
+/* Modal h4 section dividers */
+.modal-content h4 {
+    color: var(--admin-text-primary) !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid var(--admin-border) !important;
+    padding-bottom: 8px !important;
+}
+
+/* ==========================================
+   18. FILTER CONTROLS — FLAT
+   ========================================== */
+.filter-trigger {
+    height: var(--admin-btn-height) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    background: var(--admin-surface) !important;
+    color: var(--admin-text-secondary) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    transition: var(--admin-transition);
+    padding: 0 12px !important;
+    gap: 8px !important;
+}
+
+.filter-trigger:hover {
+    border-color: var(--admin-accent) !important;
+    color: var(--admin-accent-text) !important;
+    background: var(--admin-accent-subtle) !important;
+}
+
+.filter-trigger .filter-icon {
+    background: var(--admin-accent-subtle) !important;
+    color: var(--admin-accent-text) !important;
+    border-radius: var(--admin-radius-sm) !important;
+}
+
+.filter-dropdown {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    box-shadow: var(--admin-shadow-md) !important;
+}
+
+/* ==========================================
+   19. TOAST NOTIFICATIONS — FLAT
+   ========================================== */
+#toast-container {
+    z-index: 10000;
+}
+
+.toast {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    box-shadow: var(--admin-shadow-md) !important;
+    border-left: 4px solid transparent !important;
+    padding: 14px 18px !important;
+}
+
+.toast-success {
+    border-left-color: var(--admin-success) !important;
+}
+
+.toast-error {
+    border-left-color: var(--admin-danger) !important;
+}
+
+.toast-info {
+    border-left-color: var(--admin-accent) !important;
+}
+
+.toast-icon {
+    font-size: 1.125rem !important;
+}
+
+.toast-success .toast-icon { color: var(--admin-success) !important; }
+.toast-error .toast-icon { color: var(--admin-danger) !important; }
+.toast-info .toast-icon { color: var(--admin-accent) !important; }
+
+.toast-top-text {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: var(--admin-text-primary) !important;
+}
+
+.toast-body {
+    font-size: 0.8125rem !important;
+    color: var(--admin-text-secondary) !important;
+}
+
+/* ==========================================
+   20. LOGIN PAGE — FLAT
+   ========================================== */
+.login-box {
+    max-width: 420px !important;
+    padding: 40px !important;
+    background: var(--admin-surface) !important;
+    border-radius: var(--admin-radius-lg) !important;
+    border: 1px solid var(--admin-border) !important;
+    box-shadow: var(--admin-shadow-sm) !important;
+    text-align: center;
+}
+
+.login-box h2 {
+    color: var(--admin-text-primary) !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 24px !important;
+}
+
+.login-box .submit-btn,
+.login-box button[type="submit"] {
+    width: 100% !important;
+    height: 44px !important;
+    background: var(--admin-accent) !important;
+    color: var(--admin-text-inverse) !important;
+    border: none !important;
+    border-radius: var(--admin-radius) !important;
+    font-size: 0.9375rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: var(--admin-transition);
+}
+
+.login-box .submit-btn:hover,
+.login-box button[type="submit"]:hover {
+    background: var(--admin-accent-hover) !important;
+}
+
+/* ==========================================
+   21. IMAGE MANAGEMENT — FLAT
+   ========================================== */
+.image-manage-card {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    box-shadow: none !important;
+    transition: var(--admin-transition);
+}
+
+.image-manage-card:hover {
+    border-color: var(--admin-accent) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.image-manage-card h4 {
+    color: var(--admin-text-primary) !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+
+.image-gallery-card {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    box-shadow: none !important;
+}
+
+.image-gallery-card:hover {
+    border-color: var(--admin-border-strong) !important;
+    box-shadow: none !important;
+}
+
+.image-gallery-card.is-default {
+    border-color: var(--admin-warning) !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================
+   22. BULK IMAGES MODAL — FLAT
+   ========================================== */
+.bulk-drop-zone {
+    border: 2px dashed var(--admin-border-strong) !important;
+    border-radius: var(--admin-radius-lg) !important;
+    background: var(--admin-surface-alt) !important;
+    transition: var(--admin-transition);
+}
+
+.bulk-drop-zone:hover {
+    border-color: var(--admin-accent) !important;
+    background: var(--admin-accent-subtle) !important;
+    transform: none !important;
+}
+
+.bulk-drop-zone.dragover {
+    border-color: var(--admin-success) !important;
+    background: var(--admin-success-subtle) !important;
+    transform: none !important;
+}
+
+.bulk-drop-zone i {
+    color: var(--admin-text-tertiary) !important;
+}
+
+.bulk-drop-zone .drop-text {
+    color: var(--admin-text-primary) !important;
+}
+
+.bulk-drop-zone .drop-subtext {
+    color: var(--admin-text-secondary) !important;
+}
+
+/* Bulk preview items */
+.bulk-preview-item {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+}
+
+/* Bulk tabs */
+.bulk-tab {
+    color: var(--admin-text-secondary) !important;
+    border-bottom-color: transparent !important;
+    transition: var(--admin-transition);
+}
+
+.bulk-tab:hover {
+    color: var(--admin-text-primary) !important;
+    background: var(--admin-surface-hover) !important;
+}
+
+.bulk-tab.active {
+    color: var(--admin-accent-text) !important;
+    border-bottom-color: var(--admin-accent) !important;
+}
+
+/* ==========================================
+   23. CSV MODAL — FLAT
+   ========================================== */
+.csv-field-checkbox {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius-sm) !important;
+    transition: var(--admin-transition);
+}
+
+.csv-field-checkbox:hover {
+    border-color: var(--admin-accent) !important;
+    background: var(--admin-accent-subtle) !important;
+}
+
+.csv-upload-zone {
+    border: 2px dashed var(--admin-border-strong) !important;
+    border-radius: var(--admin-radius-lg) !important;
+    background: var(--admin-surface-alt) !important;
+}
+
+.csv-upload-zone:hover {
+    border-color: var(--admin-accent) !important;
+    background: var(--admin-accent-subtle) !important;
+}
+
+#csvPreviewTable th {
+    background: var(--admin-accent) !important;
+    color: var(--admin-text-inverse) !important;
+}
+
+#csvPreviewTable td {
+    border-bottom-color: var(--admin-border) !important;
+}
+
+#csvPreviewTable tr:hover td {
+    background: var(--admin-surface-hover) !important;
+}
+
+/* ==========================================
+   24. TAG CHIPS — FLAT
+   ========================================== */
+.bulk-tag-chip,
+.tag-chip {
+    background: var(--admin-surface-alt) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: 100px !important;
+    color: var(--admin-text-secondary) !important;
+    transition: var(--admin-transition);
+    box-shadow: none !important;
+}
+
+.bulk-tag-chip:hover,
+.tag-chip:hover {
+    background: var(--admin-surface-hover) !important;
+    border-color: var(--admin-border-strong) !important;
+    transform: none !important;
+}
+
+.bulk-tag-chip.active,
+.tag-chip.active {
+    background: var(--admin-accent-subtle) !important;
+    border-color: var(--admin-accent) !important;
+    color: var(--admin-accent-text) !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================
+   25. CATEGORIES / TESTIMONIALS / WHY US
+   ========================================== */
+#categoryList,
+#testimonialList,
+#whyUsFeatureList {
+    gap: 12px !important;
+}
+
+/* ==========================================
+   26. FIELD UPDATED ANIMATION
+   ========================================== */
+@keyframes admin-field-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(26, 115, 232, 0);
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
+.field-updated {
+    animation: admin-field-pulse 0.6s ease-out !important;
+}
+
+.section-toggle-card.updated {
+    animation: admin-field-pulse 0.6s ease-out !important;
+}
+
+/* ==========================================
+   27. DARK MODE TOGGLE BUTTON
+   ========================================== */
+.admin-theme-toggle {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    background: var(--admin-surface) !important;
+    color: var(--admin-text-secondary) !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: var(--admin-transition);
+    padding: 0;
+}
+
+.admin-theme-toggle:hover {
+    background: var(--admin-surface-hover) !important;
+    color: var(--admin-text-primary) !important;
+}
+
+/* ==========================================
+   28. SCROLLBAR STYLING
+   ========================================== */
+.admin-container ::-webkit-scrollbar,
+.modal-content ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.admin-container ::-webkit-scrollbar-track,
+.modal-content ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.admin-container ::-webkit-scrollbar-thumb,
+.modal-content ::-webkit-scrollbar-thumb {
+    background: var(--admin-border-strong);
+    border-radius: 3px;
+}
+
+.admin-container ::-webkit-scrollbar-thumb:hover,
+.modal-content ::-webkit-scrollbar-thumb:hover {
+    background: var(--admin-text-tertiary);
+}
+
+/* ==========================================
+   29. PROGRESS BARS — FLAT
+   ========================================== */
+#bulkProgressArea {
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    background: var(--admin-surface) !important;
+}
+
+/* ==========================================
+   30. MISC OVERRIDES
+   ========================================== */
+
+/* Remove the product card hover transform */
+.product-card-admin:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Image tag pill */
+.image-tag {
+    background: var(--admin-accent) !important;
+    border-radius: 100px !important;
+}
+
+/* Variant rows in modal */
+.variant-row {
+    background: var(--admin-surface-alt);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+/* Images section header text */
+#imagesManagementHeader h3 {
+    color: var(--admin-text-primary) !important;
+}
+
+#imagesManagementHeader p {
+    color: var(--admin-text-secondary) !important;
+}
+
+/* Category list / Testimonial list / Why Us cards rendered by JS
+   use inline styles - these overrides ensure flat look */
+#categoryList > div,
+#testimonialList > div,
+#whyUsFeatureList > div {
+    background: var(--admin-surface) !important;
+    border: 1px solid var(--admin-border) !important;
+    border-radius: var(--admin-radius) !important;
+    box-shadow: none !important;
+}
