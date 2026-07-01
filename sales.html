@@ -926,10 +926,10 @@
                 else if (Array.isArray(rawVariants)) variants = rawVariants;
             } catch(e){}
             variants = variants.filter(v => v.active !== false);
-            const disabledTypes = (window.state && window.state.settings && window.state.settings.disabled_variant_types) ? window.state.settings.disabled_variant_types : [];
+            const disabledTypes = ((window.state && window.state.settings && window.state.settings.disabled_variant_types) ? window.state.settings.disabled_variant_types : []).map(t => typeof t === 'string' ? t.trim().toLowerCase() : t);
             if (disabledTypes.length > 0) {
                 variants = variants.filter(v => {
-                    const pkg = (v.packaging_type || '').trim();
+                    const pkg = (v.packaging_type || '').trim().toLowerCase();
                     return pkg === '' || !disabledTypes.includes(pkg);
                 });
             }
