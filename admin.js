@@ -307,7 +307,7 @@ async function handleLogout() {
         allTestimonials = [];
         allCombos = [];
         editSnapshot = {};
-        
+
         // Force full page reload to wipe any remaining JS memory state
         // This is more thorough than just calling showLogin()
         window.location.reload();
@@ -1246,7 +1246,7 @@ async function fetchSettings() {
             document.getElementById('setThankyouTitle').value = data.thankyou_title || 'Thank You for Choosing Us!';
             document.getElementById('setThankyouTitleTelugu').value = data.thankyou_title_telugu || 'మీ విశ్వాసానికి ధన్యవాదాలు';
             document.getElementById('setThankyouSubtitle').value = data.thankyou_subtitle || 'Every order means the world to us. We craft each product with love, tradition, and the finest ingredients — just for you.';
-            
+
             // Global Variant Packaging
             const disabledTypes = data.disabled_variant_types || [];
             document.querySelectorAll('.global-pkg-toggle').forEach(checkbox => {
@@ -1386,7 +1386,7 @@ if (siteSettingsForm) {
 
             // Legal Documents
             shipping_return_policy: document.getElementById('setShippingReturnPolicy').value,
-            
+
             // Global Variant Packaging
             disabled_variant_types: Array.from(document.querySelectorAll('.global-pkg-toggle')).filter(cb => !cb.checked).map(cb => cb.value)
         };
@@ -3386,18 +3386,22 @@ window.loadExistingImages = async function () {
 
         const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Pouch', 'Packet', 'Front View', 'Back View', 'Lifestyle'];
 
-        grid.innerHTML = images.map((img, idx) => `
+        grid.innerHTML = images.map((img, idx) => {
+            const currentTag = (img.tags && img.tags.length > 0) ? img.tags[0] : '';
+            return `
             <div class="bulk-preview-item" data-id="${img.id}">
-                <img src="${img.image_url}" alt="Product image" loading="lazy">
+                <div>
+                    <img src="${img.image_url}" alt="Product image" loading="lazy">
+                </div>
                 <div class="file-info">
                     <div class="file-name">${img.products?.product_name || 'Unknown Product'}</div>
                     <div class="match-result matched">
                         <i class="fas fa-link"></i> ${img.is_default ? '⭐ Default Image' : 'Additional Image'}
                     </div>
                 </div>
-                <div class="bulk-controls">
+                <div class="bulk-controls" style="width: 100%;">
                     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <select onchange="window.updateExistingImageProduct('${img.id}', this.value)" style="flex: 1;">
+                        <select onchange="window.updateExistingImageProduct('${img.id}', this.value)" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border-medium);">
                             ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === img.product_id ? 'selected' : ''}>${p.product_name}</option>`).join('')}
                         </select>
                         <button onclick="window.deleteExistingImage('${img.id}')" class="btn-delete-small" title="Delete Image" 
@@ -3405,18 +3409,16 @@ window.loadExistingImages = async function () {
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
-                    <div class="bulk-tags-row">
+                    <select onchange="window.updateExistingImageTagSingle('${img.id}', this.value)" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-medium);">
+                        <option value="">Select Variant Type...</option>
                         ${bulkTags.map(tag => `
-                            <label class="tag-chip ${(img.tags || []).includes(tag) ? 'active' : ''}">
-                                <input type="checkbox" ${(img.tags || []).includes(tag) ? 'checked' : ''} 
-                                    onchange="window.updateExistingImageTag('${img.id}', '${tag}', this.checked)">
-                                ${tag}
-                            </label>
+                            <option value="${tag}" ${currentTag === tag ? 'selected' : ''}>${tag}</option>
                         `).join('')}
-                    </div>
+                    </select>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
     } catch (e) {
         console.error('Error loading existing images:', e);
@@ -3459,80 +3461,50 @@ window.updateExistingImageProduct = function (imageId, newProductId) {
     existingImagesEdits[imageId].product_id = newProductId;
 };
 
-// Track tag change & Enforce Unique Tags
-window.updateExistingImageTag = async function (imageId, tag, isChecked) {
+// Track tag change & Enforce Unique Tags (Single tag per image)
+window.updateExistingImageTagSingle = async function (imageId, tag) {
     const img = existingImagesData.find(i => i.id === imageId);
     if (!img) return;
 
     if (!existingImagesEdits[imageId]) {
         existingImagesEdits[imageId] = { tags: [...(img.tags || [])] };
     }
-    if (!existingImagesEdits[imageId].tags) {
-        existingImagesEdits[imageId].tags = [...(img.tags || [])];
+
+    if (!tag) {
+        existingImagesEdits[imageId].tags = [];
+        return;
     }
 
-    // CHECK FOR DUPLICATES IF ADDING A TAG
-    if (isChecked) {
-        // Find current product ID (could be edited or original)
-        const currentProductId = existingImagesEdits[imageId]?.product_id || img.product_id;
+    // CHECK FOR DUPLICATES
+    const currentProductId = existingImagesEdits[imageId]?.product_id || img.product_id;
 
-        // Check if any OTHER image for this product already has this tag
-        const duplicateImg = existingImagesData.find(otherImg => {
-            if (otherImg.id === imageId) return false; // Skip self
+    // Check if any OTHER image for this product already has this tag
+    const duplicateImg = existingImagesData.find(otherImg => {
+        if (otherImg.id === imageId) return false; // Skip self
 
-            // Check product match (handle if other image was also edited)
-            const otherProductId = existingImagesEdits[otherImg.id]?.product_id || otherImg.product_id;
-            if (otherProductId !== currentProductId) return false;
+        const otherProductId = existingImagesEdits[otherImg.id]?.product_id || otherImg.product_id;
+        if (otherProductId !== currentProductId) return false;
 
-            // Check if it has the tag (handle edits)
-            const otherTags = existingImagesEdits[otherImg.id]?.tags || otherImg.tags || [];
-            return otherTags.includes(tag);
-        });
+        const otherTags = existingImagesEdits[otherImg.id]?.tags || otherImg.tags || [];
+        return otherTags.includes(tag);
+    });
 
-        if (duplicateImg) {
-            const confirmReplace = confirm(
-                `Product already has an image tagged "${tag}".\n\nDo you want to MOVE this tag to the current image?`
-            );
-
-            if (!confirmReplace) {
-                // Revert checkbox in UI
-                const checkbox = document.querySelector(`.bulk-preview-item[data-id="${imageId}"] input[onchange*="'${tag}'"]`);
-                if (checkbox) checkbox.checked = false;
-                return; // Stop
-            }
-
-            // Remove tag from the OTHER image
-            if (!existingImagesEdits[duplicateImg.id]) {
-                existingImagesEdits[duplicateImg.id] = { tags: [...(duplicateImg.tags || [])] };
-            }
-            if (!existingImagesEdits[duplicateImg.id].tags) {
-                existingImagesEdits[duplicateImg.id].tags = [...(duplicateImg.tags || [])];
-            }
-            // Remove the tag
-            existingImagesEdits[duplicateImg.id].tags = existingImagesEdits[duplicateImg.id].tags.filter(t => t !== tag);
-
-            // Update UI for the OTHER image (uncheck it)
-            const otherCheckbox = document.querySelector(`.bulk-preview-item[data-id="${duplicateImg.id}"] input[onchange*="'${tag}'"]`);
-            if (otherCheckbox) {
-                otherCheckbox.checked = false;
-                otherCheckbox.parentElement.classList.remove('active');
-            }
-            showToast(`Tag "${tag}" moved to this image.`, 'info');
+    if (duplicateImg) {
+        // Auto-replace: remove tag from the OTHER image
+        if (!existingImagesEdits[duplicateImg.id]) {
+            existingImagesEdits[duplicateImg.id] = { tags: [...(duplicateImg.tags || [])] };
         }
+        existingImagesEdits[duplicateImg.id].tags = existingImagesEdits[duplicateImg.id].tags.filter(t => t !== tag);
+
+        // Update UI for the OTHER image (unselect it)
+        const otherSelect = document.querySelector(`.bulk-preview-item[data-id="${duplicateImg.id}"] select[onchange*="updateExistingImageTagSingle"]`);
+        if (otherSelect && otherSelect.value === tag) {
+            otherSelect.value = '';
+        }
+        showToast(`Replaced existing "${tag}" image.`, 'info');
     }
 
-    if (isChecked && !existingImagesEdits[imageId].tags.includes(tag)) {
-        existingImagesEdits[imageId].tags.push(tag);
-    } else if (!isChecked) {
-        existingImagesEdits[imageId].tags = existingImagesEdits[imageId].tags.filter(t => t !== tag);
-    }
-
-    // Update current chip visual
-    const checkbox = document.querySelector(`.bulk-preview-item[data-id="${imageId}"] input[onchange*="'${tag}'"]`);
-    if (checkbox && checkbox.parentElement) {
-        if (isChecked) checkbox.parentElement.classList.add('active');
-        else checkbox.parentElement.classList.remove('active');
-    }
+    existingImagesEdits[imageId].tags = [tag];
 };
 
 // Save all changes to existing images
@@ -3735,7 +3707,10 @@ function matchFilenameToProduct(filename) {
         }
     });
 
-    return { product: bestMatch, score: bestScore, tags: foundTags };
+    // Ensure only one tag is assigned based on the file name. Default to "Default" if none matched.
+    const finalTags = foundTags.length > 0 ? [foundTags[0]] : ['Default'];
+
+    return { product: bestMatch, score: bestScore, tags: finalTags };
 }
 
 // Fetch existing images for duplicate detection
@@ -3845,20 +3820,17 @@ async function handleBulkFilesSelected(files) {
                     <div class="file-name">${file.name}</div>
                     ${statusHtml}
                 </div>
-                <div class="bulk-controls">
-                    <select onchange="window.manualMatchProduct(${idx}, this.value)" class="bulk-product-select">
+                <div class="bulk-controls" style="width: 100%;">
+                    <select onchange="window.manualMatchProduct(${idx}, this.value)" class="bulk-product-select" style="width: 100%; margin-bottom: 8px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-medium);">
                         <option value="">Select Product...</option>
                         ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === selectedProductId ? 'selected' : ''}>${p.product_name}</option>`).join('')}
                     </select>
-                    <div class="bulk-tags-row">
+                    <select onchange="window.updateBulkTagSingle(${idx}, this.value)" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-medium);">
+                        <option value="">Select Variant Type...</option>
                         ${bulkTags.map(tag => `
-                            <label class="bulk-tag-chip ${detectedTags.includes(tag) ? 'active' : ''}">
-                                <input type="checkbox" ${detectedTags.includes(tag) ? 'checked' : ''} 
-                                    onchange="window.toggleBulkTag(${idx}, '${tag}', this.checked)">
-                                ${tag}
-                            </label>
+                            <option value="${tag}" ${detectedTags.includes(tag) ? 'selected' : ''}>${tag}</option>
                         `).join('')}
-                    </div>
+                    </select>
                 </div>
             </div>
         `;
@@ -3916,18 +3888,12 @@ window.manualMatchProduct = function (idx, productId) {
     updateBulkMatchCounts();
 };
 
-// Toggle tag for a bulk image — re-check for replacement on tag change
-window.toggleBulkTag = function (idx, tag, isChecked) {
+// Update tag for a bulk image — single selection
+window.updateBulkTagSingle = function (idx, tag) {
     if (idx < 0 || idx >= pendingBulkImages.length) return;
 
     const item = pendingBulkImages[idx];
-    if (!item.tags) item.tags = [];
-
-    if (isChecked && !item.tags.includes(tag)) {
-        item.tags.push(tag);
-    } else if (!isChecked) {
-        item.tags = item.tags.filter(t => t !== tag);
-    }
+    item.tags = tag ? [tag] : [];
 
     // Re-check replacement status
     const productId = item.manualProductId || item.matchedProduct?.id;
@@ -3935,14 +3901,8 @@ window.toggleBulkTag = function (idx, tag, isChecked) {
         item.replaceInfo = checkForExistingImage(productId, item.tags);
     }
 
-    // Update visual state of the chip
-    const itemEl = document.querySelector(`.bulk-preview-item[data-idx="${idx}"]`);
-    if (itemEl) {
-        const chip = itemEl.querySelector(`label.bulk-tag-chip input[onchange*="'${tag}'"]`)?.parentElement;
-        if (chip) {
-            chip.classList.toggle('active', isChecked);
-        }
-    }
+    // Update UI replace indicator
+    window.manualMatchProduct(idx, productId);
 };
 
 // Update match counts
@@ -4094,254 +4054,254 @@ window.saveBulkImages = async function () {
         }
         progress.style.display = 'none';
     }
-// End of Save bulk images
-
-// Legacy single image upload (kept for other uses like category images)
-const handleImageUpload = async (file, statusElementId, inputElementId) => {
-    const statusEl = document.getElementById(statusElementId);
-    const inputEl = document.getElementById(inputElementId);
-
-    if (!file) return;
-
-    statusEl.textContent = 'Uploading...';
-    statusEl.style.color = 'var(--text-secondary)';
-
-    try {
-        const publicUrl = await uploadImageToStorage(file);
-        inputEl.value = publicUrl;
-        statusEl.textContent = 'Upload Complete!';
-        statusEl.style.color = '#10b981';
-    } catch (error) {
-        console.error('Upload Error:', error);
-        statusEl.textContent = 'Error: ' + error.message;
-        statusEl.style.color = 'red';
-    }
 };
 
-// Event Listeners for Legacy Upload Inputs (categories, settings, etc.)
-const setupUploadListeners = () => {
-    // Legacy showcase upload removed - now using bulk upload
-};
+    // Legacy single image upload (kept for other uses like category images)
+    const handleImageUpload = async (file, statusElementId, inputElementId) => {
+        const statusEl = document.getElementById(statusElementId);
+        const inputEl = document.getElementById(inputElementId);
 
-// Initialize listeners when script loads
-setupUploadListeners();
+        if (!file) return;
 
+        statusEl.textContent = 'Uploading...';
+        statusEl.style.color = 'var(--text-secondary)';
 
-// ========================================
-// NUTRITION QUICK FILL FUNCTIONALITY
-// ========================================
-/**
- * Parses a nutrition string like:
- * "Calories: 14.95kcal, Protein: 0.63g, Carbs: 2.47g, Fiber: 0.91g, Sugar: 0.52g, Sodium: 0.11g"
- * OR without colons:
- * "Calories 20.88kcal, Protein 0.7g, Total Fat 1.49g, Carbs 1.51g"
- * And populates the corresponding nutrition input fields.
- */
-const parseNutritionString = (inputString) => {
-    if (!inputString || typeof inputString !== 'string') return { count: 0, filledServing: false };
-
-    // Clean up the string
-    const str = inputString.trim();
-
-    // Define field mappings: key variations -> form input ID
-    const fieldMappings = {
-        // Calories
-        'calories': 'nutriCalories',
-        'cal': 'nutriCalories',
-        'energy': 'nutriCalories',
-        // Protein
-        'protein': 'nutriProtein',
-        // Carbs
-        'carbs': 'nutriCarbs',
-        'carbohydrates': 'nutriCarbs',
-        'carbohydrate': 'nutriCarbs',
-        // Fiber
-        'fiber': 'nutriFiber',
-        'fibre': 'nutriFiber',
-        'dietary fiber': 'nutriFiber',
-        // Sugar/Sugars
-        'sugar': 'nutriSugars',
-        'sugars': 'nutriSugars',
-        // Sodium
-        'sodium': 'nutriSodium',
-        'salt': 'nutriSodium',
-        // Total Fat
-        'fat': 'nutriFat',
-        'total fat': 'nutriFat',
-        'totalfat': 'nutriFat',
-        // Saturated Fat
-        'saturated fat': 'nutriSatFat',
-        'sat fat': 'nutriSatFat',
-        'satfat': 'nutriSatFat',
-        'saturatedfat': 'nutriSatFat',
-        // Serving Size
-        'serving size': 'nutriDetails',
-        'serving': 'nutriDetails',
-        'per serving': 'nutriDetails'
+        try {
+            const publicUrl = await uploadImageToStorage(file);
+            inputEl.value = publicUrl;
+            statusEl.textContent = 'Upload Complete!';
+            statusEl.style.color = '#10b981';
+        } catch (error) {
+            console.error('Upload Error:', error);
+            statusEl.textContent = 'Error: ' + error.message;
+            statusEl.style.color = 'red';
+        }
     };
 
-    // Split by comma to get individual key-value pairs
-    const parts = str.split(',');
+    // Event Listeners for Legacy Upload Inputs (categories, settings, etc.)
+    const setupUploadListeners = () => {
+        // Legacy showcase upload removed - now using bulk upload
+    };
 
-    let matchedCount = 0;
-    let filledServing = false;
+    // Initialize listeners when script loads
+    setupUploadListeners();
 
-    parts.forEach(part => {
-        part = part.trim();
-        if (!part) return;
 
-        let key = '';
-        let value = '';
+    // ========================================
+    // NUTRITION QUICK FILL FUNCTIONALITY
+    // ========================================
+    /**
+     * Parses a nutrition string like:
+     * "Calories: 14.95kcal, Protein: 0.63g, Carbs: 2.47g, Fiber: 0.91g, Sugar: 0.52g, Sodium: 0.11g"
+     * OR without colons:
+     * "Calories 20.88kcal, Protein 0.7g, Total Fat 1.49g, Carbs 1.51g"
+     * And populates the corresponding nutrition input fields.
+     */
+    const parseNutritionString = (inputString) => {
+        if (!inputString || typeof inputString !== 'string') return { count: 0, filledServing: false };
 
-        // Check if there's a colon separator
-        const colonIndex = part.indexOf(':');
-        if (colonIndex !== -1) {
-            // Format: "Key: Value"
-            key = part.substring(0, colonIndex).trim().toLowerCase();
-            value = part.substring(colonIndex + 1).trim();
-        } else {
-            // Format: "Key Value" (e.g., "Calories 20.88kcal")
-            // Find where the numeric value starts
-            const match = part.match(/^([a-zA-Z\s]+)\s+([\d.]+.*)$/);
-            if (match) {
-                key = match[1].trim().toLowerCase();
-                value = match[2].trim();
-            }
-        }
+        // Clean up the string
+        const str = inputString.trim();
 
-        if (!key || !value) return;
+        // Define field mappings: key variations -> form input ID
+        const fieldMappings = {
+            // Calories
+            'calories': 'nutriCalories',
+            'cal': 'nutriCalories',
+            'energy': 'nutriCalories',
+            // Protein
+            'protein': 'nutriProtein',
+            // Carbs
+            'carbs': 'nutriCarbs',
+            'carbohydrates': 'nutriCarbs',
+            'carbohydrate': 'nutriCarbs',
+            // Fiber
+            'fiber': 'nutriFiber',
+            'fibre': 'nutriFiber',
+            'dietary fiber': 'nutriFiber',
+            // Sugar/Sugars
+            'sugar': 'nutriSugars',
+            'sugars': 'nutriSugars',
+            // Sodium
+            'sodium': 'nutriSodium',
+            'salt': 'nutriSodium',
+            // Total Fat
+            'fat': 'nutriFat',
+            'total fat': 'nutriFat',
+            'totalfat': 'nutriFat',
+            // Saturated Fat
+            'saturated fat': 'nutriSatFat',
+            'sat fat': 'nutriSatFat',
+            'satfat': 'nutriSatFat',
+            'saturatedfat': 'nutriSatFat',
+            // Serving Size
+            'serving size': 'nutriDetails',
+            'serving': 'nutriDetails',
+            'per serving': 'nutriDetails'
+        };
 
-        // Try to find a matching field
-        const inputId = fieldMappings[key];
-        if (inputId) {
-            const inputEl = document.getElementById(inputId);
-            if (inputEl) {
-                inputEl.value = value;
-                matchedCount++;
+        // Split by comma to get individual key-value pairs
+        const parts = str.split(',');
 
-                // Track if serving size was filled
-                if (inputId === 'nutriDetails') {
-                    filledServing = true;
+        let matchedCount = 0;
+        let filledServing = false;
+
+        parts.forEach(part => {
+            part = part.trim();
+            if (!part) return;
+
+            let key = '';
+            let value = '';
+
+            // Check if there's a colon separator
+            const colonIndex = part.indexOf(':');
+            if (colonIndex !== -1) {
+                // Format: "Key: Value"
+                key = part.substring(0, colonIndex).trim().toLowerCase();
+                value = part.substring(colonIndex + 1).trim();
+            } else {
+                // Format: "Key Value" (e.g., "Calories 20.88kcal")
+                // Find where the numeric value starts
+                const match = part.match(/^([a-zA-Z\s]+)\s+([\d.]+.*)$/);
+                if (match) {
+                    key = match[1].trim().toLowerCase();
+                    value = match[2].trim();
                 }
+            }
 
-                // Add a brief highlight animation
-                inputEl.classList.add('field-updated');
-                setTimeout(() => {
-                    inputEl.classList.remove('field-updated');
-                }, 800);
+            if (!key || !value) return;
+
+            // Try to find a matching field
+            const inputId = fieldMappings[key];
+            if (inputId) {
+                const inputEl = document.getElementById(inputId);
+                if (inputEl) {
+                    inputEl.value = value;
+                    matchedCount++;
+
+                    // Track if serving size was filled
+                    if (inputId === 'nutriDetails') {
+                        filledServing = true;
+                    }
+
+                    // Add a brief highlight animation
+                    inputEl.classList.add('field-updated');
+                    setTimeout(() => {
+                        inputEl.classList.remove('field-updated');
+                    }, 800);
+                }
+            }
+        });
+
+        return { count: matchedCount, filledServing };
+    };
+
+    // Event listener for Quick Fill input
+    const setupNutritionQuickFill = () => {
+        const quickFillInput = document.getElementById('nutriQuickFill');
+
+        if (quickFillInput) {
+            // Common handler for both blur and Enter
+            const handleQuickFill = (e) => {
+                const val = e.target.value.trim();
+                if (val) {
+                    const result = parseNutritionString(val);
+                    if (result.count > 0) {
+                        e.target.value = ''; // Clear once filled
+
+                        // Check if serving size was filled
+                        if (!result.filledServing) {
+                            // Highlight the serving size field to prompt user
+                            const servingInput = document.getElementById('nutriDetails');
+                            if (servingInput) {
+                                servingInput.style.border = '2px solid #f59e0b';
+                                servingInput.style.background = '#fef3c7';
+                                servingInput.setAttribute('placeholder', '⚠️ Please enter serving size (e.g., 5g)');
+
+                                // Focus on serving size field
+                                setTimeout(() => servingInput.focus(), 100);
+
+                                // Reset styling after user interacts
+                                const resetStyle = () => {
+                                    servingInput.style.border = '';
+                                    servingInput.style.background = '';
+                                    servingInput.setAttribute('placeholder', 'e.g. Per 100g');
+                                    servingInput.removeEventListener('input', resetStyle);
+                                    servingInput.removeEventListener('blur', resetStyle);
+                                };
+                                servingInput.addEventListener('input', resetStyle);
+                                servingInput.addEventListener('blur', resetStyle);
+                            }
+
+                            showToast(`Filled ${result.count} field(s). Please update Serving Size!`, 'info');
+                        } else {
+                            showToast(`Filled ${result.count} nutrition field(s)!`, 'success');
+                        }
+                    }
+                }
+            };
+
+            // Parse on blur (when user leaves the field)
+            quickFillInput.addEventListener('blur', handleQuickFill);
+
+            // Also parse on Enter key
+            quickFillInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleQuickFill(e);
+                }
+            });
+        }
+    };
+
+    // Initialize nutrition quick fill
+    setupNutritionQuickFill();
+
+
+    // Global Escape Key Listener to Close Modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const pModal = document.getElementById('productModal');
+            const cModal = document.getElementById('categoryModal');
+            const tModal = document.getElementById('testimonialModal');
+
+            if (pModal && pModal.style.display === 'flex') {
+                if (typeof window.closeProductModal === 'function') window.closeProductModal();
+                else { pModal.style.display = 'none'; document.body.style.overflow = ''; }
+            }
+            if (cModal && cModal.style.display === 'flex') {
+                if (typeof window.closeCategoryModal === 'function') window.closeCategoryModal();
+                else cModal.style.display = 'none';
+            }
+            if (tModal && tModal.style.display === 'flex') {
+                if (typeof window.closeTestimonialModal === 'function') window.closeTestimonialModal();
+                else tModal.style.display = 'none';
             }
         }
     });
+    // ----------------------------------------------------
+    // WHY US FEATURES MANAGEMENT
+    // ----------------------------------------------------
 
-    return { count: matchedCount, filledServing };
-};
-
-// Event listener for Quick Fill input
-const setupNutritionQuickFill = () => {
-    const quickFillInput = document.getElementById('nutriQuickFill');
-
-    if (quickFillInput) {
-        // Common handler for both blur and Enter
-        const handleQuickFill = (e) => {
-            const val = e.target.value.trim();
-            if (val) {
-                const result = parseNutritionString(val);
-                if (result.count > 0) {
-                    e.target.value = ''; // Clear once filled
-
-                    // Check if serving size was filled
-                    if (!result.filledServing) {
-                        // Highlight the serving size field to prompt user
-                        const servingInput = document.getElementById('nutriDetails');
-                        if (servingInput) {
-                            servingInput.style.border = '2px solid #f59e0b';
-                            servingInput.style.background = '#fef3c7';
-                            servingInput.setAttribute('placeholder', '⚠️ Please enter serving size (e.g., 5g)');
-
-                            // Focus on serving size field
-                            setTimeout(() => servingInput.focus(), 100);
-
-                            // Reset styling after user interacts
-                            const resetStyle = () => {
-                                servingInput.style.border = '';
-                                servingInput.style.background = '';
-                                servingInput.setAttribute('placeholder', 'e.g. Per 100g');
-                                servingInput.removeEventListener('input', resetStyle);
-                                servingInput.removeEventListener('blur', resetStyle);
-                            };
-                            servingInput.addEventListener('input', resetStyle);
-                            servingInput.addEventListener('blur', resetStyle);
-                        }
-
-                        showToast(`Filled ${result.count} field(s). Please update Serving Size!`, 'info');
-                    } else {
-                        showToast(`Filled ${result.count} nutrition field(s)!`, 'success');
-                    }
-                }
-            }
-        };
-
-        // Parse on blur (when user leaves the field)
-        quickFillInput.addEventListener('blur', handleQuickFill);
-
-        // Also parse on Enter key
-        quickFillInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleQuickFill(e);
-            }
-        });
-    }
-};
-
-// Initialize nutrition quick fill
-setupNutritionQuickFill();
-
-
-// Global Escape Key Listener to Close Modals
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const pModal = document.getElementById('productModal');
-        const cModal = document.getElementById('categoryModal');
-        const tModal = document.getElementById('testimonialModal');
-
-        if (pModal && pModal.style.display === 'flex') {
-            if (typeof window.closeProductModal === 'function') window.closeProductModal();
-            else { pModal.style.display = 'none'; document.body.style.overflow = ''; }
-        }
-        if (cModal && cModal.style.display === 'flex') {
-            if (typeof window.closeCategoryModal === 'function') window.closeCategoryModal();
-            else cModal.style.display = 'none';
-        }
-        if (tModal && tModal.style.display === 'flex') {
-            if (typeof window.closeTestimonialModal === 'function') window.closeTestimonialModal();
-            else tModal.style.display = 'none';
+    async function fetchWhyUsFeatures() {
+        whyUsFeatureList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">Loading...</td></tr>';
+        try {
+            const { data, error } = await supabase.from('why_us_features').select('*').order('order_index', { ascending: true });
+            if (error) throw error;
+            renderWhyUsFeatures(data);
+        } catch (e) {
+            console.error(e);
+            whyUsFeatureList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${escapeHTML(e.message)}</td></tr>`;
         }
     }
-});
-// ----------------------------------------------------
-// WHY US FEATURES MANAGEMENT
-// ----------------------------------------------------
 
-async function fetchWhyUsFeatures() {
-    whyUsFeatureList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">Loading...</td></tr>';
-    try {
-        const { data, error } = await supabase.from('why_us_features').select('*').order('order_index', { ascending: true });
-        if (error) throw error;
-        renderWhyUsFeatures(data);
-    } catch (e) {
-        console.error(e);
-        whyUsFeatureList.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Error: ${escapeHTML(e.message)}</td></tr>`;
-    }
-}
+    function renderWhyUsFeatures(features) {
+        if (!features || features.length === 0) {
+            whyUsFeatureList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">No features found.</td></tr>';
+            return;
+        }
 
-function renderWhyUsFeatures(features) {
-    if (!features || features.length === 0) {
-        whyUsFeatureList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px;">No features found.</td></tr>';
-        return;
-    }
-
-    whyUsFeatureList.innerHTML = features.map(f => `
+        whyUsFeatureList.innerHTML = features.map(f => `
         <div class="admin-product-card draggable-item" 
              draggable="true" 
              data-id="${escapeHTML(f.id)}" 
@@ -4383,446 +4343,446 @@ function renderWhyUsFeatures(features) {
              </div>
         </div>
     `).join('');
-}
-
-window.showWhyUsModal = (feature = null) => {
-    featureModal.style.display = 'flex';
-    if (feature) {
-        featureModalTitle.textContent = 'Edit Feature';
-        editSnapshot = JSON.parse(JSON.stringify(feature)); // Snapshot
-        document.getElementById('featureId').value = feature.id;
-        document.getElementById('featureTitle').value = feature.title;
-        document.getElementById('featureDescription').value = feature.description || '';
-        document.getElementById('featureImageUrl').value = feature.image_url || '';
-        document.getElementById('featureOrder').value = feature.order_index;
-    } else {
-        featureModalTitle.textContent = 'Add Feature';
-        editSnapshot = null; // New
-        featureForm.reset();
-        document.getElementById('featureId').value = '';
     }
-};
 
-window.closeFeatureModal = () => {
-    featureModal.style.display = 'none';
-};
-
-window.editWhyUsFeature = async (id) => {
-    try {
-        const { data, error } = await supabase.from('why_us_features').select('*').eq('id', id).single();
-        if (error) throw error;
-        showWhyUsModal(data);
-    } catch (e) {
-        showToast('Error fetching feature: ' + e.message, 'error');
-    }
-};
-
-window.deleteWhyUsFeature = async (id) => {
-    if (!confirm('Are you sure you want to delete this feature?')) return;
-    try {
-        const { error } = await supabase.from('why_us_features').delete().eq('id', id);
-        if (error) throw error;
-        fetchWhyUsFeatures();
-    } catch (e) {
-        showToast('Error deleting feature: ' + e.message, 'error');
-    }
-};
-
-if (featureForm) {
-    featureForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('featureId').value;
-        const btn = featureForm.querySelector('button[type="submit"]');
-        const oldText = btn ? btn.textContent : 'Save Feature';
-
-        if (btn) {
-            btn.textContent = 'Saving...';
-            btn.disabled = true;
+    window.showWhyUsModal = (feature = null) => {
+        featureModal.style.display = 'flex';
+        if (feature) {
+            featureModalTitle.textContent = 'Edit Feature';
+            editSnapshot = JSON.parse(JSON.stringify(feature)); // Snapshot
+            document.getElementById('featureId').value = feature.id;
+            document.getElementById('featureTitle').value = feature.title;
+            document.getElementById('featureDescription').value = feature.description || '';
+            document.getElementById('featureImageUrl').value = feature.image_url || '';
+            document.getElementById('featureOrder').value = feature.order_index;
+        } else {
+            featureModalTitle.textContent = 'Add Feature';
+            editSnapshot = null; // New
+            featureForm.reset();
+            document.getElementById('featureId').value = '';
         }
+    };
 
-        const featureData = {
-            title: document.getElementById('featureTitle').value,
-            description: document.getElementById('featureDescription').value,
-            image_url: document.getElementById('featureImageUrl').value,
-            order_index: parseInt(document.getElementById('featureOrder').value) || 0
-        };
+    window.closeFeatureModal = () => {
+        featureModal.style.display = 'none';
+    };
 
+    window.editWhyUsFeature = async (id) => {
         try {
-            if (id) {
-                const { error } = await supabase.from('why_us_features').update(featureData).eq('id', id);
-                if (error) throw error;
-            } else {
-                const { error } = await supabase.from('why_us_features').insert([featureData]);
-                if (error) throw error;
-            }
-            closeFeatureModal();
-            fetchWhyUsFeatures();
-
-            let toastMsg = 'Feature saved!';
-            if (id) {
-                const changes = getChanges(editSnapshot, featureData);
-                toastMsg = `Updated: ${changes.join(', ')}`;
-            } else {
-                toastMsg = 'Created New Feature';
-            }
-            showToast(toastMsg, 'success');
+            const { data, error } = await supabase.from('why_us_features').select('*').eq('id', id).single();
+            if (error) throw error;
+            showWhyUsModal(data);
         } catch (e) {
-            showToast('Error saving feature: ' + e.message, 'error');
-        } finally {
+            showToast('Error fetching feature: ' + e.message, 'error');
+        }
+    };
+
+    window.deleteWhyUsFeature = async (id) => {
+        if (!confirm('Are you sure you want to delete this feature?')) return;
+        try {
+            const { error } = await supabase.from('why_us_features').delete().eq('id', id);
+            if (error) throw error;
+            fetchWhyUsFeatures();
+        } catch (e) {
+            showToast('Error deleting feature: ' + e.message, 'error');
+        }
+    };
+
+    if (featureForm) {
+        featureForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('featureId').value;
+            const btn = featureForm.querySelector('button[type="submit"]');
+            const oldText = btn ? btn.textContent : 'Save Feature';
+
             if (btn) {
-                btn.textContent = oldText;
-                btn.disabled = false;
-            }
-        }
-    });
-}
-
-// ----------------------------------------------------
-// WEBSITE SECTIONS MANAGEMENT
-// Uses dedicated 'website_sections' table
-// ALL DEFAULTS ARE TRUE (ON)
-// ----------------------------------------------------
-
-async function fetchSectionSettings() {
-    try {
-        const { data, error } = await supabase.from('website_sections').select('*').single();
-        if (error && error.code !== 'PGRST116') throw error;
-
-        if (data) {
-            // Hero Section
-            editSnapshot = JSON.parse(JSON.stringify(data)); // Snapshot
-            const heroToggle = document.getElementById('secShowHero');
-            if (heroToggle) heroToggle.checked = data.show_hero_section !== false;
-
-            // Product Carousel
-            const tickerToggle = document.getElementById('secShowTicker');
-            if (tickerToggle) tickerToggle.checked = data.show_product_carousel !== false;
-
-            // Our Collections
-            const collectionsToggle = document.getElementById('secShowCollections');
-            if (collectionsToggle) collectionsToggle.checked = data.show_collections !== false;
-
-            // Quick Commerce Layout
-            const quickLayoutToggle = document.getElementById('secShowQuickLayout');
-            if (quickLayoutToggle) quickLayoutToggle.checked = data.show_quick_layout !== false;
-
-            // Testimonials
-            const testimonialsToggle = document.getElementById('secShowTestimonials');
-            if (testimonialsToggle) testimonialsToggle.checked = data.show_testimonials !== false;
-
-            // Why Us
-            const whyUsToggle = document.getElementById('secShowWhyUs');
-            if (whyUsToggle) whyUsToggle.checked = data.show_why_us !== false;
-
-            // Get In Touch (Contact Form)
-            const contactToggle = document.getElementById('secShowContact');
-            if (contactToggle) contactToggle.checked = data.show_contact_form !== false;
-
-            // Footer
-            const footerToggle = document.getElementById('secShowFooter');
-            if (footerToggle) footerToggle.checked = data.show_footer !== false;
-
-            // Special Combo Offers
-            const combosToggle = document.getElementById('secShowCombos');
-            if (combosToggle) combosToggle.checked = data.show_combos !== false;
-        } else {
-            // No data found - set all toggles to ON (default) with null checks
-            const heroEl = document.getElementById('secShowHero');
-            const tickerEl = document.getElementById('secShowTicker');
-            const collectionsEl = document.getElementById('secShowCollections');
-            const quickLayoutEl = document.getElementById('secShowQuickLayout');
-            const testimonialsEl = document.getElementById('secShowTestimonials');
-            const whyUsEl = document.getElementById('secShowWhyUs');
-            const contactEl = document.getElementById('secShowContact');
-            const combosEl = document.getElementById('secShowCombos');
-            const footerEl = document.getElementById('secShowFooter');
-
-            if (heroEl) heroEl.checked = true;
-            if (tickerEl) tickerEl.checked = true;
-            if (collectionsEl) collectionsEl.checked = true;
-            if (quickLayoutEl) quickLayoutEl.checked = true;
-            if (testimonialsEl) testimonialsEl.checked = true;
-            if (whyUsEl) whyUsEl.checked = true;
-            if (contactEl) contactEl.checked = true;
-            if (combosEl) combosEl.checked = true;
-            if (footerEl) footerEl.checked = true;
-        }
-    } catch (e) {
-        console.error('Section settings fetch error:', e);
-    }
-}
-
-// Cancel section changes - revert to original values
-window.cancelSectionChanges = function () {
-    if (!editSnapshot) {
-        showToast('No changes to cancel', 'info');
-        return;
-    }
-
-    // Map of toggle IDs to their corresponding data keys
-    const toggleMap = {
-        'secShowHero': 'show_hero_section',
-        'secShowTicker': 'show_product_carousel',
-        'secShowCollections': 'show_collections',
-        'secShowQuickLayout': 'show_quick_layout',
-        'secShowTestimonials': 'show_testimonials',
-        'secShowWhyUs': 'show_why_us',
-        'secShowContact': 'show_contact_form',
-        'secShowCombos': 'show_combos',
-        'secShowFooter': 'show_footer'
-    };
-
-    // Revert each toggle to its original value
-    for (const [toggleId, dataKey] of Object.entries(toggleMap)) {
-        const toggle = document.getElementById(toggleId);
-        if (toggle && editSnapshot.hasOwnProperty(dataKey)) {
-            toggle.checked = editSnapshot[dataKey] !== false;
-        }
-    }
-
-    showToast('Changes cancelled', 'info');
-};
-
-window.saveSectionSettings = async function () {
-    const btn = document.querySelector('.floating-actions .fab-save');
-    const oldHtml = btn ? btn.innerHTML : '<i class="fas fa-save"></i><span>Save</span>';
-
-    if (btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
-        btn.disabled = true;
-    }
-
-    // Map section data keys to toggle element IDs for highlighting
-    const fieldToToggleMap = {
-        'show_hero_section': 'secShowHero',
-        'show_product_carousel': 'secShowTicker',
-        'show_collections': 'secShowCollections',
-        'show_quick_layout': 'secShowQuickLayout',
-        'show_testimonials': 'secShowTestimonials',
-        'show_why_us': 'secShowWhyUs',
-        'show_contact_form': 'secShowContact',
-        'show_combos': 'secShowCombos',
-        'show_footer': 'secShowFooter'
-    };
-
-    // All defaults are TRUE
-    const sectionData = {
-        show_hero_section: document.getElementById('secShowHero')?.checked ?? true,
-        show_product_carousel: document.getElementById('secShowTicker')?.checked ?? true,
-        show_collections: document.getElementById('secShowCollections')?.checked ?? true,
-        show_quick_layout: document.getElementById('secShowQuickLayout')?.checked ?? true,
-        show_testimonials: document.getElementById('secShowTestimonials')?.checked ?? true,
-        show_why_us: document.getElementById('secShowWhyUs')?.checked ?? true,
-        show_contact_form: document.getElementById('secShowContact')?.checked ?? true,
-        show_combos: document.getElementById('secShowCombos')?.checked ?? true,
-        show_footer: document.getElementById('secShowFooter')?.checked ?? true
-    };
-
-    try {
-        // Check if section settings exist
-        const { data } = await supabase.from('website_sections').select('id').single();
-
-        if (data) {
-            const { error } = await supabase.from('website_sections').update(sectionData).eq('id', data.id);
-            if (error) throw error;
-
-            // Get list of changed fields
-            const changedFields = [];
-            if (editSnapshot) {
-                for (const key in sectionData) {
-                    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-                    if (!isLooseEqual(editSnapshot[key], sectionData[key])) {
-                        changedFields.push(key);
-                    }
-                }
+                btn.textContent = 'Saving...';
+                btn.disabled = true;
             }
 
-            // Highlight the changed toggle cards
-            changedFields.forEach(field => {
-                if (field === '__proto__' || field === 'constructor' || field === 'prototype') return;
-                const toggleId = fieldToToggleMap[field];
-                if (toggleId) {
-                    const toggleEl = document.getElementById(toggleId);
-                    if (toggleEl) {
-                        // Find the parent section-toggle-card
-                        const card = toggleEl.closest('.section-toggle-card');
-                        if (card) {
-                            card.classList.add('updated');
-                            // Remove the class after animation completes
-                            setTimeout(() => card.classList.remove('updated'), 2000);
-                        }
-                    }
-                }
-            });
+            const featureData = {
+                title: document.getElementById('featureTitle').value,
+                description: document.getElementById('featureDescription').value,
+                image_url: document.getElementById('featureImageUrl').value,
+                order_index: parseInt(document.getElementById('featureOrder').value) || 0
+            };
 
-            // Show toast with changes
-            if (changedFields.length > 0) {
-                const labels = changedFields.map(f =>
-                    f.replace(/^show_/, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-                );
-                showToast(`Updated: ${labels.join(', ')}`, 'success');
+            try {
+                if (id) {
+                    const { error } = await supabase.from('why_us_features').update(featureData).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.from('why_us_features').insert([featureData]);
+                    if (error) throw error;
+                }
+                closeFeatureModal();
+                fetchWhyUsFeatures();
+
+                let toastMsg = 'Feature saved!';
+                if (id) {
+                    const changes = getChanges(editSnapshot, featureData);
+                    toastMsg = `Updated: ${changes.join(', ')}`;
+                } else {
+                    toastMsg = 'Created New Feature';
+                }
+                showToast(toastMsg, 'success');
+            } catch (e) {
+                showToast('Error saving feature: ' + e.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.textContent = oldText;
+                    btn.disabled = false;
+                }
+            }
+        });
+    }
+
+    // ----------------------------------------------------
+    // WEBSITE SECTIONS MANAGEMENT
+    // Uses dedicated 'website_sections' table
+    // ALL DEFAULTS ARE TRUE (ON)
+    // ----------------------------------------------------
+
+    async function fetchSectionSettings() {
+        try {
+            const { data, error } = await supabase.from('website_sections').select('*').single();
+            if (error && error.code !== 'PGRST116') throw error;
+
+            if (data) {
+                // Hero Section
+                editSnapshot = JSON.parse(JSON.stringify(data)); // Snapshot
+                const heroToggle = document.getElementById('secShowHero');
+                if (heroToggle) heroToggle.checked = data.show_hero_section !== false;
+
+                // Product Carousel
+                const tickerToggle = document.getElementById('secShowTicker');
+                if (tickerToggle) tickerToggle.checked = data.show_product_carousel !== false;
+
+                // Our Collections
+                const collectionsToggle = document.getElementById('secShowCollections');
+                if (collectionsToggle) collectionsToggle.checked = data.show_collections !== false;
+
+                // Quick Commerce Layout
+                const quickLayoutToggle = document.getElementById('secShowQuickLayout');
+                if (quickLayoutToggle) quickLayoutToggle.checked = data.show_quick_layout !== false;
+
+                // Testimonials
+                const testimonialsToggle = document.getElementById('secShowTestimonials');
+                if (testimonialsToggle) testimonialsToggle.checked = data.show_testimonials !== false;
+
+                // Why Us
+                const whyUsToggle = document.getElementById('secShowWhyUs');
+                if (whyUsToggle) whyUsToggle.checked = data.show_why_us !== false;
+
+                // Get In Touch (Contact Form)
+                const contactToggle = document.getElementById('secShowContact');
+                if (contactToggle) contactToggle.checked = data.show_contact_form !== false;
+
+                // Footer
+                const footerToggle = document.getElementById('secShowFooter');
+                if (footerToggle) footerToggle.checked = data.show_footer !== false;
+
+                // Special Combo Offers
+                const combosToggle = document.getElementById('secShowCombos');
+                if (combosToggle) combosToggle.checked = data.show_combos !== false;
             } else {
-                showToast('Data already matches your input', 'info');
+                // No data found - set all toggles to ON (default) with null checks
+                const heroEl = document.getElementById('secShowHero');
+                const tickerEl = document.getElementById('secShowTicker');
+                const collectionsEl = document.getElementById('secShowCollections');
+                const quickLayoutEl = document.getElementById('secShowQuickLayout');
+                const testimonialsEl = document.getElementById('secShowTestimonials');
+                const whyUsEl = document.getElementById('secShowWhyUs');
+                const contactEl = document.getElementById('secShowContact');
+                const combosEl = document.getElementById('secShowCombos');
+                const footerEl = document.getElementById('secShowFooter');
+
+                if (heroEl) heroEl.checked = true;
+                if (tickerEl) tickerEl.checked = true;
+                if (collectionsEl) collectionsEl.checked = true;
+                if (quickLayoutEl) quickLayoutEl.checked = true;
+                if (testimonialsEl) testimonialsEl.checked = true;
+                if (whyUsEl) whyUsEl.checked = true;
+                if (contactEl) contactEl.checked = true;
+                if (combosEl) combosEl.checked = true;
+                if (footerEl) footerEl.checked = true;
             }
-        } else {
-            const { error } = await supabase.from('website_sections').insert([sectionData]);
-            if (error) throw error;
-            showToast('Section settings created!', 'success');
-        }
-
-        // Update snapshot for the next comparison
-        editSnapshot = JSON.parse(JSON.stringify(sectionData));
-
-    } catch (e) {
-        console.error('Error saving section settings:', e);
-        showToast('Error saving section settings: ' + e.message, 'error');
-    } finally {
-        if (btn) {
-            btn.innerHTML = oldHtml;
-            btn.disabled = false;
+        } catch (e) {
+            console.error('Section settings fetch error:', e);
         }
     }
-};
 
-// ========================================
-// GLOBAL EXPORTS FOR CSV MANAGER
-// ========================================
-window.fetchProducts = fetchProducts;
-window.fetchCategories = fetchCategories;
-window.fetchTestimonials = fetchTestimonials;
-
-// Expose state via getter to ensure freshness (primitives like currentView need this)
-window.getAppState = () => ({
-    currentView,
-    allProducts,
-    allCategories, // Ensure this variable exists in admin.js
-    allTestimonials
-});
-
-// ==========================================
-// CSV MANAGER SHIMS (Fallbacks if script fails)
-// ==========================================
-const createShim = (name) => {
-    // Only shim if not already defined (though admin.js loads first so it defines them first)
-    // We define them here. csv_manager.js (loading second) will overwrite them if it uses window.name = ...
-    // OR if we use CsvManager pattern, we rely on these shims to proxy.
-    // Let's implement Proxy Shim Pattern.
-    if (name !== '__proto__' && name !== 'constructor' && name !== 'prototype') {
-        window[name] = (...args) => {
-            if (window.CsvManager && typeof window.CsvManager[name] === 'function') {
-                return window.CsvManager[name](...args);
-            }
-
-            // Backward compatibility: If csv_manager.js still uses window.openCsvModal (old way)
-            // Then these shims would have been overwritten. 
-            // IF we are here, it means they were NOT overwritten OR we are using CsvManager pattern 
-            // but CsvManager is missing.
-
-            console.warn(`Shim: ${name} called but CSV Manager not ready.`);
-            alert('CSV Manager functionality is not loaded. Please check console for errors or refresh.');
-        };
-    }
-};
-
-[
-    'openCsvModal',
-    'closeCsvModal',
-    'switchCsvTab',
-    'exportProductsCsv',
-    'handleCsvUpload',
-    'processCsvImport',
-    'selectAllCsvFields',
-    'clearCsvUpload'
-].forEach(createShim);
-console.log('CSV Shims Initialized from admin.js');
-
-// ==========================================
-// MIGRATION TOOL: Supabase -> Cloudinary
-// ==========================================
-window.migrateSupabaseToCloudinary = async function () {
-    if (!confirm("This will migrate images from Supabase Storage to Cloudinary. It may take some time. Continue?")) return;
-
-    // UI Setup
-    const progressDiv = document.getElementById('migrationProgress');
-    const progressBar = document.getElementById('migrationBar');
-    const progressText = document.getElementById('migrationStatusText');
-    const progressCount = document.getElementById('migrationCount');
-
-    if (progressDiv) progressDiv.style.display = 'block';
-    if (progressBar) progressBar.style.width = '0%';
-    if (progressText) progressText.innerText = 'Scanning for Supabase images...';
-
-    try {
-        // 1. Fetch images needing migration (URLs containing 'supabase')
-        // We scan product_images table
-        const { data: images, error } = await supabase
-            .from('product_images')
-            .select('id, image_url')
-            .ilike('image_url', '%supabase%');
-
-        if (error) throw error;
-
-        if (!images || images.length === 0) {
-            if (progressText) progressText.innerText = 'No Supabase images found in product_images table.';
-            showToast('No Supabase images found to migrate in product_images table.', 'info');
+    // Cancel section changes - revert to original values
+    window.cancelSectionChanges = function () {
+        if (!editSnapshot) {
+            showToast('No changes to cancel', 'info');
             return;
         }
 
-        const total = images.length;
-        let migrated = 0;
-        let failed = 0;
+        // Map of toggle IDs to their corresponding data keys
+        const toggleMap = {
+            'secShowHero': 'show_hero_section',
+            'secShowTicker': 'show_product_carousel',
+            'secShowCollections': 'show_collections',
+            'secShowQuickLayout': 'show_quick_layout',
+            'secShowTestimonials': 'show_testimonials',
+            'secShowWhyUs': 'show_why_us',
+            'secShowContact': 'show_contact_form',
+            'secShowCombos': 'show_combos',
+            'secShowFooter': 'show_footer'
+        };
 
-        if (progressCount) progressCount.innerText = `0/${total}`;
+        // Revert each toggle to its original value
+        for (const [toggleId, dataKey] of Object.entries(toggleMap)) {
+            const toggle = document.getElementById(toggleId);
+            if (toggle && editSnapshot.hasOwnProperty(dataKey)) {
+                toggle.checked = editSnapshot[dataKey] !== false;
+            }
+        }
 
-        // 2. Migrate each image
-        for (const img of images) {
-            try {
-                if (progressText) progressText.innerText = `Migrating image ${migrated + failed + 1} of ${total}...`;
+        showToast('Changes cancelled', 'info');
+    };
 
-                // A. Download image from Supabase
-                const response = await fetch(img.image_url);
-                if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
-                const blob = await response.blob();
+    window.saveSectionSettings = async function () {
+        const btn = document.querySelector('.floating-actions .fab-save');
+        const oldHtml = btn ? btn.innerHTML : '<i class="fas fa-save"></i><span>Save</span>';
 
-                // Convert to File for our upload function
-                const file = new File([blob], `migrated_${img.id}.jpg`, { type: blob.type });
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+            btn.disabled = true;
+        }
 
-                // B. Upload to Cloudinary
-                // This uses our NEW uploadImageToStorage which points to Cloudinary
-                const newUrl = await uploadImageToStorage(file);
+        // Map section data keys to toggle element IDs for highlighting
+        const fieldToToggleMap = {
+            'show_hero_section': 'secShowHero',
+            'show_product_carousel': 'secShowTicker',
+            'show_collections': 'secShowCollections',
+            'show_quick_layout': 'secShowQuickLayout',
+            'show_testimonials': 'secShowTestimonials',
+            'show_why_us': 'secShowWhyUs',
+            'show_contact_form': 'secShowContact',
+            'show_combos': 'secShowCombos',
+            'show_footer': 'secShowFooter'
+        };
 
-                // C. Update Database
-                const { error: updateError } = await supabase
-                    .from('product_images')
-                    .update({ image_url: newUrl })
-                    .eq('id', img.id);
+        // All defaults are TRUE
+        const sectionData = {
+            show_hero_section: document.getElementById('secShowHero')?.checked ?? true,
+            show_product_carousel: document.getElementById('secShowTicker')?.checked ?? true,
+            show_collections: document.getElementById('secShowCollections')?.checked ?? true,
+            show_quick_layout: document.getElementById('secShowQuickLayout')?.checked ?? true,
+            show_testimonials: document.getElementById('secShowTestimonials')?.checked ?? true,
+            show_why_us: document.getElementById('secShowWhyUs')?.checked ?? true,
+            show_contact_form: document.getElementById('secShowContact')?.checked ?? true,
+            show_combos: document.getElementById('secShowCombos')?.checked ?? true,
+            show_footer: document.getElementById('secShowFooter')?.checked ?? true
+        };
 
-                if (updateError) throw updateError;
+        try {
+            // Check if section settings exist
+            const { data } = await supabase.from('website_sections').select('id').single();
 
-                migrated++;
-            } catch (e) {
-                console.error('Migration failed for image:', img.id, e);
-                failed++;
+            if (data) {
+                const { error } = await supabase.from('website_sections').update(sectionData).eq('id', data.id);
+                if (error) throw error;
+
+                // Get list of changed fields
+                const changedFields = [];
+                if (editSnapshot) {
+                    for (const key in sectionData) {
+                        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+                        if (!isLooseEqual(editSnapshot[key], sectionData[key])) {
+                            changedFields.push(key);
+                        }
+                    }
+                }
+
+                // Highlight the changed toggle cards
+                changedFields.forEach(field => {
+                    if (field === '__proto__' || field === 'constructor' || field === 'prototype') return;
+                    const toggleId = fieldToToggleMap[field];
+                    if (toggleId) {
+                        const toggleEl = document.getElementById(toggleId);
+                        if (toggleEl) {
+                            // Find the parent section-toggle-card
+                            const card = toggleEl.closest('.section-toggle-card');
+                            if (card) {
+                                card.classList.add('updated');
+                                // Remove the class after animation completes
+                                setTimeout(() => card.classList.remove('updated'), 2000);
+                            }
+                        }
+                    }
+                });
+
+                // Show toast with changes
+                if (changedFields.length > 0) {
+                    const labels = changedFields.map(f =>
+                        f.replace(/^show_/, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    );
+                    showToast(`Updated: ${labels.join(', ')}`, 'success');
+                } else {
+                    showToast('Data already matches your input', 'info');
+                }
+            } else {
+                const { error } = await supabase.from('website_sections').insert([sectionData]);
+                if (error) throw error;
+                showToast('Section settings created!', 'success');
             }
 
-            // Update Progress
-            const pct = Math.round(((migrated + failed) / total) * 100);
-            if (progressBar) progressBar.style.width = `${pct}%`;
-            if (progressCount) progressCount.innerText = `${migrated + failed}/${total}`;
+            // Update snapshot for the next comparison
+            editSnapshot = JSON.parse(JSON.stringify(sectionData));
+
+        } catch (e) {
+            console.error('Error saving section settings:', e);
+            showToast('Error saving section settings: ' + e.message, 'error');
+        } finally {
+            if (btn) {
+                btn.innerHTML = oldHtml;
+                btn.disabled = false;
+            }
         }
+    };
 
-        if (progressText) progressText.innerText = `Migration Complete! ${migrated} success, ${failed} failed.`;
-        showToast(`Migration complete: ${migrated} moved to Cloudinary`, 'success');
+    // ========================================
+    // GLOBAL EXPORTS FOR CSV MANAGER
+    // ========================================
+    window.fetchProducts = fetchProducts;
+    window.fetchCategories = fetchCategories;
+    window.fetchTestimonials = fetchTestimonials;
 
-        // Refresh grid if on the tab
-        if (window.loadExistingImages) {
-            const filter = document.getElementById('editImageProductFilter');
-            window.loadExistingImages(filter ? filter.value : 'all');
+    // Expose state via getter to ensure freshness (primitives like currentView need this)
+    window.getAppState = () => ({
+        currentView,
+        allProducts,
+        allCategories, // Ensure this variable exists in admin.js
+        allTestimonials
+    });
+
+    // ==========================================
+    // CSV MANAGER SHIMS (Fallbacks if script fails)
+    // ==========================================
+    const createShim = (name) => {
+        // Only shim if not already defined (though admin.js loads first so it defines them first)
+        // We define them here. csv_manager.js (loading second) will overwrite them if it uses window.name = ...
+        // OR if we use CsvManager pattern, we rely on these shims to proxy.
+        // Let's implement Proxy Shim Pattern.
+        if (name !== '__proto__' && name !== 'constructor' && name !== 'prototype') {
+            window[name] = (...args) => {
+                if (window.CsvManager && typeof window.CsvManager[name] === 'function') {
+                    return window.CsvManager[name](...args);
+                }
+
+                // Backward compatibility: If csv_manager.js still uses window.openCsvModal (old way)
+                // Then these shims would have been overwritten. 
+                // IF we are here, it means they were NOT overwritten OR we are using CsvManager pattern 
+                // but CsvManager is missing.
+
+                console.warn(`Shim: ${name} called but CSV Manager not ready.`);
+                alert('CSV Manager functionality is not loaded. Please check console for errors or refresh.');
+            };
         }
+    };
 
-    } catch (e) {
-        console.error('Migration error:', e);
-        if (progressText) progressText.innerText = 'Error during migration check console.';
-        showToast('Error migrating images', 'error');
+    [
+        'openCsvModal',
+        'closeCsvModal',
+        'switchCsvTab',
+        'exportProductsCsv',
+        'handleCsvUpload',
+        'processCsvImport',
+        'selectAllCsvFields',
+        'clearCsvUpload'
+    ].forEach(createShim);
+    console.log('CSV Shims Initialized from admin.js');
+
+    // ==========================================
+    // MIGRATION TOOL: Supabase -> Cloudinary
+    // ==========================================
+    window.migrateSupabaseToCloudinary = async function () {
+        if (!confirm("This will migrate images from Supabase Storage to Cloudinary. It may take some time. Continue?")) return;
+
+        // UI Setup
+        const progressDiv = document.getElementById('migrationProgress');
+        const progressBar = document.getElementById('migrationBar');
+        const progressText = document.getElementById('migrationStatusText');
+        const progressCount = document.getElementById('migrationCount');
+
+        if (progressDiv) progressDiv.style.display = 'block';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.innerText = 'Scanning for Supabase images...';
+
+        try {
+            // 1. Fetch images needing migration (URLs containing 'supabase')
+            // We scan product_images table
+            const { data: images, error } = await supabase
+                .from('product_images')
+                .select('id, image_url')
+                .ilike('image_url', '%supabase%');
+
+            if (error) throw error;
+
+            if (!images || images.length === 0) {
+                if (progressText) progressText.innerText = 'No Supabase images found in product_images table.';
+                showToast('No Supabase images found to migrate in product_images table.', 'info');
+                return;
+            }
+
+            const total = images.length;
+            let migrated = 0;
+            let failed = 0;
+
+            if (progressCount) progressCount.innerText = `0/${total}`;
+
+            // 2. Migrate each image
+            for (const img of images) {
+                try {
+                    if (progressText) progressText.innerText = `Migrating image ${migrated + failed + 1} of ${total}...`;
+
+                    // A. Download image from Supabase
+                    const response = await fetch(img.image_url);
+                    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+                    const blob = await response.blob();
+
+                    // Convert to File for our upload function
+                    const file = new File([blob], `migrated_${img.id}.jpg`, { type: blob.type });
+
+                    // B. Upload to Cloudinary
+                    // This uses our NEW uploadImageToStorage which points to Cloudinary
+                    const newUrl = await uploadImageToStorage(file);
+
+                    // C. Update Database
+                    const { error: updateError } = await supabase
+                        .from('product_images')
+                        .update({ image_url: newUrl })
+                        .eq('id', img.id);
+
+                    if (updateError) throw updateError;
+
+                    migrated++;
+                } catch (e) {
+                    console.error('Migration failed for image:', img.id, e);
+                    failed++;
+                }
+
+                // Update Progress
+                const pct = Math.round(((migrated + failed) / total) * 100);
+                if (progressBar) progressBar.style.width = `${pct}%`;
+                if (progressCount) progressCount.innerText = `${migrated + failed}/${total}`;
+            }
+
+            if (progressText) progressText.innerText = `Migration Complete! ${migrated} success, ${failed} failed.`;
+            showToast(`Migration complete: ${migrated} moved to Cloudinary`, 'success');
+
+            // Refresh grid if on the tab
+            if (window.loadExistingImages) {
+                const filter = document.getElementById('editImageProductFilter');
+                window.loadExistingImages(filter ? filter.value : 'all');
+            }
+
+        } catch (e) {
+            console.error('Migration error:', e);
+            if (progressText) progressText.innerText = 'Error during migration check console.';
+            showToast('Error migrating images', 'error');
+        }
     }
-};

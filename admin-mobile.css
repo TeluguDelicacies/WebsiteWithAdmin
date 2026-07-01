@@ -744,32 +744,27 @@ Only loads on screens < 768px
 
 /* Preview items - stacked layout */
 .bulk-preview-item {
-    flex-wrap: wrap !important;
     gap: 8px !important;
-    padding: 10px !important;
+    padding: 12px !important;
 }
 
 .bulk-preview-item img {
-    width: 50px !important;
-    height: 50px !important;
-}
-
-.bulk-preview-item .file-info {
-    width: calc(100% - 60px) !important;
+    height: 120px !important;
 }
 
 .bulk-preview-item .file-name {
-    font-size: 0.8rem !important;
+    font-size: 0.95rem !important;
 }
 
 .bulk-preview-item .match-result {
-    font-size: 0.7rem !important;
+    font-size: 0.8rem !important;
 }
 
 .bulk-preview-item select {
     width: 100% !important;
     max-width: none !important;
     margin-top: 8px !important;
+    padding: 8px !important;
 }
 
 /* Bulk Images Button - icon only like CSV button */

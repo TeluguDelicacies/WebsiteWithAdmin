@@ -302,31 +302,38 @@
         /* Bulk Preview Item */
         .bulk-preview-item {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 12px;
-            padding: 12px;
+            padding: 15px;
             background: white;
-            border: 1px solid var(--border-light);
-            border-radius: 10px;
-            margin-bottom: 8px;
+            border: 1px solid var(--border-medium);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .bulk-preview-item:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
         .bulk-preview-item img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
             border-radius: 8px;
-            flex-shrink: 0;
+            background: #f8fafc;
         }
 
         .bulk-preview-item .file-info {
-            flex: 1;
+            width: 100%;
             min-width: 0;
         }
 
         .bulk-preview-item .file-name {
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 700;
+            font-size: 1rem;
             color: var(--text-primary);
             white-space: nowrap;
             overflow: hidden;
@@ -334,16 +341,8 @@
         }
 
         .bulk-preview-item .match-result {
-            font-size: 0.8rem;
-            margin-top: 4px;
-        }
-
-        .bulk-preview-item .match-result.matched {
-            color: #059669;
-        }
-
-        .bulk-preview-item .match-result.unmatched {
-            color: #dc2626;
+            font-size: 0.9rem;
+            margin-top: 6px;
         }
 
         .bulk-preview-item .match-badge {
@@ -2871,7 +2870,7 @@
                     </div>
 
                     <!-- Preview Grid with Match Status -->
-                    <div id="bulkImagesPreview" style="max-height: 350px; overflow-y: auto; margin-top: 15px;">
+                    <div id="bulkImagesPreview" style="max-height: 500px; overflow-y: auto; margin-top: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 5px;">
                         <!-- Preview items injected here -->
                     </div>
 
@@ -2940,7 +2939,7 @@
                         </div>
 
                         <!-- Existing Images Grid -->
-                        <div id="existingImagesGrid" style="max-height: 350px; overflow-y: auto;">
+                        <div id="existingImagesGrid" style="max-height: 500px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 5px; width: 100%;">
                             <p style="text-align: center; color: var(--text-secondary); padding: 30px;">
                                 Select a filter or click "Edit Existing" tab to load images.
                             </p>
