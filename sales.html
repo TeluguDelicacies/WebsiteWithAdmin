@@ -1022,7 +1022,7 @@
             // 5. Resolve Images
             const productImages = state.allProductImages || [];
             const showcaseImg = productImages.find(img => img.product_id === product.id && img.is_default) || productImages.find(img => img.product_id === product.id);
-            const displayImg = showcaseImg?.image_url || product.showcase_image || state.placeholder;
+            const displayImg = showcaseImg?.image_url || state.placeholder;
 
             // 6. Render
             return `
@@ -1307,7 +1307,7 @@
             // Resolve Images
             const productImages = state.allProductImages || [];
             const showcaseImg = productImages.find(img => img.product_id === product.id && img.is_default) || productImages.find(img => img.product_id === product.id);
-            const displayImg = showcaseImg?.image_url || product.showcase_image || state.placeholder;
+            const displayImg = showcaseImg?.image_url || state.placeholder;
 
             // 1. Get Product Data & Sort Variants by MRP lowest to highest
             // Standardize variants
@@ -2429,7 +2429,7 @@
 
                 return `
         <div class="sim-item" data-product-id="${item.id}" data-product='${escapedProduct}' data-variant='${escapedVariant}' onclick="window.location.href='/sales/${item.slug || item.id}'" style="cursor:pointer;">
-            <img src="${(state.allProductImages || []).find(img => img.product_id === item.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === item.id)?.image_url || item.showcase_image || state.placeholder}" class="sim-img"
+            <img src="${(state.allProductImages || []).find(img => img.product_id === item.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === item.id)?.image_url || state.placeholder}" class="sim-img"
                 onerror="this.src='${state.placeholder}'">
             <div class="sim-info">
                 <h4 style="font-size:0.9rem; margin:0; line-height:1.2; cursor:pointer;" onclick="window.location.href='/sales/${item.slug || item.id}'">${item.product_name}</h4>
@@ -2506,7 +2506,7 @@
                                 name: product.product_name,
                                 telugu_name: product.product_name_telugu,
                                 price: variant.price || product.price || product.mrp,
-                                image: (state.allProductImages || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === product.id)?.image_url || product.showcase_image,
+                                image: (state.allProductImages || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === product.id)?.image_url || state.placeholder,
                                 variant: variant,
                                 qty: val
                             });
@@ -2548,7 +2548,7 @@
         function updateHistory(p, resolvedImg) {
             let hist = []; try { hist = JSON.parse(localStorage.getItem('td_history') || '[]'); } catch (e) { }
             hist = hist.filter(x => x.slug !== p.slug && x.id !== p.id);
-            hist.unshift({ id: p.id, slug: p.slug, name: p.product_name, img: resolvedImg || p.showcase_image });
+            hist.unshift({ id: p.id, slug: p.slug, name: p.product_name, img: resolvedImg || state.placeholder });
             localStorage.setItem('td_history', JSON.stringify(hist.slice(0, 8)));
         }
 
@@ -2758,7 +2758,7 @@
                     name: product.product_name,
                     telugu_name: product.product_name_telugu,
                     price: variant ? variant.price : product.mrp,
-                    image: (state.allProductImages || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === product.id)?.image_url || product.showcase_image,
+                    image: (state.allProductImages || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === product.id)?.image_url || state.placeholder,
                     variant: variant,
                     qty: qty
                 });
@@ -3450,7 +3450,10 @@
                         });
 
                         if (variantImg) variantImages.push(variantImg.image_url);
-                        else if (it.products.showcase_image) productImages.push(it.products.showcase_image);
+                        else {
+                            const defaultPImg = pImgs.find(pi => pi.is_default) || pImgs[0];
+                            if (defaultPImg) productImages.push(defaultPImg.image_url);
+                        }
 
                         let variants = [];
                         try {
@@ -3604,7 +3607,10 @@
                 });
 
                 if (variantImg) galleryList.push(variantImg.image_url);
-                else if (it.products.showcase_image) galleryList.push(it.products.showcase_image);
+                else {
+                    const defaultPImg = pImgs.find(pi => pi.is_default) || pImgs[0];
+                    if (defaultPImg) galleryList.push(defaultPImg.image_url);
+                }
 
                 const nutritionImg = pImgs.find(img => {
                     const tags = (img.tags || []).map(t => t.toLowerCase().trim());
@@ -3619,7 +3625,7 @@
                 const variantText = it.variant_quantity + (it.packaging_type ? ` - ${it.packaging_type}` : '');
 
                 // Bundle Item HTML - Compact Card for Grid
-                const displayImg = variantImg?.image_url || it.products.showcase_image || pImgs[0]?.image_url || state.placeholder;
+                const displayImg = variantImg?.image_url || pImgs.find(pi => pi.is_default)?.image_url || pImgs[0]?.image_url || state.placeholder;
                 const bundleItem = `
                     <li class="bundle-item-card" onclick="window.showProductQuickInfo('${it.products.id}')">
                         

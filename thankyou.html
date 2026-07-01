@@ -315,7 +315,7 @@
                     img = productImages.find(i => i.is_default) || productImages[0];
                 }
 
-                const imageUrl = optimizeImage(img?.image_url || p.showcase_image || placeholder, { width: 300 });
+                const imageUrl = optimizeImage(img?.image_url || placeholder, { width: 300 });
                 const slug = p.slug || p.id;
                 const price = cheapestVariant?.price || '';
 

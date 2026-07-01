@@ -319,7 +319,7 @@ window.showQuickPreview = function (product) {
 
     // Image (optimized for popup display ~500px)
     const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
-    const showcaseImg = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
+    const showcaseImg = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url;
     const rawImageUrl = showcaseImg || window.currentSiteSettings?.product_placeholder_url || '';
     const imageUrl = optimizeImage(rawImageUrl, { width: 500 });
     imgEl.src = imageUrl;
@@ -597,7 +597,7 @@ window.quickPreviewAddToCart = function () {
             id: product.id,
             name: product.product_name,
             telugu_name: product.product_name_telugu || '',
-            image: (window.allProductImagesCache || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (window.allProductImagesCache || []).find(img => img.product_id === product.id)?.image_url || product.showcase_image,
+            image: (window.allProductImagesCache || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (window.allProductImagesCache || []).find(img => img.product_id === product.id)?.image_url || window.currentSiteSettings?.product_placeholder_url || '',
             variant: variant,
             price: Number(variant.price) || 0,
             qty: 1
@@ -2943,8 +2943,6 @@ function renderCombos(combos, container) {
                         productImages.push(defaultImg.image_url);
                     } else if (pImages.length > 0) {
                         productImages.push(pImages[0].image_url);
-                    } else if (item.products.showcase_image) {
-                        productImages.push(item.products.showcase_image);
                     }
                 }
 
@@ -3418,7 +3416,7 @@ function renderProducts(products, categories) {
 
                 // Find default image from cache
                 const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
-                let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
+                let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url;
 
                 if (!localImage) {
                     localImage = window.currentSiteSettings?.product_placeholder_url;
@@ -3611,7 +3609,7 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
     const contentNutId = `content-nut-${product.id}`;
     const categoryName = cardElement.dataset.category;
     const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
-    let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
+    let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url;
 
     if (!localImage) {
         // Fallback to generic placeholders if no specific image is set
@@ -4170,7 +4168,7 @@ function renderQuickProductsHTML(products, showMrp) {
 
     return products.map(product => {
         const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
-        let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
+        let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url;
         if (!localImage || localImage.trim() === '') localImage = window.currentSiteSettings?.product_placeholder_url;
         const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
 
@@ -4265,7 +4263,7 @@ window.openQuickProductModal = function (productId) {
 
     // Prepare Content
     const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
-    let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url || product.showcase_image;
+    let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url;
     if (!localImage || localImage.trim() === '') localImage = window.currentSiteSettings?.product_placeholder_url;
     const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
 

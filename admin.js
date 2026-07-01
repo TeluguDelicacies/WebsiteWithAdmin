@@ -3618,72 +3618,119 @@ function setupBulkDragDrop() {
     };
 }
 
+// Levenshtein distance for fuzzy matching
+function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            dp[i][j] = a[i - 1] === b[j - 1]
+                ? dp[i - 1][j - 1]
+                : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+        }
+    }
+    return dp[m][n];
+}
+
+// Tag-based display_order mapping
+const TAG_ORDER_MAP = {
+    'Default': 0, 'Glass Jar': 1, 'Standup Pouch': 2, 'PET Jar': 3,
+    'Pouch': 4, 'Packet': 5, 'Front View': 6, 'Back View': 7,
+    'Nutrition': 8, 'Lifestyle': 9
+};
+
+function getDisplayOrderForTags(tags) {
+    if (!tags || tags.length === 0) return 50;
+    let best = 50;
+    tags.forEach(t => {
+        if (TAG_ORDER_MAP[t] !== undefined && TAG_ORDER_MAP[t] < best) best = TAG_ORDER_MAP[t];
+    });
+    return best;
+}
+
+// Packaging type keywords — ordered longest-first to avoid partial matches
+const PACKAGING_KEYWORDS = [
+    { key: 'standup pouch', tag: 'Standup Pouch' },
+    { key: 'standup', tag: 'Standup Pouch' },
+    { key: 'glass jar', tag: 'Glass Jar' },
+    { key: 'glass', tag: 'Glass Jar' },
+    { key: 'pet jar', tag: 'PET Jar' },
+    { key: 'pet', tag: 'PET Jar' },
+    { key: 'pouch', tag: 'Pouch' },
+    { key: 'packet', tag: 'Packet' },
+    { key: 'nutrition', tag: 'Nutrition' },
+    { key: 'front', tag: 'Front View' },
+    { key: 'back', tag: 'Back View' },
+    { key: 'lifestyle', tag: 'Lifestyle' },
+    { key: 'default', tag: 'Default' }
+];
+
 // Fuzzy match filename to product
 function matchFilenameToProduct(filename) {
-    // 1. IMPROVED NORMALIZATION
-    // Remove extension, and replace common separators (. , + - _) with spaces
+    // 1. Normalize: strip extension, replace separators with spaces
     const baseName = filename.replace(/\.[^/.]+$/, '')
         .toLowerCase()
         .replace(/[.\-,_+]/g, ' ')
+        .replace(/\d+\s*(g|gm|gms|kg|ml|l)\b/gi, '') // Strip weight numbers
         .replace(/\s+/g, ' ')
         .trim();
 
-    // 2. EXPANDED TAGS
-    // Added Nutrition and Packet
-    const tagKeywords = ['pet jar', 'glass jar', 'standup', 'pouch', 'front', 'back', 'lifestyle', 'nutrition', 'packet'];
+    // 2. Extract packaging type tags from filename
     const foundTags = [];
     let searchName = baseName;
 
-    tagKeywords.forEach(tag => {
-        if (baseName.includes(tag)) {
-            // Capitalize for display
-            foundTags.push(tag.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-            searchName = searchName.replace(tag, '').trim();
+    PACKAGING_KEYWORDS.forEach(({ key, tag }) => {
+        if (searchName.includes(key) && !foundTags.includes(tag)) {
+            foundTags.push(tag);
+            searchName = searchName.replace(new RegExp(key, 'g'), '').replace(/\s+/g, ' ').trim();
         }
     });
 
-    // 3. ROBUST MATCHING
+    // 3. Match against products
     let bestMatch = null;
     let bestScore = 0;
 
-    // Helper: Normalize for space-insensitive comparison
     const clearStr = (s) => s.replace(/\s+/g, '');
 
     allProductsCache.forEach(product => {
         const productName = product.product_name.toLowerCase();
         const productSlug = (product.slug || '').toLowerCase();
+        let score = 0;
 
-        // A. Exact Match (Human Friendly)
+        // A. Exact match
         if (searchName === productName || searchName === productSlug) {
-            bestMatch = product;
-            bestScore = 150; // Bonus for exact match
-            return;
+            score = 150;
         }
-
-        // B. Space-Insensitive Exact Match (Handles "AvisaginjalaKaaram")
-        const searchClear = clearStr(searchName);
-        if (searchClear === clearStr(productName) || searchClear === clearStr(productSlug)) {
-            if (bestScore < 120) {
-                bestMatch = product;
-                bestScore = 120;
+        // B. Space-insensitive exact match
+        else if (clearStr(searchName) === clearStr(productName) || clearStr(searchName) === clearStr(productSlug)) {
+            score = 120;
+        }
+        // C. Word-overlap matching
+        else {
+            const words = searchName.split(' ').filter(w => w.length >= 2);
+            if (words.length > 0) {
+                let matchedWords = 0;
+                words.forEach(word => {
+                    if (productName.includes(word) || productSlug.includes(word)) matchedWords++;
+                });
+                score = (matchedWords / words.length) * 100;
             }
         }
 
-        // C. Partial/Fuzzy Word Match
-        // Filter out very short noise words, but allow 2-char words if they are part of the name
-        const words = searchName.split(' ').filter(w => w.length >= 2);
-        let matchedWords = 0;
-
-        words.forEach(word => {
-            if (productName.includes(word) || productSlug.includes(word)) {
-                matchedWords++;
+        // D. Levenshtein tiebreaker (if score is close)
+        if (score < 50 && searchName.length > 3) {
+            const dist = levenshtein(clearStr(searchName), clearStr(productName));
+            const maxLen = Math.max(clearStr(searchName).length, clearStr(productName).length);
+            const similarity = ((maxLen - dist) / maxLen) * 100;
+            if (similarity > score && similarity >= 60) {
+                score = similarity;
             }
-        });
+        }
 
-        const wordScore = words.length > 0 ? (matchedWords / words.length) * 100 : 0;
-
-        if (wordScore > bestScore && wordScore >= 50) {
-            bestScore = wordScore;
+        if (score > bestScore && score >= 50) {
+            bestScore = score;
             bestMatch = product;
         }
     });
@@ -3691,7 +3738,38 @@ function matchFilenameToProduct(filename) {
     return { product: bestMatch, score: bestScore, tags: foundTags };
 }
 
-// Handle files selected
+// Fetch existing images for duplicate detection
+let existingProductImagesMap = {};
+
+async function loadExistingImagesForDuplicateCheck() {
+    try {
+        const { data, error } = await supabase
+            .from('product_images')
+            .select('id, product_id, image_url, tags, is_default, display_order');
+        if (!error && data) {
+            existingProductImagesMap = {};
+            data.forEach(img => {
+                if (!existingProductImagesMap[img.product_id]) existingProductImagesMap[img.product_id] = [];
+                existingProductImagesMap[img.product_id].push(img);
+            });
+        }
+    } catch (e) {
+        console.error('Error loading existing images for duplicate check:', e);
+    }
+}
+
+// Check if an uploaded image would replace an existing one
+function checkForExistingImage(productId, tags) {
+    if (!productId || !tags || tags.length === 0) return null;
+    const existing = existingProductImagesMap[productId] || [];
+    for (const tag of tags) {
+        const match = existing.find(img => (img.tags || []).includes(tag));
+        if (match) return { existingImage: match, matchedTag: tag };
+    }
+    return null;
+}
+
+// Handle files selected — with duplicate awareness
 async function handleBulkFilesSelected(files) {
     const preview = document.getElementById('bulkImagesPreview');
     const summary = document.getElementById('bulkImagesSummary');
@@ -3699,19 +3777,25 @@ async function handleBulkFilesSelected(files) {
 
     // Filter only images
     const imageFiles = files.filter(f => f.type.startsWith('image/'));
-
     if (imageFiles.length === 0) {
         showToast('Please select image files only', 'error');
         return;
     }
 
+    // Load existing images for duplicate checking
+    await loadExistingImagesForDuplicateCheck();
+
     let matchedCount = 0;
     let unmatchedCount = 0;
+    let replaceCount = 0;
 
-    // Process each file
     for (const file of imageFiles) {
         const match = matchFilenameToProduct(file.name);
         const objectUrl = URL.createObjectURL(file);
+
+        // Check for existing image with same tag (duplicate/replace)
+        const productId = match.product?.id || null;
+        const existingCheck = productId ? checkForExistingImage(productId, match.tags) : null;
 
         const item = {
             file: file,
@@ -3719,32 +3803,50 @@ async function handleBulkFilesSelected(files) {
             matchedProduct: match.product,
             matchScore: match.score,
             tags: match.tags,
-            manualProductId: null
+            manualProductId: null,
+            replaceInfo: existingCheck // { existingImage, matchedTag } or null
         };
 
         pendingBulkImages.push(item);
 
         if (match.product) matchedCount++;
         else unmatchedCount++;
+        if (existingCheck) replaceCount++;
 
-        // Render preview item - always show dropdown for override capability
+        // Render preview item
         const selectedProductId = match.product?.id || '';
-        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Nutrition', 'Front View', 'Back View', 'Lifestyle'];
+        const bulkTags = ['Default', 'PET Jar', 'Glass Jar', 'Standup Pouch', 'Packet', 'Pouch', 'Nutrition', 'Front View', 'Back View', 'Lifestyle'];
         const detectedTags = match.tags || [];
+        const idx = pendingBulkImages.length - 1;
+
+        // Friendly replace indicator
+        let statusHtml = '';
+        if (existingCheck) {
+            statusHtml = `<div class="match-result" style="background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; padding: 4px 8px; border-radius: 6px; font-size: 0.78rem;">
+                <i class="fas fa-sync-alt"></i> Will update <strong>${existingCheck.matchedTag}</strong> image
+            </div>`;
+        } else if (match.product) {
+            statusHtml = `<div class="match-result matched">
+                <i class="fas fa-check-circle"></i> New image for ${match.product.product_name}
+            </div>`;
+        } else {
+            statusHtml = `<div class="match-result unmatched">
+                <i class="fas fa-question-circle"></i> Select product below
+            </div>`;
+        }
 
         const html = `
-            <div class="bulk-preview-item" data-idx="${pendingBulkImages.length - 1}">
-                <img src="${objectUrl}" alt="${file.name}">
+            <div class="bulk-preview-item" data-idx="${idx}">
+                <div style="position: relative;">
+                    <img src="${objectUrl}" alt="${file.name}">
+                    ${existingCheck ? `<div style="position:absolute; top:4px; right:4px; background:#f59e0b; color:#fff; border-radius:12px; padding:2px 8px; font-size:0.7rem; font-weight:600;"><i class="fas fa-sync-alt"></i> Update</div>` : ''}
+                </div>
                 <div class="file-info">
                     <div class="file-name">${file.name}</div>
-                    <div class="match-result ${match.product ? 'matched' : 'unmatched'}">
-                        ${match.product
-                ? `<i class="fas fa-check-circle"></i> Auto-matched`
-                : `<i class="fas fa-question-circle"></i> Select product`}
-                    </div>
+                    ${statusHtml}
                 </div>
                 <div class="bulk-controls">
-                    <select onchange="window.manualMatchProduct(${pendingBulkImages.length - 1}, this.value)" class="bulk-product-select">
+                    <select onchange="window.manualMatchProduct(${idx}, this.value)" class="bulk-product-select">
                         <option value="">Select Product...</option>
                         ${allProductsCache.map(p => `<option value="${p.id}" ${p.id === selectedProductId ? 'selected' : ''}>${p.product_name}</option>`).join('')}
                     </select>
@@ -3752,7 +3854,7 @@ async function handleBulkFilesSelected(files) {
                         ${bulkTags.map(tag => `
                             <label class="bulk-tag-chip ${detectedTags.includes(tag) ? 'active' : ''}">
                                 <input type="checkbox" ${detectedTags.includes(tag) ? 'checked' : ''} 
-                                    onchange="window.toggleBulkTag(${pendingBulkImages.length - 1}, '${tag}', this.checked)">
+                                    onchange="window.toggleBulkTag(${idx}, '${tag}', this.checked)">
                                 ${tag}
                             </label>
                         `).join('')}
@@ -3761,26 +3863,38 @@ async function handleBulkFilesSelected(files) {
             </div>
         `;
 
-
         preview.insertAdjacentHTML('beforeend', html);
     }
 
-    // Update summary
+    // Update summary with replace count
     document.getElementById('matchedCount').textContent = matchedCount;
     document.getElementById('unmatchedCount').textContent = unmatchedCount;
+
+    // Show replace count if any
+    const replaceCountEl = document.getElementById('replaceCount');
+    const replaceCountSpan = document.getElementById('replaceCountNum');
+    if (replaceCountEl && replaceCountSpan) {
+        replaceCountSpan.textContent = replaceCount;
+        replaceCountEl.style.display = replaceCount > 0 ? 'inline' : 'none';
+    }
+
     summary.style.display = 'block';
 
-    // Show save button if any matches
     if (matchedCount > 0) {
         saveBtn.style.display = 'inline-flex';
     }
 }
 
-// Manual product selection for unmatched files
+// Manual product selection — re-check for duplicates
 window.manualMatchProduct = function (idx, productId) {
     if (idx < 0 || idx >= pendingBulkImages.length) return;
 
     pendingBulkImages[idx].manualProductId = productId;
+
+    // Re-check for replacement
+    const tags = pendingBulkImages[idx].tags || [];
+    const existingCheck = productId ? checkForExistingImage(productId, tags) : null;
+    pendingBulkImages[idx].replaceInfo = existingCheck;
 
     // Update UI
     const item = document.querySelector(`.bulk-preview-item[data-idx="${idx}"]`);
@@ -3788,15 +3902,21 @@ window.manualMatchProduct = function (idx, productId) {
 
     if (productId) {
         const product = allProductsCache.find(p => p.id === productId);
-        matchResult.className = 'match-result matched';
-        matchResult.innerHTML = `<i class="fas fa-check-circle"></i> ${product?.product_name || 'Selected'}`;
-
-        // Update matched count
-        updateBulkMatchCounts();
+        if (existingCheck) {
+            matchResult.className = 'match-result';
+            matchResult.style.cssText = 'background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; padding: 4px 8px; border-radius: 6px; font-size: 0.78rem;';
+            matchResult.innerHTML = `<i class="fas fa-sync-alt"></i> Will update <strong>${existingCheck.matchedTag}</strong> image`;
+        } else {
+            matchResult.className = 'match-result matched';
+            matchResult.style.cssText = '';
+            matchResult.innerHTML = `<i class="fas fa-check-circle"></i> ${product?.product_name || 'Selected'}`;
+        }
     }
+
+    updateBulkMatchCounts();
 };
 
-// Toggle tag for a bulk image
+// Toggle tag for a bulk image — re-check for replacement on tag change
 window.toggleBulkTag = function (idx, tag, isChecked) {
     if (idx < 0 || idx >= pendingBulkImages.length) return;
 
@@ -3807,6 +3927,12 @@ window.toggleBulkTag = function (idx, tag, isChecked) {
         item.tags.push(tag);
     } else if (!isChecked) {
         item.tags = item.tags.filter(t => t !== tag);
+    }
+
+    // Re-check replacement status
+    const productId = item.manualProductId || item.matchedProduct?.id;
+    if (productId) {
+        item.replaceInfo = checkForExistingImage(productId, item.tags);
     }
 
     // Update visual state of the chip
@@ -3823,21 +3949,30 @@ window.toggleBulkTag = function (idx, tag, isChecked) {
 function updateBulkMatchCounts() {
     let matched = 0;
     let unmatched = 0;
+    let replacing = 0;
 
     pendingBulkImages.forEach(item => {
         if (item.matchedProduct || item.manualProductId) matched++;
         else unmatched++;
+        if (item.replaceInfo) replacing++;
     });
 
     document.getElementById('matchedCount').textContent = matched;
     document.getElementById('unmatchedCount').textContent = unmatched;
+
+    const replaceCountEl = document.getElementById('replaceCount');
+    const replaceCountSpan = document.getElementById('replaceCountNum');
+    if (replaceCountEl && replaceCountSpan) {
+        replaceCountSpan.textContent = replacing;
+        replaceCountEl.style.display = replacing > 0 ? 'inline' : 'none';
+    }
 
     if (matched > 0) {
         document.getElementById('bulkUploadSaveBtn').style.display = 'inline-flex';
     }
 }
 
-// Save all matched images
+// Save all matched images — with smart replace and display_order
 window.saveBulkImages = async function () {
     const progress = document.getElementById('bulkImagesProgress');
     const progressBar = document.getElementById('bulkProgressBar');
@@ -3845,7 +3980,6 @@ window.saveBulkImages = async function () {
     const saveBtn = document.getElementById('bulkUploadSaveBtn');
     const oldHtml = saveBtn ? saveBtn.innerHTML : 'Save to DB';
 
-    // Filter matched images
     const toUpload = pendingBulkImages.filter(item => item.matchedProduct || item.manualProductId);
 
     if (toUpload.length === 0) {
@@ -3861,32 +3995,77 @@ window.saveBulkImages = async function () {
     progressBar.style.width = '0%';
 
     let uploaded = 0;
+    let replaced = 0;
     let errors = 0;
 
     try {
         for (const item of toUpload) {
             try {
-                progressText.textContent = `Uploading ${uploaded + 1}/${toUpload.length}...`;
+                const productId = item.manualProductId || item.matchedProduct?.id;
+                const tags = item.tags || [];
+                const displayOrder = getDisplayOrderForTags(tags);
+                const isDefault = tags.includes('Default');
 
-                // Upload to storage
+                progressText.textContent = `Uploading ${uploaded + replaced + 1}/${toUpload.length}...`;
+
+                // Upload to Cloudinary
                 const imageUrl = await uploadImageToStorage(item.file);
 
-                // Get product ID
-                const productId = item.manualProductId || item.matchedProduct?.id;
+                // Check if we should replace an existing image
+                const existingCheck = checkForExistingImage(productId, tags);
 
-                // Save to product_images table
-                const { error } = await supabase.from('product_images').insert({
-                    product_id: productId,
-                    image_url: imageUrl,
-                    is_default: false,
-                    tags: item.tags || [],
-                    display_order: 99 // Will be sorted later
-                });
+                if (existingCheck) {
+                    // UPDATE existing row with new URL
+                    const updateData = {
+                        image_url: imageUrl,
+                        tags: tags,
+                        display_order: displayOrder
+                    };
 
-                if (error) throw error;
+                    if (isDefault) {
+                        // Clear other defaults first
+                        await supabase.from('product_images').update({ is_default: false }).eq('product_id', productId);
+                        updateData.is_default = true;
+                    }
 
-                uploaded++;
-                progressBar.style.width = `${(uploaded / toUpload.length) * 100}%`;
+                    const { error } = await supabase
+                        .from('product_images')
+                        .update(updateData)
+                        .eq('id', existingCheck.existingImage.id);
+
+                    if (error) throw error;
+                    replaced++;
+                } else {
+                    // INSERT new row
+                    if (isDefault) {
+                        await supabase.from('product_images').update({ is_default: false }).eq('product_id', productId);
+                    }
+
+                    const { error } = await supabase.from('product_images').insert({
+                        product_id: productId,
+                        image_url: imageUrl,
+                        is_default: isDefault,
+                        tags: tags,
+                        display_order: displayOrder
+                    });
+
+                    if (error) throw error;
+                    uploaded++;
+                }
+
+                // Sync showcase_image (passive sync for backwards compat)
+                if (isDefault) {
+                    await supabase.from('products').update({ showcase_image: imageUrl }).eq('id', productId);
+                }
+
+                // Remove from existing map to avoid double-replacing
+                if (existingCheck && existingProductImagesMap[productId]) {
+                    existingProductImagesMap[productId] = existingProductImagesMap[productId].filter(
+                        img => img.id !== existingCheck.existingImage.id
+                    );
+                }
+
+                progressBar.style.width = `${((uploaded + replaced + errors) / toUpload.length) * 100}%`;
 
             } catch (e) {
                 console.error('Error uploading image:', e);
@@ -3894,9 +4073,17 @@ window.saveBulkImages = async function () {
             }
         }
 
-        if (uploaded > 0) {
-            showToast(`Uploaded ${uploaded} images${errors > 0 ? `, ${errors} failed` : ''}`, 'success');
+        const parts = [];
+        if (uploaded > 0) parts.push(`${uploaded} new`);
+        if (replaced > 0) parts.push(`${replaced} updated`);
+        if (errors > 0) parts.push(`${errors} failed`);
+
+        if (uploaded + replaced > 0) {
+            showToast(`Images saved: ${parts.join(', ')}`, 'success');
             closeBulkImagesModal();
+            // Refresh caches
+            if (window.fetchProducts) await window.fetchProducts();
+            if (window.renderImagesProductGrid) window.renderImagesProductGrid();
         } else {
             showToast('Failed to upload images', 'error');
         }
@@ -3907,7 +4094,7 @@ window.saveBulkImages = async function () {
         }
         progress.style.display = 'none';
     }
-};
+// End of Save bulk images
 
 // Legacy single image upload (kept for other uses like category images)
 const handleImageUpload = async (file, statusElementId, inputElementId) => {
