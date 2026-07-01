@@ -1047,6 +1047,19 @@ window.getSortedVariants = function (product) {
         console.warn('Variant parse error', e);
     }
 
+    // Filter out inactive variants
+    variants = variants.filter(v => v.active !== false);
+
+    // Filter out globally disabled packaging types
+    const disabledTypes = window.currentSiteSettings?.disabled_variant_types || [];
+    if (disabledTypes.length > 0) {
+        variants = variants.filter(v => {
+            const pkg = (v.packaging_type || '').trim();
+            return pkg === '' || !disabledTypes.includes(pkg);
+        });
+    }
+
+
     if (!variants || variants.length === 0) {
         return [{
             quantity: product.quantity || 'Standard',
@@ -3313,8 +3326,32 @@ async function fetchAndRenderProducts() {
             showToast('Database connected but no products found.', 'info');
         }
 
-        // Filter out hidden products
-        const visibleProducts = (products || []).filter(p => p.is_visible !== false);
+        // Filter out hidden products and products with no active variants
+        const visibleProducts = (products || []).filter(p => {
+            if (p.is_visible === false) return false;
+            
+            let rawVariants = [];
+            try {
+                if (typeof p.quantity_variants === 'string') {
+                    rawVariants = JSON.parse(p.quantity_variants);
+                } else if (Array.isArray(p.quantity_variants)) {
+                    rawVariants = p.quantity_variants;
+                }
+            } catch (e) {}
+
+            if (rawVariants && rawVariants.length > 0) {
+                let activeVariants = rawVariants.filter(v => v.active !== false);
+                const disabledTypes = window.currentSiteSettings?.disabled_variant_types || [];
+                if (disabledTypes.length > 0) {
+                    activeVariants = activeVariants.filter(v => {
+                        const pkg = (v.packaging_type || '').trim();
+                        return pkg === '' || !disabledTypes.includes(pkg);
+                    });
+                }
+                if (activeVariants.length === 0) return false;
+            }
+            return true;
+        });
 
         window.allProductsCache = visibleProducts;
         window.allProductImagesCache = imagesResp.data || [];
@@ -4233,7 +4270,17 @@ window.openQuickProductModal = function (productId) {
     const fallbackImg = window.currentSiteSettings?.product_placeholder_url || './images/placeholder-product.jpg';
 
     let variants = [];
-    try { variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; } catch (e) { variants = []; }
+    try { 
+        variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : product.quantity_variants; 
+        variants = variants.filter(v => v.active !== false);
+        const disabledTypes = window.currentSiteSettings?.disabled_variant_types || [];
+        if (disabledTypes.length > 0) {
+            variants = variants.filter(v => {
+                const pkg = (v.packaging_type || '').trim();
+                return pkg === '' || !disabledTypes.includes(pkg);
+            });
+        }
+    } catch (e) { variants = []; }
     let quantitiesText = variants.length > 0 ? variants.map(v => v.quantity).join(', ') : (product.net_weight || 'Standard');
 
     let nutInfo = {};

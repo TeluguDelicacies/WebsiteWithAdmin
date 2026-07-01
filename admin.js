@@ -1246,6 +1246,12 @@ async function fetchSettings() {
             document.getElementById('setThankyouTitle').value = data.thankyou_title || 'Thank You for Choosing Us!';
             document.getElementById('setThankyouTitleTelugu').value = data.thankyou_title_telugu || 'మీ విశ్వాసానికి ధన్యవాదాలు';
             document.getElementById('setThankyouSubtitle').value = data.thankyou_subtitle || 'Every order means the world to us. We craft each product with love, tradition, and the finest ingredients — just for you.';
+            
+            // Global Variant Packaging
+            const disabledTypes = data.disabled_variant_types || [];
+            document.querySelectorAll('.global-pkg-toggle').forEach(checkbox => {
+                checkbox.checked = !disabledTypes.includes(checkbox.value);
+            });
         }
     } catch (e) {
         console.error('Settings fetch error:', e);
@@ -1312,6 +1318,12 @@ window.cancelSettingsChanges = function () {
     document.getElementById('setThankyouTitleTelugu').value = data.thankyou_title_telugu || 'మీ విశ్వాసానికి ధన్యవాదాలు';
     document.getElementById('setThankyouSubtitle').value = data.thankyou_subtitle || 'Every order means the world to us. We craft each product with love, tradition, and the finest ingredients — just for you.';
 
+    // Global Variant Packaging
+    const disabledTypes = data.disabled_variant_types || [];
+    document.querySelectorAll('.global-pkg-toggle').forEach(checkbox => {
+        checkbox.checked = !disabledTypes.includes(checkbox.value);
+    });
+
     showToast('Settings changes cancelled', 'info');
 };
 
@@ -1373,7 +1385,10 @@ if (siteSettingsForm) {
             thankyou_subtitle: document.getElementById('setThankyouSubtitle').value,
 
             // Legal Documents
-            shipping_return_policy: document.getElementById('setShippingReturnPolicy').value
+            shipping_return_policy: document.getElementById('setShippingReturnPolicy').value,
+            
+            // Global Variant Packaging
+            disabled_variant_types: Array.from(document.querySelectorAll('.global-pkg-toggle')).filter(cb => !cb.checked).map(cb => cb.value)
         };
 
         try {
@@ -2094,7 +2109,7 @@ async function loadTestimonialData(id) {
 window.addVariantRow = (data = null) => {
     const div = document.createElement('div');
     div.className = 'variant-row';
-    div.style.cssText = 'display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr 1.2fr 1.5fr auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
+    div.style.cssText = 'display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr 1.2fr 1.5fr auto auto; gap: 10px; margin-bottom: 20px; align-items: start; background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);';
 
     div.innerHTML = `
         <div>
@@ -2136,6 +2151,10 @@ window.addVariantRow = (data = null) => {
                 <option value="PET Jar" ${data && data.packaging_type === 'PET Jar' ? 'selected' : ''}>PET Jar</option>
                 <option value="Packet" ${data && data.packaging_type === 'Packet' ? 'selected' : ''}>Packet</option>
             </select>
+        </div>
+        <div>
+            <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600;">Active</label>
+            <input type="checkbox" class="variant-active" ${data && data.active === false ? '' : 'checked'} style="width: 20px; height: 20px; margin-top: 5px; accent-color: var(--color-primary-green);">
         </div>
         <button type="button" onclick="this.parentElement.remove()" class="nav-btn" style="color: #ef4444; border-color: #ef4444; margin-top: 26px; min-width: auto; padding: 10px;" title="Delete Variant">
             <i class="fas fa-trash"></i>
@@ -2310,6 +2329,7 @@ productForm.addEventListener('submit', async (e) => {
         const stock = parseInt(row.querySelector('.variant-stock').value || 0);
         const currentSold = parseInt(row.querySelector('.variant-sold-batch').value || 0);
         const globalSold = parseInt(row.querySelector('.variant-sold-global').value || 0);
+        const isActive = row.querySelector('.variant-active') ? row.querySelector('.variant-active').checked : true;
 
         if (qty && price) {
             variants.push({
@@ -2319,7 +2339,8 @@ productForm.addEventListener('submit', async (e) => {
                 stock: stock,
                 current_sold: currentSold,
                 global_sold: globalSold,
-                packaging_type: row.querySelector('.variant-packaging').value
+                packaging_type: row.querySelector('.variant-packaging').value,
+                active: isActive
             });
             calculatedTotalStock += stock;
             calculatedTotalSold += globalSold; // Product level tracking uses global total
