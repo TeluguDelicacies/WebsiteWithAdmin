@@ -1557,8 +1557,19 @@
                     return;
                 }
 
-                // Show ALL images (tagged and untagged)
+                // Filter out images that match globally disabled types
+                const disabledTypesImages = (window.state?.settings?.disabled_variant_types || []).map(t => typeof t === 'string' ? t.trim().toLowerCase() : t);
                 let visibleImages = images || [];
+                if (disabledTypesImages.length > 0) {
+                    visibleImages = visibleImages.filter(img => {
+                        if (!img.tags || img.tags.length === 0) return true;
+                        const hasDisabledTag = img.tags.some(tag => {
+                            const cleanTag = typeof tag === 'string' ? tag.trim().toLowerCase() : '';
+                            return disabledTypesImages.some(dt => cleanTag === dt || cleanTag.includes(dt));
+                        });
+                        return !hasDisabledTag;
+                    });
+                }
 
                 // --- CUSTOM SORTING LOGIC ---
                 // Order: 1. fallbackImage (current display) 2. Glass tag 3. Standup tag 4. PET Jar tag 5. Nutrition tag 6. Default tag 7. Untagged (last)

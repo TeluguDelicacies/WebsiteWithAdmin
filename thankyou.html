@@ -341,8 +341,52 @@
                 ]);
 
                 const settings = settingsRes.data || {};
-                const products = productsRes.data || [];
-                const images = imagesRes.data || [];
+                
+                // Helper to validate variants
+                const getValidVariants = (rawVariants) => {
+                    let variants = [];
+                    try {
+                        if (typeof rawVariants === 'string') variants = JSON.parse(rawVariants);
+                        else if (Array.isArray(rawVariants)) variants = rawVariants;
+                    } catch(e){}
+                    variants = variants.filter(v => v.active !== false);
+                    const disabledTypes = (settings.disabled_variant_types || []).map(t => typeof t === 'string' ? t.trim().toLowerCase() : t);
+                    if (disabledTypes.length > 0) {
+                        variants = variants.filter(v => {
+                            const pkg = (v.packaging_type || '').trim().toLowerCase();
+                            return pkg === '' || !disabledTypes.includes(pkg);
+                        });
+                    }
+                    return variants;
+                };
+
+                // Filter out images that match globally disabled types
+                const disabledTypesImages = (settings.disabled_variant_types || []).map(t => typeof t === 'string' ? t.trim().toLowerCase() : t);
+                let images = imagesRes.data || [];
+                if (disabledTypesImages.length > 0) {
+                    images = images.filter(img => {
+                        if (!img.tags || img.tags.length === 0) return true;
+                        const hasDisabledTag = img.tags.some(tag => {
+                            const cleanTag = typeof tag === 'string' ? tag.trim().toLowerCase() : '';
+                            return disabledTypesImages.some(dt => cleanTag === dt || cleanTag.includes(dt));
+                        });
+                        return !hasDisabledTag;
+                    });
+                }
+
+                // Filter out products and update their quantity_variants
+                const products = (productsRes.data || []).map(p => {
+                    const originalVars = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants || '[]') : (p.quantity_variants || []);
+                    const filteredVars = getValidVariants(p.quantity_variants);
+                    p.quantity_variants = filteredVars;
+                    p._original_variant_count = originalVars.length;
+                    return p;
+                }).filter(p => {
+                    if (p.is_visible === false) return false;
+                    // If it originally had variants but all were filtered out, hide product
+                    if (p._original_variant_count > 0 && p.quantity_variants.length === 0) return false;
+                    return true;
+                });
 
                 // ── Logo & Favicon ──
                 if (settings.logo_url) {
