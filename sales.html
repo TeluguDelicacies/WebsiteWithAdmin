@@ -918,6 +918,23 @@
          * Helper: Sort variants based on default image tag and price
          * Rule: Matching Tag first, then Cheapest to Costliest
          */
+        
+        window.getValidVariants = function(rawVariants) {
+            let variants = [];
+            try {
+                if (typeof rawVariants === 'string') variants = JSON.parse(rawVariants);
+                else if (Array.isArray(rawVariants)) variants = rawVariants;
+            } catch(e){}
+            variants = variants.filter(v => v.active !== false);
+            const disabledTypes = (window.state && window.state.settings && window.state.settings.disabled_variant_types) ? window.state.settings.disabled_variant_types : [];
+            if (disabledTypes.length > 0) {
+                variants = variants.filter(v => {
+                    const pkg = (v.packaging_type || '').trim();
+                    return pkg === '' || !disabledTypes.includes(pkg);
+                });
+            }
+            return variants;
+        };
         window.getSortedVariants = function (product) {
             let variants = [];
             try {
@@ -1296,7 +1313,7 @@
             // Standardize variants
             let rawVars = [];
             try {
-                rawVars = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+                rawVars = window.getValidVariants(product.quantity_variants);
             } catch (e) { }
 
             // SORT: Lowest MRP to Highest
@@ -1513,7 +1530,7 @@
 
             // Final Sync (After all components are ready)
             if (window.syncDetailPageCart) {
-                const vars = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+                const vars = window.getValidVariants(product.quantity_variants);
                 window.syncDetailPageCart(vars[0]);
             }
         }
@@ -2660,7 +2677,7 @@
             if (!state.currentProduct) return;
 
             // Get selected variant
-            const variants = typeof state.currentProduct.quantity_variants === 'string' ? JSON.parse(state.currentProduct.quantity_variants) : (state.currentProduct.quantity_variants || []);
+            const variants = window.getValidVariants(state.currentProduct.quantity_variants);
 
             let idx = 0;
             if (typeof window._detailActiveVariantIdx === 'number') {
@@ -2767,9 +2784,7 @@
 
             let variants = [];
             try {
-                variants = typeof state.currentProduct.quantity_variants === 'string' ?
-                    JSON.parse(state.currentProduct.quantity_variants) :
-                    (state.currentProduct.quantity_variants || []);
+                variants = window.getValidVariants(state.currentProduct.quantity_variants);
             } catch (e) { }
 
             let selectedVariant = null;
@@ -2835,7 +2850,7 @@
 
             // If specific variant not passed, try to get from UI
             if (!selectedVariant) {
-                const variants = typeof product.quantity_variants === 'string' ? JSON.parse(product.quantity_variants) : (product.quantity_variants || []);
+                const variants = window.getValidVariants(product.quantity_variants);
                 if (variants.length > 0) {
                     let idx = 0;
                     if (typeof window._detailActiveVariantIdx === 'number') {
@@ -3007,9 +3022,7 @@
                 if (!it.products) return;
                 let variants = [];
                 try {
-                    variants = typeof it.products.quantity_variants === 'string'
-                        ? JSON.parse(it.products.quantity_variants)
-                        : (it.products.quantity_variants || []);
+                    variants = window.getValidVariants(it.products.quantity_variants);
                 } catch (e) { }
                 const match = variants.find(v =>
                     String(v.quantity) === String(it.variant_quantity) &&
@@ -3138,9 +3151,7 @@
                             if (cartItem.variant) {
                                 let vars = [];
                                 try {
-                                    vars = typeof dbProd.quantity_variants === 'string'
-                                        ? JSON.parse(dbProd.quantity_variants)
-                                        : (dbProd.quantity_variants || []);
+                                    vars = window.getValidVariants(dbProd.quantity_variants);
                                 } catch (e) { }
 
                                 // Match by quantity label matches
@@ -3432,7 +3443,7 @@
 
                         let variants = [];
                         try {
-                            variants = typeof it.products.quantity_variants === 'string' ? JSON.parse(it.products.quantity_variants) : (it.products.quantity_variants || []);
+                            variants = window.getValidVariants(it.products.quantity_variants);
                         } catch (e) { }
 
                         const match = variants.find(v =>
@@ -3564,9 +3575,7 @@
                 // Price matching
                 let variants = [];
                 try {
-                    variants = typeof it.products.quantity_variants === 'string'
-                        ? JSON.parse(it.products.quantity_variants)
-                        : (it.products.quantity_variants || []);
+                    variants = window.getValidVariants(it.products.quantity_variants);
                 } catch (e) { }
 
                 const match = variants.find(v =>
@@ -3999,7 +4008,7 @@
             // Re-calculate offer price for message
             let calculatedTotalMrp = 0;
             combo.combo_items.forEach(it => {
-                let variants = typeof it.products.quantity_variants === 'string' ? JSON.parse(it.products.quantity_variants) : (it.products.quantity_variants || []);
+                let variants = window.getValidVariants(it.products.quantity_variants);
                 const match = variants.find(v => String(v.quantity) === String(it.variant_quantity) && String(v.packaging_type || '') === String(it.packaging_type || '')) || variants[0];
                 calculatedTotalMrp += (match ? (match.mrp || match.price || 0) : 0);
             });
