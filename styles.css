@@ -7198,3 +7198,29 @@ Uses same card structure as sales page product grid
 .fade-refresh {
   animation: fadeRefresh 0.4s ease-out forwards;
 }
+
+/* Brand Carousel Animations */
+.hide-on-mobile { display: flex; }
+.hide-on-desktop { display: none; }
+@media (max-width: 768px) {
+  .hide-on-mobile { display: none !important; }
+  .hide-on-desktop { display: block !important; }
+}
+.mobile-brand-carousel {
+  position: relative;
+  width: 80px;
+  height: 40px;
+}
+.mobile-brand-carousel .brand-logo-item {
+  position: absolute;
+  top: 0;
+  right: 0;
+  max-height: 40px;
+  max-width: 80px;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.mobile-brand-carousel .brand-logo-item.active {
+  opacity: 1;
+}

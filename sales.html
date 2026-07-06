@@ -854,11 +854,17 @@
                 </div>
                 
                 <div class="brand-logos-wrapper">
-                    <div class="desktop-brand-grid">
+                    <div class="desktop-brand-grid hide-on-mobile">
                         ${brands.map(b => `
                             <div class="desktop-logo-wrapper">
                                 <img src="${b.sub_brand_logo_url}" class="brand-logo-item" alt="${b.sub_brand}">
                             </div>
+                        `).join('')}
+                    </div>
+                    <!-- Mobile Carousel (Hidden on Desktop) -->
+                    <div class="mobile-brand-carousel hide-on-desktop">
+                        ${brands.map((b, idx) => `
+                            <img src="${b.sub_brand_logo_url}" class="brand-logo-item ${idx === 0 ? 'active' : ''}" alt="${b.sub_brand}">
                         `).join('')}
                     </div>
                 </div>
@@ -948,10 +954,18 @@
                             <p class="category-short-desc">${category.short_description || ''}</p>
                         </div>
                         ${category.slug === 'ready-to-eat' 
-                          ? `<div style="display:flex; gap:10px; align-items:center;">
+                          ? `
+                             <!-- Desktop Grid -->
+                             <div class="desktop-brand-grid hide-on-mobile" style="display:flex; gap:10px; align-items:center;">
                                 <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" style="max-height: 40px; object-fit: contain;">
                                 <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" style="max-height: 40px; object-fit: contain;">
-                             </div>`
+                             </div>
+                             <!-- Mobile Carousel -->
+                             <div class="mobile-brand-carousel hide-on-desktop">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" class="brand-logo-item active" style="max-height: 40px; object-fit: contain;">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" class="brand-logo-item" style="max-height: 40px; object-fit: contain;">
+                             </div>
+                            `
                           : (category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : '')}
                     </div>
 
@@ -963,6 +977,9 @@
                     </div>
                 </section>
             `;
+
+            // Start Widget Cycle
+            window.startBrandWidgetCycle();
 
             // Scroll breadcrumbs
             window.updateBreadcrumbScroll();
