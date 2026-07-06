@@ -2190,6 +2190,7 @@ async function loadProductData(productId) {
         document.getElementById('productNameTelugu').value = product.product_name_telugu || '';
         document.getElementById('productDescriptor').value = product.discriptor || '';
         document.getElementById('productCategory').value = product.product_category;
+        document.getElementById('productSubCategory').value = product.sub_category || '';
         document.getElementById('productTagline').value = product.product_tagline || '';
         document.getElementById('productDescription').value = product.product_description || '';
 
@@ -2375,6 +2376,7 @@ productForm.addEventListener('submit', async (e) => {
             product_name_telugu: document.getElementById('productNameTelugu').value,
             discriptor: document.getElementById('productDescriptor').value,
             product_category: document.getElementById('productCategory').value,
+            sub_category: document.getElementById('productSubCategory').value,
             product_tagline: document.getElementById('productTagline').value,
             product_description: document.getElementById('productDescription').value,
             ingredients: document.getElementById('productIngredients').value,

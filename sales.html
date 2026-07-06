@@ -106,6 +106,23 @@
         </div>
     </main>
 
+    <!-- Mobile Quick Navigation FAB -->
+    <button class="mobile-nav-fab" onclick="window.toggleMobileNav()">
+        <i class="fas fa-layer-group"></i> Categories
+    </button>
+    <div id="mobileNavOverlay" class="cart-overlay" onclick="window.toggleMobileNav()"></div>
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+        <div class="cart-header">
+            <h3>Quick Navigation</h3>
+            <button class="close-cart" onclick="window.toggleMobileNav()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-nav-content" id="mobileNavContent">
+            <!-- Categories injected here -->
+        </div>
+    </div>
+
     <!-- Cart Drawer -->
     <div id="cartOverlay" class="cart-overlay" onclick="window.toggleCartDrawer()"></div>
     <div id="cartDrawer" class="cart-drawer">
@@ -887,6 +904,22 @@
                 (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === slug
             );
 
+            // Extract unique sub-categories
+            const subCategories = [...new Set(catProducts.map(p => (p.sub_category || '').trim()).filter(Boolean))];
+            let subCategoryHtml = '';
+            if (subCategories.length > 0) {
+                subCategoryHtml = `
+                    <div class="subcategory-filters-container">
+                        <div class="subcategory-filters">
+                            <button class="subcategory-pill active" onclick="window.filterSubCategory('all', this)">All</button>
+                            ${subCategories.map(sub => `
+                                <button class="subcategory-pill" onclick="window.filterSubCategory('${escapeHTML(sub)}', this)">${escapeHTML(sub)}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             // Use the NEW Quick Commerce HTML Structure
             app.innerHTML = `
                 <div class="breadcrumb-section">
@@ -903,6 +936,8 @@
                         ${category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : ''}
                     </div>
 
+                    ${subCategoryHtml}
+
                     <!-- New Grid Container -->
                     <div class="category-grid">
                         ${catProducts.map(p => renderProductCard(p, category)).join('')}
@@ -913,6 +948,60 @@
             // Scroll breadcrumbs
             window.updateBreadcrumbScroll();
         }
+
+        window.filterSubCategory = function(subCategory, btnElement) {
+            // Update active pill
+            const container = btnElement.closest('.subcategory-filters');
+            container.querySelectorAll('.subcategory-pill').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Filter products
+            const cards = document.querySelectorAll('.category-grid .product-card');
+            cards.forEach(card => {
+                if (subCategory === 'all') {
+                    card.style.display = 'flex';
+                } else {
+                    if (card.dataset.subcategory === subCategory) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        };
+
+        /**
+         * Mobile Navigation Drawer Logic
+         */
+        window.toggleMobileNav = function () {
+            const drawer = document.getElementById('mobileNavDrawer');
+            const overlay = document.getElementById('mobileNavOverlay');
+            
+            if (drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                overlay.classList.remove('active');
+            } else {
+                window.populateMobileNav();
+                drawer.classList.add('open');
+                overlay.classList.add('active');
+            }
+        };
+
+        window.populateMobileNav = function () {
+            const container = document.getElementById('mobileNavContent');
+            let html = '<div class="mobile-nav-list">';
+            
+            state.categories.forEach(cat => {
+                html += `
+                    <div class="mobile-nav-item" onclick="window.navigateToCategory('${cat.slug}'); window.toggleMobileNav();">
+                        <i class="fas fa-chevron-right"></i> ${escapeHTML(cat.title)}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        };
 
         /**
          * Helper: Sort variants based on default image tag and price
@@ -1026,7 +1115,7 @@
 
             // 6. Render
             return `
-            <article class="product-card" id="card-${product.id}" data-variants='${JSON.stringify(sortedVariants).replace(/'/g, "&apos;")}' data-current-idx="0">
+            <article class="product-card" id="card-${product.id}" data-subcategory="${escapeHTML(product.sub_category || '')}" data-variants='${JSON.stringify(sortedVariants).replace(/'/g, "&apos;")}' data-current-idx="0">
                 
                  <!-- Image Area -->
                 <div class="card-image-container">

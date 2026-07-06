@@ -2376,6 +2376,44 @@ QUICK COMMERCE GRID & CARD (New Implementation)
 ========================================
 */
 
+/* Sub-Category Filters */
+.subcategory-filters-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.subcategory-filters-container::-webkit-scrollbar {
+  display: none;
+}
+.subcategory-filters {
+  display: flex;
+  gap: 10px;
+  padding: 5px 0;
+  width: max-content;
+}
+.subcategory-pill {
+  padding: 8px 16px;
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.subcategory-pill.active {
+  background: var(--color-brand-blue-primary);
+  color: var(--color-white);
+  border-color: var(--color-brand-blue-primary);
+}
+.subcategory-pill:hover:not(.active) {
+  background: var(--color-gray-200);
+}
+
 /* Task 1: The Grid Layout */
 .category-grid {
   display: grid;
@@ -4027,6 +4065,75 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 .cart-overlay.open {
   opacity: 1;
   visibility: visible;
+}
+
+/* Mobile Quick Navigation FAB & Drawer */
+.mobile-nav-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--color-brand-blue-primary);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.mobile-nav-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 769px) {
+  .mobile-nav-fab {
+    display: none; /* Only show on mobile */
+  }
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  max-height: 70vh;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  z-index: 1000;
+  transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+.mobile-nav-drawer.open {
+  bottom: 0;
+}
+.mobile-nav-list {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mobile-nav-item {
+  padding: 15px;
+  background: var(--color-gray-100);
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.mobile-nav-item i {
+  color: var(--color-brand-yellow);
 }
 
 /* Cart Drawer */
