@@ -2392,8 +2392,8 @@ QUICK COMMERCE GRID & CARD (New Implementation)
 
 @media (min-width: 768px) {
   .category-grid {
-    grid-template-columns: repeat(4, 1fr);
-    /* Tablet: 4 columns */
+    grid-template-columns: repeat(3, 1fr);
+    /* Tablet: 3 columns */
     gap: 20px;
     /* Desktop gap */
   }
@@ -2401,8 +2401,8 @@ QUICK COMMERCE GRID & CARD (New Implementation)
 
 @media (min-width: 1024px) {
   .category-grid {
-    grid-template-columns: repeat(5, 1fr);
-    /* Desktop: 5 columns */
+    grid-template-columns: repeat(4, 1fr);
+    /* Desktop: 4 columns */
   }
 }
 
@@ -2568,6 +2568,25 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   color: var(--color-brand-yellow-hover);
   /* Brand accent for discount */
   font-weight: 600;
+}
+
+/* Product Descriptor */
+.product-descriptor {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detail-page-descriptor {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
 }
 
 /* Titles */
