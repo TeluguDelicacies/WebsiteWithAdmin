@@ -112,9 +112,6 @@
     </button>
     <div id="mobileNavOverlay" class="cart-overlay" style="background: transparent; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; z-index: 9998;" onclick="window.toggleMobileNav()"></div>
     <div id="mobileNavDrawer" class="mobile-nav-drawer dark-popup">
-        <div class="dark-popup-header">
-            <h3>Menu</h3>
-        </div>
         <div class="mobile-nav-content" id="mobileNavContent">
             <!-- Categories injected here -->
         </div>
@@ -1025,8 +1022,6 @@
             let html = '<div class="dark-popup-list">';
             
             const totalProducts = state.allProducts.filter(p => p.is_visible !== false).length;
-            const header = document.querySelector('.dark-popup-header h3');
-            if (header) header.innerHTML = `Menu <span class="header-count">${totalProducts}</span>`;
 
             state.categories.forEach(cat => {
                 const catProducts = state.allProducts.filter(p => {

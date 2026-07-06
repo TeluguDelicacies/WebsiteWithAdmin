@@ -2384,6 +2384,11 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
+@media (max-width: 768px) {
+  .subcategory-filters-container {
+    display: none !important;
+  }
+}
 .subcategory-filters-container::-webkit-scrollbar {
   display: none;
 }
@@ -4102,7 +4107,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 .mobile-nav-drawer.dark-popup {
   position: fixed;
   bottom: 20px;
-  left: 20px;
+  right: 20px;
   transform: translateY(120%);
   width: 50vw;
   max-height: 35vh;
@@ -4123,28 +4128,16 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   pointer-events: auto;
   bottom: 90px;
 }
-.dark-popup-header {
-  padding: 15px 15px 5px 15px;
-}
-.dark-popup-header h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: white;
-}
-.header-count {
-  font-size: 0.9rem;
-  font-weight: 600;
+.mobile-nav-content {
+  width: 100%;
 }
 .dark-popup-list {
-  padding: 0 15px 15px 15px;
+  padding: 15px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
 }
 .dark-popup-item {
   display: flex;
@@ -4155,6 +4148,12 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   color: #e5e5e5;
   cursor: pointer;
   transition: color 0.2s ease;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.dark-popup-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 .dark-popup-item:hover {
   color: white;
