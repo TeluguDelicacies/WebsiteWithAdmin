@@ -961,6 +961,16 @@
 
             // Scroll breadcrumbs
             window.updateBreadcrumbScroll();
+
+            // Apply pending subcategory filter if navigating from global mobile menu
+            if (window.pendingSubCategoryFilter) {
+                setTimeout(() => {
+                    if (window.filterSubCategoryMobile) {
+                        window.filterSubCategoryMobile(window.pendingSubCategoryFilter);
+                    }
+                    window.pendingSubCategoryFilter = null;
+                }, 50);
+            }
         }
 
         window.filterSubCategory = function(subCategory, btnElement) {
@@ -993,11 +1003,11 @@
             
             if (drawer.classList.contains('open')) {
                 drawer.classList.remove('open');
-                overlay.classList.remove('active');
+                overlay.classList.remove('open');
             } else {
                 window.populateMobileNav();
                 drawer.classList.add('open');
-                overlay.classList.add('active');
+                overlay.classList.add('open');
             }
         };
 
