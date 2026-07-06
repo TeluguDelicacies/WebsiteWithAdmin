@@ -2572,14 +2572,17 @@ QUICK COMMERCE GRID & CARD (New Implementation)
 
 /* Product Descriptor */
 .product-descriptor {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
   font-weight: 600;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  line-height: 1.2;
-  white-space: nowrap;
+  line-height: 1.3;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
