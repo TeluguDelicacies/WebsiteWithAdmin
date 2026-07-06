@@ -110,7 +110,7 @@
     <button class="mobile-nav-fab" onclick="window.toggleMobileNav()">
         <i class="fas fa-utensils"></i>
     </button>
-    <div id="mobileNavOverlay" class="cart-overlay" style="background: rgba(0,0,0,0.5); z-index: 9998;" onclick="window.toggleMobileNav()"></div>
+    <div id="mobileNavOverlay" class="cart-overlay" style="background: transparent; z-index: 9998;" onclick="window.toggleMobileNav()"></div>
     <div id="mobileNavDrawer" class="mobile-nav-drawer dark-popup">
         <div class="dark-popup-header">
             <h3>Menu</h3>
@@ -1005,10 +1005,41 @@
             const container = document.getElementById('mobileNavContent');
             let html = '<div class="dark-popup-list">';
             
-            // Calculate total products to show next to "Menu" header
-            const totalProducts = state.allProducts.filter(p => p.is_visible !== false).length;
+            // Determine context
+            let currentProducts = [];
+            if (state.currentCategory === 'all-products' || !state.currentCategory) {
+                currentProducts = state.allProducts.filter(p => p.is_visible !== false);
+            } else {
+                currentProducts = state.allProducts.filter(p => (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === state.currentCategory && p.is_visible !== false);
+            }
+
             const header = document.querySelector('.dark-popup-header h3');
-            if (header) header.innerHTML = `Menu <span class="header-count">${totalProducts}</span>`;
+            if (header) header.innerHTML = `Menu <span class="header-count">${currentProducts.length}</span>`;
+
+            // Extract subcategories from current products
+            const subCategories = [...new Set(currentProducts.map(p => (p.sub_category || '').trim()).filter(Boolean))];
+
+            if (subCategories.length > 0) {
+                html += `<div style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform: uppercase; margin-top: 5px; margin-bottom: 0px;">Filters</div>`;
+                html += `
+                    <div class="dark-popup-item" onclick="window.filterSubCategoryMobile('all'); window.toggleMobileNav();">
+                        <span class="dark-popup-title">All Items</span>
+                        <span class="dark-popup-count">${currentProducts.length}</span>
+                    </div>
+                `;
+                subCategories.forEach(sub => {
+                    const count = currentProducts.filter(p => (p.sub_category || '').trim() === sub).length;
+                    html += `
+                        <div class="dark-popup-item" onclick="window.filterSubCategoryMobile('${escapeHTML(sub)}'); window.toggleMobileNav();">
+                            <span class="dark-popup-title">${escapeHTML(sub)}</span>
+                            <span class="dark-popup-count">${count}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `<div style="height: 1px; background: #333; margin: 10px 0;"></div>`;
+                html += `<div style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 0px;">Categories</div>`;
+            }
 
             state.categories.forEach(cat => {
                 const count = state.allProducts.filter(p => {
@@ -1025,6 +1056,33 @@
             
             html += '</div>';
             container.innerHTML = html;
+        };
+
+        window.filterSubCategoryMobile = function(subCategory) {
+            // Filter products
+            const cards = document.querySelectorAll('.category-grid .product-card');
+            cards.forEach(card => {
+                if (subCategory === 'all') {
+                    card.style.display = 'flex';
+                } else {
+                    if (card.dataset.subcategory === subCategory) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Sync with horizontal pills if they exist
+            const pills = document.querySelectorAll('.subcategory-pill');
+            pills.forEach(pill => {
+                pill.classList.remove('active');
+                if (subCategory === 'all' && pill.textContent.trim() === 'All') {
+                    pill.classList.add('active');
+                } else if (pill.textContent.trim() === subCategory) {
+                    pill.classList.add('active');
+                }
+            });
         };
 
         /**
