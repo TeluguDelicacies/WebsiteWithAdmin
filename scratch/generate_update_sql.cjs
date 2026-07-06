@@ -41,21 +41,27 @@ function parseNutritionToJSON(nutritionStr) {
             let val = match[2].trim();
             if (keyMapping[key]) {
                 result[keyMapping[key]] = val;
-            } else if (key.includes('serving')) {
-                detailsArr.push(part);
+            } else if (key.includes('serving size')) {
+                result['serving_size'] = val;
+            } else if (key.includes('total serving')) {
+                result['total_servings'] = val;
             } else {
                 result[key] = val; // fallback
             }
         } else {
-            if (part.toLowerCase().includes('serving')) {
-                detailsArr.push(part);
+            // handle cases like "Total_servings: 20"
+            const kvMatch = part.match(/^([^:]+):\s*(.+)$/);
+            if (kvMatch) {
+                let key = kvMatch[1].trim().toLowerCase();
+                let val = kvMatch[2].trim();
+                if (key.includes('total_serving') || key.includes('total serving')) {
+                    result['total_servings'] = val;
+                } else if (key.includes('serving size')) {
+                    result['serving_size'] = val;
+                }
             }
         }
     });
-
-    if (detailsArr.length > 0) {
-        result['serving_size'] = detailsArr.join(', ');
-    }
 
     return JSON.stringify(result);
 }
