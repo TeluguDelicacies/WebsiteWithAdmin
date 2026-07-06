@@ -947,7 +947,12 @@
                             </h1>
                             <p class="category-short-desc">${category.short_description || ''}</p>
                         </div>
-                        ${category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : ''}
+                        ${category.slug === 'ready-to-eat' 
+                          ? `<div style="display:flex; gap:10px; align-items:center;">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" style="max-height: 40px; object-fit: contain;">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" style="max-height: 40px; object-fit: contain;">
+                             </div>`
+                          : (category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : '')}
                     </div>
 
                     ${subCategoryHtml}
@@ -1252,7 +1257,7 @@
                 <!-- Info Area -->
                 <div class="card-info">
                      <!-- 1. Sub-Brand (Top) -->
-                     ${dispCategory.sub_brand ? `<span class="card-sub-brand">${dispCategory.sub_brand}</span>` : ''}
+                     <!-- Sub-brand removed per user request -->
 
                      <!-- 2. English Title -->
                     ${product.discriptor ? `<p class="product-descriptor" title="${product.discriptor}">${product.discriptor}</p>` : ''}
@@ -1532,6 +1537,18 @@
 
             updateHistory(product, displayImg);
 
+            // Determine initial logo based on packaging
+            let initialLogoUrl = category?.sub_brand_logo_url || '';
+            const isGlass = defaultV.packaging_type && defaultV.packaging_type.toLowerCase().includes('glass');
+            const teepiLogo = state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url;
+            const akshayaLogo = state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url;
+            
+            if (isGlass && teepiLogo) {
+                initialLogoUrl = teepiLogo;
+            } else if (!isGlass && akshayaLogo) {
+                initialLogoUrl = akshayaLogo;
+            }
+
             const app = document.getElementById('app');
 
             // Clean up previous transition classes if any
@@ -1562,7 +1579,7 @@
                         
                         <div class="gallery-wrapper">
                             <div class="product-gallery" id="productFlipper">
-                                ${category?.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}" class="overlay-logo">` : ''}
+                                ${initialLogoUrl ? `<img src="${initialLogoUrl}" class="overlay-logo" id="productModalBrandLogo">` : `<img src="" class="overlay-logo" id="productModalBrandLogo" style="display:none;">`}
                                 <div class="gallery-inner">
                                     <!-- Front: Image -->
                                     <div class="gallery-front">
@@ -2139,6 +2156,27 @@
                 activeVariantIdx = idx;
                 window._detailActiveVariantIdx = idx; // Update global state
                 const v = variants[idx];
+
+                // Dynamic Brand Logo Logic
+                const logoEl = document.getElementById('productModalBrandLogo');
+                if (logoEl && window.state && window.state.categories) {
+                    const isGlass = v.packaging_type && v.packaging_type.toLowerCase().includes('glass');
+                    const teepiLogo = window.state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url;
+                    const akshayaLogo = window.state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url;
+                    
+                    if (isGlass && teepiLogo) {
+                        logoEl.src = teepiLogo;
+                        logoEl.style.display = 'block';
+                    } else if (!isGlass && akshayaLogo) {
+                        logoEl.src = akshayaLogo;
+                        logoEl.style.display = 'block';
+                    } else if (window.state.currentCategory && window.state.categories.find(c => c.slug === window.state.currentCategory)?.sub_brand_logo_url) {
+                        logoEl.src = window.state.categories.find(c => c.slug === window.state.currentCategory).sub_brand_logo_url;
+                        logoEl.style.display = 'block';
+                    } else {
+                        logoEl.style.display = 'none';
+                    }
+                }
                 const labelEl = document.getElementById('variantLabel');
                 if (labelEl) labelEl.innerHTML = `<span class="variant-qty">${v.quantity}</span>${v.packaging_type ? `<span class="variant-pkg" style="display:inline; margin-left:4px;">(${v.packaging_type})</span>` : ''} - ₹${v.price}`;
 
