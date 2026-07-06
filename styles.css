@@ -4160,10 +4160,17 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 }
 .dark-popup-title {
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 .dark-popup-count {
   font-weight: 600;
   color: white;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
 
 /* Cart Drawer */
