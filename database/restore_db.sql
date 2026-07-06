@@ -137,7 +137,7 @@ VALUES
     'Hot rice and ghee — a mellow, comforting combination that appeals to all ages.'
 ),
 (
-    'Idli Podi', 
+    'Karnataka Idli Podi', 
     'ready-to-eat', 
     135, 
     '250g', 
@@ -189,7 +189,7 @@ VALUES
     'A healthy addition to hot rice or meals — enjoy the nutritional benefits of flax seeds and ragi in a tasty podi.'
 ),
 (
-    'Godhuma Kaaram', 
+    'Special Godhuma Kaaram', 
     'ready-to-cook', 
     155, 
     '250g', 

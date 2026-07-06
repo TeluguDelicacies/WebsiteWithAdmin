@@ -3679,11 +3679,11 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
 
                 <div id="${escapeHTML(contentNutId)}" class="info-content-box" style="display: none;">
                     <strong>Nutrition (per serving):</strong><br>
-                    ${nutInfo.details ? `<em>${escapeHTML(nutInfo.details)}</em><br>` : ''}
+                    ${nutInfo.serving_size ? `<em>Serving Size: ${escapeHTML(nutInfo.serving_size)}</em><br>` : (nutInfo.details ? `<em>${escapeHTML(nutInfo.details)}</em><br>` : '')}
                     ${nutInfo.calories ? `Calories: ${escapeHTML(nutInfo.calories)}<br>` : ''}
                     ${nutInfo.protein ? `Protein: ${escapeHTML(nutInfo.protein)}<br>` : ''}
-                    ${nutInfo.satFat ? `Saturated Fat: ${escapeHTML(nutInfo.satFat)}<br>` : ''}
-                    ${nutInfo.fat ? `Total Fat: ${escapeHTML(nutInfo.fat)}<br>` : ''}
+                    ${(nutInfo.sat_fat || nutInfo.satFat || nutInfo.saturated_fat) ? `Saturated Fat: ${escapeHTML(nutInfo.sat_fat || nutInfo.satFat || nutInfo.saturated_fat)}<br>` : ''}
+                    ${(nutInfo.fat || nutInfo.total_fat) ? `Total Fat: ${escapeHTML(nutInfo.fat || nutInfo.total_fat)}<br>` : ''}
                     ${nutInfo.carbs ? `Carbs: ${escapeHTML(nutInfo.carbs)}<br>` : ''}
                     ${nutInfo.fiber ? `Fiber: ${escapeHTML(nutInfo.fiber)}<br>` : ''}
                     ${nutInfo.sugars ? `Sugars: ${escapeHTML(nutInfo.sugars)}<br>` : ''}
@@ -4315,7 +4315,8 @@ window.openQuickProductModal = function (productId) {
                     <strong>Nutrition:</strong><br>
                     ${nutInfo.calories ? `Calories: ${nutInfo.calories}<br>` : ''}
                     ${nutInfo.protein ? `Protein: ${nutInfo.protein}<br>` : ''}
-                    ${nutInfo.fat ? `Fat: ${nutInfo.fat}<br>` : ''}
+                    ${(nutInfo.sat_fat || nutInfo.satFat || nutInfo.saturated_fat) ? `Saturated Fat: ${nutInfo.sat_fat || nutInfo.satFat || nutInfo.saturated_fat}<br>` : ''}
+                    ${(nutInfo.fat || nutInfo.total_fat) ? `Fat: ${nutInfo.fat || nutInfo.total_fat}<br>` : ''}
                 </div>
 
                 <div id="${contentUsageId}" class="info-content-box" style="display: none;">

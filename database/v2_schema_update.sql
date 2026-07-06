@@ -80,7 +80,7 @@ SET
     ingredients = 'Chickpea, Urad Dal, Dry Red Chili, Cumin, Black Pepper, Salt, Curry Leaf',
     nutrition_info = '{"calories": "17.73 kcal", "protein": "1.06 g", "fat": "0.16 g", "carbs": "3 g", "details": "Per 5g serving"}',
     serving_suggestion = 'Sprinkle over hot idlis with ghee for a classic, flavorful experience.'
-WHERE product_name ILIKE '%Idli Podi%';
+WHERE product_name ILIKE '%Karnataka Idli Podi%';
 
 -- Dosa Kaaram
 UPDATE public.products 
@@ -124,4 +124,4 @@ SET
     ingredients = 'Chakki Atta, Urad Dal, Red Chilly Powder, Dry Coconut, Flax Seed, Garlic, Salt',
     nutrition_info = '{"calories": "16.96 kcal", "protein": "0.58 g", "fat": "0.3 g", "carbs": "3.01 g", "details": "Per 5g serving"}',
     serving_suggestion = 'Sprinkle over hot idlis or dosas with ghee for a flavorful experience.'
-WHERE product_name ILIKE '%Godhuma Kaaram%';
+WHERE product_name ILIKE '%Special Godhuma Kaaram%';
