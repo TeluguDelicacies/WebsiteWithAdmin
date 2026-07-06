@@ -7208,15 +7208,15 @@ Uses same card structure as sales page product grid
 }
 .mobile-brand-carousel {
   position: relative;
-  width: 80px;
-  height: 40px;
+  width: 92px;
+  height: 46px;
 }
 .mobile-brand-carousel .brand-logo-item {
   position: absolute;
   top: 0;
   right: 0;
-  max-height: 40px;
-  max-width: 80px;
+  max-height: 46px;
+  max-width: 92px;
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;

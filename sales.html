@@ -957,13 +957,13 @@
                           ? `
                              <!-- Desktop Grid -->
                              <div class="desktop-brand-grid hide-on-mobile" style="display:flex; gap:10px; align-items:center;">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" style="max-height: 40px; object-fit: contain;">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" style="max-height: 40px; object-fit: contain;">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" style="max-height: 46px; object-fit: contain;">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" style="max-height: 46px; object-fit: contain;">
                              </div>
                              <!-- Mobile Carousel -->
                              <div class="mobile-brand-carousel hide-on-desktop">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" class="brand-logo-item active" style="max-height: 40px; object-fit: contain;">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" class="brand-logo-item" style="max-height: 40px; object-fit: contain;">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" class="brand-logo-item active" style="max-height: 46px; object-fit: contain;">
+                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" class="brand-logo-item" style="max-height: 46px; object-fit: contain;">
                              </div>
                             `
                           : (category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : '')}
