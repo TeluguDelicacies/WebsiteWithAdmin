@@ -4111,6 +4111,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   transform: translateY(120%);
   width: 50vw;
   max-height: 35vh;
+  overflow-y: auto;
   background: #0f0f0f;
   color: white;
   border-radius: 16px;
@@ -4133,7 +4134,6 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 }
 .dark-popup-list {
   padding: 15px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
