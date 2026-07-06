@@ -4072,13 +4072,13 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   background: var(--color-primary-dark, #0f0f0f);
   color: white;
   border: none;
   border-radius: 50%;
-  font-size: 1.2rem;
+  font-size: 1rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   z-index: 999;
@@ -4105,11 +4105,11 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   left: 20px;
   transform: translateY(120%);
   width: calc(100% - 40px);
-  max-width: 350px;
+  max-width: 300px;
   max-height: 70vh;
   background: #0f0f0f;
   color: white;
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   z-index: 9999;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
@@ -4125,32 +4125,32 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   bottom: 90px;
 }
 .dark-popup-header {
-  padding: 20px 20px 10px 20px;
+  padding: 15px 15px 8px 15px;
 }
 .dark-popup-header h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .header-count {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 .dark-popup-list {
-  padding: 0 20px 20px 20px;
+  padding: 0 15px 15px 15px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 .dark-popup-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #e5e5e5;
   cursor: pointer;
   transition: color 0.2s ease;
