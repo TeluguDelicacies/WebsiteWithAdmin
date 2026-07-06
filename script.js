@@ -306,6 +306,7 @@ window.showQuickPreview = function (product) {
     const imgEl = document.getElementById('quickPreviewImg');
     const subBrandEl = document.getElementById('quickPreviewSubBrand');
     const nameEl = document.getElementById('quickPreviewName');
+    const descriptorEl = document.getElementById('quickPreviewDescriptor');
     const teluguEl = document.getElementById('quickPreviewTelugu');
     const taglineEl = document.getElementById('quickPreviewTagline');
     const priceEl = document.getElementById('quickPreviewPrice');
@@ -330,6 +331,21 @@ window.showQuickPreview = function (product) {
         const subBrand = product.sub_brand || '';
         subBrandEl.textContent = subBrand;
         subBrandEl.style.display = subBrand ? 'block' : 'none';
+    }
+
+    // Product Descriptor
+    if (descriptorEl) {
+        const descriptor = product.discriptor || '';
+        descriptorEl.textContent = descriptor;
+        descriptorEl.style.display = descriptor ? 'block' : 'none';
+        if (descriptor) {
+            descriptorEl.style.fontSize = '0.85rem';
+            descriptorEl.style.color = 'var(--text-secondary)';
+            descriptorEl.style.fontWeight = '600';
+            descriptorEl.style.marginBottom = '2px';
+            descriptorEl.style.textTransform = 'uppercase';
+            descriptorEl.style.letterSpacing = '0.5px';
+        }
     }
 
     // Product name
@@ -3429,6 +3445,7 @@ function renderProducts(products, categories) {
                         <img src="${optimizedImage}" alt="${product.product_name}" onerror="this.src='${window.currentSiteSettings?.product_placeholder_url}'">
                     </div>
                     <div class="product-info">
+                        ${product.discriptor ? `<p class="product-descriptor" style="font-size:0.75rem; color:var(--text-secondary); font-weight:600; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.5px;">${escapeHTML(product.discriptor)}</p>` : ''}
                         <h3>${product.product_name}</h3>
                         <p class="telugu-name">${product.product_name_telugu || product.product_tagline || ''}</p>
                     </div>
@@ -3662,6 +3679,7 @@ function renderOverlayProduct(product, container, selectEl, cardElement, allProd
         <div class="revealed-product">
             <img src="${escapeHTML(localImage)}" class="revealed-img" alt="${escapeHTML(product.product_name)}" onerror="this.src='${escapeHTML(window.currentSiteSettings?.product_placeholder_url || '')}'">
             <div class="revealed-info">
+                ${product.discriptor ? `<p class="product-descriptor" style="font-size:0.75rem; color:var(--text-secondary); font-weight:600; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.5px;">${escapeHTML(product.discriptor)}</p>` : ''}
                 <h4>${escapeHTML(product.product_name)}</h4>
                 <p class="revealed-tagline">${escapeHTML(product.product_tagline || '')}</p>
                 <p class="card-desc" style="margin-bottom: 15px;">${escapeHTML(product.product_description || '')}</p>
@@ -4194,6 +4212,7 @@ function renderQuickProductsHTML(products, showMrp) {
             </div>
             
             <div class="quick-product-item-info">
+                ${product.discriptor ? `<p class="product-descriptor" style="font-size:0.75rem; color:var(--text-secondary); font-weight:600; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.5px;">${escapeHTML(product.discriptor)}</p>` : ''}
                 <h4>${escapeHTML(product.product_name)}</h4>
                 <p class="telugu-name">${escapeHTML(product.product_name_telugu || '')}</p>
                 <div class="weight">${escapeHTML(qtyDisplay)}</div>
@@ -4295,6 +4314,7 @@ window.openQuickProductModal = function (productId) {
             
             <div class="quick-modal-body revealed-info"> <!-- Added revealed-info class for switchInfoTab comaptibility -->
                 <img src="${localImage}" alt="${product.product_name}" onerror="this.src='${fallbackImg}'">
+                ${product.discriptor ? `<p class="product-descriptor" style="font-size:0.85rem; color:var(--text-secondary); font-weight:600; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.5px;">${escapeHTML(product.discriptor)}</p>` : ''}
                 <h3>${product.product_name}</h3>
                 <p class="quick-modal-tagline">${product.product_tagline || ''}</p>
                 <p class="quick-modal-desc">${product.product_description || ''}</p>
