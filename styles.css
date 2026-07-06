@@ -4100,9 +4100,9 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
 .mobile-nav-drawer.dark-popup {
   position: fixed;
   bottom: 20px;
-  left: 50%;
-  transform: translate(-50%, 120%);
-  width: 90%;
+  left: 20px;
+  transform: translateY(120%);
+  width: calc(100% - 40px);
   max-width: 350px;
   max-height: 70vh;
   background: #0f0f0f;
@@ -4117,7 +4117,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   pointer-events: none;
 }
 .mobile-nav-drawer.dark-popup.open {
-  transform: translate(-50%, 0);
+  transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
   bottom: 90px;
