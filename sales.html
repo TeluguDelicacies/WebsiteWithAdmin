@@ -110,7 +110,7 @@
     <button class="mobile-nav-fab" onclick="window.toggleMobileNav()">
         <i class="fas fa-utensils"></i>
     </button>
-    <div id="mobileNavOverlay" class="cart-overlay" style="background: transparent; z-index: 9998;" onclick="window.toggleMobileNav()"></div>
+    <div id="mobileNavOverlay" class="cart-overlay" style="background: transparent; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; z-index: 9998;" onclick="window.toggleMobileNav()"></div>
     <div id="mobileNavDrawer" class="mobile-nav-drawer dark-popup">
         <div class="dark-popup-header">
             <h3>Menu</h3>
@@ -1001,57 +1001,49 @@
             }
         };
 
+        window.handleGlobalSubCategoryClick = function(catSlug, subName) {
+            if (state.currentCategory === catSlug) {
+                window.filterSubCategoryMobile(subName);
+            } else {
+                window.pendingSubCategoryFilter = subName;
+                window.navigateToCategory(catSlug);
+            }
+        };
+
         window.populateMobileNav = function () {
             const container = document.getElementById('mobileNavContent');
             let html = '<div class="dark-popup-list">';
             
-            // Determine context
-            let currentProducts = [];
-            if (state.currentCategory === 'all-products' || !state.currentCategory) {
-                currentProducts = state.allProducts.filter(p => p.is_visible !== false);
-            } else {
-                currentProducts = state.allProducts.filter(p => (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === state.currentCategory && p.is_visible !== false);
-            }
-
+            const totalProducts = state.allProducts.filter(p => p.is_visible !== false).length;
             const header = document.querySelector('.dark-popup-header h3');
-            if (header) header.innerHTML = `Menu <span class="header-count">${currentProducts.length}</span>`;
-
-            // Extract subcategories from current products
-            const subCategories = [...new Set(currentProducts.map(p => (p.sub_category || '').trim()).filter(Boolean))];
-
-            if (subCategories.length > 0) {
-                html += `<div style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform: uppercase; margin-top: 5px; margin-bottom: 0px;">Filters</div>`;
-                html += `
-                    <div class="dark-popup-item" onclick="window.filterSubCategoryMobile('all'); window.toggleMobileNav();">
-                        <span class="dark-popup-title">All Items</span>
-                        <span class="dark-popup-count">${currentProducts.length}</span>
-                    </div>
-                `;
-                subCategories.forEach(sub => {
-                    const count = currentProducts.filter(p => (p.sub_category || '').trim() === sub).length;
-                    html += `
-                        <div class="dark-popup-item" onclick="window.filterSubCategoryMobile('${escapeHTML(sub)}'); window.toggleMobileNav();">
-                            <span class="dark-popup-title">${escapeHTML(sub)}</span>
-                            <span class="dark-popup-count">${count}</span>
-                        </div>
-                    `;
-                });
-                
-                html += `<div style="height: 1px; background: #333; margin: 10px 0;"></div>`;
-                html += `<div style="font-size: 0.75rem; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 0px;">Categories</div>`;
-            }
+            if (header) header.innerHTML = `Menu <span class="header-count">${totalProducts}</span>`;
 
             state.categories.forEach(cat => {
-                const count = state.allProducts.filter(p => {
+                const catProducts = state.allProducts.filter(p => {
                     return (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === cat.slug && p.is_visible !== false;
-                }).length;
+                });
+                const count = catProducts.length;
+                if (count === 0) return;
                 
+                // Add Main Category
                 html += `
                     <div class="dark-popup-item" onclick="window.navigateToCategory('${cat.slug}'); window.toggleMobileNav();">
-                        <span class="dark-popup-title">${escapeHTML(cat.title)}</span>
+                        <span class="dark-popup-title" style="color: white;">${escapeHTML(cat.title)}</span>
                         <span class="dark-popup-count">${count}</span>
                     </div>
                 `;
+
+                // Add Sub-categories of this category
+                const subCategories = [...new Set(catProducts.map(p => (p.sub_category || '').trim()).filter(Boolean))];
+                subCategories.forEach(sub => {
+                    const subCount = catProducts.filter(p => (p.sub_category || '').trim() === sub).length;
+                    html += `
+                        <div class="dark-popup-item" onclick="window.toggleMobileNav(); window.handleGlobalSubCategoryClick('${cat.slug}', '${escapeHTML(sub)}');">
+                            <span class="dark-popup-title" style="padding-left: 15px;">${escapeHTML(cat.title)} - ${escapeHTML(sub)}</span>
+                            <span class="dark-popup-count">${subCount}</span>
+                        </div>
+                    `;
+                });
             });
             
             html += '</div>';
