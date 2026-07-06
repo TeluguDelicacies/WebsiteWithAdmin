@@ -941,7 +941,10 @@
                     <!-- Header -->
                     <div class="category-header-simple">
                         <div>
-                            <h1>${category.title}</h1>
+                            <h1 style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+                                ${category.title}
+                                <span id="mobileSubCategoryHeading" style="display:none; font-size: 0.65em; color: var(--color-brand-blue-secondary); font-weight: 600;"></span>
+                            </h1>
                             <p class="category-short-desc">${category.short_description || ''}</p>
                         </div>
                         ${category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : ''}
@@ -1045,8 +1048,8 @@
                     const safeSub = sub.replace(/'/g, "\\'").replace(/"/g, "&quot;");
                     html += `
                         <div class="dark-popup-item" onclick="window.toggleMobileNav(); window.handleGlobalSubCategoryClick('${cat.slug}', '${safeSub}');">
-                            <span class="dark-popup-title" style="padding-left: 25px; font-size: 0.85em; color: #bbb;">${escapeHTML(sub)}</span>
-                            <span class="dark-popup-count" style="font-size: 0.85em; color: #bbb;">${subCount}</span>
+                            <span class="dark-popup-title" style="padding-left: 25px; font-size: 0.9em; color: #bbb;">${escapeHTML(sub)}</span>
+                            <span class="dark-popup-count" style="font-size: 0.9em; color: #bbb;">${subCount}</span>
                         </div>
                     `;
                 });
@@ -1057,6 +1060,28 @@
         };
 
         window.filterSubCategoryMobile = function(subCategory) {
+            // Scroll to top of grid
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Refresh animation on grid
+            const grid = document.querySelector('.category-grid');
+            if (grid) {
+                grid.classList.remove('fade-refresh');
+                void grid.offsetWidth; // trigger reflow
+                grid.classList.add('fade-refresh');
+            }
+
+            // Update mobile subcategory heading
+            const heading = document.getElementById('mobileSubCategoryHeading');
+            if (heading) {
+                if (subCategory === 'all') {
+                    heading.style.display = 'none';
+                } else {
+                    heading.style.display = 'block';
+                    heading.innerHTML = `&rsaquo; ${escapeHTML(subCategory)}`;
+                }
+            }
+
             // Filter products
             const cards = document.querySelectorAll('.category-grid .product-card');
             cards.forEach(card => {

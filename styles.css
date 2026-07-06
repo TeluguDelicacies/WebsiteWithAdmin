@@ -4144,7 +4144,7 @@ QUICK COMMERCE & LAYOUT REFINEMENTS
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #e5e5e5;
   cursor: pointer;
   transition: color 0.2s ease;
@@ -7183,4 +7183,11 @@ Uses same card structure as sales page product grid
   .combo-detail-body {
     grid-template-columns: 1fr;
   }
+}
+@keyframes fadeRefresh {
+  0% { opacity: 0.3; transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.fade-refresh {
+  animation: fadeRefresh 0.4s ease-out forwards;
 }
