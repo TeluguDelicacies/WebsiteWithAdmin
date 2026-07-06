@@ -110,6 +110,7 @@ const CsvManager = {
                     if (isChecked('csvFieldName')) baseRow.product_name = p.product_name;
                     if (isChecked('csvFieldNameTelugu')) baseRow.product_name_telugu = p.product_name_telugu || '';
                     if (isChecked('csvFieldCategory')) baseRow.product_category = p.product_category;
+                    if (isChecked('csvFieldSubCategory')) baseRow.sub_category = p.sub_category || '';
                     if (isChecked('csvFieldTagline')) baseRow.product_tagline = p.product_tagline || '';
                     if (isChecked('csvFieldDescription')) baseRow.product_description = p.product_description || '';
                     if (isChecked('csvFieldIngredients')) baseRow.ingredients = p.ingredients || '';
@@ -373,7 +374,7 @@ const CsvManager = {
 
                 // Standard product keywords to map from CSV to DB
                 const productFields = [
-                    'product_name', 'product_name_telugu', 'product_category',
+                    'product_name', 'product_name_telugu', 'product_category', 'sub_category',
                     'product_tagline', 'product_description', 'ingredients',
                     'serving_suggestion', 'is_trending', 'is_visible',
                     'shelf_life', 'is_refrigerated'

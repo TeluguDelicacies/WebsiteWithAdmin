@@ -108,15 +108,12 @@
 
     <!-- Mobile Quick Navigation FAB -->
     <button class="mobile-nav-fab" onclick="window.toggleMobileNav()">
-        <i class="fas fa-layer-group"></i> Categories
+        <i class="fas fa-utensils"></i>
     </button>
-    <div id="mobileNavOverlay" class="cart-overlay" onclick="window.toggleMobileNav()"></div>
-    <div id="mobileNavDrawer" class="mobile-nav-drawer">
-        <div class="cart-header">
-            <h3>Quick Navigation</h3>
-            <button class="close-cart" onclick="window.toggleMobileNav()">
-                <i class="fas fa-times"></i>
-            </button>
+    <div id="mobileNavOverlay" class="cart-overlay" style="background: rgba(0,0,0,0.5); z-index: 9998;" onclick="window.toggleMobileNav()"></div>
+    <div id="mobileNavDrawer" class="mobile-nav-drawer dark-popup">
+        <div class="dark-popup-header">
+            <h3>Menu</h3>
         </div>
         <div class="mobile-nav-content" id="mobileNavContent">
             <!-- Categories injected here -->
@@ -1006,12 +1003,22 @@
 
         window.populateMobileNav = function () {
             const container = document.getElementById('mobileNavContent');
-            let html = '<div class="mobile-nav-list">';
+            let html = '<div class="dark-popup-list">';
             
+            // Calculate total products to show next to "Menu" header
+            const totalProducts = state.allProducts.filter(p => p.is_visible !== false).length;
+            const header = document.querySelector('.dark-popup-header h3');
+            if (header) header.innerHTML = `Menu <span class="header-count">${totalProducts}</span>`;
+
             state.categories.forEach(cat => {
+                const count = state.allProducts.filter(p => {
+                    return (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-') === cat.slug && p.is_visible !== false;
+                }).length;
+                
                 html += `
-                    <div class="mobile-nav-item" onclick="window.navigateToCategory('${cat.slug}'); window.toggleMobileNav();">
-                        <i class="fas fa-chevron-right"></i> ${escapeHTML(cat.title)}
+                    <div class="dark-popup-item" onclick="window.navigateToCategory('${cat.slug}'); window.toggleMobileNav();">
+                        <span class="dark-popup-title">${escapeHTML(cat.title)}</span>
+                        <span class="dark-popup-count">${count}</span>
                     </div>
                 `;
             });
