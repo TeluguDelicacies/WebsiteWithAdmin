@@ -238,6 +238,19 @@
         // Expose state for debugging
         window.state = state;
 
+        // Helper: Escape HTML to prevent XSS attacks
+        window.escapeHTML = function(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+        // Also make it available directly without window. just in case
+        const escapeHTML = window.escapeHTML;
+
         // Initialize header cart button visibility
         window.initHeaderCartButton = function () {
             try {
@@ -764,6 +777,8 @@
 
         // --- View: All Products ---
         function renderAllProductsView() {
+            const fab = document.querySelector('.mobile-nav-fab');
+            if (fab) fab.style.display = 'flex';
             const app = document.getElementById('app');
 
             // Update State
@@ -892,6 +907,8 @@
         }
 
         function renderSingleCategoryGrid(slug) {
+            const fab = document.querySelector('.mobile-nav-fab');
+            if (fab) fab.style.display = 'flex';
             const app = document.getElementById('app');
             const category = state.categories.find(c => c.slug === slug);
 
@@ -1357,6 +1374,8 @@
 
         // --- View: Product ---
         async function renderProductView(slugOrId, direction = 'fade') {
+            const fab = document.querySelector('.mobile-nav-fab');
+            if (fab) fab.style.display = 'none';
             // Find product by slug first, then by ID (backwards compatibility)
             let product = state.allProducts.find(p => p.slug === slugOrId);
             if (!product) {
