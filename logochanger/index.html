@@ -1,0 +1,4045 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Telugu Delicacies Customizer</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-border: rgba(148, 163, 184, 0.1);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.3);
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --transition: all 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ========== MOBILE LAYOUT ========== */
+    .app {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 8px;
+      order: -10;
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    /* Logo Selector */
+    .logo-selector-wrap {
+      order: 0;
+    }
+
+    .logo-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-selector label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .logo-select {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+    }
+
+    .logo-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Preview Section */
+    .preview-section {
+      order: -1;
+      position: relative;
+    }
+
+    .preview-wrapper {
+      position: relative;
+    }
+
+    .preview-overlay-buttons {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .preview-btn {
+      padding: 6px 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .preview-btn.random {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: white;
+    }
+
+    .preview-btn.reset {
+      background: rgba(30, 41, 59, 0.95);
+      color: var(--text-secondary);
+      border: 1px solid var(--card-border);
+    }
+
+    .preview-container {
+      background: #ffffff;
+      border-radius: var(--radius-sm);
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #svgContainer {
+      width: 90%;
+      height: 90%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #svgContainer svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Controls Section */
+    .controls-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      order: 2;
+    }
+
+    .control-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .control-info {
+      flex: 1;
+    }
+
+    .control-label {
+      font-size: 0.813rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .control-desc {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .reset-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .color-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .color-picker {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border: 2px solid var(--bg);
+      border-radius: 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .color-picker::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-picker::-webkit-color-swatch {
+      border: none;
+      border-radius: 7px;
+    }
+
+    .hex-input-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hex-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .hex-input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      overflow: hidden;
+    }
+
+    .hex-input-wrap:focus-within {
+      border-color: var(--accent);
+    }
+
+    .hex-prefix {
+      padding: 0 6px 0 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+
+    .hex-input {
+      flex: 1;
+      padding: 10px 8px 10px 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: monospace;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      min-width: 0;
+    }
+
+    .hex-input:focus {
+      outline: none;
+    }
+
+    .copy-btn {
+      padding: 10px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .copy-btn.copied {
+      color: var(--success);
+    }
+
+    .stroke-section {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .stroke-section-title {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stroke-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .stroke-color-picker {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 2px solid var(--bg);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .stroke-color-picker::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .stroke-color-picker::-webkit-color-swatch {
+      border: none;
+      border-radius: 5px;
+    }
+
+    .stroke-width-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+    }
+
+    .stroke-width-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      height: 32px;
+    }
+
+    .stepper-btn {
+      width: 32px;
+      height: 100%;
+      border: none;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .stepper-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .stepper-btn:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .stroke-width-input {
+      width: 40px;
+      height: 100%;
+      padding: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+      color: var(--text-primary);
+      text-align: center;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .stroke-width-input::-webkit-outer-spin-button,
+    .stroke-width-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .stroke-width-input:focus {
+      outline: none;
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .scale-select {
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--card-border);
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 0.813rem;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    /* Download Section */
+    .download-section {
+      order: 3;
+    }
+
+    .download-section label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .filename-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      background: var(--bg);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .filename-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    /* Standard download buttons row */
+    .download-buttons-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .download-btn {
+      flex: 1;
+      padding: 12px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .download-btn.primary {
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      color: white;
+    }
+
+    .download-btn.secondary {
+      background: var(--bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--card-border);
+    }
+
+    /* HD Export section */
+    .hd-section {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-top: 8px;
+    }
+
+    .hd-section-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hd-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scale-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--card);
+      border-radius: 6px;
+      padding: 6px 10px;
+    }
+
+    .scale-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .scale-input {
+      width: 36px;
+      padding: 4px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .scale-input:focus {
+      outline: none;
+    }
+
+    .hd-btn {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .hd-hint {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .download-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Bulk Section */
+    .bulk-section {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px dashed var(--card-border);
+    }
+
+    .bulk-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bulk-desc {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .bulk-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .bulk-btn {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .bulk-btn.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .bulk-btn.primary:disabled {
+      background: var(--bg);
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+      cursor: not-allowed;
+    }
+
+    .bulk-btn.secondary {
+      background: var(--bg);
+      color: var(--text-primary);
+      border: 1px solid var(--card-border);
+    }
+
+    .bulk-status {
+      background: var(--card);
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .bulk-progress-bar {
+      height: 4px;
+      background: var(--bg);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .bulk-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .bulk-status-text {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--success);
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.75rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ========== DESKTOP LAYOUT ========== */
+    body.is-desktop {
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    body.is-desktop .app {
+      height: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: grid;
+      grid-template-columns: minmax(450px, 1fr) minmax(350px, 500px);
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    body.is-desktop .header {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      text-align: left;
+      padding: 4px 0;
+    }
+
+    body.is-desktop .header h1 {
+      font-size: 1.4rem;
+    }
+
+    body.is-desktop .header p {
+      font-size: 0.7rem;
+    }
+
+    /* Left Column: All controls */
+    body.is-desktop .left-column {
+      grid-column: 1;
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    body.is-desktop .left-column::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    body.is-desktop .left-column::-webkit-scrollbar-thumb {
+      background: var(--card-border);
+      border-radius: 2px;
+    }
+
+    body.is-desktop .logo-selector-wrap {
+      order: 0;
+    }
+
+    body.is-desktop .controls-section {
+      order: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-content: start;
+    }
+
+    body.is-desktop .download-section {
+      order: 2;
+    }
+
+    body.is-desktop .download-buttons-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    body.is-desktop .hd-row {
+      flex-wrap: nowrap;
+    }
+
+    /* Right Column: Preview only */
+    body.is-desktop .preview-section {
+      grid-column: 2;
+      grid-row: 2;
+      order: unset;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+
+    body.is-desktop .preview-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    body.is-desktop .preview-container {
+      width: 100%;
+      max-width: 450px;
+      aspect-ratio: 1;
+    }
+
+    body.is-desktop .preview-overlay-buttons {
+      top: 12px;
+      right: 12px;
+    }
+
+    body.is-desktop .preview-btn {
+      padding: 8px 14px;
+      font-size: 0.75rem;
+    }
+
+    /* Hide mobile elements on desktop */
+    body.is-desktop .mobile-only {
+      display: none;
+    }
+
+    /* Show desktop elements only on desktop */
+    .desktop-only {
+      display: none;
+    }
+
+    body.is-desktop .desktop-only {
+      display: flex;
+    }
+
+    /* ========== PORTAL BACKGROUND GENERATOR ========== */
+    .portal-section {
+      order: 3;
+    }
+
+    .portal-section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .portal-section-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .portal-subsection {
+      margin-bottom: 16px;
+    }
+
+    .portal-subsection-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .portal-subsection-title .badge {
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      color: white;
+      font-size: 0.55rem;
+      padding: 2px 6px;
+      border-radius: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Portal Preset Buttons */
+    .portal-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .portal-preset-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .portal-preset-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .portal-preset-btn.selected {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+    .portal-color-swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+    }
+
+    .portal-preset-info {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    /* Complementary Colors */
+    .complementary-colors {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .complementary-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .complementary-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .complementary-btn.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    .complementary-label {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.55rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* Custom Color Picker */
+    .custom-bg-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .custom-bg-picker {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 2px solid var(--card-border);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .custom-bg-picker::-webkit-color-swatch-wrapper {
+      padding: 2px;
+    }
+
+    .custom-bg-picker::-webkit-color-swatch {
+      border-radius: 6px;
+      border: none;
+    }
+
+    .custom-bg-hex {
+      flex: 1;
+      max-width: 120px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-family: monospace;
+    }
+
+    .custom-bg-hex:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Aspect Ratio Selector */
+    .aspect-ratio-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .aspect-ratio-select {
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .aspect-ratio-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .dimension-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dimension-input {
+      width: 70px;
+      padding: 8px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    .dimension-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .dimension-sep {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    /* Multi-Logo Section */
+    .multi-logo-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--bg);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch.active {
+      background: var(--accent);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(20px);
+    }
+
+    .toggle-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .multi-logo-options {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .multi-logo-options.visible {
+      display: flex;
+    }
+
+    .logo-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .logo-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    .logo-checkbox:hover {
+      border-color: var(--text-muted);
+    }
+
+    .logo-checkbox.selected {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--text-primary);
+    }
+
+    .logo-checkbox input {
+      display: none;
+    }
+
+    .logo-checkbox .checkmark {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--text-muted);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-checkbox.selected .checkmark {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .logo-checkbox.selected .checkmark::after {
+      content: '✓';
+      color: white;
+      font-size: 0.65rem;
+    }
+
+    .layout-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .layout-btn {
+      padding: 8px 14px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .layout-btn:hover {
+      border-color: var(--text-muted);
+    }
+
+    .layout-btn.selected {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--text-primary);
+    }
+
+    /* Preview Grid */
+    .portal-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .portal-preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .portal-preview-item:hover {
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+
+    .portal-preview-item.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+
+    .portal-preview-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .portal-preview-label {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-size: 0.55rem;
+      padding: 3px 6px;
+      border-radius: 4px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .portal-preview-download {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .portal-preview-item:hover .portal-preview-download {
+      opacity: 1;
+    }
+
+    .portal-preview-download:hover {
+      background: var(--accent);
+    }
+
+    /* Export Actions */
+    .portal-export-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .portal-export-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, var(--accent), #2563eb);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .portal-export-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .portal-export-btn.secondary {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+    }
+
+    .portal-export-btn.secondary:hover {
+      border-color: var(--accent);
+      box-shadow: none;
+    }
+
+    /* Go to Portal Button (in controls section) */
+    .go-to-portal-btn {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-weight: 600;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .go-to-portal-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .portal-preview-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .portal-preset-btn {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+      }
+
+      .complementary-btn {
+        width: 38px;
+        height: 38px;
+      }
+    }
+
+    /* Portal Toggle Button (appears at top) */
+    .portal-toggle-wrap {
+      order: -1;
+    }
+
+    .portal-toggle-btn {
+      width: 100%;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      border: none;
+      border-radius: var(--radius);
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .portal-toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .portal-toggle-btn .icon {
+      font-size: 1.2rem;
+    }
+
+    .portal-toggle-btn .arrow {
+      margin-left: auto;
+      transition: transform 0.3s;
+    }
+
+    .portal-toggle-btn.active .arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Portal Section Collapsible */
+    .portal-section {
+      order: 0;
+      display: none;
+    }
+
+    .portal-section.expanded {
+      display: block;
+    }
+
+    /* Portal Page Mode - Full Screen */
+    .header-portal-btn {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      border: none;
+      border-radius: 20px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .header-portal-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    /* Page Mode: Hide customizer, show portal fullscreen */
+    body.portal-page-mode .left-column>*:not(.portal-section) {
+      display: none !important;
+    }
+
+    body.portal-page-mode .portal-toggle-wrap {
+      display: none !important;
+    }
+
+    body.portal-page-mode .portal-section {
+      display: block !important;
+      order: 0;
+    }
+
+    body.portal-page-mode .preview-section {
+      display: none !important;
+    }
+
+    body.portal-page-mode .left-column {
+      grid-column: 1 / -1 !important;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    body.portal-page-mode .header-portal-btn {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+    }
+
+    body.portal-page-mode .header-portal-btn:hover {
+      border-color: var(--accent);
+      box-shadow: none;
+    }
+
+    /* Logo Position Selector */
+    .logo-position-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      max-width: 200px;
+    }
+
+    .position-btn {
+      aspect-ratio: 1;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      padding: 8px 4px;
+      text-align: center;
+    }
+
+    .position-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .position-btn.selected {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .position-btn .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    /* Drag and Drop Logo List */
+    .draggable-logos {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .draggable-logo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      cursor: grab;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .draggable-logo-item:hover {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .draggable-logo-item.dragging {
+      opacity: 0.5;
+      border-style: dashed;
+      cursor: grabbing;
+    }
+
+    .draggable-logo-item.drag-over {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.15);
+    }
+
+    .drag-handle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      cursor: grab;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .logo-item-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .logo-item-name {
+      flex: 1;
+      font-size: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .logo-item-order {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      background: var(--card);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* Download UI Layout Fixes */
+    .download-header-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+      align-items: flex-end;
+    }
+
+    .download-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .download-input-group label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .download-section input[type="text"],
+    .download-section select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+    }
+
+    .download-section input[type="text"]:focus,
+    .download-section select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .download-buttons-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .download-buttons-row .download-btn {
+      flex: 1;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .download-buttons-row .download-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .download-buttons-row .download-btn:active {
+      transform: translateY(0);
+    }
+
+    .progress-bar-wrap {
+      height: 4px;
+      background: var(--bg-card);
+      border-radius: 2px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      display: none;
+      position: relative;
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.2s ease-out;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* ========== EFFECTS PANEL ========== */
+    .effects-section {
+      order: 1;
+    }
+
+    .effects-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .effects-title {
+      font-size: 0.813rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .effects-subtitle {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .effect-row {
+      margin-bottom: 12px;
+    }
+
+    .effect-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .effect-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .effect-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .effect-value {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-family: monospace;
+    }
+
+    .effect-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--bg);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .effect-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--card);
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+      transition: transform 0.15s;
+    }
+
+    .effect-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .effect-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--card);
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+    }
+
+    /* B&W Preset Buttons */
+    .bw-presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .bw-preset-btn {
+      padding: 6px 12px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--card-border);
+      background: var(--bg);
+      color: var(--text-secondary);
+    }
+
+    .bw-preset-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .bw-preset-btn.active {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+    .bw-preset-btn.bw-black {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-color: #333;
+    }
+
+    .bw-preset-btn.bw-black:hover,
+    .bw-preset-btn.bw-black.active {
+      border-color: var(--accent);
+    }
+
+    .bw-preset-btn.bw-white {
+      background: #f0f0f0;
+      color: #222;
+      border-color: #ccc;
+    }
+
+    .bw-preset-btn.bw-white:hover,
+    .bw-preset-btn.bw-white.active {
+      border-color: var(--accent);
+    }
+
+    .effects-divider {
+      height: 1px;
+      background: var(--card-border);
+      margin: 12px 0;
+    }
+
+    .effects-section-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>Customize the brands of Telugu Delicacies</h1>
+      <p>Select a brand and design your unique logo style</p>
+    </header>
+
+    <!-- Left Column (Desktop) -->
+    <div class="left-column">
+      <!-- Portal Toggle Button -->
+      <div class="portal-toggle-wrap">
+        <button id="portalToggleBtn" class="portal-toggle-btn">
+          <span class="icon">🎨</span>
+          <span>Portal Background Generator</span>
+          <span class="arrow">▼</span>
+        </button>
+      </div>
+
+      <!-- Logo Selector -->
+      <div class="logo-selector-wrap card">
+        <div class="logo-selector">
+          <label for="logoSelect">Logo</label>
+          <select id="logoSelect" class="logo-select">
+            <option value="td">Telugu Delicacies</option>
+            <option value="akshaya">Akshaya</option>
+            <option value="tasty">Tasty Pinch</option>
+            <option value="teepi">Teepi Gurthu</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Controls Section (2x2 on desktop) -->
+      <section class="controls-section" id="controlsSection"></section>
+
+      <!-- Effects Section -->
+      <section class="effects-section">
+        <div class="effects-card">
+          <div class="effects-title">✨ Effects</div>
+          <div class="effects-subtitle">Apply visual effects and color presets</div>
+
+          <div class="effects-section-label">Color Presets</div>
+          <div class="bw-presets">
+            <button class="bw-preset-btn active" data-bw-mode="original" title="Restore original colors">🎨
+              Original</button>
+            <button class="bw-preset-btn bw-black" data-bw-mode="bw" title="Convert to black & white">⬛ B&W</button>
+            <button class="bw-preset-btn bw-white" data-bw-mode="inverse" title="Inverted black & white">⬜
+              Inverse</button>
+            <button class="bw-preset-btn" data-bw-mode="grayscale" title="Grayscale with tonal variation">🌫️
+              Grayscale</button>
+          </div>
+
+          <div class="effects-divider"></div>
+          <div class="effects-section-label">Adjustments</div>
+
+          <div class="effect-row">
+            <div class="effect-label-row">
+              <span class="effect-label">Opacity</span>
+              <span class="effect-value" id="opacityValue">100%</span>
+            </div>
+            <input type="range" class="effect-slider" id="opacitySlider" min="0" max="100" step="1" value="100">
+          </div>
+        </div>
+      </section>
+
+      <!-- Download Section -->
+      <section class="download-section card">
+        <div class="download-header-row">
+          <div class="download-input-group" style="flex: 1;">
+            <label for="fileName">File Name</label>
+            <input type="text" id="fileName" placeholder="Enter file name" value="logo">
+          </div>
+          <div class="download-input-group" style="flex: 0 0 140px;">
+            <label for="dpiInput">Quality (Scale)</label>
+            <select id="dpiInput" class="scale-select">
+              <option value="1">1x (Standard)</option>
+              <option value="2" selected>2x (High Res)</option>
+              <option value="3">3x (Print)</option>
+              <option value="4">4x (Ultra HD)</option>
+              <option value="8">8x (Super)</option>
+              <option value="20">20x (Extreme)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="dlProgressWrap" class="progress-bar-wrap">
+          <div id="dlProgressFill" class="progress-bar-fill"></div>
+        </div>
+
+        <div class="download-buttons-row" style="display: flex; gap: 10px; margin-top: 15px;">
+          <button id="exportPNG" class="download-btn primary" title="Download PNG (Transparent)">
+            <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Save PNG
+          </button>
+          <button id="exportJPG" class="download-btn secondary" title="Download JPG (White Background)">
+            <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Save JPG
+          </button>
+          <button id="exportSVG" class="download-btn secondary" title="Download Vector">
+            <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Save SVG
+          </button>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; text-align: center;">
+          Quality setting applies to PNG & JPG. SVG is always vector.
+        </div>
+
+        <!-- Row 3: Bulk Generation (Conditional for Product Packaging) -->
+        <div id="bulkSection" class="bulk-section" style="display: none;">
+          <div class="bulk-title">📦 Bulk Generation (Product & Tagline)</div>
+          <div class="bulk-desc">Upload a CSV to generate logos in bulk. Columns needed: <b>Product Name, Tagline</b>
+          </div>
+          <div class="bulk-controls">
+            <input type="file" id="bulkCSVInput" accept=".csv" style="display: none;">
+            <button id="bulkUploadBtn" class="bulk-btn secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Upload CSV
+            </button>
+            <button id="runBulkBtn" class="bulk-btn primary" disabled>
+              Generate & Download All
+            </button>
+          </div>
+          <div id="bulkStatus" class="bulk-status" style="display: none;">
+            <div class="bulk-progress-bar">
+              <div id="bulkProgressFill" class="bulk-progress-fill"></div>
+            </div>
+            <div id="bulkStatusText" class="bulk-status-text">Ready to process 0 rows</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Portal Background Generator Section -->
+      <section class="portal-section card" id="portalSection">
+        <div class="portal-section-title">🎨 Portal Background Generator</div>
+        <div class="portal-section-subtitle">Create logo images optimized for different platforms</div>
+
+        <!-- Portal Presets -->
+        <div class="portal-subsection">
+          <div class="portal-subsection-title">Select Platform</div>
+          <div class="portal-presets" id="portalPresets">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Aspect Ratio / Dimensions -->
+        <div class="portal-subsection">
+          <div class="portal-subsection-title">Output Size</div>
+          <div class="aspect-ratio-row">
+            <select id="aspectRatioSelect" class="aspect-ratio-select">
+              <option value="1:1">1:1 Square</option>
+              <option value="4:3">4:3 Landscape</option>
+              <option value="3:4">3:4 Portrait</option>
+              <option value="16:9">16:9 Widescreen</option>
+              <option value="9:16">9:16 Vertical</option>
+              <option value="custom">Custom</option>
+            </select>
+            <div class="dimension-inputs">
+              <input type="number" id="outputWidth" class="dimension-input" value="1000" min="100" max="4000">
+              <span class="dimension-sep">×</span>
+              <input type="number" id="outputHeight" class="dimension-input" value="1000" min="100" max="4000">
+              <span class="dimension-sep">px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Complementary Colors -->
+        <div class="portal-subsection">
+          <div class="portal-subsection-title">
+            Suggested for Your Logo
+            <span class="badge">Smart</span>
+          </div>
+          <div class="complementary-colors" id="complementaryColors">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Custom Background Color -->
+        <div class="portal-subsection">
+          <div class="portal-subsection-title">Custom Background</div>
+          <div class="custom-bg-row">
+            <input type="color" id="customBgPicker" class="custom-bg-picker" value="#FFFFFF">
+            <input type="text" id="customBgHex" class="custom-bg-hex" value="FFFFFF" maxlength="6" placeholder="FFFFFF">
+            <button id="applyCustomBg" class="layout-btn">Apply</button>
+          </div>
+        </div>
+
+        <!-- Logo Position (Single Logo Mode) -->
+        <div class="portal-subsection" id="logoPositionSection">
+          <div class="portal-subsection-title">Logo Position</div>
+          <div class="logo-position-grid" id="logoPositionGrid">
+            <button class="position-btn" data-position="top-left" title="Top Left">↖</button>
+            <button class="position-btn" data-position="top-center" title="Top Center">↑</button>
+            <button class="position-btn" data-position="top-right" title="Top Right">↗</button>
+            <button class="position-btn" data-position="center-left" title="Center Left">←</button>
+            <button class="position-btn selected" data-position="center" title="Center">●</button>
+            <button class="position-btn" data-position="center-right" title="Center Right">→</button>
+            <button class="position-btn" data-position="bottom-left" title="Bottom Left">↙</button>
+            <button class="position-btn" data-position="bottom-center" title="Bottom Center">↓</button>
+            <button class="position-btn" data-position="bottom-right" title="Bottom Right">↘</button>
+          </div>
+        </div>
+
+        <!-- Multi-Logo Combo -->
+        <div class="portal-subsection">
+          <div class="portal-subsection-title">
+            Combine Logos
+            <span class="badge">New</span>
+          </div>
+          <div class="multi-logo-toggle">
+            <div id="multiLogoToggle" class="toggle-switch"></div>
+            <span class="toggle-label">Combine multiple brand logos</span>
+          </div>
+          <div id="multiLogoOptions" class="multi-logo-options">
+            <div class="portal-subsection-title" style="margin-top: 8px;">
+              Drag to Reorder
+            </div>
+            <div class="draggable-logos" id="draggableLogos">
+              <!-- Populated by JavaScript with drag-drop items -->
+            </div>
+            <div class="portal-subsection-title" style="margin-top: 12px;">
+              Layout
+            </div>
+            <div class="layout-selector" id="layoutSelector">
+              <button class="layout-btn selected" data-layout="2x2">2×2 Grid</button>
+              <button class="layout-btn" data-layout="1x4">1×4 Row</button>
+              <button class="layout-btn" data-layout="4x1">4×1 Column</button>
+              <button class="layout-btn" data-layout="featured">TD + Sub-brands</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Grid -->
+        <div class="portal-subsection">
+          <div class="portal-subsection-title">Preview</div>
+          <div class="portal-preview-grid" id="portalPreviewGrid">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Export Actions -->
+        <div class="portal-export-actions">
+          <button id="exportSelectedPortal" class="portal-export-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download Selected
+          </button>
+          <button id="exportAllPortals" class="portal-export-btn secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download All
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Preview Section (Right Column on Desktop) -->
+    <section class="preview-section card">
+      <div class="preview-wrapper">
+        <!-- Overlay buttons on top-right of preview -->
+        <div class="preview-overlay-buttons">
+          <button id="randomBtn" class="preview-btn random" title="Generate random colors">&#x1F3B2; Random</button>
+          <button id="resetBtn" class="preview-btn reset" title="Reset to defaults">&#8634; Reset</button>
+        </div>
+        <div class="preview-container" id="preview">
+          <div id="svgContainer"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { LOGO_SVGS } from './logos.js';
+
+    /* ========== RESPONSIVE DETECTION ========== */
+    const DESKTOP_MIN_WIDTH = 900;
+    const DESKTOP_MIN_HEIGHT = 500;
+
+    function checkDesktop() {
+      const isDesktop = window.innerWidth >= DESKTOP_MIN_WIDTH &&
+        window.innerHeight >= DESKTOP_MIN_HEIGHT;
+      document.body.classList.toggle('is-desktop', isDesktop);
+      if (checkDesktop.lastMode !== isDesktop) {
+        console.log(`Layout: ${isDesktop ? 'DESKTOP' : 'MOBILE'} (${window.innerWidth}Ã—${window.innerHeight})`);
+        checkDesktop.lastMode = isDesktop;
+      }
+    }
+    checkDesktop.lastMode = null;
+    checkDesktop();
+    window.addEventListener('orientationchange', checkDesktop);
+
+    /* ========== Configuration ========== */
+    /* ========== Configuration ========== */
+    const LOGO_CONFIG = {
+      td: {
+        name: "Telugu Delicacies",
+
+        controls: [
+          {
+            id: "path",
+            selector: "#path1, #TDPath",
+            label: "TD Letters",
+            desc: "The white 'TD' lettering in the center",
+            tooltip: "Change the color of the TD letters",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#FFFFFF", stroke: "#000000", strokeWidth: "2" }
+          },
+          {
+            id: "rect",
+            selector: "#rect1, #SquareBehindTD",
+            label: "Background",
+            desc: "The yellow square behind the letters",
+            tooltip: "Change the background square color",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#EEDC29", stroke: "#EEDC29", strokeWidth: "0" }
+          }
+        ],
+        fileName: "TD-custom"
+      },
+      akshaya: {
+        name: "Akshaya",
+
+        controls: [
+          {
+            id: "green",
+            selector: "#path3",
+            label: "Leaves & Green",
+            desc: "Green leaf decorations and elements",
+            tooltip: "Change the green parts of the logo",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#18aa3e", stroke: "#18aa3e", strokeWidth: "0" }
+          },
+          {
+            id: "yellow",
+            selector: "#path4",
+            label: "Sun & Yellow",
+            desc: "Yellow sun and accent elements",
+            tooltip: "Change the yellow/sun parts of the logo",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#fdf311", stroke: "#fdf311", strokeWidth: "0" }
+          }
+        ],
+        fileName: "Akshaya-custom"
+      },
+      tasty: {
+        name: "Tasty Pinch",
+        baseScale: 25,
+        controls: [
+          {
+            id: "bg",
+            selector: "#rect3",
+            label: "Background Color",
+            desc: "The background square color",
+            tooltip: "Change the background color",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#fff0c4", stroke: "#761e1a", strokeWidth: "0.9" }
+          },
+          {
+            id: "brand",
+            selector: "#path2",
+            label: "Brand Fill",
+            desc: "Main brand color",
+            tooltip: "Change the logo color",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#761e1a", stroke: "#000000", strokeWidth: "0" }
+          }
+        ],
+        fileName: "Tasty-Pinch-custom"
+      },
+      teepi: {
+        name: "Teepi Gurthu",
+
+        controls: [
+          {
+            id: "gold",
+            selector: "#path9",
+            label: "Fill Element",
+            desc: "Main fill element",
+            tooltip: "Change the fill element color",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#f0bc54", stroke: "#f0bc54", strokeWidth: "0" }
+          },
+          {
+            id: "orange",
+            selector: "#path8",
+            label: "Lollypop and Reel Fill Colour",
+            desc: "Lollypop and reel fill elements",
+            tooltip: "Change the lollypop and reel fill colour",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#ee8214", stroke: "#ee8214", strokeWidth: "0" }
+          },
+          {
+            id: "dark",
+            selector: "#path7",
+            label: "Dark Detail",
+            desc: "Dark grey detail elements",
+            tooltip: "Change the dark detail color",
+            showStroke: true,
+            showStrokeWidth: true,
+            defaults: { fill: "#922902", stroke: "#922902", strokeWidth: "0" }
+          }
+        ],
+        fileName: "Teepi-Gurthu-custom"
+      }
+    };
+
+    const STORAGE_KEY = 'tdLogoCustomizer_v8';
+    let currentLogoKey = 'td';
+    let currentConfig = LOGO_CONFIG[currentLogoKey];
+    let svgRoot = null;
+    let controlState = {};
+
+    const els = {
+      svgContainer: document.getElementById('svgContainer'),
+      controlsSection: document.getElementById('controlsSection'),
+      logoSelect: document.getElementById('logoSelect'),
+      fileNameInput: document.getElementById('fileName'),
+      dpiInput: document.getElementById('dpiInput'),
+      randomBtn: document.getElementById('randomBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      exportPNG: document.getElementById('exportPNG'),
+      exportJPG: document.getElementById('exportJPG'),
+      exportSVG: document.getElementById('exportSVG'),
+      dlProgressWrap: document.getElementById('dlProgressWrap'),
+      dlProgressFill: document.getElementById('dlProgressFill'),
+      toast: document.getElementById('toast'),
+      // Bulk elements
+      bulkSection: document.getElementById('bulkSection'),
+      bulkCSVInput: document.getElementById('bulkCSVInput'),
+      bulkUploadBtn: document.getElementById('bulkUploadBtn'),
+      runBulkBtn: document.getElementById('runBulkBtn'),
+      bulkStatus: document.getElementById('bulkStatus'),
+      bulkProgressFill: document.getElementById('bulkProgressFill'),
+      bulkStatusText: document.getElementById('bulkStatusText'),
+      // Effects elements
+      opacitySlider: document.getElementById('opacitySlider'),
+      opacityValue: document.getElementById('opacityValue'),
+      bwPresetBtns: document.querySelectorAll('.bw-preset-btn')
+    };
+
+    /* ========== EFFECTS STATE ========== */
+    let effectsState = {
+      bwMode: 'original',  // 'original', 'bw', 'inverse', 'grayscale'
+      opacity: 100,
+      originalColors: {}   // stash of original controlState colors before B&W
+    };
+
+    function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
+
+    function hexToRgb(hex) {
+      if (!hex) return null;
+      let h = String(hex).replace('#', '').trim();
+      if (h.length === 3) h = h.split('').map(c => c + c).join('');
+      if (h.length !== 6) return null;
+      const bigint = parseInt(h, 16);
+      return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x => ('0' + Math.round(clamp(x, 0, 255)).toString(16)).slice(-2)).join('').toUpperCase();
+    }
+
+    function hslToRgb(h, s, l) {
+      h = ((h % 360) + 360) % 360;
+      if (s === 0) { const v = Math.round(l * 255); return { r: v, g: v, b: v }; }
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+      let r1 = 0, g1 = 0, b1 = 0;
+      if (h < 60) { r1 = c; g1 = x; }
+      else if (h < 120) { r1 = x; g1 = c; }
+      else if (h < 180) { g1 = c; b1 = x; }
+      else if (h < 240) { g1 = x; b1 = c; }
+      else if (h < 300) { r1 = x; b1 = c; }
+      else { r1 = c; b1 = x; }
+      return { r: Math.round((r1 + m) * 255), g: Math.round((g1 + m) * 255), b: Math.round((b1 + m) * 255) };
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add('show');
+      setTimeout(() => els.toast.classList.remove('show'), 2000);
+    }
+
+    function renderLogo(brandName) {
+      console.log(`[LogoCustomizer] Rendering logo: ${brandName}`);
+      const svgContent = LOGO_SVGS[brandName];
+      if (svgContent) {
+        els.svgContainer.innerHTML = svgContent;
+        svgRoot = els.svgContainer.querySelector('svg');
+        if (svgRoot) {
+          svgRoot.id = 'svgRootInlined';
+          console.log(`[LogoCustomizer] Successfully rendered: ${brandName}`);
+        } else {
+          console.error('[LogoCustomizer] SVG rendered but no <svg> element found');
+        }
+      } else {
+        console.error(`[LogoCustomizer] Logo not found: ${brandName}`);
+        els.svgContainer.innerHTML = '<div style="color:red;padding:20px;">Logo Not Found</div>';
+      }
+    }
+
+    function generateControlsUI() {
+      els.controlsSection.innerHTML = '';
+      currentConfig.controls.forEach(ctrl => {
+        const state = controlState[ctrl.id] || ctrl.defaults;
+        const card = document.createElement('div');
+        card.className = 'control-card';
+        card.id = `control-${ctrl.id}`;
+        card.title = ctrl.tooltip || '';
+
+        let html;
+        if (ctrl.type === 'text') {
+          html = `
+            <div class="control-header">
+              <div class="control-info">
+                <span class="control-label">${ctrl.label}</span>
+                <span class="control-desc">${ctrl.desc}</span>
+              </div>
+              <button class="reset-btn" data-reset="${ctrl.id}" title="Reset text">&#8634;</button>
+            </div>
+            <div class="hex-input-wrap">
+              <input type="text" class="hex-input" id="${ctrl.id}-text-input" 
+                     value="${state.text || ''}" style="padding-left:10px; width:100%; text-transform:none;"
+                     placeholder="Enter text">
+            </div>`;
+        } else {
+          html = `
+            <div class="control-header">
+              <div class="control-info">
+                <span class="control-label">${ctrl.label}</span>
+                <span class="control-desc">${ctrl.desc}</span>
+              </div>
+              <button class="reset-btn" data-reset="${ctrl.id}" title="Reset to default">&#8634;</button>
+            </div>
+            <div class="color-row">
+              <input type="color" class="color-picker" id="${ctrl.id}-fill-picker" value="${state.fill}" title="Click to pick a color">
+              <div class="hex-input-group">
+                <span class="hex-label">Color</span>
+                <div class="hex-input-wrap">
+                  <span class="hex-prefix">#</span>
+                  <input type="text" class="hex-input" id="${ctrl.id}-fill-hex" 
+                         value="${state.fill ? state.fill.replace('#', '') : ''}" maxlength="6" placeholder="FFFFFF"
+                         title="Enter hex color code" autocomplete="off" spellcheck="false">
+                  <button class="copy-btn" data-copy="${ctrl.id}-fill" title="Copy color code">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>`;
+
+          if (ctrl.showStroke || ctrl.showStrokeWidth) {
+            html += `<div class="stroke-section">
+                <div class="stroke-section-title">Stroke (Outline)</div>
+                <div class="stroke-row">`;
+            if (ctrl.showStroke) {
+              html += `<input type="color" class="stroke-color-picker" id="${ctrl.id}-stroke-picker" value="${state.stroke}" title="Stroke color">`;
+            }
+            if (ctrl.showStrokeWidth) {
+              html += `<div class="stroke-width-wrap" title="Outline thickness"><span class="stroke-width-label">Width:</span>
+                  <div class="stepper">
+                    <button class="stepper-btn minus">&minus;</button>
+                    <input type="number" class="stroke-width-input" id="${ctrl.id}-stroke-width" value="${state.strokeWidth}" min="0" max="20" step="1">
+                    <button class="stepper-btn plus">+</button>
+                  </div></div>`;
+            }
+            html += `</div></div>`;
+          }
+
+          // Per-element fill opacity slider
+          const opVal = state.fillOpacity !== undefined ? state.fillOpacity : 100;
+          html += `<div class="stroke-section">
+              <div class="stroke-section-title">Fill Opacity</div>
+              <div class="effect-row" style="margin:0">
+                <div class="effect-label-row">
+                  <span class="effect-label">Amount</span>
+                  <span class="effect-value" id="${ctrl.id}-opacity-value">${opVal}%</span>
+                </div>
+                <input type="range" class="effect-slider" id="${ctrl.id}-opacity-slider" min="0" max="100" step="1" value="${opVal}">
+              </div>
+            </div>`;
+        }
+        card.innerHTML = html;
+        els.controlsSection.appendChild(card);
+      });
+      wireControlEvents();
+    }
+
+    function wireControlEvents() {
+      currentConfig.controls.forEach(ctrl => {
+        const fillPicker = document.getElementById(`${ctrl.id}-fill-picker`);
+        const fillHex = document.getElementById(`${ctrl.id}-fill-hex`);
+        const strokePicker = document.getElementById(`${ctrl.id}-stroke-picker`);
+        const strokeWidth = document.getElementById(`${ctrl.id}-stroke-width`);
+        const resetBtn = document.querySelector(`[data-reset="${ctrl.id}"]`);
+        const copyBtns = document.querySelectorAll(`[data-copy^="${ctrl.id}"]`);
+        const textInput = document.getElementById(`${ctrl.id}-text-input`);
+
+        if (textInput) {
+          textInput.addEventListener('input', () => {
+            controlState[ctrl.id].text = textInput.value;
+            applyStyles(); saveSettings();
+          });
+        }
+
+        if (fillPicker) {
+          fillPicker.addEventListener('input', () => {
+            const hex = fillPicker.value.toUpperCase();
+            fillHex.value = hex.replace('#', '');
+            controlState[ctrl.id].fill = hex;
+            applyStyles(); saveSettings();
+          });
+        }
+
+        if (fillHex) {
+          fillHex.addEventListener('input', () => {
+            let val = fillHex.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 6);
+            fillHex.value = val;
+            if (val.length === 6 || val.length === 3) {
+              let normalized = val.length === 3 ? val.split('').map(c => c + c).join('') : val;
+              normalized = '#' + normalized;
+              fillPicker.value = normalized;
+              controlState[ctrl.id].fill = normalized;
+              applyStyles(); saveSettings();
+            }
+          });
+          fillHex.addEventListener('blur', () => {
+            let val = fillHex.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+            if (val.length === 3) val = val.split('').map(c => c + c).join('');
+            fillHex.value = val.length === 6 ? val : controlState[ctrl.id].fill.replace('#', '');
+          });
+        }
+
+        if (strokePicker) {
+          strokePicker.addEventListener('input', () => {
+            controlState[ctrl.id].stroke = strokePicker.value.toUpperCase();
+            applyStyles(); saveSettings();
+          });
+        }
+
+        if (strokeWidth) {
+          const updateStroke = () => {
+            controlState[ctrl.id].strokeWidth = strokeWidth.value;
+            applyStyles(); saveSettings();
+          };
+          strokeWidth.addEventListener('input', updateStroke);
+
+          const stepper = strokeWidth.closest('.stepper');
+          if (stepper) {
+            const minus = stepper.querySelector('.minus');
+            const plus = stepper.querySelector('.plus');
+            minus.addEventListener('click', () => {
+              strokeWidth.stepDown();
+              strokeWidth.dispatchEvent(new Event('input'));
+            });
+            plus.addEventListener('click', () => {
+              strokeWidth.stepUp();
+              strokeWidth.dispatchEvent(new Event('input'));
+            });
+          }
+        }
+
+        // Per-element fill opacity slider
+        const opacSlider = document.getElementById(`${ctrl.id}-opacity-slider`);
+        const opacValueEl = document.getElementById(`${ctrl.id}-opacity-value`);
+        if (opacSlider) {
+          opacSlider.addEventListener('input', () => {
+            controlState[ctrl.id].fillOpacity = parseInt(opacSlider.value);
+            if (opacValueEl) opacValueEl.textContent = opacSlider.value + '%';
+            applyStyles(); saveSettings();
+          });
+        }
+
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            controlState[ctrl.id] = { ...ctrl.defaults, fillOpacity: 100 };
+            if (textInput) textInput.value = ctrl.defaults.text;
+            if (fillPicker) fillPicker.value = ctrl.defaults.fill;
+            if (fillHex) fillHex.value = ctrl.defaults.fill.replace('#', '');
+            if (strokePicker) strokePicker.value = ctrl.defaults.stroke;
+            if (strokeWidth) strokeWidth.value = ctrl.defaults.strokeWidth;
+            if (opacSlider) { opacSlider.value = 100; if (opacValueEl) opacValueEl.textContent = '100%'; }
+            applyStyles(); saveSettings();
+            showToast('Reset \u2713');
+          });
+        }
+
+        copyBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            navigator.clipboard.writeText(controlState[ctrl.id].fill).then(() => {
+              btn.classList.add('copied');
+              showToast('Copied ' + controlState[ctrl.id].fill);
+              setTimeout(() => btn.classList.remove('copied'), 1000);
+            }).catch(() => showToast('Copy failed'));
+          });
+        });
+      });
+    }
+
+    function applyStyles() {
+      if (!svgRoot) return;
+      currentConfig.controls.forEach(ctrl => {
+        const state = controlState[ctrl.id] || ctrl.defaults;
+        svgRoot.querySelectorAll(ctrl.selector).forEach(el => {
+          if (ctrl.type === 'text') {
+            if (state.text !== undefined) el.textContent = state.text;
+          } else {
+            if (state.fill) el.style.setProperty('fill', state.fill);
+            if (ctrl.showStroke && state.stroke) el.style.setProperty('stroke', state.stroke);
+            if (ctrl.showStrokeWidth && state.strokeWidth) el.style.setProperty('stroke-width', state.strokeWidth);
+
+            // Per-element fill opacity
+            const fillOp = state.fillOpacity !== undefined ? state.fillOpacity : 100;
+            el.style.setProperty('fill-opacity', fillOp / 100);
+          }
+        });
+      });
+      applyEffects();
+    }
+
+    /* ========== EFFECTS LOGIC ========== */
+    function applyEffects() {
+      if (!svgRoot) return;
+
+      // --- Opacity ---
+      const opacityVal = effectsState.opacity / 100;
+      svgRoot.style.opacity = opacityVal < 1 ? opacityVal : '';
+    }
+
+    function getLuminance(hex) {
+      const rgb = hexToRgb(hex);
+      if (!rgb) return 0.5;
+      // Relative luminance (ITU-R BT.709)
+      return (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+    }
+
+    function applyBWMode(mode) {
+      effectsState.bwMode = mode;
+
+      // If switching away from original, stash current colors first
+      if (mode !== 'original' && Object.keys(effectsState.originalColors).length === 0) {
+        currentConfig.controls.forEach(ctrl => {
+          if (ctrl.type === 'text') return;
+          effectsState.originalColors[ctrl.id] = { ...controlState[ctrl.id] };
+        });
+      }
+
+      // For B&W and Inverse: compute median luminance as the threshold
+      // so elements are split relative to each other, not against a fixed 0.5
+      let bwThreshold = 0.5;
+      if (mode === 'bw' || mode === 'inverse') {
+        const luminances = [];
+        currentConfig.controls.forEach(ctrl => {
+          if (ctrl.type === 'text') return;
+          const original = effectsState.originalColors[ctrl.id] || ctrl.defaults;
+          luminances.push(getLuminance(original.fill));
+        });
+        if (luminances.length > 1) {
+          luminances.sort((a, b) => a - b);
+          const mid = Math.floor(luminances.length / 2);
+          bwThreshold = luminances.length % 2 === 0
+            ? (luminances[mid - 1] + luminances[mid]) / 2
+            : luminances[mid];
+        }
+      }
+
+      currentConfig.controls.forEach(ctrl => {
+        if (ctrl.type === 'text') return;
+        const original = effectsState.originalColors[ctrl.id] || ctrl.defaults;
+
+        let newFill;
+        switch (mode) {
+          case 'bw': {
+            const lum = getLuminance(original.fill);
+            newFill = lum > bwThreshold ? '#FFFFFF' : '#000000';
+            break;
+          }
+          case 'inverse': {
+            const lum = getLuminance(original.fill);
+            newFill = lum > bwThreshold ? '#000000' : '#FFFFFF';
+            break;
+          }
+          case 'grayscale': {
+            const rgb = hexToRgb(original.fill);
+            if (rgb) {
+              const gray = Math.round(0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b);
+              newFill = rgbToHex(gray, gray, gray);
+            } else {
+              newFill = original.fill;
+            }
+            break;
+          }
+          default: // 'original'
+            newFill = original.fill;
+        }
+
+        controlState[ctrl.id].fill = newFill;
+
+        // Also update the stroke for consistency
+        if (ctrl.showStroke && mode !== 'original') {
+          const origStroke = original.stroke || original.fill;
+          const strokeLum = getLuminance(origStroke);
+          switch (mode) {
+            case 'bw':
+              controlState[ctrl.id].stroke = strokeLum > bwThreshold ? '#FFFFFF' : '#000000';
+              break;
+            case 'inverse':
+              controlState[ctrl.id].stroke = strokeLum > bwThreshold ? '#000000' : '#FFFFFF';
+              break;
+            case 'grayscale': {
+              const srgb = hexToRgb(origStroke);
+              if (srgb) {
+                const sg = Math.round(0.2126 * srgb.r + 0.7152 * srgb.g + 0.0722 * srgb.b);
+                controlState[ctrl.id].stroke = rgbToHex(sg, sg, sg);
+              }
+              break;
+            }
+          }
+        } else if (mode === 'original' && ctrl.showStroke) {
+          controlState[ctrl.id].stroke = original.stroke;
+        }
+
+        // Update all UI pickers/inputs so user can fine-tune
+        const fillPicker = document.getElementById(`${ctrl.id}-fill-picker`);
+        const fillHex = document.getElementById(`${ctrl.id}-fill-hex`);
+        const strokePicker = document.getElementById(`${ctrl.id}-stroke-picker`);
+        const strokeWidthInput = document.getElementById(`${ctrl.id}-stroke-width`);
+        if (fillPicker) fillPicker.value = controlState[ctrl.id].fill;
+        if (fillHex) fillHex.value = controlState[ctrl.id].fill.replace('#', '');
+        if (strokePicker) strokePicker.value = controlState[ctrl.id].stroke || '';
+        if (strokeWidthInput) strokeWidthInput.value = controlState[ctrl.id].strokeWidth || '0';
+      });
+
+      // If returning to original, clear stash
+      if (mode === 'original') {
+        effectsState.originalColors = {};
+      }
+
+      // Update button states
+      els.bwPresetBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.bwMode === mode);
+      });
+
+      applyStyles();
+      saveSettings();
+
+      const labels = { original: 'Original colors', bw: 'Black & White', inverse: 'Inverse B&W', grayscale: 'Grayscale' };
+      showToast(`${labels[mode]} ✓`);
+    }
+
+    function resetEffects() {
+      effectsState = { bwMode: 'original', opacity: 100, originalColors: {} };
+      els.opacitySlider.value = 100;
+      els.opacityValue.textContent = '100%';
+      els.bwPresetBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.bwMode === 'original');
+      });
+      // Reset per-element fill opacity sliders
+      currentConfig.controls.forEach(ctrl => {
+        if (ctrl.type === 'text') return;
+        if (controlState[ctrl.id]) controlState[ctrl.id].fillOpacity = 100;
+        const slider = document.getElementById(`${ctrl.id}-opacity-slider`);
+        const valEl = document.getElementById(`${ctrl.id}-opacity-value`);
+        if (slider) slider.value = 100;
+        if (valEl) valEl.textContent = '100%';
+      });
+    }
+
+    function wireEffectsEvents() {
+      // B&W preset buttons
+      els.bwPresetBtns.forEach(btn => {
+        btn.addEventListener('click', () => applyBWMode(btn.dataset.bwMode));
+      });
+
+      // Opacity slider
+      els.opacitySlider.addEventListener('input', () => {
+        effectsState.opacity = parseInt(els.opacitySlider.value);
+        els.opacityValue.textContent = effectsState.opacity + '%';
+        applyEffects();
+      });
+    }
+
+    function saveSettings() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        logoKey: currentLogoKey, controls: controlState,
+        fileName: els.fileNameInput.value.trim() || currentConfig.fileName,
+        dpi: parseInt(els.dpiInput.value) || 2
+      }));
+    }
+
+    function loadSettings() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const data = JSON.parse(raw);
+          if (data.logoKey && LOGO_CONFIG[data.logoKey]) {
+            currentLogoKey = data.logoKey;
+            currentConfig = LOGO_CONFIG[currentLogoKey];
+            els.logoSelect.value = currentLogoKey;
+          }
+          if (data.controls) controlState = data.controls;
+          if (data.fileName) els.fileNameInput.value = data.fileName;
+          if (data.dpi) els.dpiInput.value = data.dpi;
+          return;
+        } catch (e) { }
+      }
+      initControlState();
+      els.fileNameInput.value = currentConfig.fileName;
+    }
+
+    function initControlState() {
+      controlState = {};
+      currentConfig.controls.forEach(ctrl => { controlState[ctrl.id] = { ...ctrl.defaults }; });
+    }
+
+    function getContentBounds() {
+      if (!svgRoot) return null;
+
+      // Fallback: use original viewBox if available
+      const vb = svgRoot.viewBox?.baseVal;
+      const fallback = {
+        x: vb?.x || 0,
+        y: vb?.y || 0,
+        width: vb?.width || parseInt(svgRoot.getAttribute('width')) || 1024,
+        height: vb?.height || parseInt(svgRoot.getAttribute('height')) || 1024
+      };
+
+      try {
+        // Use screen CTM for more robust root-relative mapping
+        const svgScreenCTM = svgRoot.getScreenCTM();
+        if (!svgScreenCTM) return fallback;
+        const svgInverseCTM = svgScreenCTM.inverse();
+
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+        svgRoot.querySelectorAll('path, rect, circle, ellipse, polygon, polyline, text, image').forEach(el => {
+          try {
+            // Skip elements in non-rendering containers
+            if (el.closest('defs, clipPath, mask, marker')) return;
+
+            // Skip invisible elements
+            const style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity || '1') === 0) return;
+
+            // Stricter check: skip elements with no fill AND no stroke (unless image/text)
+            const tagName = el.tagName.toLowerCase();
+            if (tagName !== 'image' && tagName !== 'text') {
+              const hasFill = style.fill !== 'none' && style.fill !== 'rgba(0,0,0,0)';
+              const hasStroke = style.stroke !== 'none' && style.stroke !== 'rgba(0,0,0,0)' && parseFloat(style.strokeWidth || '0') > 0;
+              if (!hasFill && !hasStroke) return;
+            }
+
+            const rawBBox = el.getBBox();
+            // Expand bbox by half the stroke-width to account for stroke extents
+            const sw = parseFloat(style.strokeWidth || '0') || 0;
+            const halfStroke = sw / 2;
+            const bbox = {
+              x: rawBBox.x - halfStroke,
+              y: rawBBox.y - halfStroke,
+              width: rawBBox.width + sw,
+              height: rawBBox.height + sw
+            };
+            if (bbox.width > 0 && bbox.height > 0) {
+              const elCTM = el.getScreenCTM();
+              if (!elCTM) return;
+
+              // Map el coordinates to root SVG coordinate space
+              const relativeCTM = svgInverseCTM.multiply(elCTM);
+
+              const corners = [
+                { x: bbox.x, y: bbox.y },
+                { x: bbox.x + bbox.width, y: bbox.y },
+                { x: bbox.x, y: bbox.y + bbox.height },
+                { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
+              ];
+
+              corners.forEach(p => {
+                const tx = relativeCTM.a * p.x + relativeCTM.c * p.y + relativeCTM.e;
+                const ty = relativeCTM.b * p.x + relativeCTM.d * p.y + relativeCTM.f;
+                minX = Math.min(minX, tx);
+                minY = Math.min(minY, ty);
+                maxX = Math.max(maxX, tx);
+                maxY = Math.max(maxY, ty);
+              });
+            }
+          } catch (e) { }
+        });
+
+        if (minX === Infinity || !isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) {
+          return fallback;
+        }
+
+        // Apply comfortable padding to prevent edge clipping from
+        // anti-aliasing, sub-pixel rendering, or stroke miter joins
+        const padding = 4;
+        return {
+          x: minX - padding,
+          y: minY - padding,
+          width: (maxX - minX) + (padding * 2),
+          height: (maxY - minY) + (padding * 2)
+        };
+      } catch (e) {
+        console.error('Error calculating content bounds:', e);
+        return fallback;
+      }
+    }
+
+    function makeSerializableClone(scale = 1, cropToContent = true) {
+      if (!svgRoot) return null;
+      const clone = svgRoot.cloneNode(true);
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      clone.querySelectorAll('*').forEach(el => { if (el.style?.cssText) el.setAttribute('style', el.style.cssText); });
+      let w, h;
+      if (cropToContent) {
+        const bounds = getContentBounds();
+        if (bounds) {
+          clone.setAttribute('viewBox', `${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}`);
+          w = bounds.width; h = bounds.height;
+        } else {
+          // Fallback to original viewBox if bounds calculation failed
+          const vb = svgRoot.viewBox?.baseVal;
+          w = vb?.width || parseInt(svgRoot.getAttribute('width')) || 1024;
+          h = vb?.height || parseInt(svgRoot.getAttribute('height')) || 1024;
+        }
+      } else {
+        const vb = svgRoot.viewBox?.baseVal;
+        w = vb?.width || parseInt(svgRoot.getAttribute('width')) || 1024;
+        h = vb?.height || parseInt(svgRoot.getAttribute('height')) || 1024;
+      }
+      clone.setAttribute('width', String(Math.round(w * scale)));
+      clone.setAttribute('height', String(Math.round(h * scale)));
+      return { clone, w, h };
+    }
+
+    let progressTimer;
+    function startProgress() {
+      els.dlProgressWrap.style.display = 'block';
+      els.dlProgressFill.style.width = '0%';
+      let p = 0; clearInterval(progressTimer);
+      progressTimer = setInterval(() => {
+        p += (92 - p) * 0.1;
+        els.dlProgressFill.style.width = p + '%';
+      }, 100);
+    }
+    function finishProgress() {
+      clearInterval(progressTimer);
+      els.dlProgressFill.style.width = '100%';
+      setTimeout(() => {
+        els.dlProgressWrap.style.display = 'none';
+        els.dlProgressFill.style.width = '0%';
+      }, 600);
+    }
+
+    async function exportPNG() {
+      applyStyles();
+      startProgress();
+
+      // Delay slightly to let UI update (progress bar show)
+      await new Promise(r => setTimeout(r, 100));
+
+      try {
+        const safeName = (els.fileNameInput.value.trim() || currentConfig.fileName || currentConfig.name || 'logo').replace(/[^a-zA-Z0-9-_\.]/g, '_');
+        const multiplier = parseInt(els.dpiInput.value) || 1;
+        const baseScale = currentConfig.baseScale || 1;
+        let scale = baseScale * multiplier;
+        const suffix = multiplier > 1 ? `-${multiplier}x` : '';
+
+        const data = makeSerializableClone(scale, true);
+        if (!data) throw new Error('SVG not loaded');
+        let { clone, w, h } = data;
+
+        // Stability safety: clamp to ~12k pixels max side
+        const MAX_SIDE = 12000;
+        let fw = Math.round(w * scale);
+        let fh = Math.round(h * scale);
+
+        if (fw > MAX_SIDE || fh > MAX_SIDE) {
+          const ratio = MAX_SIDE / Math.max(fw, fh);
+          scale *= ratio;
+          fw = Math.round(w * scale);
+          fh = Math.round(h * scale);
+          showToast('Resolution adjusted for stability');
+        }
+
+        const svgString = '<?xml version="1.0"?>\n' + new XMLSerializer().serializeToString(clone);
+        const url = URL.createObjectURL(new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' }));
+        const img = new Image();
+        img.src = url;
+
+        await img.decode();
+
+        const canvas = document.createElement('canvas');
+        canvas.width = fw; canvas.height = fh;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, fw, fh);
+
+        URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.download = `${safeName}${suffix}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+        showToast(`Saved ${fw}×${fh} \u2713`);
+      } catch (e) {
+        console.error(e);
+        showToast('Export failed');
+      } finally {
+        finishProgress();
+      }
+    }
+
+    async function exportJPG() {
+      applyStyles();
+      startProgress();
+      await new Promise(r => setTimeout(r, 100));
+
+      try {
+        const safeName = (els.fileNameInput.value.trim() || currentConfig.fileName || currentConfig.name || 'logo').replace(/[^a-zA-Z0-9-_\.]/g, '_');
+        const multiplier = parseInt(els.dpiInput.value) || 1;
+        const baseScale = currentConfig.baseScale || 1;
+        let scale = baseScale * multiplier;
+        const suffix = multiplier > 1 ? `-${multiplier}x` : '';
+
+        const data = makeSerializableClone(scale, true);
+        if (!data) throw new Error('SVG not loaded');
+        const { clone, w, h } = data;
+
+        const MAX_SIDE = 12000;
+        let fw = Math.round(w * scale);
+        let fh = Math.round(h * scale);
+        if (fw > MAX_SIDE || fh > MAX_SIDE) {
+          const ratio = MAX_SIDE / Math.max(fw, fh);
+          scale *= ratio;
+          fw = Math.round(w * scale);
+          fh = Math.round(h * scale);
+          showToast('Resolution adjusted for stability');
+        }
+
+        const svgString = '<?xml version="1.0"?>\n' + new XMLSerializer().serializeToString(clone);
+        const url = URL.createObjectURL(new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' }));
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+
+        const canvas = document.createElement('canvas');
+        canvas.width = fw;
+        canvas.height = fh;
+        const ctx = canvas.getContext('2d');
+
+        // JPEG doesn't support transparency, so fill with white
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+
+        const a = document.createElement('a');
+        a.download = `${safeName}${suffix}.jpg`;
+        a.href = canvas.toDataURL('image/jpeg', 0.9);
+        a.click();
+        showToast(`Saved JPG ${fw}×${fh} \u2713`);
+      } catch (e) {
+        console.error(e);
+        showToast('Export failed');
+      } finally {
+        finishProgress();
+      }
+    }
+
+    function exportSVG() {
+      applyStyles();
+      const safeName = (els.fileNameInput.value.trim() || currentConfig.fileName || currentConfig.name || 'logo').replace(/[^a-zA-Z0-9-_\.]/g, '_');
+      const baseScale = currentConfig.baseScale || 1;
+      const data = makeSerializableClone(baseScale, true);
+      if (!data) return showToast('SVG not loaded');
+      const url = URL.createObjectURL(new Blob(['<?xml version="1.0"?>\n' + new XMLSerializer().serializeToString(data.clone)], { type: 'image/svg+xml;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.download = `${safeName}.svg`; a.href = url; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      showToast('SVG saved \u2713');
+    }
+
+    let lastRandomHue = null;
+    function randomizeColors() {
+      const numColors = currentConfig.controls.length;
+      let baseHue;
+      do { baseHue = Math.floor(Math.random() * 360); } while (lastRandomHue !== null && Math.abs(baseHue - lastRandomHue) < 30);
+      lastRandomHue = baseHue;
+      const saturation = 0.65 + Math.random() * 0.25;
+      const lightness = 0.40 + Math.random() * 0.20;
+      const hues = numColors === 1 ? [baseHue] : numColors === 2 ? [baseHue, (baseHue + 180) % 360] :
+        Array.from({ length: numColors }, (_, i) => (baseHue + (360 / numColors) * i) % 360);
+
+      currentConfig.controls.forEach((ctrl, i) => {
+        if (ctrl.type === 'text') return; // Skip text controls
+        if (ctrl.excludeRandom) return; // Skip excluded controls
+        const rgb = hslToRgb(hues[i % hues.length], saturation, lightness);
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+        controlState[ctrl.id].fill = hex;
+        const fillPicker = document.getElementById(`${ctrl.id}-fill-picker`);
+        const fillHex = document.getElementById(`${ctrl.id}-fill-hex`);
+        if (fillPicker) fillPicker.value = hex;
+        if (fillHex) fillHex.value = hex.replace('#', '');
+      });
+      applyStyles(); saveSettings();
+      showToast(`${numColors === 1 ? 'Random' : numColors === 2 ? 'Complementary' : 'Triadic'} colors \uD83C\uDFB2`);
+    }
+
+    function resetAll() {
+      initControlState();
+      resetEffects();
+      els.fileNameInput.value = currentConfig.fileName;
+      generateControlsUI();
+      applyStyles(); saveSettings();
+      showToast('Reset to defaults \u2713');
+    }
+
+    async function switchLogo(key) {
+      currentLogoKey = key;
+      currentConfig = LOGO_CONFIG[key];
+      initControlState();
+      els.fileNameInput.value = currentConfig.fileName || currentConfig.name || key;
+      resetEffects();
+      renderLogo(key);
+      generateControlsUI();
+      applyStyles(); saveSettings();
+      // Update portal complementary colors when logo changes
+      updateComplementaryColors();
+
+      // Show/hide bulk generation section
+      if (key === 'productPackaging') {
+        els.bulkSection.style.display = 'block';
+      } else {
+        els.bulkSection.style.display = 'none';
+      }
+    }
+
+    /* ========== PORTAL BACKGROUND GENERATOR ========== */
+    const PORTAL_PRESETS = [
+      { id: 'white', name: 'General', color: '#FFFFFF', ratio: '1:1', width: 1000, height: 1000 },
+      { id: 'amazon', name: 'Amazon', color: '#FF9900', ratio: '1:1', width: 1000, height: 1000 },
+      { id: 'flipkart', name: 'Flipkart', color: '#2874F0', ratio: '1:1', width: 1000, height: 1000 },
+      { id: 'swiggy', name: 'Swiggy', color: '#FC8019', ratio: '1:1', width: 512, height: 512 },
+      { id: 'zomato', name: 'Zomato', color: '#E23744', ratio: '1:1', width: 512, height: 512 },
+      { id: 'instagram', name: 'Instagram', color: '#833AB4', ratio: '1:1', width: 1080, height: 1080 },
+      { id: 'instagram-story', name: 'IG Story', color: '#833AB4', ratio: '9:16', width: 1080, height: 1920 },
+      { id: 'facebook', name: 'FB Cover', color: '#1877F2', ratio: '2.7:1', width: 820, height: 312 },
+      { id: 'whatsapp', name: 'WhatsApp', color: '#25D366', ratio: '1:1', width: 500, height: 500 },
+      { id: 'youtube', name: 'YouTube', color: '#FF0000', ratio: '16:9', width: 1280, height: 720 },
+      { id: 'linkedin', name: 'LinkedIn', color: '#0A66C2', ratio: '1:1', width: 400, height: 400 },
+      { id: 'twitter', name: 'Twitter/X', color: '#000000', ratio: '1:1', width: 400, height: 400 }
+    ];
+
+    let portalState = {
+      selectedPreset: null,
+      selectedBgColor: '#FFFFFF',
+      customBgColor: '#FFFFFF',
+      outputWidth: 1000,
+      outputHeight: 1000,
+      multiLogoEnabled: false,
+      selectedLogos: ['td', 'akshaya', 'tasty', 'teepi'],
+      logoOrder: ['td', 'akshaya', 'tasty', 'teepi'],
+      logoPosition: 'center',
+      layout: '2x2',
+      complementaryColors: [],
+      previewItems: [],
+      isExpanded: false
+    };
+
+    const portalEls = {
+      portalToggleBtn: document.getElementById('portalToggleBtn'),
+      portalSection: document.getElementById('portalSection'),
+      portalPresets: document.getElementById('portalPresets'),
+      aspectRatioSelect: document.getElementById('aspectRatioSelect'),
+      outputWidth: document.getElementById('outputWidth'),
+      outputHeight: document.getElementById('outputHeight'),
+      complementaryColors: document.getElementById('complementaryColors'),
+      customBgPicker: document.getElementById('customBgPicker'),
+      customBgHex: document.getElementById('customBgHex'),
+      applyCustomBg: document.getElementById('applyCustomBg'),
+      logoPositionSection: document.getElementById('logoPositionSection'),
+      logoPositionGrid: document.getElementById('logoPositionGrid'),
+      multiLogoToggle: document.getElementById('multiLogoToggle'),
+      multiLogoOptions: document.getElementById('multiLogoOptions'),
+      draggableLogos: document.getElementById('draggableLogos'),
+      layoutSelector: document.getElementById('layoutSelector'),
+      portalPreviewGrid: document.getElementById('portalPreviewGrid'),
+      exportSelectedPortal: document.getElementById('exportSelectedPortal'),
+      exportAllPortals: document.getElementById('exportAllPortals')
+    };
+
+    // Color theory functions
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return { h: h * 360, s, l };
+    }
+
+    function hslToHex(h, s, l) {
+      const rgb = hslToRgb(h, s, l);
+      return rgbToHex(rgb.r, rgb.g, rgb.b);
+    }
+
+    function getComplementaryColors(logoColors) {
+      if (!logoColors || logoColors.length === 0) return [];
+
+      // Get the dominant color (first fill color)
+      const dominantHex = logoColors[0];
+      const rgb = hexToRgb(dominantHex);
+      if (!rgb) return [];
+
+      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+
+      // Generate 5 complementary background colors
+      const complementary = [];
+
+      // 1. Complementary (opposite on color wheel)
+      complementary.push({
+        name: 'Complement',
+        color: hslToHex((hsl.h + 180) % 360, Math.min(hsl.s * 0.7, 0.6), 0.85)
+      });
+
+      // 2. Analogous 1 (30° shift, light)
+      complementary.push({
+        name: 'Analogous',
+        color: hslToHex((hsl.h + 30) % 360, Math.min(hsl.s * 0.5, 0.4), 0.9)
+      });
+
+      // 3. Analogous 2 (-30° shift, light)
+      complementary.push({
+        name: 'Analogous 2',
+        color: hslToHex((hsl.h + 330) % 360, Math.min(hsl.s * 0.5, 0.4), 0.9)
+      });
+
+      // 4. Triadic 1 (120° shift)
+      complementary.push({
+        name: 'Triadic',
+        color: hslToHex((hsl.h + 120) % 360, Math.min(hsl.s * 0.6, 0.5), 0.88)
+      });
+
+      // 5. Neutral (desaturated version)
+      complementary.push({
+        name: 'Neutral',
+        color: hslToHex(hsl.h, 0.1, 0.92)
+      });
+
+      return complementary;
+    }
+
+    function updateComplementaryColors() {
+      // Get current logo colors
+      const logoColors = [];
+      currentConfig.controls.forEach(ctrl => {
+        if (ctrl.type === 'text') return;
+        const state = controlState[ctrl.id];
+        if (state && state.fill) {
+          logoColors.push(state.fill);
+        }
+      });
+
+      portalState.complementaryColors = getComplementaryColors(logoColors);
+      renderComplementaryColors();
+    }
+
+    function renderComplementaryColors() {
+      portalEls.complementaryColors.innerHTML = '';
+      portalState.complementaryColors.forEach((item, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'complementary-btn';
+        btn.style.background = item.color;
+        btn.title = `${item.name}: ${item.color}`;
+        btn.dataset.color = item.color;
+        btn.addEventListener('click', () => selectBackground(item.color));
+        portalEls.complementaryColors.appendChild(btn);
+      });
+    }
+
+    function renderPortalPresets() {
+      portalEls.portalPresets.innerHTML = '';
+      PORTAL_PRESETS.forEach(preset => {
+        const btn = document.createElement('button');
+        btn.className = 'portal-preset-btn';
+        btn.dataset.preset = preset.id;
+        btn.innerHTML = `
+          <span class="portal-color-swatch" style="background: ${preset.color}"></span>
+          <span>${preset.name}</span>
+          <span class="portal-preset-info">${preset.width}×${preset.height}</span>
+        `;
+        btn.addEventListener('click', () => selectPreset(preset));
+        portalEls.portalPresets.appendChild(btn);
+      });
+    }
+
+    function selectPreset(preset) {
+      portalState.selectedPreset = preset;
+      portalState.selectedBgColor = preset.color;
+      portalState.outputWidth = preset.width;
+      portalState.outputHeight = preset.height;
+
+      // Update UI
+      portalEls.outputWidth.value = preset.width;
+      portalEls.outputHeight.value = preset.height;
+
+      // Update aspect ratio select
+      const ratioMap = { '1:1': '1:1', '4:3': '4:3', '3:4': '3:4', '16:9': '16:9', '9:16': '9:16' };
+      portalEls.aspectRatioSelect.value = ratioMap[preset.ratio] || 'custom';
+
+      // Highlight selected preset
+      document.querySelectorAll('.portal-preset-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.preset === preset.id);
+      });
+
+      // Update custom color picker
+      portalEls.customBgPicker.value = preset.color;
+      portalEls.customBgHex.value = preset.color.replace('#', '');
+
+      generatePortalPreviews();
+    }
+
+    function selectBackground(color) {
+      portalState.selectedBgColor = color;
+      portalState.selectedPreset = null;
+
+      // Clear preset selection
+      document.querySelectorAll('.portal-preset-btn').forEach(btn => btn.classList.remove('selected'));
+
+      // Highlight complementary button
+      document.querySelectorAll('.complementary-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.color === color);
+      });
+
+      // Update custom color picker
+      portalEls.customBgPicker.value = color;
+      portalEls.customBgHex.value = color.replace('#', '');
+
+      generatePortalPreviews();
+    }
+
+    function renderDraggableLogos() {
+      portalEls.draggableLogos.innerHTML = '';
+      let draggedItem = null;
+
+      portalState.logoOrder.forEach((key, index) => {
+        const config = LOGO_CONFIG[key];
+        if (!config) return;
+
+        const item = document.createElement('div');
+        item.className = 'draggable-logo-item';
+        item.draggable = true;
+        item.dataset.key = key;
+
+        const isSelected = portalState.selectedLogos.includes(key);
+
+        item.innerHTML = `
+          <span class="drag-handle">☰</span>
+          <input type="checkbox" class="logo-item-checkbox" ${isSelected ? 'checked' : ''}>
+          <span class="logo-item-name">${config.name}</span>
+          <span class="logo-item-order">#${index + 1}</span>
+        `;
+
+        // Checkbox toggle
+        const checkbox = item.querySelector('.logo-item-checkbox');
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            if (!portalState.selectedLogos.includes(key)) {
+              portalState.selectedLogos.push(key);
+            }
+          } else {
+            portalState.selectedLogos = portalState.selectedLogos.filter(k => k !== key);
+          }
+          generatePortalPreviews();
+        });
+
+        // Drag events
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          document.querySelectorAll('.draggable-logo-item').forEach(el => el.classList.remove('drag-over'));
+          draggedItem = null;
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (draggedItem && draggedItem !== item) {
+            item.classList.add('drag-over');
+          }
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+
+          if (draggedItem && draggedItem !== item) {
+            const draggedKey = draggedItem.dataset.key;
+            const targetKey = item.dataset.key;
+
+            const draggedIndex = portalState.logoOrder.indexOf(draggedKey);
+            const targetIndex = portalState.logoOrder.indexOf(targetKey);
+
+            // Swap positions
+            portalState.logoOrder.splice(draggedIndex, 1);
+            portalState.logoOrder.splice(targetIndex, 0, draggedKey);
+
+            // Re-render and update previews
+            renderDraggableLogos();
+            generatePortalPreviews();
+          }
+        });
+
+        portalEls.draggableLogos.appendChild(item);
+      });
+    }
+
+    function generatePortalPreviews() {
+      portalEls.portalPreviewGrid.innerHTML = '';
+      portalState.previewItems = [];
+
+      const bgColor = portalState.selectedBgColor;
+      const width = parseInt(portalEls.outputWidth.value) || 1000;
+      const height = parseInt(portalEls.outputHeight.value) || 1000;
+
+      if (portalState.multiLogoEnabled && portalState.selectedLogos.length > 1) {
+        // Multi-logo preview
+        const previewItem = createMultiLogoPreview(bgColor, width, height);
+        portalEls.portalPreviewGrid.appendChild(previewItem);
+        portalState.previewItems.push({ type: 'multi', bgColor, width, height });
+      } else {
+        // Single logo preview with current settings
+        const previewItem = createSingleLogoPreview(bgColor, width, height, currentLogoKey);
+        portalEls.portalPreviewGrid.appendChild(previewItem);
+        portalState.previewItems.push({ type: 'single', bgColor, width, height, logoKey: currentLogoKey });
+      }
+
+      // Add quick previews for complementary colors
+      portalState.complementaryColors.slice(0, 5).forEach(item => {
+        if (item.color !== bgColor) {
+          const previewItem = portalState.multiLogoEnabled && portalState.selectedLogos.length > 1
+            ? createMultiLogoPreview(item.color, width, height)
+            : createSingleLogoPreview(item.color, width, height, currentLogoKey);
+          portalEls.portalPreviewGrid.appendChild(previewItem);
+          portalState.previewItems.push({
+            type: portalState.multiLogoEnabled ? 'multi' : 'single',
+            bgColor: item.color,
+            width,
+            height,
+            logoKey: currentLogoKey
+          });
+        }
+      });
+    }
+
+    function createSingleLogoPreview(bgColor, width, height, logoKey) {
+      const item = document.createElement('div');
+      item.className = 'portal-preview-item';
+      item.style.background = bgColor;
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'portal-preview-canvas';
+      canvas.width = 200;
+      canvas.height = 200;
+
+      renderLogoToCanvas(canvas, bgColor, width, height, logoKey).then(() => {
+        item.appendChild(canvas);
+      });
+
+      const label = document.createElement('div');
+      label.className = 'portal-preview-label';
+      label.textContent = `${bgColor} • ${width}×${height}`;
+      item.appendChild(label);
+
+      const downloadBtn = document.createElement('button');
+      downloadBtn.className = 'portal-preview-download';
+      downloadBtn.innerHTML = '↓';
+      downloadBtn.title = 'Download this variant';
+      downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportPortalImage(bgColor, width, height, logoKey);
+      });
+      item.appendChild(downloadBtn);
+
+      item.addEventListener('click', () => selectBackground(bgColor));
+
+      return item;
+    }
+
+    function createMultiLogoPreview(bgColor, width, height) {
+      const item = document.createElement('div');
+      item.className = 'portal-preview-item';
+      item.style.background = bgColor;
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'portal-preview-canvas';
+      canvas.width = 200;
+      canvas.height = 200;
+
+      renderMultiLogoToCanvas(canvas, bgColor, width, height).then(() => {
+        item.appendChild(canvas);
+      });
+
+      const label = document.createElement('div');
+      label.className = 'portal-preview-label';
+      label.textContent = `${portalState.layout} • ${bgColor}`;
+      item.appendChild(label);
+
+      const downloadBtn = document.createElement('button');
+      downloadBtn.className = 'portal-preview-download';
+      downloadBtn.innerHTML = '↓';
+      downloadBtn.title = 'Download this variant';
+      downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exportMultiLogoImage(bgColor, width, height);
+      });
+      item.appendChild(downloadBtn);
+
+      item.addEventListener('click', () => selectBackground(bgColor));
+
+      return item;
+    }
+
+    async function renderLogoToCanvas(canvas, bgColor, targetWidth, targetHeight, logoKey) {
+      const ctx = canvas.getContext('2d');
+      const canvasW = canvas.width;
+      const canvasH = canvas.height;
+
+      // Fill background
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvasW, canvasH);
+
+      // Get SVG content
+      const svgContent = LOGO_SVGS[logoKey];
+      if (!svgContent) return;
+
+      // Create temporary container to apply styles
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = svgContent;
+      const tempSvg = tempDiv.querySelector('svg');
+
+      if (!tempSvg) return;
+
+      // Apply current control state if it's the current logo
+      if (logoKey === currentLogoKey) {
+        currentConfig.controls.forEach(ctrl => {
+          const state = controlState[ctrl.id] || ctrl.defaults;
+          tempSvg.querySelectorAll(ctrl.selector).forEach(el => {
+            if (ctrl.type === 'text') {
+              if (state.text !== undefined) el.textContent = state.text;
+            } else {
+              if (state.fill) el.style.setProperty('fill', state.fill);
+              if (ctrl.showStroke && state.stroke) el.style.setProperty('stroke', state.stroke);
+              if (ctrl.showStrokeWidth && state.strokeWidth) el.style.setProperty('stroke-width', state.strokeWidth);
+            }
+          });
+        });
+      }
+
+      // Serialize and draw
+      tempSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      const svgString = new XMLSerializer().serializeToString(tempSvg);
+      const url = URL.createObjectURL(new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' }));
+
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          // Calculate scale (92% of canvas for "minimal padding" look)
+          const fillRatio = 0.92;
+          const scale = Math.min(canvasW * fillRatio / img.width, canvasH * fillRatio / img.height);
+          const w = img.width * scale;
+          const h = img.height * scale;
+
+          // Calculate position based on logoPosition
+          const position = portalState.logoPosition || 'center';
+          const padding = canvasW * 0.04; // 4% padding for side-alignment
+          let x, y;
+
+          // Horizontal position
+          if (position.includes('left')) {
+            x = padding;
+          } else if (position.includes('right')) {
+            x = canvasW - w - padding;
+          } else {
+            x = (canvasW - w) / 2;
+          }
+
+          // Vertical position
+          if (position.includes('top')) {
+            y = padding;
+          } else if (position.includes('bottom')) {
+            y = canvasH - h - padding;
+          } else {
+            y = (canvasH - h) / 2;
+          }
+
+          ctx.drawImage(img, x, y, w, h);
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.src = url;
+      });
+    }
+
+    async function renderMultiLogoToCanvas(canvas, bgColor, targetWidth, targetHeight) {
+      const ctx = canvas.getContext('2d');
+      const canvasW = canvas.width;
+      const canvasH = canvas.height;
+
+      // Fill background
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvasW, canvasH);
+
+      // Use logoOrder but filter to only selected logos
+      const logos = portalState.logoOrder.filter(key => portalState.selectedLogos.includes(key));
+      if (logos.length === 0) return;
+
+      const positions = getLogoPositions(portalState.layout, canvasW, canvasH, logos.length);
+
+      for (let i = 0; i < logos.length && i < positions.length; i++) {
+        const pos = positions[i];
+        const logoKey = logos[i];
+
+        await renderLogoAtPosition(ctx, logoKey, pos.x, pos.y, pos.w, pos.h);
+      }
+    }
+
+    function getLogoPositions(layout, canvasW, canvasH, count) {
+      const padding = canvasW * 0.05;
+      const positions = [];
+
+      switch (layout) {
+        case '2x2': {
+          const cellW = (canvasW - padding * 3) / 2;
+          const cellH = (canvasH - padding * 3) / 2;
+          for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 2; col++) {
+              positions.push({
+                x: padding + col * (cellW + padding),
+                y: padding + row * (cellH + padding),
+                w: cellW,
+                h: cellH
+              });
+            }
+          }
+          break;
+        }
+        case '1x4': {
+          const cellW = (canvasW - padding * 5) / 4;
+          const cellH = canvasH * 0.6;
+          const startY = (canvasH - cellH) / 2;
+          for (let i = 0; i < 4; i++) {
+            positions.push({
+              x: padding + i * (cellW + padding),
+              y: startY,
+              w: cellW,
+              h: cellH
+            });
+          }
+          break;
+        }
+        case '4x1': {
+          const cellW = canvasW * 0.6;
+          const cellH = (canvasH - padding * 5) / 4;
+          const startX = (canvasW - cellW) / 2;
+          for (let i = 0; i < 4; i++) {
+            positions.push({
+              x: startX,
+              y: padding + i * (cellH + padding),
+              w: cellW,
+              h: cellH
+            });
+          }
+          break;
+        }
+        case 'featured': {
+          // Main TD logo large at top
+          positions.push({
+            x: canvasW * 0.2,
+            y: padding,
+            w: canvasW * 0.6,
+            h: canvasH * 0.5
+          });
+          // Sub-brands below
+          const subW = (canvasW - padding * 4) / 3;
+          const subH = canvasH * 0.3;
+          const subY = canvasH * 0.6;
+          for (let i = 0; i < 3; i++) {
+            positions.push({
+              x: padding + i * (subW + padding),
+              y: subY,
+              w: subW,
+              h: subH
+            });
+          }
+          break;
+        }
+        default:
+          positions.push({ x: padding, y: padding, w: canvasW - padding * 2, h: canvasH - padding * 2 });
+      }
+
+      return positions;
+    }
+
+    async function renderLogoAtPosition(ctx, logoKey, x, y, w, h) {
+      const svgContent = LOGO_SVGS[logoKey];
+      if (!svgContent) return;
+
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = svgContent;
+      const tempSvg = tempDiv.querySelector('svg');
+      if (!tempSvg) return;
+
+      // Apply default styles for this logo
+      const config = LOGO_CONFIG[logoKey];
+      if (config) {
+        config.controls.forEach(ctrl => {
+          const defaults = ctrl.defaults;
+          tempSvg.querySelectorAll(ctrl.selector).forEach(el => {
+            if (ctrl.type === 'text') {
+              if (defaults.text !== undefined) el.textContent = defaults.text;
+            } else {
+              if (defaults.fill) el.style.setProperty('fill', defaults.fill);
+              if (ctrl.showStroke) el.style.setProperty('stroke', defaults.stroke);
+              if (ctrl.showStrokeWidth) el.style.setProperty('stroke-width', defaults.strokeWidth);
+            }
+          });
+        });
+      }
+
+      tempSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      const svgString = new XMLSerializer().serializeToString(tempSvg);
+      const url = URL.createObjectURL(new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' }));
+
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(w / img.width, h / img.height) * 0.9;
+          const imgW = img.width * scale;
+          const imgH = img.height * scale;
+          const imgX = x + (w - imgW) / 2;
+          const imgY = y + (h - imgH) / 2;
+
+          ctx.drawImage(img, imgX, imgY, imgW, imgH);
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.src = url;
+      });
+    }
+
+    async function exportPortalImage(bgColor, width, height, logoKey) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      await renderLogoToCanvas(canvas, bgColor, width, height, logoKey);
+
+      const safeName = (els.fileNameInput.value.trim() || currentConfig.fileName).replace(/[^a-zA-Z0-9-_\.]/g, '_');
+      const colorName = bgColor.replace('#', '');
+
+      const a = document.createElement('a');
+      a.download = `${safeName}-${colorName}-${width}x${height}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+
+      showToast(`Saved ${width}×${height} ✓`);
+    }
+
+    async function exportMultiLogoImage(bgColor, width, height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      await renderMultiLogoToCanvas(canvas, bgColor, width, height);
+
+      const colorName = bgColor.replace('#', '');
+
+      const a = document.createElement('a');
+      a.download = `TD-brands-${portalState.layout}-${colorName}-${width}x${height}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+
+      showToast(`Saved ${width}×${height} ✓`);
+    }
+
+    async function exportAllPortalImages() {
+      showToast('Exporting all variants...');
+
+      for (const item of portalState.previewItems) {
+        if (item.type === 'multi') {
+          await exportMultiLogoImage(item.bgColor, item.width, item.height);
+        } else {
+          await exportPortalImage(item.bgColor, item.width, item.height, item.logoKey);
+        }
+        await new Promise(r => setTimeout(r, 300)); // Small delay between downloads
+      }
+
+      showToast(`Exported ${portalState.previewItems.length} images ✓`);
+    }
+
+    function wirePortalEvents() {
+      // Portal toggle button
+      portalEls.portalToggleBtn.addEventListener('click', () => {
+        portalState.isExpanded = !portalState.isExpanded;
+        portalEls.portalToggleBtn.classList.toggle('active', portalState.isExpanded);
+        portalEls.portalSection.classList.toggle('expanded', portalState.isExpanded);
+      });
+
+      // Logo position grid
+      portalEls.logoPositionGrid.querySelectorAll('.position-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          portalState.logoPosition = btn.dataset.position;
+          portalEls.logoPositionGrid.querySelectorAll('.position-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          generatePortalPreviews();
+        });
+      });
+
+      // Aspect ratio change
+      portalEls.aspectRatioSelect.addEventListener('change', () => {
+        const ratio = portalEls.aspectRatioSelect.value;
+        const baseSize = 1000;
+
+        switch (ratio) {
+          case '1:1':
+            portalEls.outputWidth.value = baseSize;
+            portalEls.outputHeight.value = baseSize;
+            break;
+          case '4:3':
+            portalEls.outputWidth.value = baseSize;
+            portalEls.outputHeight.value = Math.round(baseSize * 3 / 4);
+            break;
+          case '3:4':
+            portalEls.outputWidth.value = Math.round(baseSize * 3 / 4);
+            portalEls.outputHeight.value = baseSize;
+            break;
+          case '16:9':
+            portalEls.outputWidth.value = 1280;
+            portalEls.outputHeight.value = 720;
+            break;
+          case '9:16':
+            portalEls.outputWidth.value = 1080;
+            portalEls.outputHeight.value = 1920;
+            break;
+        }
+
+        generatePortalPreviews();
+      });
+
+      // Dimension inputs
+      portalEls.outputWidth.addEventListener('change', () => {
+        portalEls.aspectRatioSelect.value = 'custom';
+        generatePortalPreviews();
+      });
+      portalEls.outputHeight.addEventListener('change', () => {
+        portalEls.aspectRatioSelect.value = 'custom';
+        generatePortalPreviews();
+      });
+
+      // Custom background color
+      portalEls.customBgPicker.addEventListener('input', () => {
+        portalEls.customBgHex.value = portalEls.customBgPicker.value.replace('#', '').toUpperCase();
+      });
+
+      portalEls.customBgHex.addEventListener('input', () => {
+        let val = portalEls.customBgHex.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 6);
+        portalEls.customBgHex.value = val;
+        if (val.length === 6) {
+          portalEls.customBgPicker.value = '#' + val;
+        }
+      });
+
+      portalEls.applyCustomBg.addEventListener('click', () => {
+        const color = portalEls.customBgPicker.value.toUpperCase();
+        selectBackground(color);
+      });
+
+      // Multi-logo toggle
+      portalEls.multiLogoToggle.addEventListener('click', () => {
+        portalState.multiLogoEnabled = !portalState.multiLogoEnabled;
+        portalEls.multiLogoToggle.classList.toggle('active', portalState.multiLogoEnabled);
+        portalEls.multiLogoOptions.classList.toggle('visible', portalState.multiLogoEnabled);
+        // Hide position selector when multi-logo is enabled
+        portalEls.logoPositionSection.style.display = portalState.multiLogoEnabled ? 'none' : 'block';
+        generatePortalPreviews();
+      });
+
+      // Layout selector
+      portalEls.layoutSelector.querySelectorAll('.layout-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          portalState.layout = btn.dataset.layout;
+          portalEls.layoutSelector.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          generatePortalPreviews();
+        });
+      });
+
+      // Export buttons
+      portalEls.exportSelectedPortal.addEventListener('click', () => {
+        const bgColor = portalState.selectedBgColor;
+        const width = parseInt(portalEls.outputWidth.value) || 1000;
+        const height = parseInt(portalEls.outputHeight.value) || 1000;
+
+        if (portalState.multiLogoEnabled && portalState.selectedLogos.length > 1) {
+          exportMultiLogoImage(bgColor, width, height);
+        } else {
+          exportPortalImage(bgColor, width, height, currentLogoKey);
+        }
+      });
+
+      portalEls.exportAllPortals.addEventListener('click', exportAllPortalImages);
+    }
+
+    function initPortalSection() {
+      renderPortalPresets();
+      renderDraggableLogos();
+      updateComplementaryColors();
+      generatePortalPreviews();
+      wirePortalEvents();
+    }
+
+    function wireMainEvents() {
+      els.logoSelect.addEventListener('change', () => switchLogo(els.logoSelect.value));
+      els.randomBtn.addEventListener('click', randomizeColors);
+      els.resetBtn.addEventListener('click', resetAll);
+      els.exportPNG.addEventListener('click', exportPNG);
+      els.exportJPG.addEventListener('click', exportJPG);
+      els.exportSVG.addEventListener('click', exportSVG);
+      els.dpiInput.addEventListener('change', saveSettings);
+    }
+
+    async function init() {
+      loadSettings();
+      renderLogo(currentLogoKey);
+      generateControlsUI();
+      applyStyles();
+      wireMainEvents();
+      wireEffectsEvents();
+      initPortalSection();
+      wireBulkEvents();
+    }
+
+    /* ========== BULK GENERATION LOGIC ========== */
+    let bulkData = [];
+
+    function wireBulkEvents() {
+      els.bulkUploadBtn.addEventListener('click', () => els.bulkCSVInput.click());
+      els.bulkCSVInput.addEventListener('change', handleCSVUpload);
+      els.runBulkBtn.addEventListener('click', runBulkExport);
+    }
+
+    function handleCSVUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target.result;
+        bulkData = parseCSV(text);
+
+        if (bulkData.length > 0) {
+          els.runBulkBtn.disabled = false;
+          els.bulkStatus.style.display = 'block';
+          els.bulkStatusText.textContent = `Ready to process ${bulkData.length} rows`;
+          els.bulkProgressFill.style.width = '0%';
+          showToast(`CSV loaded: ${bulkData.length} rows found`);
+        } else {
+          els.runBulkBtn.disabled = true;
+          showToast('No valid data found in CSV');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseCSV(text) {
+      const rows = text.split(/\r?\n/).filter(line => line.trim());
+      if (rows.length < 2) return [];
+
+      const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+      const data = [];
+
+      // Look for specific columns
+      const nameIdx = headers.findIndex(h => h.includes('product') || h.includes('name'));
+      const taglineIdx = headers.findIndex(h => h.includes('tagline') || h.includes('desc'));
+
+      if (nameIdx === -1) {
+        showToast('CSV must have a "Product Name" column');
+        return [];
+      }
+
+      for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i].split(',').map(c => c.trim().replace(/^"(.*)"$/, '$1'));
+        if (cols[nameIdx]) {
+          data.push({
+            name: cols[nameIdx],
+            tagline: taglineIdx !== -1 ? cols[taglineIdx] : ''
+          });
+        }
+      }
+      return data;
+    }
+
+    async function runBulkExport() {
+      if (bulkData.length === 0) return;
+
+      els.runBulkBtn.disabled = true;
+      els.bulkUploadBtn.disabled = true;
+
+      const total = bulkData.length;
+      for (let i = 0; i < total; i++) {
+        const row = bulkData[i];
+
+        // Update status UI
+        const percent = ((i + 1) / total) * 100;
+        els.bulkProgressFill.style.width = `${percent}%`;
+        els.bulkStatusText.textContent = `Processing ${i + 1}/${total}: ${row.name}`;
+
+        // Apply data to controls
+        const nameCtrl = currentConfig.controls.find(c => c.id === 'text_productName');
+        const taglineCtrl = currentConfig.controls.find(c => c.id === 'text_tagline1');
+
+        if (nameCtrl) {
+          controlState[nameCtrl.id].text = row.name;
+          const input = document.getElementById(`${nameCtrl.id}-text-input`);
+          if (input) input.value = row.name;
+        }
+
+        if (taglineCtrl && row.tagline) {
+          controlState[taglineCtrl.id].text = row.tagline;
+          const input = document.getElementById(`${taglineCtrl.id}-text-input`);
+          if (input) input.value = row.tagline;
+        }
+
+        applyStyles();
+
+        // Small delay to ensure UI updates and let CPU breathe
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Trigger export (High Res if selected)
+        exportPNG(true);
+
+        // Wait a bit more between downloads to avoid browser congestion
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      els.bulkStatusText.textContent = `Completed ${total} exports!`;
+      els.runBulkBtn.disabled = false;
+      els.bulkUploadBtn.disabled = false;
+      showToast('Bulk export completed ✓');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+  </script>
+</body>
+
+</html>

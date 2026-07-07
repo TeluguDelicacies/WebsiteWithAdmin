@@ -1,0 +1,54 @@
+# Logo Background Generator Feature
+
+Add a new section within the Logo Customizer that allows customers to generate logos with various background colors for use on different portals (e-commerce sites, social media, marketplaces, etc.).
+
+## Proposed Changes
+
+### UI Structure
+The feature will be added as a new collapsible section below the existing download section, titled "Portal Background Generator".
+
+can we also make an option that will give give 5 options taht compliment eh colours of the logo.
+
+If teh customer has genrated a custom color through the website, color picker, we need to add a but to redirect this current state to the protal backgoud section. 
+
+CAn we also do one where we can selects if the customer wants to add mutliple logos?
+
+### [MODIFY] [index.html](file:///e:/GitHUB/LogoColourChanger/index.html)
+
+#### CSS Additions
+- Add styles for the new "Portal Backgrounds" section
+- Style for preset background color buttons (common portal colors)
+- Style for custom background color picker
+- Style for preview grid showing logo on different backgrounds
+- Style for batch download button
+
+#### HTML Additions (after the HD Export section)
+Add a new card section with:
+1. **Section Title**: "Generate for Portals"
+2. **Preset Colors Row**: Quick-select buttons for common portal backgrounds:
+   - White (#FFFFFF) - General use
+   - Amazon Orange (#FF9900)
+   - Flipkart Blue (#2874F0)
+   - Swiggy Orange (#FC8019)
+   - Zomato Red (#E23744)
+   - Instagram Gradient (simplified)
+   - Custom color picker
+3. **Preview Grid**: 2x3 or 3x2 grid showing the current logo on each selected background
+4. **Export Options**:
+   - "Download All" button to batch export all variations
+   - Individual download buttons on each preview
+
+#### JavaScript Additions
+- `generatePortalBackgrounds()` - Creates preview images with different backgrounds
+- `exportWithBackground(bgColor)` - Exports the logo with a solid background color
+- `exportAllBackgrounds()` - Batch exports all selected background variations
+- Wire up event listeners for the new UI elements
+
+## Verification Plan
+
+### Manual Verification
+1. Open the page and verify the new "Portal Backgrounds" section appears
+2. Select different background presets and verify the preview updates
+3. Use the custom color picker to set a custom background
+4. Click "Download All" and verify multiple files are downloaded
+5. Verify each downloaded image has the correct background color
