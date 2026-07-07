@@ -4790,3 +4790,75 @@ window.saveBulkImages = async function () {
             showToast('Error migrating images', 'error');
         }
     }
+window.downloadAllImagesZip = async function() {
+    showToast('Gathering images...', 'info');
+    try {
+        const { data: images, error } = await supabase.from('product_images').select('*, products(product_name)');
+        if (error) throw error;
+        if (!images || images.length === 0) {
+            showToast('No images found', 'error');
+            return;
+        }
+
+        showToast(`Preparing zip with ${images.length} images. Please wait...`, 'info');
+        const zip = new JSZip();
+        const imgFolder = zip.folder("website_images");
+        
+        let fetchedCount = 0;
+        const btn = document.getElementById('downloadAllImagesBtn');
+        const originalBtnText = btn ? btn.innerHTML : '';
+        
+        for (let i = 0; i < images.length; i++) {
+            const imgData = images[i];
+            if (!imgData.image_url) continue;
+            
+            try {
+                const response = await fetch(imgData.image_url, { mode: 'cors' });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const blob = await response.blob();
+                
+                let filename = `image_${imgData.id}`;
+                if (imgData.products && imgData.products.product_name) {
+                    let safeProductName = imgData.products.product_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    filename = `${safeProductName}_${imgData.id}`;
+                }
+                
+                let ext = 'jpg';
+                if (imgData.image_url.includes('.png')) ext = 'png';
+                else if (imgData.image_url.includes('.webp')) ext = 'webp';
+                else if (imgData.image_url.includes('.gif')) ext = 'gif';
+                else if (blob.type) {
+                    const mimeExt = blob.type.split('/')[1];
+                    if (mimeExt && mimeExt !== 'octet-stream') ext = mimeExt;
+                }
+                
+                imgFolder.file(`${filename}.${ext}`, blob);
+                fetchedCount++;
+                
+                if (btn) btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${fetchedCount}/${images.length}`;
+            } catch (err) {
+                console.error('Failed to fetch image:', imgData.image_url, err);
+            }
+        }
+        
+        if (fetchedCount === 0) {
+            showToast('Failed to fetch any images (CORS or network issues)', 'error');
+            if (btn) btn.innerHTML = originalBtnText;
+            return;
+        }
+
+        if (btn) btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Zipping...`;
+        
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "website_images.zip");
+        
+        showToast('Download complete', 'success');
+        if (btn) btn.innerHTML = originalBtnText;
+        
+    } catch (error) {
+        console.error('Error downloading images:', error);
+        showToast('Error downloading images', 'error');
+        const btn = document.getElementById('downloadAllImagesBtn');
+        if (btn) btn.innerHTML = '<i class="fas fa-file-archive"></i> Download All Images';
+    }
+};
