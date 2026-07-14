@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Single Catalogue Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --copper-dark: #b8623b;
+            --copper-primary: #d4af37;
+            --bg-sand: #fbf8f1;
+            --text-dark: #2c1e16;
+            --text-light: #ffffff;
+            --table-red: #a4161a;
+            --table-green: #2d6a4f;
+            --panel-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-sand);
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .poster-container {
+            width: 1080px; height: 1920px;
+            background-color: var(--bg-sand);
+            position: relative;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            border: 15px solid var(--copper-primary);
+            box-sizing: border-box;
+        }
+
+        /* Scattered Ingredients Background */
+        .bg-scatter {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.15;
+            filter: blur(1px);
+        }
+
+        /* Top Header */
+        .header {
+            position: relative; z-index: 2;
+            padding: 20px 40px 5px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(180deg, rgba(251,248,241,1) 0%, rgba(251,248,241,0.95) 70%, rgba(251,248,241,0) 100%);
+        }
+        
+        .header-left {
+            display: flex; flex-direction: column; gap: 5px; margin-right: 20px;
+        }
+        .header-logo { height: 110px; object-fit: contain; }
+        
+        .header-right {
+            text-align: left; display: flex; flex-direction: column; gap: 2px;
+            flex-grow: 1; justify-content: center;
+        }
+        .brand-title {
+            font-family: 'Cinzel', serif; font-size: 34px; font-weight: 800; color: var(--table-red);
+            margin: 0;
+        }
+        .brand-subtitle {
+            font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; color: var(--table-green);
+            margin: 0;
+        }
+        .brand-telugu {
+            font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 800; color: var(--copper-dark);
+            margin: 3px 0 2px 0; letter-spacing: 0.5px;
+        }
+        .brand-desc {
+            font-family: 'Playfair Display', serif; font-size: 13px; font-style: italic; font-weight: 600; color: #4a3b32;
+            margin: 0 0 4px 0; line-height: 1.4; max-width: 600px; border-left: 3px solid var(--copper-primary); padding-left: 10px;
+        }
+        .contact-info {
+            font-size: 14px; font-weight: 700; color: var(--text-dark);
+            display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 4px;
+            background: rgba(164, 22, 26, 0.05); padding: 4px 12px; border-radius: 20px; width: fit-content; border: 1px solid rgba(164,22,26,0.1);
+        }
+        .contact-info i { color: var(--table-red); font-size: 16px; }
+
+        .catalogue-heading {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 34px;
+            font-weight: 800;
+            margin: 0px 0 10px 0;
+            background: linear-gradient(90deg, #b8623b, #d4af37, #b8623b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(184, 98, 59, 0.2);
+            letter-spacing: 2px;
+            position: relative; z-index: 2;
+        }
+
+        /* Main Content - Grid of Cards */
+        .content {
+            position: relative; z-index: 2;
+            flex-grow: 1;
+            padding: 0 40px;
+            display: flex; flex-direction: column; gap: 4px;
+            overflow: hidden;
+        }
+
+        .category-group {
+            margin-bottom: 2px;
+        }
+        
+        .category-title {
+            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700;
+            color: var(--text-light); background: var(--copper-dark);
+            padding: 2px 14px; border-radius: 20px;
+            display: inline-block; margin-bottom: 6px;
+            box-shadow: 0 2px 5px rgba(184, 98, 59, 0.3);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 15px;
+        }
+
+        /* Compact Card Design */
+        .product-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(212,175,55,0.4);
+            border-radius: 8px;
+            padding: 6px 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex; flex-direction: row; gap: 10px; align-items: center;
+        }
+        
+        .card-product-img {
+            width: 45px; height: 55px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-product-img img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .card-details {
+            display: flex; flex-direction: column; justify-content: center; flex-grow: 1; overflow: hidden;
+        }
+
+        .card-header {
+            display: flex; gap: 8px; align-items: center; margin-bottom: 4px;
+        }
+
+        .card-title-group {
+            flex-grow: 1; overflow: hidden;
+        }
+
+        .product-name {
+            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--table-red);
+            margin: 0 0 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        .product-tagline {
+            font-family: 'Playfair Display', serif; font-style: italic; font-size: 11px; color: var(--text-dark);
+            margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .prices-row {
+            display: flex; gap: 5px; align-items: center;
+        }
+        
+        .price-box {
+            display: flex; flex-direction: row; align-items: baseline; justify-content: center; gap: 4px;
+            background: rgba(0,0,0,0.03);
+            border: 1px dashed rgba(212,175,55,0.6);
+            padding: 3px 6px; border-radius: 4px;
+            flex: 1;
+        }
+        
+        .price-label { font-size: 9px; font-weight: 700; color: var(--text-dark); text-transform: uppercase; text-align: center; }
+        .price-val { font-size: 13px; font-weight: 800; color: var(--table-green); }
+        
+        .price-rtc { flex: none; width: 100%; display: flex; justify-content: center; gap: 10px; padding: 2px 10px; box-sizing: border-box; flex-direction: row; }
+        .price-rtc .price-label { font-size: 10px; }
+        .price-rtc .price-val { font-size: 14px; }
+
+        /* Footer */
+        .footer {
+            position: relative; z-index: 2;
+            margin-top: auto;
+            background: #fff;
+            color: var(--text-dark);
+            padding: 12px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 5px solid var(--copper-primary);
+        }
+        
+        .footer-left {
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .footer-left .fw-bold { font-size: 14px; font-weight: 700; }
+        .footer-left .fw-small { font-size: 12px; font-weight: 500; }
+        
+        .footer-center {
+            display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; line-height: 1.2;
+        }
+        .footer-center i { font-size: 32px; color: #25D366; }
+
+        .footer-right {
+            text-align: right; display: flex; align-items: center; gap: 12px;
+        }
+        .footer-right .fw-bold { font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; gap: 8px;}
+        .footer-right .fw-bold i { color: var(--table-red); font-size: 20px;}
+        .footer-right .fw-small { font-size: 12px; font-weight: 500; margin-bottom: 3px; }
+        .footer-qr { width: 55px; height: 55px; border: 2px solid var(--copper-primary); border-radius: 4px; padding: 2px; background: #fff; }
+    </style>
+</head>
+<body>
+    <main class="poster-container" id="poster">
+        <!-- Background Ingredients (Injected dynamically) -->
+        <div id="bgScatterContainer"></div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <img src="Logos/TD Main Company Logo.png" alt="Telugu Delicacies" class="header-logo">
+            </div>
+            <div class="header-right">
+                <h1 class="brand-title">Telugu Delicacies</h1>
+                <h2 class="brand-subtitle">Modern Yet Traditional</h2>
+                <p class="brand-telugu">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
+                <p class="brand-desc">Experience traditional recipes elevated by premium ingredients. We bring you heirloom flavours, perfected with modern care.</p>
+                <div class="contact-info">
+                    <i class="fab fa-whatsapp"></i> / <i class="fas fa-phone-alt"></i> +91 96185 19191
+                </div>
+            </div>
+        </header>
+
+        <h2 class="catalogue-heading">COMPLETE PRODUCT CATALOGUE</h2>
+
+        <!-- Main Content -->
+        <div class="content" id="productContent">
+            <!-- Categories injected here -->
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-left">
+                <div class="fw-bold">Net Wt: 100Gms & 250Gms |</div>
+                <div class="fw-small">Other Sizes & Bulk Quantities<br>Available on Request</div>
+            </div>
+            <div class="footer-center">
+                <i class="fab fa-whatsapp"></i>
+                <div>
+                    Order via<br>WhatsApp:<br><span style="color:var(--table-red)">+91 96185 19191</span>
+                </div>
+            </div>
+            <div class="footer-right">
+                <div>
+                    <div class="fw-small">Browse & Order online at:</div>
+                    <div class="fw-bold"><i class="fas fa-globe"></i> telugudelicacies.com</div>
+                </div>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=a4161a&data=https://telugudelicacies.com" class="footer-qr" alt="Website QR Code">
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // Will be populated by Puppeteer
+        window.loadCatalogue = function(categories, backgroundImages) {
+            
+            // 1. Scatter Backgrounds densely
+            const bgContainer = document.getElementById('bgScatterContainer');
+            const positions = [];
+            const rows = 10;
+            const cols = 5;
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<cols; c++) {
+                    positions.push({
+                        t: ((r / rows) * 100 + (Math.random() * 4 - 2)) + '%',
+                        l: ((c / cols) * 100 + (Math.random() * 4 - 2)) + '%',
+                        s: 90 + Math.random() * 120
+                    });
+                }
+            }
+            
+            positions.forEach((pos, idx) => {
+                const imgName = backgroundImages[idx % backgroundImages.length];
+                const img = document.createElement('img');
+                img.src = `Ingredient Images/${imgName}`;
+                img.className = 'bg-scatter';
+                img.style.width = pos.s + 'px';
+                img.style.height = 'auto';
+                if(pos.t) img.style.top = pos.t;
+                if(pos.l) img.style.left = pos.l;
+                
+                // Random rotation
+                const rot = Math.floor(Math.random() * 360);
+                img.style.transform = `rotate(${rot}deg)`;
+                
+                bgContainer.appendChild(img);
+            });
+            
+            // 2. Render Products
+            const content = document.getElementById('productContent');
+            
+            for (const cat of categories) {
+                const group = document.createElement('div');
+                group.className = 'category-group';
+                
+                // Only render category header if there are products
+                if (cat.products.length > 0) {
+                    const title = document.createElement('div');
+                    title.className = 'category-title';
+                    title.innerText = cat.name;
+                    group.appendChild(title);
+                }
+                
+                const grid = document.createElement('div');
+                grid.className = 'products-grid';
+                
+                for (const p of cat.products) {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    
+                    let cardBgColor = 'rgba(255, 255, 255, 0.95)';
+                    switch(cat.name) {
+                        case 'General': cardBgColor = 'rgba(255, 225, 215, 0.95)'; break; // Reddish/copper
+                        case 'Nutty': cardBgColor = 'rgba(255, 230, 205, 0.95)'; break; // Orange/brown
+                        case 'Leafy': cardBgColor = 'rgba(215, 245, 220, 0.95)'; break; // Green
+                        case 'Sprinkling': cardBgColor = 'rgba(255, 240, 190, 0.95)'; break; // Yellow
+                        case 'Healthy': cardBgColor = 'rgba(210, 235, 255, 0.95)'; break; // Blue
+                        case 'Tasty Pinch': cardBgColor = 'rgba(255, 220, 240, 0.95)'; break; // Pink
+                        case 'Ready to Cook':
+                        case 'Ready To Cook': cardBgColor = 'rgba(230, 230, 230, 0.95)'; break; // Grey
+                    }
+                    card.style.background = cardBgColor;
+                    
+                    let productPhotoSrc = 'https://via.placeholder.com/45?text=P';
+                    if (p.photo_standup && p.photo_standup.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_standup}`;
+                    } else if (p.photo_jar && p.photo_jar.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_jar}`;
+                    } else if (p.photo_1kg && p.photo_1kg.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_1kg}`;
+                    } else if (p.photo_one_unit && p.photo_one_unit.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_one_unit}`;
+                    }
+
+                    let pricesHtml = '';
+                    if (cat.name === 'Ready to Cook' || cat.name === 'Ready To Cook' || p.product_category === 'ready-to-cook') {
+                        pricesHtml = `
+                            <div class="prices-row">
+                                <div class="price-box price-rtc">
+                                    <span class="price-label">1 Unit</span>
+                                    <span class="price-val">₹${p.price_one_unit_pouch}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        pricesHtml = `
+                            <div class="prices-row">
+                                <div class="price-box">
+                                    <span class="price-label">100g Glass</span>
+                                    <span class="price-val">₹${p.price_100g_glass_jar || '-'}</span>
+                                </div>
+                                <div class="price-box">
+                                    <span class="price-label">100g Pouch</span>
+                                    <span class="price-val">₹${p.price_100g_standup || '-'}</span>
+                                </div>
+                                <div class="price-box">
+                                    <span class="price-label">250g Pouch</span>
+                                    <span class="price-val">₹${p.price_250g_standup || '-'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="card-product-img">
+                            <img src="${productPhotoSrc}" alt="">
+                        </div>
+                        <div class="card-details">
+                            <div class="card-header">
+                                <div class="card-title-group">
+                                    <h4 class="product-name">${p.product_name}</h4>
+                                    <p class="product-tagline">${p.product_tagline || ''}</p>
+                                </div>
+                            </div>
+                            ${pricesHtml}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+                
+                group.appendChild(grid);
+                content.appendChild(group);
+            }
+        };
+    </script>
+</body>
+</html>

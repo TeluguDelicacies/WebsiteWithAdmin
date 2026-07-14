@@ -26,39 +26,68 @@ async function fetchProducts() {
     return products;
 }
 
+function parseCSV(content) {
+    let rows = [];
+    let currentRow = [];
+    let currentVal = '';
+    let quote = false;
+    for (let i = 0; i < content.length; i++) {
+        let cc = content[i], nc = content[i+1];
+        if (cc === '"' && quote && nc === '"') {
+            currentVal += '"';
+            i++;
+            continue;
+        }
+        if (cc === '"') {
+            quote = !quote;
+            continue;
+        }
+        if (cc === ',' && !quote) {
+            currentRow.push(currentVal.trim());
+            currentVal = '';
+            continue;
+        }
+        if ((cc === '\n' || cc === '\r') && !quote) {
+            if (cc === '\r' && nc === '\n') i++;
+            if (currentVal || currentRow.length > 0) {
+                currentRow.push(currentVal.trim());
+                rows.push(currentRow);
+                currentRow = [];
+                currentVal = '';
+            }
+            continue;
+        }
+        currentVal += cc;
+    }
+    if (currentVal || currentRow.length > 0) {
+        currentRow.push(currentVal.trim());
+        rows.push(currentRow);
+    }
+    return rows;
+}
+
 // Fallback method to test with local CSV if Supabase isn't fully setup with these exact columns yet
 function fetchProductsFromLocalCSV() {
     const csvPath = path.join(__dirname, '../Data for Catalogue/master_product_data_v2.csv');
     if (!fs.existsSync(csvPath)) return [];
     
     const content = fs.readFileSync(csvPath, 'utf8');
-    const rows = content.split('\n');
-    const headers = rows[0].split(',').map(h => h.trim());
+    const rows = parseCSV(content);
+    if (rows.length === 0) return [];
     
+    const headers = rows[0];
     const products = [];
-    let quote = false;
+    
     for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
-        if (!row.trim()) continue;
-        
-        let col = 0;
+        if (row.length === 0) continue;
         let p = {};
-        let currentVal = '';
-        for (let c = 0; c < row.length; c++) {
-            let cc = row[c], nc = row[c+1];
-            if (cc === '"' && quote && nc === '"') { currentVal += cc; ++c; continue; }
-            if (cc === '"') { quote = !quote; continue; }
-            if (cc === ',' && !quote) { 
-                p[headers[col]] = currentVal;
-                col++;
-                currentVal = '';
-                continue; 
-            }
-            currentVal += cc;
+        for (let j = 0; j < headers.length; j++) {
+            p[headers[j]] = row[j] || '';
         }
-        p[headers[col]] = currentVal;
         products.push(p);
     }
+    
     return products;
 }
 
@@ -100,19 +129,14 @@ async function generateCatalogues() {
     const availableIngredientImages = fs.existsSync(ingredientImagesDir) ? fs.readdirSync(ingredientImagesDir) : [];
 
     function findBestImageMatch(ingredientName) {
-        if (!ingredientName) return '';
+        if (!ingredientName || ingredientName === '0' || ingredientName === 0) return '';
         let target = String(ingredientName).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
         if (!target) return '';
         
         // Exact substring
         for (let img of availableIngredientImages) {
-            let imgBase = img.replace(/\.png$/i, '').toLowerCase();
+            let imgBase = img.replace(/\.png$/i, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
             if (imgBase === target) return path.join(ingredientImagesDir, img);
-        }
-        // Substring
-        for (let img of availableIngredientImages) {
-            let imgBase = img.replace(/\.png$/i, '').toLowerCase();
-            if (imgBase.includes(target) || target.includes(imgBase)) return path.join(ingredientImagesDir, img);
         }
         return '';
     }
@@ -121,14 +145,23 @@ async function generateCatalogues() {
     for (const product of products) {
         const safeName = (product.product_name || 'Unknown').replace(/[^a-z0-9]/gi, '_').toLowerCase();
         
+        if (product.product_name === 'Karivepaku Podi') {
+            product.photo_glass_jar = 'Karivepaku Podi_Cylindrical_Glass_Jar.png';
+            product.photo_standup_pouch = 'Karivepaku Podi_Standup_Pouch.png';
+        }
+        if (product.product_name === 'Palli Kaaram') {
+            product.photo_glass_jar = 'Palli Kaaram_Cylindrical_Glass_Jar.png';
+            product.photo_standup_pouch = 'Palli Kaaram_Standup_Pouch.png';
+        }
+        
         const jarFilename = product.photo_glass_jar || `${product.product_name}_Cylindrical_Glass_Jar.png`;
         const pouchFilename = product.photo_standup_pouch || `${product.product_name}_Standup_Pouch.png`;
         
         const localJar = path.join(__dirname, '../Data for Catalogue/All Photos Dump NO BackGround', jarFilename);
         const localPouch = path.join(__dirname, '../Data for Catalogue/All Photos Dump NO BackGround', pouchFilename);
         
-        product.jarImgUrl = fs.existsSync(localJar) ? `file://${localJar}` : `https://via.placeholder.com/200x250/fff/999?text=Jar`;
-        product.pouchImgUrl = fs.existsSync(localPouch) ? `file://${localPouch}` : `https://via.placeholder.com/250x300/fff/999?text=Pouch`;
+        product.jarImgUrl = fs.existsSync(localJar) ? `file://${localJar}` : null;
+        product.pouchImgUrl = fs.existsSync(localPouch) ? `file://${localPouch}` : null;
         
         const hero1Path = findBestImageMatch(product.hero_ingredient_1);
         if (hero1Path) product.hero1ImgUrl = `file://${hero1Path}`;

@@ -752,6 +752,34 @@ function generateSlug(name) {
         .replace(/-+/g, '-');
 }
 
+// Helper: Generate Product Sales Page Link
+window.generateProductLink = function(product, variantQuantity) {
+    if (!product) return '/';
+    let catSlug = '';
+    const pCat = (product.product_category || '').toLowerCase().trim();
+    const cats = window.allCategoriesCache || (window.state && window.state.categories) || [];
+    
+    const match = cats.find(c => {
+        const cSlug = (c.slug || '').toLowerCase();
+        const cName = (c.category_name || '').toLowerCase();
+        return cSlug === pCat.replace(/\s+/g, '-') || cName === pCat;
+    });
+    
+    if (match) {
+        catSlug = match.slug;
+    } else if (pCat) {
+        catSlug = pCat.replace(/\s+/g, '-');
+    }
+    
+    const slug = product.slug || product.id;
+    let link = catSlug ? '/' + catSlug + '/' + slug : '/' + slug;
+    
+    if (variantQuantity) {
+        link += '?variant=' + encodeURIComponent(variantQuantity);
+    }
+    return link;
+};
+
 // ----------------------------------------------------
 // CLIENT-SIDE ROUTING (Clean URLs)
 // ----------------------------------------------------
