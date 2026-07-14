@@ -43,7 +43,7 @@ async function main() {
 
         if (products) {
             for (const p of products) {
-                const link = p.slug ? `${SITE_URL}/sales/${p.slug}` : '';
+                const link = p.slug ? `${SITE_URL}/${p.slug}` : '';
                 rows.push([
                     p.id,
                     p.product_name,
@@ -58,7 +58,7 @@ async function main() {
 
         if (combos) {
             for (const c of combos) {
-                const link = c.slug ? `${SITE_URL}/sales/${c.slug}` : '';
+                const link = c.slug ? `${SITE_URL}/${c.slug}` : '';
                 rows.push([
                     c.id,
                     c.name,

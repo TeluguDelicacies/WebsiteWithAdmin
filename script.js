@@ -415,7 +415,7 @@ window.showQuickPreview = function (product) {
     // View Details button - link to sales page
     const productSlug = product.slug || product.id;
     const defaultVariant = sortedVariants[0];
-    viewBtn.href = `/sales/${productSlug}${defaultVariant ? `?variant=${encodeURIComponent(defaultVariant.quantity)}` : ''}`;
+    viewBtn.href = `/${productSlug}${defaultVariant ? `?variant=${encodeURIComponent(defaultVariant.quantity)}` : ''}`;
 
     // Reset flip state on parent gallery
     const gallery = document.querySelector('.quick-preview-gallery');
@@ -513,7 +513,7 @@ window.selectQuickPreviewVariant = function (index) {
     const product = window.quickPreviewState.product;
     if (viewBtn && product) {
         const productSlug = product.slug || product.id;
-        viewBtn.href = `/sales/${productSlug}?variant=${encodeURIComponent(variant.quantity)}`;
+        viewBtn.href = `/${productSlug}?variant=${encodeURIComponent(variant.quantity)}`;
     }
 
     // Check for Matching Image based on Packaging Type
@@ -761,7 +761,7 @@ function generateSlug(name) {
 window.handleLinkClick = function (e, path) {
     // FIX: Force hard navigation for Sales Page links
     // This fixes the "View All" bug where SPA router tried (and failed) to load sales.html content
-    if (path.includes('/sales/')) {
+    if (path !== '/' && !path.includes('.html')) {
         return; // Allow default browser behavior (hard reload)
     }
 
@@ -804,11 +804,11 @@ window.handleRouting = async function () {
     const path = window.location.pathname;
 
     // 1. Handle Sales/Category or Product URLs
-    // Expected format: /sales/screen-slug (where screen-slug could be product or category)
-    // Or just /slug if at root, but user asked for /sales/slug
+    // Expected format: /screen-slug (where screen-slug could be product or category)
+    // Or just /slug if at root, but user asked for /slug
 
-    // We check if path matches /sales/something
-    const match = path.match(/\/sales\/([^\/]+)/);
+    // We check if path matches /something
+    const match = path.match(/^\/([^\/]+)$/);
 
     if (match && match[1]) {
         const slug = match[1];
@@ -3058,7 +3058,7 @@ async function addComboToCart(comboId) {
         showToast(`Adding "${combo.name}" to cart...`, 'info');
 
         // Redirect to combo page where user can configure and add to cart
-        window.location.href = `/sales/${combo.slug}?addToCart=true`;
+        window.location.href = `/${combo.slug}?addToCart=true`;
 
     } catch (err) {
         console.error('Error adding combo to cart:', err);
@@ -3088,7 +3088,7 @@ window.buyComboViaWhatsApp = buyComboViaWhatsApp;
  * @param {string} slug - Combo URL slug
  */
 function viewComboDetails(slug) {
-    window.location.href = `/sales/${slug}`;
+    window.location.href = `/${slug}`;
 }
 window.viewComboDetails = viewComboDetails;
 
@@ -3100,7 +3100,7 @@ window.openComboDetail = function (event, slug) {
     if (event.target.closest('button')) {
         return;
     }
-    window.location.href = `/sales/${slug}`;
+    window.location.href = `/${slug}`;
 };
 
 /**
@@ -3577,7 +3577,7 @@ function renderProducts(products, categories) {
 
                         // SALES MODE CHECK
                         if (window.currentSiteSettings?.sales_mode_enabled) {
-                            window.location.href = `/sales/${product.slug || product.id}`;
+                            window.location.href = `/${product.slug || product.id}`;
                             return;
                         }
 
@@ -3995,7 +3995,7 @@ function renderQuickLayout(products, categories, container) {
                 </div>
                 <!-- Independent View All Button Positioned via CSS -->
                 <div class="quick-header-action">
-                    <a href="/sales/${cat.slug}" onclick="handleLinkClick(event, '/sales/${cat.slug}')" class="view-all-link mobile-compact-btn">View All <i class="fas fa-chevron-right"></i></a>
+                    <a href="/${cat.slug}" onclick="handleLinkClick(event, '/sales/${cat.slug}')" class="view-all-link mobile-compact-btn">View All <i class="fas fa-chevron-right"></i></a>
                 </div>
             </div>
             <div class="quick-product-scroll" id="scroll-${cat.slug}">
@@ -4226,7 +4226,7 @@ function renderQuickProductsHTML(products, showMrp) {
 window.openQuickProductModal = function (productId) {
     if (window.currentSiteSettings?.sales_mode_enabled) {
         const product = (window.allProductsCache || []).find(p => String(p.id) === String(productId));
-        window.location.href = `/sales/${product?.slug || productId}`;
+        window.location.href = `/${product?.slug || productId}`;
         return;
     }
 

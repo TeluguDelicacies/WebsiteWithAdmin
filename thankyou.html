@@ -62,12 +62,12 @@
                     </div>
                 </a>
                 <nav class="desktop-nav">
-                    <a href="/sales/all-products" class="nav-btn" data-tooltip="Our Products">
+                    <a href="/all-products" class="nav-btn" data-tooltip="Our Products">
                         <i class="fas fa-utensils"></i>
                     </a>
                 </nav>
                 <div class="mobile-actions">
-                    <a href="/sales/all-products" class="nav-btn" data-tooltip="Our Products">
+                    <a href="/all-products" class="nav-btn" data-tooltip="Our Products">
                         <i class="fas fa-utensils"></i>
                     </a>
                 </div>
@@ -99,7 +99,7 @@
 
         <!-- CTAs right in the hero — visible in first viewport -->
         <div class="ty-cta-group">
-            <a href="/sales/all-products" class="ty-cta-btn ty-cta-primary" id="browseProductsBtn">
+            <a href="/all-products" class="ty-cta-btn ty-cta-primary" id="browseProductsBtn">
                 <i class="fas fa-utensils"></i>
                 Browse Products
             </a>
@@ -121,7 +121,7 @@
             <div class="ty-products-scroll" id="productScroll">
                 <!-- Populated by JS — trending products only -->
             </div>
-            <a href="/sales/all-products" class="ty-view-all">View All Products →</a>
+            <a href="/all-products" class="ty-view-all">View All Products →</a>
         </div>
     </section>
 
@@ -320,7 +320,7 @@
                 const price = cheapestVariant?.price || '';
 
                 return `
-                    <a href="/sales/${slug}" class="ty-product-card">
+                    <a href="/${slug}" class="ty-product-card">
                         <img src="${imageUrl}" alt="${p.product_name}" loading="lazy">
                         <div class="ty-product-card-info">
                             <div class="ty-product-card-name">${p.product_name}</div>

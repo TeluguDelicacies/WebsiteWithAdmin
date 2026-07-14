@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Catalogue Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-sand: #f4e8d3;
+            --copper-primary: #b8623b;
+            --copper-dark: #8c4222;
+            --text-dark: #3a2214;
+            --text-light: #fef7ec;
+            --wood-bg: #5c3a21;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: #222; display: flex; flex-direction: column; align-items: center; padding-bottom: 50px; }
+
+        /* Controls (No Print) */
+        .controls {
+            width: 100%;
+            background: #111;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            align-items: center;
+        }
+        .controls select, .controls button {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .controls select { background: #fff; width: 250px; }
+        .controls button { background: var(--copper-primary); color: white; transition: 0.2s; }
+        .controls button:hover { background: var(--copper-dark); }
+        .controls .hint { color: #aaa; font-size: 12px; margin-left: 10px; }
+
+        /* A4 Poster Container */
+        .poster-container {
+            width: 794px; /* A4 width at 96dpi */
+            height: 1123px; /* A4 height at 96dpi */
+            background-color: var(--bg-sand);
+            position: relative;
+            margin-top: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 35px;
+            border: 12px solid var(--copper-primary);
+        }
+
+        .editable:hover {
+            outline: 2px dashed rgba(184, 98, 59, 0.5);
+            background: rgba(255,255,255,0.2);
+        }
+        .editable:focus {
+            outline: 2px solid var(--copper-primary);
+            background: rgba(255,255,255,0.5);
+        }
+
+        .image-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .image-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .image-upload-wrapper::after {
+            content: "\f03e";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.2s; pointer-events: none;
+        }
+        .image-upload-wrapper:hover::after { opacity: 1; }
+
+        /* Rangoli Background */
+        .poster-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png');
+            background-position: 
+                -100px -100px,
+                85% -20px,
+                -30px 45%,
+                105% 50%,
+                15% 102%,
+                50% 15%,
+                110% 110%;
+            background-size: 
+                400px,
+                220px,
+                150px,
+                480px,
+                180px,
+                120px,
+                380px;
+            background-repeat: no-repeat;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Typography */
+        .category-badge {
+            display: inline-block; color: white; padding: 4px 15px; border-radius: 12px;
+            font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; z-index: 10;
+        }
+        .title-section { text-align: center; position: relative; z-index: 10; width: 100%; text-shadow: 0 0 10px var(--bg-sand), 0 0 20px var(--bg-sand), 0 0 30px var(--bg-sand); padding: 0 160px; }
+        .product-title-en { font-family: 'Cinzel', serif; font-size: 28px; color: var(--copper-dark); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; line-height: 1.1; }
+        .product-title-te { font-family: 'Inter', sans-serif; font-size: 20px; color: var(--copper-primary); font-weight: 700; margin-bottom: 5px; }
+        .product-tagline { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text-dark); font-style: italic; margin-bottom: 8px; }
+        .product-desc { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text-dark); margin: 0 auto; line-height: 1.5; font-weight: 500; max-width: 450px; }
+
+        /* Hero Overlapping Layout */
+        .hero-container {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 280px;
+            margin-bottom: 25px;
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+        .hero-stage {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+        }
+        .product-jar, .product-pouch {
+            position: relative;
+            z-index: 2;
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.4));
+        }
+        .product-col { position: absolute; z-index: 2; bottom: 0; display: flex; flex-direction: column; align-items: center; }
+        .product-col.jar { left: -5%; }
+        .product-col.pouch { right: -5%; }
+        .product-jar { height: 210px; margin-bottom: 10px; transform: scale(1.2); }
+        .product-pouch { height: 220px; }
+        .brand-logo { height: 40px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+
+        /* Copper Panel Base */
+        .copper-panel {
+            background: linear-gradient(135deg, #e3cdb1, #fcf4e8, #e3cdb1);
+            padding: 15px;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(184, 98, 59, 0.2), 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        /* 3 Styles of Borders */
+        .copper-panel.border-style-1 {
+            border: 3px solid var(--copper-primary);
+            border-radius: 12px;
+        }
+        .copper-panel.border-style-2 {
+            border: 5px double var(--copper-dark);
+            border-radius: 4px;
+        }
+        .copper-panel.border-style-3 {
+            border: 2px dashed var(--copper-primary);
+            border-radius: 20px;
+        }
+        .copper-panel::before, .copper-panel::after,
+        .copper-panel-inner::before, .copper-panel-inner::after {
+            content: ""; position: absolute; width: 8px; height: 8px;
+            background: var(--copper-dark); border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.5), inset -1px -1px 2px rgba(0,0,0,0.5);
+        }
+        .copper-panel::before { top: 8px; left: 8px; }
+        .copper-panel::after { top: 8px; right: 8px; }
+        .copper-panel-inner::before { bottom: 8px; left: 8px; }
+        .copper-panel-inner::after { bottom: 8px; right: 8px; }
+
+        .panel-title {
+            position: absolute;
+            top: -14px; left: 50%; transform: translateX(-50%);
+            background: var(--copper-dark);
+            color: var(--text-light);
+            padding: 2px 20px;
+            border-radius: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border: 2px solid var(--bg-sand);
+            white-space: nowrap;
+        }
+
+        /* Ingredients Section */
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .hero-ingredients {
+            display: flex; gap: 15px; align-items: center;
+        }
+        .hero-ing-item { text-align: center; }
+        .hero-ing-item img {
+            width: 70px; height: 70px; object-fit: cover; border-radius: 50%;
+            border: 2px solid var(--copper-primary);
+            background: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .hero-ing-name { font-size: 12px; font-weight: 600; margin-top: 5px; color: var(--copper-dark); }
+        .remove-btn { position: absolute; top: -5px; right: -5px; background: var(--copper-primary); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; border: 1px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s; }
+        .remove-btn:hover { background: #e74c3c; transform: scale(1.1); }
+        .all-ingredients { font-size: 13px; line-height: 1.5; color: var(--text-dark); }
+        
+        /* Badges */
+        .badges-container {
+            display: flex; justify-content: space-between; margin-bottom: 15px; position: relative; z-index: 1;
+        }
+        .badge {
+            background: #fff; border: 2px solid var(--copper-primary);
+            padding: 5px 10px; border-radius: 20px; font-size: 11px;
+            font-weight: 600; color: var(--copper-dark);
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .badge i { font-size: 14px; }
+
+        /* Pricing Section */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px; margin-top: 10px;
+        }
+        .price-col { display: flex; align-items: center; gap: 15px; }
+        .price-icon { width: 40px; height: 50px; background: #ddd; border-radius: 4px; border: 2px solid var(--copper-primary); }
+        .price-icon.jar { border-radius: 10px 10px 5px 5px; }
+        .price-details h4 { font-family: 'Cinzel', serif; font-size: 14px; color: var(--copper-dark); margin-bottom: 5px; }
+        .price-line { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .price-line span { color: var(--copper-dark); margin-left: 10px; font-size: 14px; }
+
+        /* How to Use */
+        .how-to-use { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+        .how-to-icons { display: flex; gap: 10px; font-size: 24px; color: var(--copper-dark); }
+        .how-to-text { font-size: 13px; line-height: 1.4; font-weight: 500; }
+
+        /* Nutrition */
+        .nutrition-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .nutrition-table td { padding: 8px 10px; border-bottom: 1px dashed rgba(184, 98, 59, 0.4); color: var(--text-dark); }
+        .nutrition-table tr:last-child td { border-bottom: none; }
+        .nutrition-table td span { font-weight: 700; color: var(--copper-dark); float: right; }
+        .nutrition-header { text-align: right; font-weight: 700; color: var(--copper-dark); font-size: 11px; padding-bottom: 5px; }
+
+        /* Footer */
+        .footer-grid { margin-top: 25px; position: relative; z-index: 1; padding-top: 15px; border-top: 2px solid var(--copper-primary); display: flex; justify-content: space-between; align-items: stretch; gap: 15px; }
+        .footer-logo { flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+        .footer-info { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; text-align: left; }
+        .footer-brand { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--copper-dark); }
+        .footer-tag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--text-dark); margin-bottom: 4px; }
+        .footer-details { font-size: 11px; font-weight: 600; color: var(--text-dark); line-height: 1.4; }
+        .website-qr { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+        .website-qr img { height: 70px; border: 2px solid var(--copper-primary); border-radius: 4px; padding: 2px; background: white; margin-bottom: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .website-qr div { font-size: 11px; font-weight: 700; color: var(--copper-dark); letter-spacing: 0.5px; text-transform: uppercase; }
+        .shelf-life { background: var(--copper-dark); color: white; padding: 4px 12px; border-radius: 4px; text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px; display: inline-block; margin-bottom: 5px; }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .controls { display: none; }
+            .poster-container { margin: 0; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <select id="productSelect" onchange="loadProduct(this.value)">
+            <option value="">Select a Product...</option>
+        </select>
+        <select id="borderSelect" onchange="changeBorders(this.value)">
+            <option value="border-style-1">Classic Copper Border</option>
+            <option value="border-style-2">Double Elegance Border</option>
+            <option value="border-style-3">Dashed Rustic Border</option>
+        </select>
+        <button onclick="downloadPNG()"><i class="fas fa-download"></i> Download PNG</button>
+        <button onclick="window.print()"><i class="fas fa-print"></i> Print PDF</button>
+        <div class="hint">Hover over text to edit directly. Click images to replace them.</div>
+    </div>
+
+    <div class="poster-container" id="poster">
+        
+        <div class="hero-container">
+            <div class="hero-stage">
+                <div class="product-col jar">
+                    <div class="image-upload-wrapper">
+                        <input type="file" onchange="previewImage(this, 'jarImg')">
+                        <img id="jarImg" class="product-jar" src="https://via.placeholder.com/200x250/fff/999?text=Glass+Jar" alt="Glass Jar">
+                    </div>
+                </div>
+                <div class="product-col pouch">
+                    <div class="image-upload-wrapper">
+                        <input type="file" onchange="previewImage(this, 'pouchImg')">
+                        <img id="pouchImg" class="product-pouch" src="https://via.placeholder.com/250x300/fff/999?text=Standup+Pouch" alt="Standup Pouch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="title-section">
+                <div class="category-badge editable" id="pCategory" style="margin-bottom: 5px;">HEALTHY</div>
+                <h1 class="product-title-en editable" id="pTitleEn">Avisaginjala Kaaram</h1>
+                <h2 class="product-title-te editable" id="pTitleTe">అవిసగింజల కారం</h2>
+                <p class="product-tagline editable" id="pTagline">Healthy Bite, Enriched with Ragi!</p>
+                <div class="product-desc editable" id="pDesc">A wholesome podi enriched with flax seeds and finger millet (ragi). Nutty, spicy, and lightly sweet, it delivers nutrition and taste in every bite.</div>
+            </div>
+        </div>
+
+        <div class="copper-panel border-style-1">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">WHAT'S INSIDE</div>
+            <div class="ingredients-grid">
+                <div>
+                    <div class="hero-ingredients">
+                        <div class="hero-ing-item">
+                            <div class="image-upload-wrapper">
+                                <input type="file" onchange="previewImage(this, 'hero1Img')">
+                                <img id="hero1Img" src="https://via.placeholder.com/70" alt="Hero 1">
+                            </div>
+                            <div class="hero-ing-name editable" id="pHero1Name">Flax Seeds</div>
+                        </div>
+                        <div class="hero-ing-item">
+                            <div class="image-upload-wrapper">
+                                <input type="file" onchange="previewImage(this, 'hero2Img')">
+                                <img id="hero2Img" src="https://via.placeholder.com/70" alt="Hero 2">
+                            </div>
+                            <div class="hero-ing-name editable" id="pHero2Name">Cardamom</div>
+                        </div>
+                        <div class="hero-ing-item" id="hero3Container" style="position: relative;">
+                            <span onclick="document.getElementById('hero3Container').style.display='none'" class="remove-btn" title="Remove"><i class="fas fa-times"></i></span>
+                            <div class="image-upload-wrapper">
+                                <input type="file" onchange="previewImage(this, 'hero3Img')">
+                                <img id="hero3Img" src="https://via.placeholder.com/70" alt="Hero 3">
+                            </div>
+                            <div class="hero-ing-name editable" id="pHero3Name">Ingredient 3</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <strong style="font-size: 14px; color: var(--copper-dark);">Ingredients:</strong>
+                    <div class="all-ingredients editable" id="pIngredients">Flax Seeds, Urad Dal, Peanuts, Finger Millet, Dry Red Chilly, Salt, Garlic, Cloves, Tamarind, Jaggery, Cardamom, Curry Leaf, Cinnamon</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="badges-container">
+            <div class="badge"><i class="fas fa-leaf" style="color: green;"></i> <span class="editable" id="pVeg">Veg</span></div>
+            <div class="badge"><i class="fas fa-seedling" style="color: darkgreen;"></i> <span class="editable" id="pVegan">Vegan</span></div>
+            <div class="badge"><i class="fas fa-shield-alt"></i> Zero Added Preservatives</div>
+            <div class="badge"><i class="fas fa-peanut"></i> <span class="editable" id="pNuts">Contains Nuts</span></div>
+            <div class="badge"><i class="fas fa-om" style="color: #d35400;"></i> <span class="editable" id="pJain">Jain Friendly</span></div>
+        </div>
+
+        <div class="copper-panel border-style-1">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">AVAILABLE SIZES</div>
+            <div class="pricing-grid">
+                <div class="price-col">
+                    <div class="image-upload-wrapper">
+                        <input type="file" onchange="previewImage(this, 'jarLogo')">
+                        <img id="jarLogo" class="price-icon jar" style="border: none; background: transparent; object-fit: contain; padding: 2px; width: 55px; height: 55px;" src="Logos/Teepi-Gurthu-Logo For GLass BOttle.png" alt="Teepi Gurthu Logo">
+                    </div>
+                    <div class="price-details">
+                        <h4>GLASS JAR:</h4>
+                        <div class="price-line editable" id="pPriceJar">100g Glass Jar <span>₹105</span></div>
+                    </div>
+                </div>
+                <div class="price-col">
+                    <div class="image-upload-wrapper">
+                        <input type="file" onchange="previewImage(this, 'pouchLogo')">
+                        <img id="pouchLogo" class="price-icon" style="border: none; background: transparent; object-fit: contain; padding: 2px; width: 55px; height: 55px;" src="Logos/Akshaya-Logo FOr all ouch.png" alt="Akshaya Logo">
+                    </div>
+                    <div class="price-details">
+                        <h4>STAND-UP POUCH:</h4>
+                        <div class="price-line editable" id="pPrice100">100g Standup <span>₹55</span></div>
+                        <div class="price-line editable" id="pPrice250">250g Standup <span>₹135</span></div>
+                        <div class="price-line editable" id="pPrice500">500g Pouch <span>₹255</span></div>
+                        <div class="price-line editable" id="pPrice1000">1kg Pouch <span>₹495</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel border-style-1">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">PERFECT PAIRINGS</div>
+            <div class="how-to-use">
+                <div class="how-to-icons">
+                    <i class="fas fa-bowl-rice"></i>
+                    <i class="fas fa-spoon"></i>
+                </div>
+                <div class="how-to-text editable" id="pHowToUse">
+                    Add the desired amount of podi to hot rice. Mix in a spoonful of ghee to enhance the flavor and aroma. Serve warm!
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel border-style-1" style="padding-top: 25px;">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">HEALTH FACTS</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <div class="shelf-life">Shelf Life: <span class="editable" id="pShelf">90 Days</span></div>
+                <div class="nutrition-header editable" id="pNutriServing">(Per serving 5g)</div>
+            </div>
+            <table class="nutrition-table">
+                <tr>
+                    <td>Calories: <span class="editable" id="pCal">20.84 kcal</span></td>
+                    <td>Total Fat: <span class="editable" id="pFat">1.13g</span></td>
+                    <td>Saturated Fat: <span class="editable" id="pSatFat">0.14g</span></td>
+                    <td>Sugars: <span class="editable" id="pSugar">0.21g</span></td>
+                </tr>
+                <tr>
+                    <td>Protein: <span class="editable" id="pPro">0.85g</span></td>
+                    <td>Carbs: <span class="editable" id="pCarb">2.03g</span></td>
+                    <td>Fiber: <span class="editable" id="pFiber">1.1g</span></td>
+                    <td>Sodium: <span class="editable" id="pSod">0.1g</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer-grid">
+            <div class="footer-logo">
+                <div class="image-upload-wrapper" style="display: inline-block;">
+                    <input type="file" onchange="previewImage(this, 'mainLogo')">
+                    <img id="mainLogo" src="Logos/TD Main Company Logo.png" alt="Company Logo" style="height: 70px; object-fit: contain;">
+                </div>
+            </div>
+            <div class="footer-info">
+                <div class="footer-brand editable">Telugu Delicacies</div>
+                <div class="footer-tag editable">Modern Yet Traditional</div>
+                <div class="footer-details editable">
+                    Phone: 9618519191 | Order via WhatsApp: +91 96185 19191<br>
+                    Net Wt: 100GMs & 250GMs | Other Sizes & Bulk Quantities Available on Request<br>
+                    Browse & Order online at: telugudelicacies.com
+                </div>
+            </div>
+            <div class="website-qr">
+                <img id="pWebQR" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://telugudelicacies.com" alt="QR Code">
+                <div class="editable" id="pWeb">SCAN TO ORDER ONLINE</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store raw CSV data
+        const rawCSV = `product_name,product_name_telugu,catalogue_category,product_category,descriptor,product_tagline,product_description,ingredients,hero_ingredient_1,hero_ingredient_2,ingredient_image_1,ingredient_image_2,serving_suggestion,serving_size_g,shelf_life_days,is_refrigerated,is_trending,is_visible,is_veg,contains_garlic,contains_nuts,is_jain,is_vegan,barcode,webpage_url,nutrition_serving_size,nutrition_calories,nutrition_protein,nutrition_total_fat,nutrition_saturated_fat,nutrition_carbs,nutrition_fiber,nutrition_sugars,nutrition_sodium,price_100g_standup,price_250g_standup,price_500g_pouch,price_1kg_pouch,price_100g_glass_jar,price_pouch,photo_standup_pouch,photo_glass_jar,testimonial_name,testimonial_location,testimonial_message,testimonial_rating,data_issues,Remarks
+Avisaginjala Kaaram,అవిసగింజల కారం,Healthy,ready-to-eat,Flaxseed Kaaram Podi,"Healthy Bite, Enriched with Ragi!","A wholesome podi enriched with flax seeds and finger millet (ragi). Nutty, spicy, and lightly sweet, it delivers nutrition and taste in every bite.","Flax Seed, Urad Dal, Peanuts, Finger Millet, Dry Red Chilly, Salt, Garlic, Cloves, Tamarind, Jaggery, Cardamom, Curry Leaf, Cinnamon",Flax Seed,Cardamom,Flax Seeds.png,Cardimom.png,Add the desired amount of podi to hot rice. Mix in a spoonful of ghee to enhance the flavor and aroma. Serve warm!,5,90,FALSE,TRUE,TRUE,Yes,Yes,Yes (Peanuts),No (Garlic),Yes,76712077,https://telugudelicacies.com/sales/avisaginjala-kaaram,5g,20.84kcal,0.85g,1.13g,0.14g,2.03g,1.1g,0.21g,0.1g,55,135,255,495,105,,Avisaginjala Kaaram_Standup_Pouch.png,Avisaginjala Kaaram_Cylindrical_Glass_Jar.png,mn reddy,Hyderabad,Good taste,5,,For all podis in details ctalogue use both images
+Moringa Kaaram,మునగాకు కారం,Healthy,ready-to-eat,Drumstick Leaf Kaaram Podi,Moringa Magic: Nutritious. Natural. Delicious!,"A nutrient-dense South Indian spice blend combining superfood Moringa leaves with roasted lentils and seeds for a savory, earthy flavor. This all-natural ""miracle podi"" delivers a potent boost of vitamins and antioxidants in every spoonful.","Red Gram, Moringa, Chickpea, Pumpkin Seeds, Salt, Dry Red Chilly, Cumin, Black Pepper, Curry Leaf, Mint Leaves, Lemon Salt",Moringa,Black Pepper,Moringa Leaf.png,black_peppercorns_2_1771656623762.png,"Mix the desired amount of this moringa, pumpkin seed blend into hot rice. Stir in a generous serving of ghee for a nutritious meal.",5,90,FALSE,FALSE,TRUE,Yes,No,No,Yes,Yes,76712080,https://telugudelicacies.com/sales/moringa-kaaram,5g,13.43kcal,0.85g,0.39g,0.06g,1.85g,0.62g,0.09g,0.22g,65,160,300,585,115,,Moringa Kaaram_Standup_Pouch.png,Moringa Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Chinthaku Podi,చింతాకు పొడి,Leafy,ready-to-eat,Tamarind Leaf Kaaram Podi,Tangy. Nutty. Traditionally Bold!,"Traditional Andhra spice powder prepared from sun-dried tamarind leaves, roasted lentils, and dried chilies. Brings a rich, tangy punch to meals.","Peanuts, Black Sesame Seeds, Tamarind Leaves, Dry Red Chilly, Garlic, Coriander, Salt",Tamarind Leaf,Peanuts,Dried Leaf.png,peanuts.png,"Add this tangy blend of chinthaku, roasted peanuts, and black sesame to hot rice. Mix in a good serving of ghee and serve warm.",5,60,FALSE,FALSE,TRUE,Yes,Yes,Yes (Peanuts),No (Garlic),Yes,76712091,https://telugudelicacies.com/sales/chinthaku-podi,5g,24.99kcal,0.96g,1.86g,0.3g,1.46g,0.61g,0.13g,0.06g,70,170,325,630,120,,Chintaku Podi_Standup_Pouch.png,Chintaku Podi_Cylindrical_Glass_Jar.png,,,,,,
+Karivepaku Podi,కరివేపాకు పొడి,Leafy,ready-to-eat,Curryleaf Kaaram Podi,Earthy.Spicy. Naturally Good!,"A must-try Andhra specialty made with fragrant curry leaves, dals, and spices. Earthy and wholesome, this podi pairs beautifully with hot rice and ghee for a nourishing meal.","Curry Leaf, Garlic, Urad Dal, Dry Red Chilly, Chickpea, Coriander, Tamarind, Salt, Cumin, Fenugreek",Karivepaku,Chana Dal,Curry Leaf.png,channa dal.png,"Mix the desired amount of this earthy curry leaf, garlic, and tamarind blend into hot rice. Stir in a generous serving of ghee for a comforting, traditional meal.",5,90,FALSE,TRUE,TRUE,Yes,Yes,No,No (Garlic),Yes,76712069,https://telugudelicacies.com/sales/karivepaku-podi,5g,12.71kcal,0.81g,0.2g,0.05g,2.39g,1.33g,0.23g,0.13g,60,145,280,540,110,,Karivepaku Podi_Standup_Pouch.png,Karivepaku Podi_Cylindrical_Glass_Jar.png,,,,,,
+Kothimera Kaaram,కొత్తిమీర కారం,Leafy,ready-to-eat,Coriander Leaves Kaaram Podi,Zesty coriander Spark – Freshness in Every Spoon!,"A vibrant, aromatic spice powder made with fresh sun-dried coriander leaves, roasted dals, and garlic. Earthy and fresh.","Red Chilly Powder, Fresh Coriander, Red Gram, Urad Dal, Salt, Poha, Dry Red Chilly, Cumin, Jaggery, Tamarind",Kothmera,Bellam,Corinader Leaf.png,Jaggery.png,"Toss this flavorful mix of coriander and roasted dals with hot rice and ghee to bring out the rich, herby aroma.",5,60,FALSE,FALSE,TRUE,Yes,No,No,Yes,Yes,76712083,https://telugudelicacies.com/sales/kothimera-kaaram,5g,12.34kcal,0.54g,0.23g,0.04g,2.37g,0.77g,0.48g,0.26g,60,145,280,540,110,,Kothimeera Kaaram_Standup_Pouch.png,Kothimeera Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Pudina Kaaram,పుదిన కారం,Leafy,ready-to-eat,Mint Leaf Kaaram Podi,"Light, Lively & Minty-Perfect!","A refreshing and aromatic South Indian spice blend featuring sun-dried mint, garlic, and roasted lentils for a zesty, herbaceous kick. This flavorful podi acts as a natural palate cleanser while providing a cooling, gut-friendly boost to your daily meals.","Red Chilly Powder, Mint Leaves, Urad Dal, Red Gram, Poha, Salt, Dry Red Chilly, Cumin, Tamarind, Jaggery",Mint Leaves,Red Gram,Mint.png,Reaosted Red Gram.png,"Add this refreshing blend of mint leaves, roasted dals, and a hint of tamarind to hot rice. Mix in a spoonful of ghee and serve warm!",5,60,FALSE,FALSE,TRUE,Yes,No,No,Yes,Yes,76712079,https://telugudelicacies.com/sales/pudina-kaaram,5g,13.89kcal,0.65g,0.26g,0.05g,2.65g,0.95g,0.47g,0.26g,60,145,280,540,110,,Pudina Kaaram_Standup_Pouch.png,Pudina Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Dosa Kaaram,దోశ కారం,Sprinkling,ready-to-eat,,Perfect Spice for Crispy Dosas!,"A flavorful podi crafted for crispy dosas. Made with poha, lentils, and aromatic spices, it adds a nutty, spicy kick that enhances every bite with ghee.","Poha, Chickpea, Urad Dal, Coriander, Red Chilly Powder, Dry Red Chilly, Salt, Cumin, Curry Leaf, Garlic, Marathi Moggu, Cinnamon",Dhaniya,Curry Leaf,coriander_seeds_1771656608535.png,Curry Leaf.png,"Evenly dust this vibrant mix of spices onto your roasting dosa. Finish with a touch of ghee for a spicy, flavorful bite.",5,90,FALSE,FALSE,TRUE,Yes,Yes,No,No (Garlic),Yes,76712078,https://telugudelicacies.com/sales/dosa-kaaram,5g,16.16kcal,0.67g,0.2g,0.02g,3.13g,0.83g,0.17g,0.09g,45,110,210,405,95,,Dosa Kaaram_Standup_Pouch.png,Dosa Kaaram_Cylindrical_Glass_Jar.png,,,,,
+Karnataka Idli Podi,కర్ణాటక ఇడ్లీ పొడి,Sprinkling,ready-to-eat,,Idli’s Best Friends: Ghee & Podi!,"A classic South Indian podi made with chickpeas, urad dal, and spices. Perfectly balanced for hot idlis with ghee, adding a nutty, mildly spicy flavor every time.","Chickpea, Urad Dal, Dry Red Chilly, Salt, Cumin, Black Pepper, Red Chilly Powder, Curry Leaf",Urad Dal,Curry Leaf,Urad Dal.png,Curry Leaf.png,Mix this classic blend of roasted dals and black pepper with a generous spoonful of ghee. Spread it right on top for a perfect bite!,5,90,FALSE,FALSE,TRUE,Yes,No,No,Yes,Yes,76712073,https://telugudelicacies.com/sales/karnataka-idli-podi,5g,17.22kcal,1.03g,0.16g,0.02g,2.91g,1.02g,0.32g,0.08g,50,120,230,450,100,,Karnataka Idli Podi_Standup_Pouch.png,Karnataka Idli Podi_Cylindrical_Glass_Jar.png,,,,,,
+Nalla Kaaram,నల్ల కారం,Sprinkling,ready-to-eat,Hotel Style Idli & Dosa Kaaram,"High fiber, gut-friendly spice!","A wholesome Andhra classic made with tamarind, dals, and garlic. High in fiber and flavor, this podi adds a tangy, spicy twist to everyday favorites.","Dry Red Chilly, Chickpea, Urad Dal, Tamarind, Garlic, Coriander, Cumin, Salt, Ghee, Ginger, Jaggery, Curry Leaf",Dry Red Chilly,Ghee,new Dried Red Chilly.png,Ghee.png,"Enjoy this hotel-style blend of roasted dals, fiery chilies, and garlic. Mix it with ghee to dip soft idlis, or sprinkle it over a roasting dosa!",5,90,FALSE,FALSE,TRUE,Yes,Yes,No,"No (Garlic, Ginger)",No (Ghee),76712062,https://telugudelicacies.com/sales/nalla-kaaram,5g,14.95kcal,0.63g,0.47g,0.15g,2.47g,0.91g,0.52g,0.11g,55,135,255,495,105,,Nalla Kaaram_Standup_Pouch.png,Nalla Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Putnala Podi,పుట్నాల పొడి,Sprinkling,ready-to-eat,Gunpowder,"Flavor-packed, protein-rich!","A protein-rich lentil blend from Kadapa, this podi combines fried gram, coconut, and garlic for a nutty, savory taste. Traditionally enjoyed with pickle rice and ghee for an extra flavor boost.","Fried Gram, Dry Coconut, Garlic, Red Chilly Powder, Salt",Putna,Red Chillies,Putna.png,red chilly powder.png,"Add this classic blend of fried gram, dry coconut, and garlic to hot rice. Mix in a spoonful of ghee and pair with your favorite pickle for a perfect meal!",5,90,FALSE,FALSE,TRUE,Yes,Yes,No,No (Garlic),Yes,76712070,https://telugudelicacies.com/sales/putnala-podi,5g,18kcal,0.9g,0.55g,0.31g,2.53g,0.6g,0.45g,0.06g,50,120,230,450,100,,Putnala Podi_Standup_Pouch.png,Putnala Podi_Cylindrical_Glass_Jar.png,,,,,,
+Kadapa Kaaram,కడప కారం,General,ready-to-eat,Rayalaseema Multipurpose Podi,"Bold flavor, rich and hearty!","A signature Andhra blend that balances peanuts, garlic, and dry coconut with a fiery kick of red chili. Rich, hearty, and versatile — a true taste of Kadapa tradition.","Peanuts, Garlic, Dry Coconut, Cumin, Dry Red Chilly, Coriander, Jaggery, Salt, Red Chilly Powder, Curry Leaf, Lemon Salt",Dry Coconut,Peanuts,Dried Coconut.png,peanuts.png,"Sprinkle this versatile, sweet-and-spicy blend of peanuts, garlic, and dry coconut over dosas, or mix it into hot rice with ghee.",5,60,FALSE,TRUE,TRUE,Yes,Yes,Yes (Peanuts),No (Garlic),Yes,76712059,https://telugudelicacies.com/sales/kadapa-kaaram,5g,20.88kcal,0.7g,1.49g,0.75g,1.51g,0.64g,0.31g,0.08g,60,145,280,540,110,,Kadapa Kaaram_Standup_Pouch.png,Kadapa Kaaram_Cylindrical_Glass_Jar.png,Kavya Duggi,Hyderabad,"Great Taste!",5,,
+Kandi Podi,కంది పొడి,General,ready-to-eat,Traditional Roasted Gram Powder,"Roasted Lentils,.Pure Comfort!","Traditional Andhra spice powder prepared from sun-dried tamarind leaves, roasted lentils, and dried chilies. Brings a rich, tangy punch to meals.","Red Gram, Chickpea, Dry Red Chilly, Coriander, Urad Dal, Garlic, Cumin, Curry Leaf, White Sesame Seeds, Salt, Mung Bean, Fresh Coriander, Red Chilly Powder, Asafoetida",Chana Dal,Putna,channa dal.png,Putna.png,"Enjoy the traditional flavor of this multipurpose blend of roasted dals, garlic, and a hint of hing. Mix it into hot rice with a spoonful of ghee, or pair it with your daily tiffins!",5,90,FALSE,TRUE,TRUE,Yes,Yes,No,No (Garlic),Yes,76712084,https://telugudelicacies.com/sales/kandi-podi/,5g,16.02kcal,0.92g,0.29g,0.04g,2.71g,0.92g,0.12g,0.08g,55,135,255,495,105,,Kandi Podi_Standup_Pouch.png,Kandi Podi_Cylindrical_Glass_Jar.png,,,,,,
+Koora Kaaram,కూర కారం,General,ready-to-eat,Rayalaseema Fry Podi,Sauté. Sprinkle. Savor Garlic!,"The essential Telugu multi-purpose spice mix used for seasoning daily curries, fries, and gravies. Perfect balance of spices.","Dry Coconut, Garlic, Red Chilly Powder, Coriander, Salt",Garlic,Coriander,garlic_bulb_1771656463037.png,coriander_seeds_1771656608535.png,"Sauté your everyday vegetables, sprinkle this rich blend of garlic and dry coconut over the top, and savor the bold flavor!",5,45,FALSE,FALSE,FALSE,Yes,Yes,No,No (Garlic),Yes,76712074,https://telugudelicacies.com/sales/koora-kaaram,5g,20.76kcal,0.39g,1.64g,1.37g,1.55g,0.95g,0.23g,0.2g,60,145,280,540,110,,Koora Kaaram_Standup_Pouch.png,Koora Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Velluli Kaaram,వెల్లుల్లి కారం,General,ready-to-eat,Garlic Kaaram Podi,Three Ingredients. Infinite Flavor!,"A garlicky podi with dry coconut and spices, a staple in every Kadapa household. Adds delicious flavor to sautéed vegetables or can be used as a base for curries.","Garlic, Red Chilly Powder, Salt, Sunflower Oil",Garlic,,garlic_bulb_1771656463037.png,,"Smear this savory garlic blend onto hot dosas, or toss it with hot rice and ghee to bring out the roasted aroma.",5,60,FALSE,TRUE,TRUE,Yes,Yes,No,No (Garlic),Yes,76712082,https://telugudelicacies.com/sales/velluli-kaaram,5g,10.59kcal,0.42g,0.45g,0.07g,1.77g,0.75g,0.17g,0.25g,60,145,280,540,110,,Velluli Kaaram_Standup_Pouch.png,Velluli Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Palli Kaaram,పల్లి కారం,Nutty,ready-to-eat,Peanut Kaaram Podi,Palli Kaaram. Boldly Telugu!,"A nutty and spicy Kadapa classic made with peanuts, chili, and curry leaves. A true part of local culture — delicious with rice or even as a snack on its own.","Peanuts, Curry Leaf, Dry Red Chilly, Garlic, Red Chilly Powder, Salt, Cumin",Peanut,,peanuts.png,,"Add this unique Rayalaseema blend of roasted peanuts, garlic, and curry leaves to hot rice. Mix in a spoonful of ghee and serve warm!",5,90,FALSE,FALSE,TRUE,Yes,Yes,Yes (Peanuts),No (Garlic),Yes,76712075,https://telugudelicacies.com/sales/palli-kaaram,5g,25.87kcal,1.24g,2.04g,0.36g,1.02g,0.64g,0.2g,0.07g,55,135,255,495,105,,Special Palli Kaaram_Standup_Pouch.png,Special Palli Kaaram_Cylindrical_Glass_Jar.png,Sri Lekha,Hyderabad,Awesome products!,5,,
+Special Godhuma Kaaram,స్పెషల్ గోధుమ కారం,Nutty,ready-to-eat,Special Nutty Kaaram Podi,"Tasty, Light & Fresh!","A wholesome, nutty podi made with chakki atta, dals, coconut, and garlic. Perfectly balanced, it brings a bold, hearty flavor to your meals.","Chakki Atta, Urad Dal, Red Chilly Powder, Dry Coconut, Flax Seed, Garlic, Salt",Chakki Atta,Flax Seed,Wheat Grains.png,Flax Seeds.png,"Smear this unique, nutty mix of whole wheat, urad dal, and garlic onto dosas, or pair it with melted ghee for the perfect savory idli dip.",5,90,FALSE,FALSE,TRUE,Yes,Yes,No,No (Garlic Cut),Yes,76712060,https://telugudelicacies.com/sales/special-godhuma-kaaram,5g,17.24kcal,0.68g,0.41g,0.2g,2.93g,0.76g,0.09g,0.07g,45,110,210,405,95,,Special Godhuma Kaaram_Standup_Pouch.png,Special Godhuma Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Special Palli Kaaram,స్పెషల్ పల్లి కారం,Nutty,ready-to-eat,Special Peanut Kaaram Podi,Rustic. Rich. Ridiculously Good!,"Our best-reviewed podi! A rustic blend of peanuts, coriander, and jaggery that delivers mellow, nutty flavors. Smooth and balanced, it’s even loved by kids when mixed with hot rice and ghee.","Peanuts, Fried Gram, Coriander, Jaggery, Dry Red Chilly, Salt, Tamarind",Peanuts,Dry Red Chilly,peanuts.png,new Dried Red Chilly.png,"Toss this flavorful mix of peanuts, fried gram, and coriander with hot rice and a good serving of ghee to beautifully bring out the sweet and tangy notes.",5,60,FALSE,TRUE,TRUE,Yes,No,Yes (Peanuts),Yes,Yes,76712061,https://telugudelicacies.com/sales/special-palli-kaaram,5g,19.99kcal,0.87g,1.03g,0.16g,2.23g,0.69g,0.85g,0.13g,60,145,280,540,110,,Special Palli Kaaram_Standup_Pouch.png,Special Palli Kaaram_Cylindrical_Glass_Jar.png,,,,,,
+Chutney Premix,చట్నీ ప్రీమిక్స్,Tasty Pinch,ready-to-use,Ready to Use Peanut Chutney,Fresh Chutney in a Snap!,"A quick and easy blend of peanuts, gram, and spices. Just add water and grind to make a smooth, flavorful Palli (groundnut) chutney in minutes.","Peanuts, Fried Gram, Dry Red Chilly, Salt, Ginger, Tamarind, Coriander Powder",Peanuts,Tamarind,peanuts.png,tamarind_1771656532513.png,Simply add water gradually to this flavorful blend until you reach your desired consistency.Ready in seconds to pair with hot tiffin.,40,90,FALSE,FALSE,TRUE,Yes,No,Yes (Peanuts),No (Ginger),Yes,76712072,https://telugudelicacies.com/sales/chutney-premix,40g,178.61kcal,9.01g,10.89g,1.83g,13.74g,5.08g,2.74g,0.64g,45,110,210,405,95,,Chutney Premix_Standup_Pouch.png,Chutney Premix_Cylindrical_Glass_Jar.png,,,,,,
+MultiGrain Mix,మల్టీ గ్రెయిన్ మిక్స్,Tasty Pinch,ready-to-use,Nutritious Multigrain Flour Additive Enhanced with Ashwagandha,"Power of 13 Grains, Strength in Every Bite!","A wholesome blend of 13 grains and legumes, designed to make multigrain chapatis at home. Nutritious and flavorful, it turns every bite into a healthy delight.","Horse Gram, Red Gram, Cornflour, Oats, Finger Millet, Soybean, Pearl Millet, Chickpea, Mung Bean, White Sesame Seeds, Urad Dal, Red Chilly Powder, Garlic, Coriander",Ullavalu,Ragi,,Ragi.png,"Add this mix to chakki atta in 1:5 ratio before making the dough, to get the health benefits of 13 grains in every bite.",40,90,FALSE,FALSE,TRUE,Yes,Yes,No,No (Garlic),Yes,76712076,https://telugudelicacies.com/sales/multigrain-mix/,40g,146.89kcal,7.23g,2.84g,0.42g,23.55g,4.57g,0.89g,0.04g,40,95,185,360,90,,MUltigrain Mix_Standup_Pouch.png,MUltigrain Mix_Cylindrical_Glass_Jar.png,,,,,,
+Peri Peri Masala,పెరి పెరి మసాలా,Tasty Pinch,ready-to-use,,"Fiery, Tangy, Totally Irresistible!","A fiery, zesty fusion blend of African bird's eye chilies, garlic, herbs, and spices. Perfect for fries, chips, and snacks.","Sugar, Salt, Red Chilly Powder, Onion Powder, Kashmiri Red Chilly Powder, Garlic Powder, Amchur Powder, Black Pepper, Oregano",Onion,Garlic,Onion.png,garlic_bulb_1771656463037.png,"Dust this zesty chili and herb mix generously over popcorn, makhana, or roasted nuts for a perfectly spicy snack.",5,120,FALSE,FALSE,TRUE,Yes,Yes,No,"No (Onion Powder, Garlic Powder)",Yes,76712088,https://telugudelicacies.com/sales/peri-peri-masala/,5g,13.46kcal,0.32g,0.14g,0.04g,3.08g,0.6g,0.92g,0.3g,80,195,370,720,130,,Peri Peri Masala_Standup_Pouch.png,Peri Peri Masala_Cylindrical_Glass_Jar.png,,,,,,
+Sambar Premix,సాంబార్ ప్రీమిక్స్,Tasty Pinch,ready-to-use,Ready to Use Tiffin Sambar,Authentic Sambar in a Snap!,"A convenient, ready-to-use blend of rice, lentils, spices, and tamarind. Just add vegetables and boil to enjoy a flavorful, authentic South Indian sambar in minutes.","Rice, Dry Red Chilly, Coriander, Red Gram, Urad Dal, Chickpea, Tamarind, Salt, Dry Coconut, Cumin, Fenugreek, Cinnamon, Curry Leaf",Toor Dal,Chekka,Toor Dal.png,Cinemon.png,Add 40g of this authentic blend to 1 liter of water along with your favorite fresh vegetables. Boil until tender for fresh sambar.,40,120,FALSE,FALSE,TRUE,Yes,No,No,Yes,Yes,76712064,https://telugudelicacies.com/sales/sambar-premix/,40g,127.92kcal,5.03g,3.08g,1.3g,22.92g,7.42g,2.16g,1.13g,50,120,230,450,100,,Sambar Premix_Standup_Pouch.png,Sambar Premix_Cylindrical_Glass_Jar.png,,,,,,`;
+
+        // Very basic CSV parser
+        function parseCSV(str) {
+            const arr = [];
+            let quote = false;
+            for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+                if (cc == '"') { quote = !quote; continue; }
+                if (cc == ',' && !quote) { ++col; continue; }
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                arr[row][col] += cc;
+            }
+            return arr;
+        }
+
+        const csvArray = parseCSV(rawCSV);
+        const headers = csvArray[0];
+        const products = csvArray.slice(1).filter(r => r.length > 1).map(row => {
+            let obj = {};
+            row.forEach((val, i) => { obj[headers[i]] = val; });
+            return obj;
+        });
+
+        const select = document.getElementById('productSelect');
+        products.forEach((p, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = p.product_name;
+            select.appendChild(opt);
+        });
+
+        function loadProduct(index) {
+            if(index === "") return;
+            const p = products[index];
+            const cat = p.catalogue_category || 'General';
+            const catBadge = document.getElementById('pCategory');
+            catBadge.innerText = cat.toUpperCase();
+            
+            let catColor = '#e6b201'; // General
+            let darkColor = '#b88e00';
+            if(cat.toLowerCase().includes('health')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+            else if(cat.toLowerCase().includes('sprinkling')) { catColor = '#007c81'; darkColor = '#00595d'; }
+            else if(cat.toLowerCase().includes('leafy')) { catColor = '#2d5a27'; darkColor = '#1a3b16'; }
+            else if(cat.toLowerCase().includes('nutty')) { catColor = '#e64456'; darkColor = '#b83443'; }
+            else if(cat.toLowerCase().includes('tasty')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+            
+            catBadge.style.backgroundColor = catColor;
+            document.documentElement.style.setProperty('--copper-primary', catColor);
+            document.documentElement.style.setProperty('--copper-dark', darkColor);
+
+            document.getElementById('pTitleEn').innerText = p.product_name;
+            document.getElementById('pTitleTe').innerText = p.product_name_telugu;
+            document.getElementById('pTagline').innerText = p.product_tagline;
+            document.getElementById('pDesc').innerText = p.product_description;
+            document.getElementById('pHero1Name').innerText = p.hero_ingredient_1 || 'Hero 1';
+            document.getElementById('pHero2Name').innerText = p.hero_ingredient_2 || 'Hero 2';
+            document.getElementById('pIngredients').innerText = p.ingredients;
+            
+            document.getElementById('pVeg').innerText = p.is_veg === 'Yes' ? 'Veg' : 'Non-Veg';
+            document.getElementById('pVegan').innerText = p.is_vegan === 'Yes' ? 'Vegan' : 'Non-Vegan';
+            document.getElementById('pNuts').innerText = p.contains_nuts !== 'No' ? 'Contains Nuts' : 'Nut Free';
+            document.getElementById('pJain').innerText = p.is_jain === 'Yes' ? 'Jain Friendly' : 'Not Jain';
+
+            document.getElementById('pPriceJar').innerHTML = `100g Glass Jar <span>₹${p.price_100g_glass_jar || '-'}</span>`;
+            document.getElementById('pPrice100').innerHTML = `100g Standup <span>₹${p.price_100g_standup || '-'}</span>`;
+            document.getElementById('pPrice250').innerHTML = `250g Standup <span>₹${p.price_250g_standup || '-'}</span>`;
+            document.getElementById('pPrice500').innerHTML = `500g Pouch <span>₹${p.price_500g_pouch || '-'}</span>`;
+            document.getElementById('pPrice1000').innerHTML = `1kg Pouch <span>₹${p.price_1kg_pouch || '-'}</span>`;
+
+            document.getElementById('pHowToUse').innerText = p.serving_suggestion;
+
+            document.getElementById('pNutriServing').innerText = `(Per serving ${p.nutrition_serving_size})`;
+            document.getElementById('pCal').innerText = p.nutrition_calories;
+            document.getElementById('pFat').innerText = p.nutrition_total_fat;
+            document.getElementById('pSatFat').innerText = p.nutrition_saturated_fat;
+            document.getElementById('pSugar').innerText = p.nutrition_sugars;
+            document.getElementById('pPro').innerText = p.nutrition_protein;
+            document.getElementById('pCarb').innerText = p.nutrition_carbs;
+            document.getElementById('pFiber').innerText = p.nutrition_fiber;
+            document.getElementById('pSod').innerText = p.nutrition_sodium;
+
+            document.getElementById('pShelf').innerText = p.shelf_life_days + ' Days';
+            const webUrl = p.webpage_url || 'https://telugudelicacies.com';
+            document.getElementById('pWebQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(webUrl)}`;
+
+            // Reset images to placeholder so user knows they need to pick
+            document.getElementById('jarImg').src = 'https://via.placeholder.com/200x250/fff/999?text=Glass+Jar';
+            document.getElementById('pouchImg').src = 'https://via.placeholder.com/250x300/fff/999?text=Standup+Pouch';
+            document.getElementById('hero1Img').src = 'https://via.placeholder.com/70';
+            document.getElementById('hero2Img').src = 'https://via.placeholder.com/70';
+            document.getElementById('hero3Img').src = 'https://via.placeholder.com/70';
+            document.getElementById('hero3Container').style.display = 'block';
+            document.getElementById('pHero3Name').innerText = 'Ingredient 3';
+        }
+
+        // Initialize with first product
+        if(products.length > 0) {
+            select.value = 0;
+            loadProduct(0);
+        }
+
+        function previewImage(input, imgId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(imgId).src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function downloadPNG() {
+            // Hide edit outlines temporarily
+            const editables = document.querySelectorAll('.editable');
+            editables.forEach(e => e.style.outline = 'none');
+            
+            const poster = document.getElementById('poster');
+            html2canvas(poster, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = document.getElementById('pTitle').innerText.split(' ')[0] + '_Catalogue.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Restore editables
+                editables.forEach(e => e.style.outline = '');
+            });
+        }
+        function changeBorders(val) {
+            document.querySelectorAll('.copper-panel').forEach(p => {
+                p.classList.remove('border-style-1', 'border-style-2', 'border-style-3');
+                p.classList.add(val);
+            });
+        }
+    </script>
+</body>
+</html>

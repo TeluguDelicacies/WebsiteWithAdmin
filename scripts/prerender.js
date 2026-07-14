@@ -249,7 +249,7 @@ function fixAssetPaths($) {
 function injectMetaTags($, product, imageUrl) {
     const title = generateMetaTitle(product);
     const description = generateMetaDescription(product);
-    const productUrl = `${SITE_URL}/sales/${product.slug}`;
+    const productUrl = `${SITE_URL}/${product.slug}`;
     const imageAlt = product.image_alt_text || `${product.product_name} - Telugu Delicacies`;
 
     // Update <title>
@@ -300,7 +300,7 @@ function injectMetaTags($, product, imageUrl) {
 function injectComboMetaTags($, combo) {
     const title = generateComboMetaTitle(combo);
     const description = generateComboMetaDescription(combo);
-    const productUrl = `${SITE_URL}/sales/${combo.slug}`;
+    const productUrl = `${SITE_URL}/${combo.slug}`;
     const imageUrl = combo.image_url || `${SITE_URL}/images/placeholder-combo.jpg`;
 
     $('title').text(title);
@@ -338,7 +338,7 @@ function generateSitemap(products, categories, combos) {
     
     <!-- All Products Page -->
     <url>
-        <loc>${SITE_URL}/sales/all-products</loc>
+        <loc>${SITE_URL}/all-products</loc>
         <lastmod>${today}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
@@ -349,7 +349,7 @@ function generateSitemap(products, categories, combos) {
     for (const category of categories) {
         xml += `
     <url>
-        <loc>${SITE_URL}/sales/${category.slug}</loc>
+        <loc>${SITE_URL}/${category.slug}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -360,7 +360,7 @@ function generateSitemap(products, categories, combos) {
     for (const product of products) {
         xml += `
     <url>
-        <loc>${SITE_URL}/sales/${product.slug}</loc>
+        <loc>${SITE_URL}/${product.slug}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
@@ -371,7 +371,7 @@ function generateSitemap(products, categories, combos) {
     for (const combo of combos || []) {
         xml += `
     <url>
-        <loc>${SITE_URL}/sales/${combo.slug}</loc>
+        <loc>${SITE_URL}/${combo.slug}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -518,7 +518,7 @@ async function prerender() {
             const productHtml = `
                 <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
                     <nav style="margin-bottom: 20px;">
-                        <a href="/">Home</a> &gt; <a href="/sales/all-products">Products</a> &gt; ${product.product_name}
+                        <a href="/">Home</a> &gt; <a href="/all-products">Products</a> &gt; ${product.product_name}
                     </nav>
                     <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
                         <div style="flex: 1; min-width: 300px;">
@@ -551,7 +551,7 @@ async function prerender() {
             await fs.writeFile(outputFile, $.html(), 'utf-8');
 
             pagesGenerated++;
-            console.log(`   ✅ Generated: /sales/${product.slug}/index.html`);
+            console.log(`   ✅ Generated: /${product.slug}/index.html`);
         }
 
         console.log(`\n   📊 Generated ${pagesGenerated} product pages\n`);
@@ -572,7 +572,7 @@ async function prerender() {
             const comboHtml = `
                 <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
                     <nav style="margin-bottom: 20px;">
-                        <a href="/">Home</a> &gt; <a href="/sales/all-products">Products</a> &gt; ${combo.name}
+                        <a href="/">Home</a> &gt; <a href="/all-products">Products</a> &gt; ${combo.name}
                     </nav>
                     <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
                         <div style="flex: 1; min-width: 300px;">
@@ -602,7 +602,7 @@ async function prerender() {
             await fs.writeFile(outputFile, $.html(), 'utf-8');
 
             comboPagesGenerated++;
-            console.log(`   ✅ Generated: /sales/${combo.slug}/index.html`);
+            console.log(`   ✅ Generated: /${combo.slug}/index.html`);
         }
 
         console.log(`\n   📊 Generated ${comboPagesGenerated} combo pages\n`);
@@ -619,11 +619,11 @@ async function prerender() {
             $('title').text(`${category.title} | Telugu Delicacies`);
             $('meta[name="description"]').attr('content', `Explore our ${category.title} collection. Authentic Telugu flavors made with traditional recipes.`);
             $('meta[property="og:title"]').attr('content', `${category.title} | Telugu Delicacies`);
-            $('meta[property="og:url"]').attr('content', `${SITE_URL}/sales/${category.slug}`);
+            $('meta[property="og:url"]').attr('content', `${SITE_URL}/${category.slug}`);
 
             // Add canonical
             if ($('link[rel="canonical"]').length === 0) {
-                $('head').append(`<link rel="canonical" href="${SITE_URL}/sales/${category.slug}" />`);
+                $('head').append(`<link rel="canonical" href="${SITE_URL}/${category.slug}" />`);
             }
 
             // Fix asset paths for category pages too
@@ -633,7 +633,7 @@ async function prerender() {
             const categoryHtml = `
                 <div class="prerendered-content" style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
                     <nav style="margin-bottom: 20px;">
-                        <a href="/">Home</a> &gt; <a href="/sales/all-products">Categories</a> &gt; ${category.title}
+                        <a href="/">Home</a> &gt; <a href="/all-products">Categories</a> &gt; ${category.title}
                     </nav>
                     <h1 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 10px;">${category.title}</h1>
                     <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 30px;">Explore our authentic ${category.title} collection, made with traditional recipes and love.</p>
@@ -654,7 +654,7 @@ async function prerender() {
             const outputFile = path.join(outputDir, 'index.html');
             await fs.writeFile(outputFile, $.html(), 'utf-8');
 
-            console.log(`   ✅ Generated: /sales/${category.slug}/index.html`);
+            console.log(`   ✅ Generated: /${category.slug}/index.html`);
         }
 
         // Generate all-products page
@@ -662,7 +662,7 @@ async function prerender() {
         $('title').text('All Products | Telugu Delicacies');
         $('meta[name="description"]').attr('content', 'Browse our complete collection of authentic Telugu delicacies. Podis, chapatis, parotas and more.');
         $('meta[property="og:title"]').attr('content', 'All Products | Telugu Delicacies');
-        $('meta[property="og:url"]').attr('content', `${SITE_URL}/sales/all-products`);
+        $('meta[property="og:url"]').attr('content', `${SITE_URL}/all-products`);
 
         // Fix asset paths
         fixAssetPaths($);
@@ -670,7 +670,7 @@ async function prerender() {
         const allProductsDir = path.join(DIST_DIR, 'sales', 'all-products');
         await ensureDir(allProductsDir);
         await fs.writeFile(path.join(allProductsDir, 'index.html'), $.html(), 'utf-8');
-        console.log(`   ✅ Generated: /sales/all-products/index.html\n`);
+        console.log(`   ✅ Generated: /all-products/index.html\n`);
 
         // ---------------------------------------------------------------------
         // Step 5: Generate sitemap.xml

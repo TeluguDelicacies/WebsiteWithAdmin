@@ -7,9 +7,9 @@
 # 2. Handle Sales/Product paths
 # Note: Netlify serves existing static files (like your prerendered pages) first.
 # If no static file exists, we fallback to sales.html for client-side functionality.
-/sales/*    /sales.html    200
+/p/*        /sales.html    200
+/sales/*    /p/:splat      301!
 
 # 3. General SPA fallback
 # Fallback all other routes to index.html for client-side routing.
 /*          /index.html    200
-
