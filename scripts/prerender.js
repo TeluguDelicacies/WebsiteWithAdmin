@@ -114,6 +114,20 @@ async function validateSupabaseConnection() {
 
 // =============================================================================
 // HELPER FUNCTIONS
+
+function getCatSlug(product, categories) {
+    if (!product) return '';
+    const pCat = (product.product_category || '').toLowerCase().trim();
+    const match = (categories || []).find(c => {
+        const cSlug = (c.slug || '').toLowerCase();
+        const cName = (c.title || '').toLowerCase();
+        return cSlug === pCat.replace(/\s+/g, '-') || cName === pCat;
+    });
+    if (match) return match.slug;
+    if (pCat) return pCat.replace(/\s+/g, '-');
+    return '';
+}
+
 // =============================================================================
 
 /**
@@ -246,10 +260,10 @@ function fixAssetPaths($) {
 /**
  * Injects product meta tags into HTML template using Cheerio
  */
-function injectMetaTags($, product, imageUrl) {
+function injectMetaTags($, product, imageUrl, categories) {
     const title = generateMetaTitle(product);
     const description = generateMetaDescription(product);
-    const productUrl = `${SITE_URL}/${product.slug}`;
+    const cSlug = getCatSlug(product, categories); const productUrl = `\${SITE_URL}/${cSlug ? cSlug + "/" : ""}\${product.slug}`;
     const imageAlt = product.image_alt_text || `${product.product_name} - Telugu Delicacies`;
 
     // Update <title>
@@ -300,7 +314,7 @@ function injectMetaTags($, product, imageUrl) {
 function injectComboMetaTags($, combo) {
     const title = generateComboMetaTitle(combo);
     const description = generateComboMetaDescription(combo);
-    const productUrl = `${SITE_URL}/${combo.slug}`;
+    const productUrl = `\${SITE_URL}/combo-offers/\${combo.slug}`;
     const imageUrl = combo.image_url || `${SITE_URL}/images/placeholder-combo.jpg`;
 
     $('title').text(title);
@@ -360,7 +374,7 @@ function generateSitemap(products, categories, combos) {
     for (const product of products) {
         xml += `
     <url>
-        <loc>${SITE_URL}/${product.slug}</loc>
+        <loc>\${SITE_URL}/\${getCatSlug(product, categories) ? getCatSlug(product, categories) + "/" : ""}\${product.slug}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
@@ -371,7 +385,7 @@ function generateSitemap(products, categories, combos) {
     for (const combo of combos || []) {
         xml += `
     <url>
-        <loc>${SITE_URL}/${combo.slug}</loc>
+        <loc>\${SITE_URL}/combo-offers/\${combo.slug}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -426,7 +440,7 @@ async function prerender() {
 
         const { data: products, error: productsError } = await supabase
             .from('products')
-            .select('id, slug, product_name, product_tagline, product_description, showcase_image, meta_title, meta_description, image_alt_text')
+            .select('id, slug, product_category, product_name, product_tagline, product_description, showcase_image, meta_title, meta_description, image_alt_text')
             .eq('is_visible', true)
             .order('display_order', { ascending: true });
 
@@ -512,7 +526,7 @@ async function prerender() {
             const imageUrl = getProductImage(product, defaultImages);
 
             // Inject meta tags AND fix asset paths
-            injectMetaTags($, product, imageUrl);
+            injectMetaTags($, product, imageUrl, categories);
 
             // Inject Body Content for SEO (Google Indexing)
             const productHtml = `

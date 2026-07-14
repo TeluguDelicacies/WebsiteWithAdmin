@@ -415,7 +415,7 @@ window.showQuickPreview = function (product) {
     // View Details button - link to sales page
     const productSlug = product.slug || product.id;
     const defaultVariant = sortedVariants[0];
-    viewBtn.href = `/${productSlug}${defaultVariant ? `?variant=${encodeURIComponent(defaultVariant.quantity)}` : ''}`;
+    viewBtn.href = window.generateProductLink(product, defaultVariant ? defaultVariant.quantity : null);
 
     // Reset flip state on parent gallery
     const gallery = document.querySelector('.quick-preview-gallery');
@@ -512,8 +512,7 @@ window.selectQuickPreviewVariant = function (index) {
     const viewBtn = document.getElementById('quickPreviewViewBtn');
     const product = window.quickPreviewState.product;
     if (viewBtn && product) {
-        const productSlug = product.slug || product.id;
-        viewBtn.href = `/${productSlug}?variant=${encodeURIComponent(variant.quantity)}`;
+        viewBtn.href = window.generateProductLink(product, variant.quantity);
     }
 
     // Check for Matching Image based on Packaging Type
@@ -3088,7 +3087,7 @@ window.buyComboViaWhatsApp = buyComboViaWhatsApp;
  * @param {string} slug - Combo URL slug
  */
 function viewComboDetails(slug) {
-    window.location.href = `/${slug}`;
+    window.location.href = window.generateProductLink({slug: slug});
 }
 window.viewComboDetails = viewComboDetails;
 
@@ -3100,7 +3099,7 @@ window.openComboDetail = function (event, slug) {
     if (event.target.closest('button')) {
         return;
     }
-    window.location.href = `/${slug}`;
+    window.location.href = window.generateProductLink({slug: slug});
 };
 
 /**
@@ -3577,7 +3576,7 @@ function renderProducts(products, categories) {
 
                         // SALES MODE CHECK
                         if (window.currentSiteSettings?.sales_mode_enabled) {
-                            window.location.href = `/${product.slug || product.id}`;
+                            window.location.href = window.generateProductLink(product);
                             return;
                         }
 
@@ -4226,7 +4225,7 @@ function renderQuickProductsHTML(products, showMrp) {
 window.openQuickProductModal = function (productId) {
     if (window.currentSiteSettings?.sales_mode_enabled) {
         const product = (window.allProductsCache || []).find(p => String(p.id) === String(productId));
-        window.location.href = `/${product?.slug || productId}`;
+        window.location.href = window.generateProductLink(product || {id: productId, slug: productId});
         return;
     }
 

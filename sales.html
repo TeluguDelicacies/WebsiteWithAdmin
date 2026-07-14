@@ -216,6 +216,34 @@
         window.supabase = supabase;
 
         // State Management
+        
+window.generateProductLink = function(product, variantQuantity) {
+    if (!product) return '/';
+    let catSlug = '';
+    const pCat = (product.product_category || '').toLowerCase().trim();
+    const cats = window.allCategoriesCache || (window.state && window.state.categories) || [];
+    
+    const match = cats.find(c => {
+        const cSlug = (c.slug || '').toLowerCase();
+        const cName = (c.category_name || '').toLowerCase();
+        return cSlug === pCat.replace(/\s+/g, '-') || cName === pCat;
+    });
+    
+    if (match) {
+        catSlug = match.slug;
+    } else if (pCat) {
+        catSlug = pCat.replace(/\s+/g, '-');
+    }
+    
+    const slug = product.slug || product.id;
+    let link = catSlug ? '/' + catSlug + '/' + slug : '/' + slug;
+    
+    if (variantQuantity) {
+        link += '?variant=' + encodeURIComponent(variantQuantity);
+    }
+    return link;
+};
+
         const state = {
             allProducts: [],
             categories: [],
@@ -2684,12 +2712,12 @@
                 const escapedVariant = JSON.stringify(firstVariant).replace(/'/g, "&apos;");
 
                 return `
-        <div class="sim-item" data-product-id="${item.id}" data-product='${escapedProduct}' data-variant='${escapedVariant}' onclick="window.location.href='/${item.slug || item.id}'" style="cursor:pointer;">
+        <div class="sim-item" data-product-id="${item.id}" data-product='${escapedProduct}' data-variant='${escapedVariant}' onclick="window.location.href='${window.generateProductLink(item)}'" style="cursor:pointer;">
             <img src="${(state.allProductImages || []).find(img => img.product_id === item.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === item.id)?.image_url || state.placeholder}" class="sim-img"
                 onerror="this.src='${state.placeholder}'">
             <div class="sim-info">
                 ${item.discriptor ? `<p class="product-descriptor" title="${item.discriptor}">${item.discriptor}</p>` : ''}
-                <h4 style="font-size:0.9rem; margin:0; line-height:1.2; cursor:pointer;" onclick="window.location.href='/${item.slug || item.id}'">${item.product_name}</h4>
+                <h4 style="font-size:0.9rem; margin:0; line-height:1.2; cursor:pointer;" onclick="window.location.href='${window.generateProductLink(item)}'">${item.product_name}</h4>
                 ${item.product_tagline ? `<span style="font-size:0.75rem; color:var(--text-secondary); display:block; margin:2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.product_tagline}</span>` : ''}
                 <!-- Price + Add Button inline -->
                 <div class="price-action-row" style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px;">
@@ -2814,7 +2842,7 @@
             if (!hist.length) return `<p style="grid-column:1/-1; color:var(--text-muted)">Your viewing history will appear
             here.</p>`;
             return hist.slice(0, 5).map(h => `
-        <div class="sim-item" onclick="window.location.href='/${h.slug || h.id}'"
+        <div class="sim-item" onclick="window.location.href='${window.generateProductLink(h)}'"
             style="background:var(--bg-primary); border:1px solid var(--border-light); display:flex; align-items:center; gap:10px; padding:5px;">
             <img src="${h.img || state.placeholder}" class="sim-img" style="width:50px; height:50px; object-fit:cover; border-radius:4px; flex-shrink:0;" onerror="this.src='${state.placeholder}'">
             <div class="sim-info" style="min-width:0;">
@@ -3755,7 +3783,7 @@
                 const theme = combo.name.toLowerCase().includes('tiranga') ? 'tiranga' : 'default';
 
                 return `
-                                <div class="combo-card" data-theme="${theme}" onclick="window.location.href='/${combo.slug}'">
+                                <div class="combo-card" data-theme="${theme}" onclick="window.location.href='/combo-offers/${combo.slug}'">
                                     ${visualHTML}
                                     <div class="combo-content">
                                         <h3 class="combo-title">${combo.name}</h3>
