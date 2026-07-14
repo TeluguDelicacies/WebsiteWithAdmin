@@ -37,9 +37,26 @@ async function main() {
         } catch (e) {
             console.warn('Failed querying combos table:', e.message);
         }
+        
+        console.log('Fetching categories...');
+        let categories = [];
+        try {
+            const { data: catData, error: catErr } = await supabase
+                .from('categories')
+                .select('id, title, slug')
+                .eq('is_visible', true);
+            if (catErr) {
+                console.warn('Could not fetch categories:', catErr.message);
+            } else {
+                categories = catData || [];
+            }
+        } catch (e) {
+            console.warn('Failed querying categories:', e.message);
+        }
 
         const rows = [];
-        rows.push(['ID', 'Product Name', 'Type', 'Category', 'Slug', 'Webpage Link', 'Status']);
+        rows.push(['--- PRODUCTS & COMBOS ---']);
+        rows.push(['ID', 'Product Name', 'Type', 'Category', 'Slug', 'Primary Webpage Link (Nested)', 'Alternative Link (Flat)', 'Legacy Link (/sales/)', 'Status']);
 
         if (products) {
             for (const p of products) {
@@ -47,14 +64,19 @@ async function main() {
                 if (p.product_category) {
                     catPart = p.product_category.toLowerCase().trim().replace(/\s+/g, '-') + '/';
                 }
-                const link = p.slug ? `${SITE_URL}/${catPart}${p.slug}` : '';
+                const nestedLink = p.slug ? `${SITE_URL}/${catPart}${p.slug}` : '';
+                const flatLink = p.slug ? `${SITE_URL}/${p.slug}` : '';
+                const legacyLink = p.slug ? `${SITE_URL}/sales/${p.slug}` : '';
+                
                 rows.push([
                     p.id,
                     p.product_name,
                     'Product',
                     p.product_category || '',
                     p.slug || '',
-                    link,
+                    nestedLink,
+                    flatLink,
+                    legacyLink,
                     p.is_visible ? 'Visible' : 'Hidden'
                 ]);
             }
@@ -62,18 +84,42 @@ async function main() {
 
         if (combos) {
             for (const c of combos) {
-                const link = c.slug ? `${SITE_URL}/combo-offers/${c.slug}` : '';
+                const nestedLink = c.slug ? `${SITE_URL}/combo-offers/${c.slug}` : '';
+                const flatLink = c.slug ? `${SITE_URL}/${c.slug}` : '';
+                const legacyLink = c.slug ? `${SITE_URL}/sales/${c.slug}` : '';
+                
                 rows.push([
                     c.id,
                     c.name,
                     'Combo',
-                    'combo',
+                    'combo-offers',
                     c.slug || '',
-                    link,
+                    nestedLink,
+                    flatLink,
+                    legacyLink,
                     c.is_active ? 'Active' : 'Inactive'
                 ]);
             }
         }
+        
+        rows.push([]);
+        rows.push([]);
+        rows.push(['--- SYSTEM & CATEGORY PAGES ---']);
+        rows.push(['Page Name', 'Link', 'Description']);
+        
+        rows.push(['Home Page', `${SITE_URL}/`, 'The main landing page of the website']);
+        rows.push(['All Products', `${SITE_URL}/all-products`, 'Shows all products available']);
+        rows.push(['Combo Offers', `${SITE_URL}/combo-offers`, 'Shows all combo offers']);
+        
+        if (categories) {
+            for (const cat of categories) {
+                rows.push([`Category: ${cat.title}`, `${SITE_URL}/${cat.slug}`, `Shows all products in ${cat.title}`]);
+            }
+        }
+        
+        rows.push(['Admin Panel', `${SITE_URL}/admin.html`, 'Store management interface']);
+        rows.push(['Thank You Page', `${SITE_URL}/thankyou.html`, 'Order confirmation page']);
+        rows.push(['Legal / Policies', `${SITE_URL}/legal.html`, 'Terms, Privacy, and Refund Policies']);
 
         // Convert to CSV format with proper quoting
         const csvContent = rows.map(row => 
