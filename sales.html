@@ -2682,13 +2682,40 @@ window.generateProductLink = function(product, variantQuantity) {
 
         // --- Logic: Data Helpers ---
         function getSimilarProducts(target) {
+            // 1. Define words we want to ignore when comparing
+            const ignoreList = ['chilli', 'chilly', 'salt', 'red chilly powder', 'red chilli powder', 'water', 'oil', 'sunflower oil', 'edible vegetable oil'];
+            
+            // 2. Helper to extract a clean array of meaningful ingredients
+            const getValidIngredients = (ingredientsString) => {
+                if (!ingredientsString) return [];
+                return ingredientsString
+                    .split(',')
+                    .map(i => i.trim().toLowerCase())
+                    .filter(i => i.length > 0 && !ignoreList.some(ignore => i.includes(ignore)));
+            };
+
+            const targetIngredients = getValidIngredients(target.ingredients);
+
             return state.allProducts
                 .filter(p => p.id !== target.id)
                 .map(p => {
-                    const isSameCat = p.product_category === target.product_category;
-                    return { ...p, score: isSameCat ? 1 : 0 };
+                    let score = 0;
+                    
+                    // Give 1 point for being in the same category as a baseline
+                    if (p.product_category === target.product_category) {
+                        score += 1;
+                    }
+
+                    // Calculate intersection of ingredients
+                    const pIngredients = getValidIngredients(p.ingredients);
+                    const commonIngredients = targetIngredients.filter(ti => pIngredients.includes(ti));
+                    
+                    // Give 2 points for every matching meaningful ingredient
+                    score += commonIngredients.length * 2;
+
+                    return { ...p, score };
                 })
-                .sort((a, b) => b.score - a.score)
+                .sort((a, b) => b.score - a.score) // Sort by highest score first
                 .slice(0, 5);
         }
 
