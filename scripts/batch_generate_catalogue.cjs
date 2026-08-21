@@ -118,7 +118,7 @@ async function generateCatalogues() {
     const page = await browser.newPage();
     
     // Set viewport to A4 size at 96dpi roughly
-    await page.setViewport({ width: 864, height: 1183, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 864, height: 1183, deviceScaleFactor: 3.125 });
     
     const templatePath = path.resolve(__dirname, '../Data for Catalogue/premium_catalogue_template.html');
     await page.goto(`file://${templatePath}`, { waitUntil: 'networkidle0' });
@@ -172,10 +172,38 @@ async function generateCatalogues() {
         const hero3Path = findBestImageMatch(product.hero_ingredient_3);
         if (hero3Path) product.hero3ImgUrl = `file://${hero3Path}`;
 
+        // Centralized Category Color Mapping
+        const cat = (product.catalogue_category || 'General').toLowerCase();
+        let catColor = '#e6b201'; // General
+        let darkColor = '#b88e00';
+        
+        if (cat.includes('health')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+        else if (cat.includes('sprinkling')) { catColor = '#007c81'; darkColor = '#00595d'; }
+        else if (cat.includes('leafy')) { catColor = '#2d5a27'; darkColor = '#1a3b16'; }
+        else if (cat.includes('nutty')) { catColor = '#e64456'; darkColor = '#b83443'; }
+        else if (cat.includes('tasty')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+        else if (cat.includes('ready')) { catColor = '#ddab82'; darkColor = '#a87b5d'; }
+        
+        product.themeCatColor = catColor;
+        product.themeDarkColor = darkColor;
+
+        // Read and recolor SVG border
+        const svgPath = path.resolve(__dirname, '../assets/rangoli_border.svg');
+        if (fs.existsSync(svgPath)) {
+            let baseSvg = fs.readFileSync(svgPath, 'utf8');
+            let coloredSvg = baseSvg.replace(/#b8623b/gi, catColor);
+            let b64Svg = Buffer.from(coloredSvg).toString('base64');
+            product.borderImage = `url('data:image/svg+xml;base64,${b64Svg}') 30 round`;
+        }
+
         // Inject data into the page
         await page.evaluate((data) => {
             if (window.injectProductData) {
                 window.injectProductData(data);
+            }
+            if (data.borderImage) {
+                const poster = document.querySelector('.poster-container');
+                if (poster) poster.style.borderImage = data.borderImage;
             }
         }, product);
 

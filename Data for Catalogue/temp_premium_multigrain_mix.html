@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Catalogue Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-sand: #f4e8d3;
+            --copper-primary: #b8623b;
+            --copper-dark: #8c4222;
+            --text-dark: #3a2214;
+            --text-light: #fef7ec;
+            --wood-bg: #5c3a21;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: #222; display: flex; flex-direction: column; align-items: center; padding-bottom: 50px; }
+
+        /* Controls (No Print) */
+        .controls {
+            width: 100%;
+            background: #111;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            align-items: center;
+        }
+        .controls select, .controls button {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .controls select { background: #fff; width: 250px; }
+        .controls button { background: var(--copper-primary); color: white; transition: 0.2s; }
+        .controls button:hover { background: var(--copper-dark); }
+        .controls .hint { color: #aaa; font-size: 12px; margin-left: 10px; }
+
+        .poster-container {
+            width: 794px; /* A4 width at 96dpi */
+            height: 1123px; /* A4 height at 96dpi */
+            background-color: var(--bg-sand);
+            position: relative;
+            margin-top: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 15px 30px 15px; /* Reduced L/R padding */
+            border: 36px solid transparent;
+            border-image: url('../assets/rangoli_border.svg') 30 round;
+        }
+
+        .editable:hover {
+            outline: 2px dashed rgba(184, 98, 59, 0.5);
+            background: rgba(255,255,255,0.2);
+        }
+        .editable:focus {
+            outline: 2px solid var(--copper-primary);
+            background: rgba(255,255,255,0.5);
+        }
+
+        .image-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .image-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .image-upload-wrapper::after {
+            content: "\f03e";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.2s; pointer-events: none;
+        }
+        .image-upload-wrapper:hover::after { opacity: 1; }
+
+        /* Rangoli Background */
+        .poster-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png'),
+                url('Rangoli FOr desgn.png');
+            background-position: 
+                -100px -100px,
+                85% -20px,
+                -30px 45%,
+                105% 50%,
+                15% 102%,
+                50% 15%,
+                110% 110%;
+            background-size: 
+                400px,
+                220px,
+                150px,
+                480px,
+                180px,
+                120px,
+                380px;
+            background-repeat: no-repeat;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Typography */
+        .category-badge {
+            display: inline-block; color: white; padding: 4px 15px; border-radius: 12px;
+            font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; z-index: 10;
+        }
+        .title-section { text-align: center; position: relative; z-index: 10; width: 100%; text-shadow: 0 0 10px var(--bg-sand), 0 0 20px var(--bg-sand), 0 0 30px var(--bg-sand); padding: 0 30px; }
+        .title-text-box { margin: 0 130px; }
+        .product-title-combined {
+            font-size: 36px; 
+            margin-bottom: 6px;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        .product-title-combined #pTitleEn {
+            font-family: 'Cinzel', serif;
+            color: var(--copper-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .product-title-combined .title-sep {
+            color: var(--copper-primary);
+            opacity: 0.6;
+            margin: 0 10px;
+            font-weight: 300;
+        }
+        .product-title-combined #pTitleTe {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75em; 
+            color: var(--copper-primary);
+            font-weight: 700;
+        }
+        .product-descriptor {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--copper-dark);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            padding: 3px 15px;
+            border-top: 1px solid var(--copper-primary);
+            border-bottom: 1px solid var(--copper-primary);
+            background: rgba(255,255,255,0.4);
+        }
+        .product-tagline { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text-dark); font-style: italic; margin-bottom: 8px; }
+        .product-desc { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text-dark); margin: 0 auto; line-height: 1.5; font-weight: 500; max-width: 450px; }
+
+        .hero-container {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 250px;
+            margin-bottom: 10px;
+            margin-top: 5px;
+            padding-top: 5px;
+            flex-shrink: 0;
+        }
+        .hero-stage {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+        }
+        .product-jar, .product-pouch {
+            position: relative;
+            z-index: 2;
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.4));
+        }
+        .product-col { position: absolute; z-index: 2; bottom: 0; display: flex; flex-direction: column; align-items: center; }
+        .product-col.jar { left: -5%; }
+        .product-col.pouch { right: -5%; }
+        .product-jar { height: 210px; margin-bottom: 5px; transform: scale(1.2); }
+        .product-pouch { height: 220px; }
+        .brand-logo { height: 40px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+
+        /* Copper Panel Base */
+        .copper-panel {
+            background: linear-gradient(135deg, #fcf4e8, #e3cdb1);
+            padding: 12px;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(184, 98, 59, 0.2), 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+        /* 3 Styles of Borders */
+        .copper-panel.border-style-1 {
+            border: 3px solid var(--copper-primary);
+            border-radius: 12px;
+        }
+        .copper-panel.border-style-2 {
+            border: 5px double var(--copper-dark);
+            border-radius: 4px;
+        }
+        .copper-panel.border-style-3 {
+            border: 2px dashed var(--copper-primary);
+            border-radius: 20px;
+        }
+        .copper-panel::before, .copper-panel::after,
+        .copper-panel-inner::before, .copper-panel-inner::after {
+            content: ""; position: absolute; width: 8px; height: 8px;
+            background: var(--copper-dark); border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.5), inset -1px -1px 2px rgba(0,0,0,0.5);
+        }
+        .copper-panel::before { top: 8px; left: 8px; }
+        .copper-panel::after { top: 8px; right: 8px; }
+        .copper-panel-inner::before { bottom: 8px; left: 8px; }
+        .copper-panel-inner::after { bottom: 8px; right: 8px; }
+
+        .panel-title {
+            position: absolute;
+            top: -14px; left: 50%; transform: translateX(-50%);
+            background: var(--copper-dark);
+            color: var(--text-light);
+            padding: 2px 20px;
+            border-radius: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border: 2px solid var(--bg-sand);
+            white-space: nowrap;
+        }
+
+        /* Ingredients Section */
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
+            margin-top: 10px;
+            align-items: center;
+        }
+        .hero-ingredients {
+            display: flex; gap: 20px; align-items: center; justify-content: center;
+        }
+        .hero-ing-item { text-align: center; }
+        .hero-ing-item img {
+            width: 80px; height: 80px; object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        }
+        .hero-ing-name { font-size: 13px; font-weight: 700; margin-top: 6px; color: var(--copper-dark); text-transform: uppercase; }
+        .all-ingredients { font-size: 13px; line-height: 1.5; color: var(--text-dark); }
+        
+        /* Badges */
+        .badges-container {
+            display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; position: relative; z-index: 1;
+        }
+        .badge {
+            background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(212,175,55,0.6);
+            padding: 5px 12px; border-radius: 20px; font-size: 11px;
+            font-weight: 700; color: var(--copper-dark);
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge i { font-size: 14px; }
+
+        /* Pricing Section */
+        .pricing-grid {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 25px; margin-top: 5px;
+        }
+        .price-col { display: flex; flex-direction: column; align-items: center; padding: 0 15px; }
+        .price-icon { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--copper-primary); background: transparent; }
+        .price-details { display: flex; flex-direction: column; text-align: center; align-items: center; width: 100%; }
+        .price-details h4 { font-family: 'Cinzel', serif; font-size: 13px; color: var(--copper-dark); margin-bottom: 5px; text-align: center; }
+        .price-line { font-size: 11px; font-weight: 600; margin-bottom: 0px; white-space: nowrap; display: flex; justify-content: space-between; gap: 15px; align-items: center; padding: 3px 0; border-bottom: 1px dashed rgba(212,175,55,0.3); width: 100%; }
+        .price-line span { color: var(--copper-dark); margin-left: 4px; font-size: 12px; }
+
+        /* How to Use */
+        .how-to-use { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+        .how-to-icons { display: flex; gap: 10px; font-size: 24px; color: var(--copper-dark); }
+        .how-to-text { font-size: 13px; line-height: 1.4; font-weight: 500; }
+
+        /* Nutrition */
+        .nutrition-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; font-family: 'Inter', sans-serif; }
+        .nutrition-table td { padding: 8px 10px; border-bottom: 1px dashed rgba(184, 98, 59, 0.4); color: var(--text-dark); }
+        .nutrition-table tr:last-child td { border-bottom: none; }
+        .nutrition-table td span { font-weight: 700; color: var(--copper-dark); float: right; }
+        .nutrition-header { text-align: right; font-weight: 700; color: var(--copper-dark); font-size: 11px; padding-bottom: 5px; }
+
+        /* Footer */
+        .footer-grid { margin-top: auto; position: relative; z-index: 1; padding-top: 15px; border-top: 2px solid var(--copper-primary); display: flex; justify-content: space-between; align-items: stretch; gap: 15px; }
+        .footer-logo { flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+        .footer-info { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; text-align: left; }
+        .footer-brand { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--copper-dark); }
+        .footer-tag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--text-dark); margin-bottom: 4px; }
+        .footer-details { font-size: 11px; font-weight: 600; color: var(--text-dark); line-height: 1.4; }
+        .website-qr { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+        .website-qr img { height: 70px; border: 2px solid var(--copper-primary); border-radius: 4px; padding: 2px; background: white; margin-bottom: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .website-qr div { font-size: 11px; font-weight: 700; color: var(--copper-dark); letter-spacing: 0.5px; text-transform: uppercase; }
+        .shelf-life { background: var(--copper-dark); color: white; padding: 4px 12px; border-radius: 4px; text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px; display: inline-block; margin-bottom: 5px; }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .controls { display: none; }
+            .poster-container { margin: 0; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+    
+    </div>
+
+    <main class="poster-container" id="poster" role="main" aria-label="Product Catalogue Poster">
+        
+        <div class="hero-container">
+            <div class="hero-stage">
+                <div class="product-col jar" id="jarCol">
+                    <div class="image-upload-wrapper">
+                        
+                        <img id="jarImg" class="product-jar" src="https://via.placeholder.com/200x250/fff/999?text=Glass+Jar" alt="Glass Jar">
+                    </div>
+                </div>
+                <div class="product-col pouch" id="pouchCol">
+                    <div class="image-upload-wrapper">
+                        
+                        <img id="pouchImg" class="product-pouch" src="https://via.placeholder.com/250x300/fff/999?text=Standup+Pouch" alt="Standup Pouch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="title-section">
+                <div class="category-badge editable" id="pCategory" style="margin-bottom: 5px;">HEALTHY</div>
+                <h1 class="product-title-combined editable">
+                    <span id="pTitleEn">Avisaginjala Kaaram</span>
+                    <span class="title-sep">|</span>
+                    <span id="pTitleTe">అవిసగింజల కారం</span>
+                </h1>
+                <div class="title-text-box">
+                    <div class="product-descriptor editable" id="pDescriptor"></div>
+                    <p class="product-tagline editable" id="pTagline">Healthy Bite, Enriched with Ragi!</p>
+                    <div class="product-desc editable" id="pDesc">A wholesome podi enriched with flax seeds and finger millet (ragi). Nutty, spicy, and lightly sweet, it delivers nutrition and taste in every bite.</div>
+                    <div class="badges-container">
+                        <div class="badge"><i class="fas fa-leaf" style="color: #27ae60;"></i> <span class="editable" id="pVeg">Veg</span></div>
+                        <div class="badge"><i class="fas fa-seedling" style="color: #1e8449;"></i> <span class="editable" id="pVegan">Vegan</span></div>
+                        <div class="badge"><i class="fas fa-shield-alt" style="color: var(--copper-primary);"></i> Zero Added Preservatives</div>
+                        <div class="badge"><i class="fas fa-peanut" style="color: #8e44ad;"></i> <span class="editable" id="pNuts">Contains Nuts</span></div>
+                        <div class="badge"><i class="fas fa-om" style="color: #d35400;"></i> <span class="editable" id="pJain">Jain Friendly</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel border-style-1">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">WHAT'S INSIDE</div>
+            <div class="ingredients-grid">
+                <div>
+                    <div class="hero-ingredients">
+                        <div class="hero-ing-item" id="hero1Container">
+                            <div class="image-upload-wrapper">
+                                <img id="hero1Img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">
+                            </div>
+                            <div class="hero-ing-name editable" id="pHero1Name"></div>
+                        </div>
+                        <div class="hero-ing-item" id="hero2Container">
+                            <div class="image-upload-wrapper">
+                                <img id="hero2Img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">
+                            </div>
+                            <div class="hero-ing-name editable" id="pHero2Name"></div>
+                        </div>
+                        <div class="hero-ing-item" id="hero3Container">
+                            <div class="image-upload-wrapper">
+                                <img id="hero3Img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">
+                            </div>
+                            <div class="hero-ing-name editable" id="pHero3Name"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <strong style="font-size: 14px; color: var(--copper-dark);">Ingredients:</strong>
+                    <div class="all-ingredients editable" id="pIngredients">Flax Seeds, Urad Dal, Peanuts, Finger Millet, Dry Red Chilly, Salt, Garlic, Cloves, Tamarind, Jaggery, Cardamom, Curry Leaf, Cinnamon</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel border-style-1">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">AVAILABLE SIZES</div>
+            <div class="pricing-grid">
+                <div class="price-col" id="jarPriceCol">
+                    <div class="price-details">
+                        <h4>GLASS JAR:</h4>
+                        <div class="price-line editable" id="pPriceJar">100g Glass Jar <span>₹105</span></div>
+                    </div>
+                </div>
+                <div class="price-col" id="standupPriceCol">
+                    <div class="price-details">
+                        <h4>STAND-UP POUCH:</h4>
+                        <div class="price-line editable" id="pPrice100">100g Standup <span>₹55</span></div>
+                        <div class="price-line editable" id="pPrice250">250g Standup <span>₹135</span></div>
+                    </div>
+                </div>
+                <div class="price-col" id="pouchPriceCol">
+                    <div class="price-details">
+                        <h4>POUCH:</h4>
+                        <div class="price-line editable" id="pPrice500">500g Pouch <span>₹255</span></div>
+                        <div class="price-line editable" id="pPrice1000">1kg Pouch <span>₹495</span></div>
+                        <div class="price-line editable" id="pPriceOnePouch">1 Unit <span>₹155</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel border-style-1" id="perfectPairingsPanel">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">PERFECT PAIRINGS</div>
+            <div class="how-to-use">
+                <div class="how-to-icons">
+                    <i class="fas fa-bowl-rice"></i>
+                    <i class="fas fa-spoon"></i>
+                </div>
+                <div class="how-to-text editable" id="pHowToUse">
+                    Add the desired amount of podi to hot rice. Mix in a spoonful of ghee to enhance the flavor and aroma. Serve warm!
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel border-style-1" style="padding-top: 20px;" id="healthFactsPanel">
+            <div class="copper-panel-inner"></div>
+            <div class="panel-title">HEALTH FACTS</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <div class="shelf-life">Shelf Life: <span class="editable" id="pShelf">90 Days</span></div>
+                <div class="nutrition-header editable" id="pNutriServing">(Per serving 5g)</div>
+            </div>
+            <table class="nutrition-table" id="nutritionTable">
+                <tr>
+                    <td>Calories: <span class="editable" id="pCal">20.84 kcal</span></td>
+                    <td>Total Fat: <span class="editable" id="pFat">1.13g</span></td>
+                    <td>Saturated Fat: <span class="editable" id="pSatFat">0.14g</span></td>
+                    <td>Sugars: <span class="editable" id="pSugar">0.21g</span></td>
+                </tr>
+                <tr>
+                    <td>Protein: <span class="editable" id="pPro">0.85g</span></td>
+                    <td>Carbs: <span class="editable" id="pCarb">2.03g</span></td>
+                    <td>Fiber: <span class="editable" id="pFiber">1.1g</span></td>
+                    <td>Sodium: <span class="editable" id="pSod">0.1g</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer-grid">
+            <div class="footer-logo">
+                <div class="image-upload-wrapper" style="display: inline-block;">
+                    
+                    <img id="mainLogo" src="Logos/TD%20Main%20Company%20Logo.png" alt="Company Logo" style="height: 70px; object-fit: contain;">
+                </div>
+            </div>
+            <div class="footer-info">
+                <div class="footer-brand editable">Telugu Delicacies</div>
+                <div class="footer-tag editable">Modern Yet Traditional</div>
+                <div class="footer-details editable">
+                    <i class="fas fa-phone-alt" style="color:var(--copper-primary)"></i> / <i class="fab fa-whatsapp" style="color:#25D366"></i> +91 96185 19191<br>
+                    Other Sizes & Bulk Quantities Available on Request<br>
+                    Browse & Order online at: telugudelicacies.com
+                </div>
+            </div>
+            <div class="website-qr">
+                <img id="pWebQR" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://telugudelicacies.com" alt="QR Code">
+                <div class="editable" id="pWeb">SCAN TO ORDER ONLINE</div>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        window.injectProductData = function(p) {
+            const cat = p.catalogue_category || 'General';
+            const catBadge = document.getElementById('pCategory');
+            if (catBadge) catBadge.innerText = cat.toUpperCase();
+            
+            let catColor = '#e6b201'; // General
+            let darkColor = '#b88e00';
+            if(cat.toLowerCase().includes('health')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+            else if(cat.toLowerCase().includes('sprinkling')) { catColor = '#007c81'; darkColor = '#00595d'; }
+            else if(cat.toLowerCase().includes('leafy')) { catColor = '#2d5a27'; darkColor = '#1a3b16'; }
+            else if(cat.toLowerCase().includes('nutty')) { catColor = '#e64456'; darkColor = '#b83443'; }
+            else if(cat.toLowerCase().includes('tasty')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+            
+            if (catBadge) catBadge.style.backgroundColor = catColor;
+            document.documentElement.style.setProperty('--copper-primary', catColor);
+            document.documentElement.style.setProperty('--copper-dark', darkColor);
+
+            if (document.getElementById('pCategory')) document.getElementById('pCategory').innerText = p.catalogue_category || 'General';
+            if (document.getElementById('pTitleEn')) document.getElementById('pTitleEn').innerText = p.product_name || 'Product Name';
+            if (document.getElementById('pTitleTe')) document.getElementById('pTitleTe').innerText = p.product_name_telugu || 'ఉత్పత్తి పేరు';
+            
+            // Auto-scale title font size so it fits on one line
+            const titleEl = document.querySelector('.product-title-combined');
+            if (titleEl) {
+                let fontSize = 36;
+                titleEl.style.fontSize = fontSize + 'px';
+                while (titleEl.scrollWidth > titleEl.clientWidth && fontSize > 14) {
+                    fontSize -= 1;
+                    titleEl.style.fontSize = fontSize + 'px';
+                }
+            }
+            
+            if (p.descriptor && p.descriptor.trim() !== '') {
+                if (document.getElementById('pDescriptor')) {
+                    document.getElementById('pDescriptor').innerText = p.descriptor;
+                    document.getElementById('pDescriptor').style.display = 'block';
+                }
+            } else {
+                if (document.getElementById('pDescriptor')) document.getElementById('pDescriptor').style.display = 'none';
+            }
+
+            if (document.getElementById('pTagline')) document.getElementById('pTagline').innerText = p.product_tagline || '';
+            if (document.getElementById('pDesc')) document.getElementById('pDesc').innerText = p.product_description || '';        
+            if (document.getElementById('pHero1Name')) document.getElementById('pHero1Name').innerText = p.hero_ingredient_1 || '';
+            if (document.getElementById('pHero2Name')) document.getElementById('pHero2Name').innerText = p.hero_ingredient_2 || '';
+            if (document.getElementById('pIngredients')) document.getElementById('pIngredients').innerText = p.ingredients || '';
+            
+            if (document.getElementById('pVeg')) document.getElementById('pVeg').innerText = p.is_veg === 'Yes' ? 'Veg' : 'Non-Veg';
+            if (document.getElementById('pVegan')) document.getElementById('pVegan').innerText = p.is_vegan === 'Yes' ? 'Vegan' : 'Non-Vegan';
+            
+            const nutBadge = document.getElementById('pNuts');
+            if (nutBadge) {
+                const nutIcon = nutBadge.previousElementSibling;
+                if (p.contains_nuts && p.contains_nuts !== 'No') {
+                    nutBadge.innerText = 'Contains Nuts';
+                    if (nutIcon) { nutIcon.className = 'fas fa-exclamation-circle'; nutIcon.style.color = '#e74c3c'; }
+                } else {
+                    nutBadge.innerText = 'Nut Free';
+                    if (nutIcon) { nutIcon.className = 'fas fa-check-circle'; nutIcon.style.color = '#27ae60'; }
+                }
+            }
+
+            if (document.getElementById('pJain')) document.getElementById('pJain').innerText = p.is_jain === 'Yes' ? 'Jain Friendly' : 'Not Jain';
+
+            const setPrice = (id, label, price) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (price && price.trim() !== '' && price !== '-') {
+                    el.innerHTML = `${label} <span>₹${price}</span>`;
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            };
+
+            setPrice('pPriceJar', '100g Glass Jar', p.price_100g_glass_jar);
+            setPrice('pPrice100', '100g Standup', p.price_100g_standup);
+            setPrice('pPrice250', '250g Standup', p.price_250g_standup);
+            setPrice('pPrice500', '500g Pouch', p.price_500g_pouch);
+            setPrice('pPrice1000', '1kg Pouch', p.price_1kg_pouch);
+            setPrice('pPriceOnePouch', '1 Unit', p.price_one_unit_pouch);
+
+            const isVisible = (id) => { const el = document.getElementById(id); return el && el.style.display !== 'none'; };
+            const updatePricingColumns = () => {
+                if (document.getElementById('jarPriceCol')) document.getElementById('jarPriceCol').style.display = isVisible('pPriceJar') ? 'block' : 'none';
+                if (document.getElementById('standupPriceCol')) document.getElementById('standupPriceCol').style.display = (isVisible('pPrice100') || isVisible('pPrice250')) ? 'block' : 'none';
+                if (document.getElementById('pouchPriceCol')) document.getElementById('pouchPriceCol').style.display = (isVisible('pPrice500') || isVisible('pPrice1000') || isVisible('pPriceOnePouch')) ? 'block' : 'none';
+            };
+            updatePricingColumns();
+
+            if (p.serving_suggestion && p.serving_suggestion.trim() !== '') {
+                if (document.getElementById('pHowToUse')) document.getElementById('pHowToUse').innerText = p.serving_suggestion;
+                if (document.getElementById('perfectPairingsPanel')) document.getElementById('perfectPairingsPanel').style.display = 'block';
+            } else {
+                if (document.getElementById('perfectPairingsPanel')) document.getElementById('perfectPairingsPanel').style.display = 'none';
+            }
+
+            const hasNutrition = p.nutrition_calories && p.nutrition_calories !== 'N/A' && p.nutrition_calories !== '-' && p.nutrition_calories.trim() !== '';
+            if (hasNutrition) {
+                if (document.getElementById('healthFactsPanel')) document.getElementById('healthFactsPanel').style.display = 'block';
+                if (document.getElementById('pNutriServing')) document.getElementById('pNutriServing').innerText = `(Per serving ${p.nutrition_serving_size || '5g'})`;
+                if (document.getElementById('pCal')) document.getElementById('pCal').innerText = p.nutrition_calories || '-';
+                if (document.getElementById('pFat')) document.getElementById('pFat').innerText = p.nutrition_total_fat || '-';
+                if (document.getElementById('pSatFat')) document.getElementById('pSatFat').innerText = p.nutrition_saturated_fat || '-';
+                if (document.getElementById('pSugar')) document.getElementById('pSugar').innerText = p.nutrition_sugars || '-';
+                if (document.getElementById('pPro')) document.getElementById('pPro').innerText = p.nutrition_protein || '-';
+                if (document.getElementById('pCarb')) document.getElementById('pCarb').innerText = p.nutrition_carbs || '-';
+                if (document.getElementById('pFiber')) document.getElementById('pFiber').innerText = p.nutrition_fiber || '-';
+                if (document.getElementById('pSod')) document.getElementById('pSod').innerText = p.nutrition_sodium || '-';
+            } else {
+                if (document.getElementById('healthFactsPanel')) document.getElementById('healthFactsPanel').style.display = 'none';
+            }
+
+            if (document.getElementById('pShelf')) document.getElementById('pShelf').innerText = (p.shelf_life_days || '-') + ' Days';
+            const webUrl = p.webpage_url || 'https://telugudelicacies.com';
+            if (document.getElementById('pWebQR')) document.getElementById('pWebQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(webUrl)}`;
+
+            // Images and Columns
+            if (p.jarImgUrl && document.getElementById('jarImg')) {
+                document.getElementById('jarImg').src = p.jarImgUrl;
+                if (document.getElementById('jarCol')) document.getElementById('jarCol').style.display = 'block';
+            } else {
+                if (document.getElementById('jarCol')) document.getElementById('jarCol').style.display = 'none';
+            }
+            
+            if (p.pouchImgUrl && document.getElementById('pouchImg')) {
+                document.getElementById('pouchImg').src = p.pouchImgUrl;
+                if (document.getElementById('pouchCol')) document.getElementById('pouchCol').style.display = 'block';
+            } else {
+                if (document.getElementById('pouchCol')) document.getElementById('pouchCol').style.display = 'none';
+            }
+            
+            // Re-apply pricing column visibility after changing columns
+            updatePricingColumns();
+            
+            // Hero Ingredients
+            const setHero = (num, name, imgUrl) => {
+                const container = document.getElementById(`hero${num}Container`);
+                const img = document.getElementById(`hero${num}Img`);
+                const text = document.getElementById(`pHero${num}Name`);
+                
+                if (name && name.trim() !== '' && imgUrl) {
+                    if (container) container.style.display = 'block';
+                    if (img) img.src = imgUrl;
+                    if (text) text.innerText = name;
+                } else {
+                    if (container) container.style.display = 'none';
+                }
+            };
+            
+            setHero(1, p.hero_ingredient_1, p.hero1ImgUrl);
+            setHero(2, p.hero_ingredient_2, p.hero2ImgUrl);
+            setHero(3, p.hero_ingredient_3, p.hero3ImgUrl);
+        };
+    </script>
+
+        <style>
+            body {
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                align-items: flex-start !important;
+            }
+            .controls {
+                display: none !important;
+            }
+            .poster-container {
+                border-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDkwIDkwIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnBhdGggeyBmaWxsOiBub25lOyBzdHJva2U6ICNjYzc3MjI7IHN0cm9rZS13aWR0aDogMy41OyBzdHJva2UtbGluZWNhcDogcm91bmQ7IH0KICAgICAgLmRvdCB7IGZpbGw6ICNjYzc3MjI7IH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgoKICA8IS0tIFRvcCBFZGdlIC0tPgogIDxwYXRoIGNsYXNzPSJwYXRoIiBkPSJNIDMwIDE1IEMgNDAgNSwgNTAgMjUsIDYwIDE1Ii8+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gMzAgMTUgQyA0MCAyNSwgNTAgNSwgNjAgMTUiLz4KICA8Y2lyY2xlIGNsYXNzPSJkb3QiIGN4PSI0NSIgY3k9IjgiIHI9IjMiLz4KICA8Y2lyY2xlIGNsYXNzPSJkb3QiIGN4PSI0NSIgY3k9IjIyIiByPSIzIi8+CgogIDwhLS0gQm90dG9tIEVkZ2UgLS0+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gMzAgNzUgQyA0MCA2NSwgNTAgODUsIDYwIDc1Ii8+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gMzAgNzUgQyA0MCA4NSwgNTAgNjUsIDYwIDc1Ii8+CiAgPGNpcmNsZSBjbGFzcz0iZG90IiBjeD0iNDUiIGN5PSI2OCIgcj0iMyIvPgogIDxjaXJjbGUgY2xhc3M9ImRvdCIgY3g9IjQ1IiBjeT0iODIiIHI9IjMiLz4KCiAgPCEtLSBMZWZ0IEVkZ2UgLS0+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gMTUgMzAgQyA1IDQwLCAyNSA1MCwgMTUgNjAiLz4KICA8cGF0aCBjbGFzcz0icGF0aCIgZD0iTSAxNSAzMCBDIDI1IDQwLCA1IDUwLCAxNSA2MCIvPgogIDxjaXJjbGUgY2xhc3M9ImRvdCIgY3g9IjgiIGN5PSI0NSIgcj0iMyIvPgogIDxjaXJjbGUgY2xhc3M9ImRvdCIgY3g9IjIyIiBjeT0iNDUiIHI9IjMiLz4KCiAgPCEtLSBSaWdodCBFZGdlIC0tPgogIDxwYXRoIGNsYXNzPSJwYXRoIiBkPSJNIDc1IDMwIEMgNjUgNDAsIDg1IDUwLCA3NSA2MCIvPgogIDxwYXRoIGNsYXNzPSJwYXRoIiBkPSJNIDc1IDMwIEMgODUgNDAsIDY1IDUwLCA3NSA2MCIvPgogIDxjaXJjbGUgY2xhc3M9ImRvdCIgY3g9IjY4IiBjeT0iNDUiIHI9IjMiLz4KICA8Y2lyY2xlIGNsYXNzPSJkb3QiIGN4PSI4MiIgY3k9IjQ1IiByPSIzIi8+CgogIDwhLS0gVG9wLUxlZnQgQ29ybmVyIC0tPgogIDxwYXRoIGNsYXNzPSJwYXRoIiBkPSJNIDMwIDE1IEMgMjAgMTUsIDE1IDIwLCAxNSAzMCIvPgogIDxwYXRoIGNsYXNzPSJwYXRoIiBkPSJNIDMwIDE1IEMgNSAwLCAwIDUsIDE1IDMwIi8+CiAgPGNpcmNsZSBjbGFzcz0iZG90IiBjeD0iMTIiIGN5PSIxMiIgcj0iMyIvPgoKICA8IS0tIFRvcC1SaWdodCBDb3JuZXIgLS0+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gNjAgMTUgQyA3MCAxNSwgNzUgMjAsIDc1IDMwIi8+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gNjAgMTUgQyA4NSAwLCA5MCA1LCA3NSAzMCIvPgogIDxjaXJjbGUgY2xhc3M9ImRvdCIgY3g9Ijc4IiBjeT0iMTIiIHI9IjMiLz4KCiAgPCEtLSBCb3R0b20tTGVmdCBDb3JuZXIgLS0+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gMzAgNzUgQyAyMCA3NSwgMTUgNzAsIDE1IDYwIi8+CiAgPHBhdGggY2xhc3M9InBhdGgiIGQ9Ik0gMzAgNzUgQyA1IDkwLCAwIDg1LCAxNSA2MCIvPgogIDxjaXJjbGUgY2xhc3M9ImRvdCIgY3g9IjEyIiBjeT0iNzgiIHI9IjMiLz4KCiAgPCEtLSBCb3R0b20tUmlnaHQgQ29ybmVyIC0tPgogIDxwYXRoIGNsYXNzPSJwYXRoIiBkPSJNIDYwIDc1IEMgNzAgNzUsIDc1IDcwLCA3NSA2MCIvPgogIDxwYXRoIGNsYXNzPSJwYXRoIiBkPSJNIDYwIDc1IEMgODUgOTAsIDkwIDg1LCA3NSA2MCIvPgogIDxjaXJjbGUgY2xhc3M9ImRvdCIgY3g9Ijc4IiBjeT0iNzgiIHI9IjMiLz4KPC9zdmc+Cg==') 30 round !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+            ::-webkit-scrollbar {
+                display: none !important;
+            }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.injectProductData) {
+                    window.injectProductData({"product_name": "MultiGrain Mix", "product_name_telugu": "\u0c2e\u0c32\u0c4d\u0c1f\u0c40 \u0c17\u0c4d\u0c30\u0c46\u0c2f\u0c3f\u0c28\u0c4d \u0c2e\u0c3f\u0c15\u0c4d\u0c38\u0c4d", "catalogue_category": "Tasty Pinch", "product_category": "ready-to-use", "descriptor": "Nutritious Multigrain Flour Additive Enhanced with Ashwagandha", "product_tagline": "Power of 13 Grains, Strength in Every Bite!", "product_description": "A wholesome blend of 13 grains and legumes, designed to make multigrain chapatis at home. Nutritious and flavorful, it turns every bite into a healthy delight.", "ingredients": "Horse Gram, Red Gram, Cornflour, Oats, Finger Millet, Soybean, Pearl Millet, Chickpea, Mung Bean, White Sesame Seeds, Urad Dal, Red Chilly Powder, Garlic, Coriander", "hero_ingredient_1": "Horse Gram", "hero_ingredient_2": "Oats", "hero_ingredient_3": "Finger Millet", "serving_suggestion": "Add this mix to chakki atta in 1:5 ratio before making the dough, to get the health benefits of 13 grains in every bite.", "serving_size_g": "40", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-use/multigrain-mix", "nutrition_serving_size": "40g", "nutrition_calories": "146.89kcal", "nutrition_protein": "7.23g", "nutrition_total_fat": "2.84g", "nutrition_saturated_fat": "0.42g", "nutrition_carbs": "23.55g", "nutrition_fiber": "4.57g", "nutrition_sugars": "0.89g", "nutrition_sodium": "0.04g", "price_100g_standup": "40", "price_250g_standup": "95", "price_500g_pouch": "185", "price_1kg_pouch": "360", "price_100g_glass_jar": "90", "price_one_unit_pouch": "", "photo_standup_pouch": "MUltigrain Mix_Standup_Pouch.png", "photo_glass_jar": "MUltigrain Mix_Cylindrical_Glass_Jar.png", "Category_Colour": "cc7722ff", "photo_standup": "MUltigrain Mix_Standup_Pouch.png", "photo_jar": "", "jarImgUrl": "file:///F:/WebsiteWithAdmin/Data for Catalogue/All Photos Dump NO BackGround/MUltigrain Mix_Cylindrical_Glass_Jar.png", "pouchImgUrl": "file:///F:/WebsiteWithAdmin/Data for Catalogue/All Photos Dump NO BackGround/MUltigrain Mix_Standup_Pouch.png", "hero1ImgUrl": "file:///F:/WebsiteWithAdmin/Data for Catalogue/Ingredient Images/Horse Gram.png", "hero2ImgUrl": "file:///F:/WebsiteWithAdmin/Data for Catalogue/Ingredient Images/Oats.png", "hero3ImgUrl": "file:///F:/WebsiteWithAdmin/Data for Catalogue/Ingredient Images/Finger Millet.png"});
+                }
+            });
+        </script>
+        
+</body>
+</html>

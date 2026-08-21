@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telugu Delicacies - Catalogue & Nutrition Portal</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --copper-primary: #b8623b;
+            --copper-dark: #9a5231;
+            --bg-sand: #fdfbf7;
+            --bg-dark: #1a3038;
+            --border-color: #e5e7eb;
+            --text-main: #374151;
+            --text-muted: #6b7280;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --danger-color: #c0392b;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background: var(--bg-sand); color: var(--text-main);
+            display: flex; flex-direction: column; height: 100vh;
+        }
+
+        /* Top Header */
+        header {
+            background: var(--bg-dark); color: white;
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 3px solid var(--copper-primary);
+        }
+        header h1 { margin: 0; font-size: 22px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        header h1 i { color: var(--copper-primary); }
+        .header-logo { height: 40px; }
+
+        /* Navigation Tab Bar */
+        .tab-bar {
+            background: white; border-bottom: 1px solid var(--border-color);
+            display: flex; padding: 0 30px; gap: 20px;
+        }
+        .tab-btn {
+            background: none; border: none; padding: 15px 20px; font-size: 15px; font-weight: bold;
+            color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent;
+            transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+        }
+        .tab-btn:hover { color: var(--copper-primary); }
+        .tab-btn.active { color: var(--copper-primary); border-bottom-color: var(--copper-primary); }
+
+        /* Content Area */
+        .content-container { flex-grow: 1; overflow: hidden; position: relative; }
+        .tab-content { display: none; height: 100%; width: 100%; overflow: auto; padding: 30px; }
+        .tab-content.active { display: block; }
+
+        /* Buttons & Controls */
+        .btn {
+            padding: 10px 18px; border-radius: 6px; font-weight: bold; font-size: 14px;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+        .btn-primary { background: var(--copper-primary); color: white; border: none; }
+        .btn-primary:hover { background: var(--copper-dark); }
+        .btn-success { background: var(--success-color); color: white; border: none; }
+        .btn-success:hover { background: #219653; }
+        .btn-secondary { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-secondary:hover { background: #f9fafb; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Status & Alert Badges */
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: bold;
+        }
+        .badge-green { background: #e2f7e8; color: var(--success-color); }
+        .badge-red { background: #fde8e8; color: var(--danger-color); }
+        .badge-orange { background: #fff3e0; color: var(--warning-color); }
+
+        /* Tab 1: Data Manager Split Layout */
+        .data-split { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: 100%; }
+        .panel { background: white; border-radius: 8px; border: 1px solid var(--border-color); padding: 25px; display: flex; flex-direction: column; }
+        .panel h3 { margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .panel-scroll { flex-grow: 1; overflow-y: auto; max-height: calc(100vh - 280px); }
+
+        /* Data Table Styling */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .data-table th, .data-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .data-table th { background: #f9fafb; font-weight: bold; color: var(--text-main); font-size: 13px; }
+        .data-table td { font-size: 13px; }
+        .data-table tbody tr:hover { background: #fcfcfc; }
+
+        /* Form elements inside tables */
+        .table-input { width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; }
+        .table-input:focus { outline: none; border-color: var(--copper-primary); }
+
+        /* Tab 2: Single Product Preview */
+        .preview-layout { display: flex; gap: 30px; height: 100%; }
+        .preview-sidebar { width: 360px; background: white; border-radius: 8px; border: 1px solid var(--border-color); padding: 20px; flex-shrink: 0; overflow-y: auto; max-height: calc(100vh - 150px); }
+        .preview-pane { flex-grow: 1; background: #1e222b; border-radius: 8px; display: flex; justify-content: center; align-items: flex-start; padding: 20px; overflow-y: auto; }
+        .iframe-wrapper {
+            width: 794px; height: 1123px; background: transparent; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); transform: scale(0.92); transform-origin: top center;
+            margin-bottom: -90px; position: relative; border: none; overflow: hidden;
+            transition: transform 0.2s, margin-bottom 0.2s;
+        }
+        iframe { width: 100%; height: 100%; border: none; background: transparent; overflow: hidden; }
+
+        /* Tab 4: Nutrition Tab Layout */
+        .nutrition-layout { display: flex; gap: 30px; height: 100%; }
+        .nutrition-canvas-container { flex-grow: 1; background: #e5e7eb; border-radius: 8px; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        canvas { box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 100%; max-height: 100%; background: white; }
+
+        /* Overlay indicator */
+        .overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.9); display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100; font-size: 18px; font-weight: bold; color: var(--copper-primary); display: none;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; }
+        .form-control:focus { outline: none; border-color: var(--copper-primary); }
+
+        .cloudinary-upload-box {
+            border: 2px dashed var(--border-color); border-radius: 8px; padding: 20px; text-align: center;
+            cursor: pointer; background: #f9fafb; transition: all 0.2s; margin-top: 10px;
+        }
+        .cloudinary-upload-box:hover { border-color: var(--copper-primary); background: #fefcfb; }
+
+        /* Login Section overlay */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-sand); display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .login-card {
+            background: white; border: 1px solid var(--border-color); padding: 40px;
+            border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px;
+        }
+        .login-card h2 { margin-top: 0; color: var(--copper-primary); font-size: 24px; text-align: center; margin-bottom: 25px; }
+    </style>
+</head>
+<body>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <h2>Portal Login</h2>
+            <form id="loginForm" onsubmit="handlePortalLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" class="form-control" placeholder="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="button" onclick="handlePortalLogin(event)" class="btn btn-primary" style="width: 100%; margin-top: 15px;">Login to Portal</button>
+            </form>
+            <div id="loginError" style="margin-top: 15px; color: var(--danger-color); font-weight: bold; text-align: center; font-size: 14px;"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <h1><i class="fa-solid fa-layer-group"></i> Telugu Delicacies — Catalogue & Nutrition Portal</h1>
+        <img src="../../../Data for Catalogue/Logos/TD%20Main%20Company%20Logo.png" class="header-logo" alt="Logo" onerror="this.onerror=null; if(!this.src.includes('../../Data')) this.src='../../Data for Catalogue/Logos/TD%20Main%20Company%20Logo.png'; else if(!this.src.includes('/Data')) this.src='/Data for Catalogue/Logos/TD%20Main%20Company%20Logo.png';">
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('data')"><i class="fa-solid fa-database"></i> Data Manager</button>
+        <button class="tab-btn" onclick="switchTab('premium')"><i class="fa-solid fa-image"></i> Premium Catalogue</button>
+        <button class="tab-btn" onclick="switchTab('all')"><i class="fa-solid fa-book-open"></i> All Catalogues</button>
+        <button class="tab-btn" onclick="switchTab('nutrition')"><i class="fa-solid fa-apple-whole"></i> FSSAI Nutrition Label</button>
+    </div>
+
+    <!-- Main Content Panels -->
+    <div class="content-container">
+        <div id="overlay" class="overlay">
+            <i class="fa-solid fa-spinner fa-spin fa-2xl"></i>
+            <span id="overlayText" style="margin-top: 15px;">Processing...</span>
+        </div>
+
+        <!-- TAB 1: Data Manager -->
+        <div id="tab-data" class="tab-content active">
+            <div class="data-split">
+                <!-- Left panel: Text Data Editor -->
+                <div class="panel">
+                    <h3>
+                        <span><i class="fa-solid fa-file-invoice"></i> Product Table (Supabase)</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="document.getElementById('csvFileInput').click()"><i class="fa-solid fa-file-csv"></i> Load CSV</button>
+                            <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVSelect(this.files)">
+                            <button class="btn btn-secondary" onclick="loadFromSupabase()"><i class="fa-solid fa-arrows-rotate"></i> Sync</button>
+                            <button class="btn btn-primary" onclick="saveToSupabase()"><i class="fa-solid fa-floppy-disk"></i> Save Table</button>
+                        </div>
+                    </h3>
+                    <div class="panel-scroll">
+                        <table class="data-table" id="productTable">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Telugu Name</th>
+                                    <th>Category</th>
+                                    <th>Colour</th>
+                                    <th>Veg</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6" style="text-align: center;">Loading from Supabase...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right panel: Images Manager & Audit -->
+                <div class="panel">
+                    <h3><span><i class="fa-solid fa-images"></i> Image Audit & Cloudinary Uploads</span></h3>
+                    <div class="panel-scroll">
+                        <div class="form-group">
+                            <label for="imgProductSelect">Select Product to Manage</label>
+                            <select id="imgProductSelect" class="form-control" onchange="auditSelectedProduct()">
+                                <option value="">Select a product...</option>
+                            </select>
+                        </div>
+
+                        <!-- Asset Audit Badges -->
+                        <div style="margin-top: 20px;" id="auditPanel">
+                            <div style="font-weight: bold; margin-bottom: 15px;">Asset Availability Audit</div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset Class</th>
+                                        <th>Target Filename / Reference</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>📦 Pouch Image</td>
+                                        <td id="auditPouchRef">-</td>
+                                        <td id="auditPouchStatus">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>🫙 Glass Jar Image</td>
+                                        <td id="auditJarRef">-</td>
+                                        <td id="auditJarStatus">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>🌶️ Hero Ingredient 1</td>
+                                        <td id="auditHero1Ref">-</td>
+                                        <td id="auditHero1Status">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>🌶️ Hero Ingredient 2</td>
+                                        <td id="auditHero2Ref">-</td>
+                                        <td id="auditHero2Status">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>🌶️ Hero Ingredient 3</td>
+                                        <td id="auditHero3Ref">-</td>
+                                        <td id="auditHero3Status">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Cloudinary Smart Auto-Tagging & Upload Dropzone -->
+                            <div style="margin-top: 25px;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">Smart Auto-Tagging Uploader</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                                    Drop product images (named like <em>Moringa Kaaram_Standup_Pouch.png</em>) or ingredient cutouts (named like <em>garlic.png</em>). The system will auto-detect the product/ingredient, apply tags, and upload them to Cloudinary!
+                                </div>
+                                <div class="cloudinary-upload-box" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fa-solid fa-wand-magic-sparkles fa-2xl" style="color: var(--copper-primary); margin-bottom: 15px; display:block;"></i>
+                                    <span>Drag & Drop files here or click to browse</span>
+                                    <input type="file" id="fileInput" style="display: none;" onchange="handleSmartUploads(this.files)" multiple accept="image/*">
+                                </div>
+                                <div id="uploadQueueStatus" style="margin-top: 10px; font-size: 13px; font-weight: bold; color: var(--copper-primary); display: none;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Generic Ingredient Images Section -->
+                        <div style="margin-top: 40px;">
+                            <div style="font-weight: bold; border-top: 2px solid var(--border-color); padding-top: 20px; margin-bottom: 15px;">
+                                Shared Ingredient Cutouts Library
+                            </div>
+                            <table class="data-table" id="ingredientsLibraryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Ingredient</th>
+                                        <th>Expected Filename</th>
+                                        <th>Audit Status</th>
+                                        <th>Upload Cutout</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="4" style="text-align: center;">No ingredients audited yet.</td></tr>
+                                </tbody>
+                            </table>
+                            <!-- Ingredient File input -->
+                            <input type="file" id="ingFileInput" style="display: none;" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Single Product Preview -->
+        <div id="tab-premium" class="tab-content">
+            <div class="preview-layout">
+                <div class="preview-sidebar">
+                    <div style="font-weight: bold; color: var(--copper-primary); margin-bottom: 12px; font-size: 15px; border-bottom: 2px solid var(--copper-primary); padding-bottom: 8px;">
+                        <i class="fa-solid fa-box-archive"></i> Product Selection
+                    </div>
+                    <div class="form-group">
+                        <label for="prevProductSelect">Select Product (Supabase Data)</label>
+                        <select id="prevProductSelect" class="form-control" onchange="renderPreview()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;"><i class="fa-solid fa-magnifying-glass-plus"></i> Preview Scaling</label>
+                        <select id="cfgPreviewZoom" class="form-control" onchange="updatePreviewZoom(this.value)">
+                            <option value="1.0">100% (Full Dimensions)</option>
+                            <option value="0.92" selected>92% (Fit Container - Fill Space)</option>
+                            <option value="0.80">80% (Medium)</option>
+                            <option value="0.65">65% (Compact)</option>
+                        </select>
+                    </div>
+
+                    <!-- Common Branding Defaults Controls -->
+                    <div style="font-weight: bold; color: var(--copper-primary); margin: 20px 0 10px 0; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+                        <i class="fa-solid fa-sliders"></i> Common Branding (All Products)
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Brand Name</label>
+                        <input type="text" id="cfgBrandName" class="form-control" value="Telugu Delicacies" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Header Slogan</label>
+                        <input type="text" id="cfgHeaderSlogan" class="form-control" value="Modern Yet Traditional" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Phone / WhatsApp</label>
+                        <input type="text" id="cfgContactPhone" class="form-control" value="+91 96185 19191" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Footer Order Note</label>
+                        <input type="text" id="cfgFooterInfo" class="form-control" value="Other Sizes & Bulk Quantities Available on Request" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Website URL (QR Code)</label>
+                        <input type="text" id="cfgWebsiteUrl" class="form-control" value="https://telugudelicacies.com" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">QR Label Text</label>
+                        <input type="text" id="cfgQrText" class="form-control" value="SCAN TO ORDER ONLINE" oninput="renderPreview()">
+                    </div>
+
+                    <!-- Table & Panel Headings Controls -->
+                    <div style="font-weight: bold; color: var(--copper-primary); margin: 20px 0 10px 0; font-size: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+                        <i class="fa-solid fa-heading"></i> Panel & Table Headings
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Panel 1: Ingredients Heading</label>
+                        <input type="text" id="cfgPanelWhatsInside" class="form-control" value="WHAT'S INSIDE" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Panel 2: Sizes & Pricing Heading</label>
+                        <input type="text" id="cfgPanelAvailableSizes" class="form-control" value="AVAILABLE SIZES" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Panel 3: Pairings Heading</label>
+                        <input type="text" id="cfgPanelPerfectPairings" class="form-control" value="PERFECT PAIRINGS" oninput="renderPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 12px;">Panel 4: Health Facts Heading</label>
+                        <input type="text" id="cfgPanelHealthFacts" class="form-control" value="HEALTH FACTS" oninput="renderPreview()">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="renderPreview()"><i class="fa-solid fa-arrows-rotate"></i> Regenerate Preview</button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="saveCommonBrandingDefaults()"><i class="fa-solid fa-floppy-disk"></i> Save Common Defaults</button>
+                        <button id="btnDownloadPremium" class="btn btn-success" style="width: 100%;" onclick="downloadPremiumPNG()"><i class="fa-solid fa-download"></i> Download PNG Image</button>
+                    </div>
+
+                    <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 12px; color: var(--text-muted);">Custom Template Upload</label>
+                        <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="document.getElementById('uploadPremiumTpl').click()"><i class="fa-solid fa-upload"></i> Upload Custom HTML Template</button>
+                        <input type="file" id="uploadPremiumTpl" style="display:none;" accept=".html" onchange="handleTemplateUpload(this.files, 'premium')">
+                    </div>
+                </div>
+                <div class="preview-pane">
+                    <div class="iframe-wrapper">
+                        <iframe id="previewFrame" src="about:blank" scrolling="no" style="overflow:hidden;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: All Catalogues -->
+        <div id="tab-all" class="tab-content">
+            <div style="max-width: 600px; margin: 50px auto; text-align: center; background: white; padding: 40px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <i class="fa-solid fa-book-open fa-4x" style="color: var(--copper-primary); margin-bottom: 20px;"></i>
+                <h2>All Products Menu Catalogue</h2>
+                <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 30px;">
+                    The "All Products" menu template is a double-column poster showing the entire range. Full layout compilation runs locally via our optimized batch Python scripts.
+                </p>
+                <div style="background: #f9fafb; border-radius: 6px; padding: 20px; border: 1px solid var(--border-color); text-align: left; margin-bottom: 30px;">
+                    <div style="font-weight: bold; margin-bottom: 8px;">Quick CLI Generation commands:</div>
+                    <code style="display: block; font-family: monospace; padding: 8px; background: #eef2f6; border-radius: 4px; overflow-x: auto;">
+                        python scripts/batch_generate_catalogues.py<br>
+                        python scripts/compile_to_pdf.py
+                    </code>
+                </div>
+                <a href="../output_catalogues/TeluguDelicacies_Full_Catalogue.pdf" class="btn btn-primary" download>
+                    <i class="fa-solid fa-file-pdf"></i> Download Compilation PDF
+                </a>
+                <div style="margin-top: 30px; text-align: center;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px;">Upload Custom Generation Code</label>
+                    <button class="btn btn-secondary" onclick="document.getElementById('uploadAllTpl').click()"><i class="fa-solid fa-upload"></i> Upload Batch Script / Template</button>
+                    <input type="file" id="uploadAllTpl" style="display:none;" accept=".html,.py,.cjs,.js" onchange="handleTemplateUpload(this.files, 'all')">
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: Nutrition Facts Label Generator -->
+        <div id="tab-nutrition" class="tab-content">
+            <div class="nutrition-layout">
+                <div class="preview-sidebar">
+                    <div class="form-group">
+                        <label for="nutriProductSelect">Select Product</label>
+                        <select id="nutriProductSelect" class="form-control" onchange="renderNutritionLabel()"></select>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="renderNutritionLabel()"><i class="fa-solid fa-arrows-rotate"></i> Regenerate Label</button>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="downloadNutritionPNG()"><i class="fa-solid fa-download"></i> Download label PNG</button>
+                    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px;">Upload Custom Generation JS</label>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="document.getElementById('uploadNutritionTpl').click()"><i class="fa-solid fa-upload"></i> Upload Nutrition Script</button>
+                        <input type="file" id="uploadNutritionTpl" style="display:none;" accept=".js" onchange="handleTemplateUpload(this.files, 'nutrition')">
+                    </div>
+                </div>
+                <div class="nutrition-canvas-container">
+                    <canvas id="nutritionCanvas" width="1080" height="1080"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script>
+        // Supabase Initialization
+        const SUPABASE_URL = 'https://pfffotghmcofyrvqynbl.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmZmZvdGdobWNvZnlydnF5bmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyNTM4OTYsImV4cCI6MjA4MDgyOTg5Nn0.eo9VOZZGX4do91GYnBCJa6a9mqcbVqqolQDQ4-C9YYc';
+        
+        let supabaseClient = null;
+        if (window.supabase && window.supabase.createClient) {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (e) {
+                console.error("Failed to initialize Supabase:", e);
+                alert("Failed to initialize Supabase. Are cookies/localStorage blocked?");
+            }
+        } else {
+            console.error("Supabase script failed to load. Check internet connection.");
+        }
+
+        // Cloudinary Details
+        const CLOUDINARY_CLOUD_NAME = 'telugudelicacies';
+        const CLOUDINARY_UPLOAD_PRESET = 'product_images';
+
+        let products = [];
+        let uniqueIngredients = [];
+        let customTemplates = {};
+
+        // UI Helpers
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activate button
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+            if(activeBtn) activeBtn.classList.add('active');
+            
+            // Activate content
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        function showOverlay(text) {
+            document.getElementById('overlayText').innerText = text;
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        function hideOverlay() {
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // On Load initialization
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (!supabaseClient) {
+                const errDiv = document.getElementById('loginError');
+                if (errDiv) errDiv.innerText = "Database connection failed. Please check internet connection.";
+                return;
+            }
+
+            loadCommonBrandingDefaults();
+            // Check active session on load
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                loadFromSupabase();
+            } else {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            }
+
+            // Auth State Change listener
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (session) {
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    if (products.length === 0) loadFromSupabase();
+                } else {
+                    document.getElementById('loginOverlay').style.display = 'flex';
+                    products = [];
+                    populateProductTable();
+                }
+            });
+        });
+
+        async function handlePortalLogin(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (!supabaseClient) {
+                alert("Database script failed to load. Cannot log in.");
+                return;
+            }
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errDiv = document.getElementById('loginError');
+            errDiv.innerText = '';
+            
+            showOverlay("Logging in...");
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                if (error) throw error;
+            } catch (err) {
+                console.error(err);
+                errDiv.innerText = "Login failed: " + err.message;
+            } finally {
+                hideOverlay();
+            }
+        }
+
+        // 1. Data Operations
+        async function loadFromSupabase() {
+            if (!supabaseClient) return;
+            showOverlay("Syncing with Supabase...");
+            try {
+                // Fetch custom templates first
+                await fetchTemplatesFromSupabase();
+
+                const { data, error } = await supabaseClient
+                    .from('catalogue_products')
+                    .select('*')
+                    .order('product_name', { ascending: true });
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    console.warn("Supabase table 'catalogue_products' is empty. Loading local CSV data...");
+                    loadFromCSV();
+                } else {
+                    products = data;
+                    populateProductTable();
+                    populateDropdowns();
+                    buildIngredientsLibrary();
+                }
+                
+            } catch (err) {
+                console.error("Supabase load error:", err);
+                alert("Error loading from Supabase. Falling back to local CSV.");
+                loadFromCSV();
+            } finally {
+                hideOverlay();
+            }
+        }
+
+        function handleCSVSelect(files) {
+            if (files.length === 0) return;
+            showOverlay("Parsing uploaded CSV file...");
+            Papa.parse(files[0], {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    products = results.data.filter(p => p.product_name && p.product_name.trim() !== "");
+                    populateProductTable();
+                    populateDropdowns();
+                    buildIngredientsLibrary();
+                    hideOverlay();
+                    alert(`Successfully parsed ${products.length} products from CSV!`);
+                },
+                error: function(err) {
+                    console.error(err);
+                    alert("Error parsing CSV: " + err.message);
+                    hideOverlay();
+                }
+            });
+        }
+
+        function loadFromCSV() {
+            Papa.parse("../Data for Catalogue/master_product_data_v2.csv", {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    products = results.data.filter(p => p.product_name && p.product_name.trim() !== "");
+                    populateProductTable();
+                    populateDropdowns();
+                    buildIngredientsLibrary();
+                },
+                error: function(err) {
+                    console.warn("Failed to auto-load CSV. Fallback to manual selection.");
+                }
+            });
+        }
+
+        function populateProductTable() {
+            const tbody = document.querySelector('#productTable tbody');
+            tbody.innerHTML = '';
+            
+            products.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" class="table-input" value="${p.product_name}" onchange="updateProductField(${idx}, 'product_name', this.value)"></td>
+                    <td><input type="text" class="table-input" value="${p.product_name_telugu || ''}" onchange="updateProductField(${idx}, 'product_name_telugu', this.value)"></td>
+                    <td><input type="text" class="table-input" value="${p.catalogue_category || ''}" onchange="updateProductField(${idx}, 'catalogue_category', this.value)"></td>
+                    <td><input type="text" class="table-input" style="font-family:monospace;" value="${p.category_colour || ''}" onchange="updateProductField(${idx}, 'category_colour', this.value)"></td>
+                    <td>
+                        <select class="table-input" onchange="updateProductField(${idx}, 'is_veg', this.value)">
+                            <option value="Yes" ${p.is_veg === 'Yes' ? 'selected' : ''}>Yes</option>
+                            <option value="No" ${p.is_veg === 'No' ? 'selected' : ''}>No</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size:12px;" onclick="auditProductDirectly(${idx})"><i class="fa-solid fa-magnifying-glass"></i> Audit</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateProductField(idx, field, value) {
+            products[idx][field] = value;
+        }
+
+        async function saveToSupabase() {
+            showOverlay("Saving edits to Supabase...");
+            let errors = 0;
+            for (let p of products) {
+                // Upsert based on product_name (unique key)
+                const payload = { ...p };
+                delete payload.id; // Let supabase handle primary key mapping if upserting
+                delete payload.created_at;
+                delete payload.updated_at;
+
+                const { error } = await supabaseClient
+                    .from('catalogue_products')
+                    .upsert(payload, { onConflict: 'product_name' });
+                if (error) {
+                    console.error("Error upserting row:", error);
+                    errors++;
+                }
+            }
+            hideOverlay();
+            if(errors > 0) {
+                alert(`Saved with ${errors} row errors. Check console.`);
+            } else {
+                alert("All edits saved to Supabase successfully!");
+            }
+            loadFromSupabase(); // refresh
+        }
+
+        function populateDropdowns() {
+            const selects = ['imgProductSelect', 'prevProductSelect', 'nutriProductSelect'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                el.innerHTML = '<option value="">Select a product...</option>';
+                products.forEach((p, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.innerText = p.product_name;
+                    el.appendChild(opt);
+                });
+            });
+        }
+
+        // Custom Templates Handling
+        async function fetchTemplatesFromSupabase() {
+            try {
+                const { data, error } = await supabaseClient.from('catalogue_templates').select('*');
+                if (!error && data) {
+                    data.forEach(t => {
+                        customTemplates[t.template_id] = t.content;
+                        if (t.template_id === 'nutrition') {
+                            applyNutritionTemplate(t.content);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Templates fetch error:", err);
+            }
+        }
+
+        function applyNutritionTemplate(jsCode) {
+            const script = document.createElement('script');
+            script.innerHTML = jsCode;
+            script.id = "customNutritionScript";
+            document.getElementById('customNutritionScript')?.remove();
+            document.body.appendChild(script);
+        }
+
+        function handleTemplateUpload(files, templateId) {
+            if (files.length === 0) return;
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const content = e.target.result;
+                showOverlay("Uploading custom template...");
+                try {
+                    const { error } = await supabaseClient.from('catalogue_templates').upsert({
+                        template_id: templateId,
+                        content: content
+                    });
+                    if (error) throw error;
+                    
+                    customTemplates[templateId] = content;
+                    
+                    if (templateId === 'nutrition') {
+                        applyNutritionTemplate(content);
+                        if (document.getElementById('nutriProductSelect').value !== "") {
+                            renderNutritionLabel();
+                        }
+                    } else if (templateId === 'premium') {
+                        if (document.getElementById('prevProductSelect').value !== "") {
+                            renderPreview();
+                        }
+                    }
+                    
+                    alert(`Template '${templateId}' uploaded and saved to Supabase successfully!`);
+                } catch (err) {
+                    console.error(err);
+                    alert("Error saving template to Supabase: " + err.message);
+                } finally {
+                    hideOverlay();
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Helper to check image status
+        function testImage(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        function cleanName(name) {
+            if (!name || name === '0' || name === '-') return '';
+            return name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+        }
+
+        // Preview Zoom Controller
+        function updatePreviewZoom(val) {
+            const scale = parseFloat(val);
+            const wrapper = document.querySelector('.iframe-wrapper');
+            if (wrapper) {
+                wrapper.style.transform = `scale(${scale})`;
+                const mb = -Math.round(1123 * (1 - scale));
+                wrapper.style.marginBottom = `${mb}px`;
+            }
+        }
+
+        // Universal Image Resolution Chain with Multi-Path & Name Variation Fallbacks
+        async function resolveProductImageUrl(p, type) {
+            if (!p) return null;
+            let ref = (type === 'pouch') 
+                ? (p.photo_standup_pouch || p.pouch_img_url || p.pouch_image || p.photo_pouch || p.pouch_url)
+                : (p.photo_glass_jar || p.jar_img_url || p.jar_image || p.photo_jar || p.jar_url);
+
+            if (ref && String(ref).trim().startsWith('http')) return String(ref).trim();
+            
+            const prodName = p.product_name || '';
+            const suffix = (type === 'pouch') ? '_Standup_Pouch.png' : '_Cylindrical_Glass_Jar.png';
+
+            const candidates = [];
+            if (ref && ref !== '0' && ref !== '-') candidates.push(ref);
+            if (prodName) {
+                candidates.push(`${prodName}${suffix}`);
+                // Chinthaku -> Chintaku
+                candidates.push(`${prodName.replace('Chinthaku', 'Chintaku')}${suffix}`);
+                candidates.push(`${prodName.replace('th', 't')}${suffix}`);
+                // Multigrain -> MUltigrain
+                candidates.push(`${prodName.replace('Multigrain', 'MUltigrain')}${suffix}`);
+                candidates.push(`${prodName.replace('multigrain', 'MUltigrain')}${suffix}`);
+            }
+
+            const pathPrefixes = [
+                '../../../Data for Catalogue/All Photos Dump NO BackGround/',
+                '../../Data for Catalogue/All Photos Dump NO BackGround/',
+                '../Data for Catalogue/All Photos Dump NO BackGround/',
+                '/Data for Catalogue/All Photos Dump NO BackGround/'
+            ];
+
+            // 1. Try local path prefixes for all candidate filenames
+            for (let cand of candidates) {
+                for (let prefix of pathPrefixes) {
+                    let testUrl = prefix + cand;
+                    if (await testImage(testUrl)) return testUrl;
+                }
+            }
+
+            // 2. Check localStorage registry (from smart uploads)
+            const productCloudRegistry = JSON.parse(localStorage.getItem('td_product_cloudinary') || '{}');
+            for (let cand of candidates) {
+                if (productCloudRegistry[cand] && await testImage(productCloudRegistry[cand])) {
+                    return productCloudRegistry[cand];
+                }
+            }
+
+            // 3. Try Cloudinary CDN direct filename match
+            for (let cand of candidates) {
+                let cloudUrl = `https://res.cloudinary.com/telugudelicacies/image/upload/catalogue_images/products/${encodeURIComponent(cand)}`;
+                if (await testImage(cloudUrl)) return cloudUrl;
+            }
+
+            // 4. Try Cloudinary CDN by clean product name + type
+            if (prodName) {
+                let cloudUrl2 = `https://res.cloudinary.com/telugudelicacies/image/upload/catalogue_images/products/${cleanName(prodName)}_${type}.png`;
+                if (await testImage(cloudUrl2)) return cloudUrl2;
+            }
+
+            return null;
+        }
+
+        async function resolveIngredientImageUrl(ingName) {
+            if (!ingName || ingName === '0' || ingName === '-') return null;
+            if (String(ingName).trim().startsWith('http')) return String(ingName).trim();
+            
+            const filename = `${cleanName(ingName)}.png`;
+            const pathPrefixes = [
+                '../../../Data for Catalogue/Ingredient Images/',
+                '../../Data for Catalogue/Ingredient Images/',
+                '../Data for Catalogue/Ingredient Images/',
+                '/Data for Catalogue/Ingredient Images/'
+            ];
+
+            for (let prefix of pathPrefixes) {
+                let testUrl = prefix + filename;
+                if (await testImage(testUrl)) return testUrl;
+            }
+
+            const registry = JSON.parse(localStorage.getItem('td_ingredient_cloudinary') || '{}');
+            if (registry[filename] && await testImage(registry[filename])) {
+                return registry[filename];
+            }
+
+            let cloudUrl = `https://res.cloudinary.com/telugudelicacies/image/upload/catalogue_images/ingredients/${filename}`;
+            if (await testImage(cloudUrl)) return cloudUrl;
+
+            return null;
+        }
+
+        // Image Audits
+        async function auditProductDirectly(idx) {
+            document.getElementById('imgProductSelect').value = idx;
+            auditSelectedProduct();
+        }
+
+        async function auditSelectedProduct() {
+            const idx = document.getElementById('imgProductSelect').value;
+            if (idx === "") return;
+            const p = products[idx];
+            
+            // Auditing standup pouch
+            const pouchRef = p.photo_standup_pouch || `${p.product_name}_Standup_Pouch.png`;
+            document.getElementById('auditPouchRef').innerText = pouchRef;
+            
+            let pouchUrl = await resolveProductImageUrl(p, 'pouch');
+            document.getElementById('auditPouchStatus').innerHTML = pouchUrl ? 
+                '<span class="badge badge-green"><i class="fa-solid fa-check"></i> Available</span>' : 
+                '<span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> Missing</span>';
+
+            // Auditing glass jar
+            const jarRef = p.photo_glass_jar || `${p.product_name}_Cylindrical_Glass_Jar.png`;
+            document.getElementById('auditJarRef').innerText = jarRef;
+            
+            let jarUrl = await resolveProductImageUrl(p, 'jar');
+            document.getElementById('auditJarStatus').innerHTML = jarUrl ? 
+                '<span class="badge badge-green"><i class="fa-solid fa-check"></i> Available</span>' : 
+                '<span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> Missing</span>';
+
+            // Audit ingredients
+            for (let num of [1, 2, 3]) {
+                const ingName = p[`hero_ingredient_${num}`];
+                const statusEl = document.getElementById(`auditHero${num}Status`);
+                const refEl = document.getElementById(`auditHero${num}Ref`);
+                
+                if (!ingName || ingName === '0' || ingName === '-') {
+                    refEl.innerText = 'Not Used';
+                    statusEl.innerHTML = '<span class="badge badge-orange"><i class="fa-solid fa-minus"></i> N/A</span>';
+                    continue;
+                }
+                
+                const expectedFile = `${cleanName(ingName)}.png`;
+                refEl.innerText = `${ingName} (${expectedFile})`;
+                
+                let ingUrl = await resolveIngredientImageUrl(ingName);
+                statusEl.innerHTML = ingUrl ? 
+                    '<span class="badge badge-green"><i class="fa-solid fa-check"></i> Available</span>' : 
+                    '<span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> Missing cutout</span>';
+            }
+        }
+
+        // Shared ingredients scanning
+        async function buildIngredientsLibrary() {
+            const ingredientsSet = new Set();
+            products.forEach(p => {
+                for(let num of [1,2,3]) {
+                    const ing = p[`hero_ingredient_${num}`];
+                    if (ing && ing !== '0' && ing !== '-' && ing.trim() !== '') {
+                        ingredientsSet.add(ing.trim());
+                    }
+                }
+            });
+            uniqueIngredients = Array.from(ingredientsSet).sort();
+            
+            const tbody = document.querySelector('#ingredientsLibraryTable tbody');
+            tbody.innerHTML = '';
+            
+            for (let ing of uniqueIngredients) {
+                const filename = `${cleanName(ing)}.png`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${ing}</strong></td>
+                    <td style="font-family: monospace;">${filename}</td>
+                    <td id="lib-status-${cleanName(ing)}">Checking...</td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size:12px;" onclick="triggerIngredientUpload('${ing}')">
+                            <i class="fa-solid fa-upload"></i> Upload PNG
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+                
+                // Perform check async
+                checkIngredientAssetStatus(ing, filename);
+            }
+        }
+
+        async function checkIngredientAssetStatus(ing, filename) {
+            const statusEl = document.getElementById(`lib-status-${cleanName(ing)}`);
+            let ingUrl = await resolveIngredientImageUrl(ing);
+            statusEl.innerHTML = ingUrl ? 
+                '<span class="badge badge-green"><i class="fa-solid fa-check"></i> Found</span>' : 
+                '<span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation"></i> Missing</span>';
+        }
+
+        // Drag & Drop / Upload handlers
+        let activeIngredientToUpload = null;
+        function triggerIngredientUpload(ing) {
+            activeIngredientToUpload = ing;
+            document.getElementById('ingFileInput').click();
+        }
+
+        document.getElementById('ingFileInput').addEventListener('change', function() {
+            if (this.files.length > 0 && activeIngredientToUpload) {
+                uploadIngredientToCloudinary(this.files[0], activeIngredientToUpload);
+            }
+        });
+
+        // Setup dropzone highlight
+        const dropZone = document.getElementById('dropZone');
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => { e.preventDefault(); dropZone.style.borderColor = 'var(--copper-primary)'; }, false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => { e.preventDefault(); dropZone.style.borderColor = 'var(--border-color)'; }, false);
+        });
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--border-color)';
+            handleSmartUploads(e.dataTransfer.files);
+        });
+
+        // Smart Auto-Tagging and Match Logic
+        async function handleSmartUploads(files) {
+            if (files.length === 0) return;
+            const statusDiv = document.getElementById('uploadQueueStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `Starting processing of ${files.length} file(s)...`;
+            
+            let uploadedCount = 0;
+            let skippedCount = 0;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileName = file.name;
+                statusDiv.innerHTML = `Analyzing file [${i+1}/${files.length}]: ${fileName}...`;
+                
+                const detection = detectFileMatch(fileName);
+                
+                if (detection.type === 'product_image') {
+                    const p = products[detection.productIdx];
+                    statusDiv.innerHTML = `Uploading [${i+1}/${files.length}]: ${fileName}<br><small style="color:var(--text-muted)">Auto-detected: <strong>${p.product_name}</strong> (${detection.targetField === 'photo_standup_pouch' ? 'Pouch' : 'Jar'})</small>`;
+                    
+                    try {
+                        const secureUrl = await uploadFileToCloudinary(file, 'catalogue_images/products', detection.tags);
+                        p[detection.targetField] = secureUrl;
+                        uploadedCount++;
+                    } catch (err) {
+                        console.error(err);
+                        statusDiv.innerHTML += `<br><span style="color:var(--danger-color)">Error uploading ${fileName}</span>`;
+                        await new Promise(r => setTimeout(r, 2000));
+                    }
+                } else if (detection.type === 'ingredient') {
+                    statusDiv.innerHTML = `Uploading [${i+1}/${files.length}]: ${fileName}<br><small style="color:var(--text-muted)">Auto-detected Ingredient Cutout: <strong>${detection.ingredient}</strong></small>`;
+                    
+                    try {
+                        const secureUrl = await uploadFileToCloudinary(file, 'catalogue_images/ingredients', detection.tags, cleanName(detection.ingredient));
+                        const registry = JSON.parse(localStorage.getItem('td_ingredient_cloudinary') || '{}');
+                        registry[`${cleanName(detection.ingredient)}.png`] = secureUrl;
+                        localStorage.setItem('td_ingredient_cloudinary', JSON.stringify(registry));
+                        uploadedCount++;
+                    } catch (err) {
+                        console.error(err);
+                        statusDiv.innerHTML += `<br><span style="color:var(--danger-color)">Error uploading ${fileName}</span>`;
+                        await new Promise(r => setTimeout(r, 2000));
+                    }
+                } else {
+                    // Manual mapping required
+                    const choice = prompt(`We couldn't auto-detect the file: "${fileName}".\n\nType "pouch" or "jar" followed by a space and the product name (e.g. "pouch Moringa Kaaram") to link it, or type "ing [Ingredient Name]" (e.g. "ing Garlic"), or click Cancel to skip.`);
+                    
+                    if (choice) {
+                        const parts = choice.trim().split(' ');
+                        const cmd = parts[0].toLowerCase();
+                        const target = parts.slice(1).join(' ');
+                        
+                        if (cmd === 'pouch' || cmd === 'jar') {
+                            const matchedIdx = products.findIndex(p => p.product_name.toLowerCase().includes(target.toLowerCase()));
+                            if (matchedIdx !== -1) {
+                                const targetField = cmd === 'pouch' ? 'photo_standup_pouch' : 'photo_glass_jar';
+                                const tags = [cmd, 'product_image', cleanName(products[matchedIdx].product_name)];
+                                statusDiv.innerHTML = `Uploading manually mapped [${i+1}/${files.length}]: ${fileName}`;
+                                try {
+                                    const secureUrl = await uploadFileToCloudinary(file, 'catalogue_images/products', tags);
+                                    products[matchedIdx][targetField] = secureUrl;
+                                    uploadedCount++;
+                                } catch(e) { console.error(e); }
+                            } else {
+                                alert("Product not found. Skipped.");
+                                skippedCount++;
+                            }
+                        } else if (cmd === 'ing') {
+                            const tags = ['ingredient', cleanName(target)];
+                            statusDiv.innerHTML = `Uploading manually mapped ingredient [${i+1}/${files.length}]: ${fileName}`;
+                            try {
+                                const secureUrl = await uploadFileToCloudinary(file, 'catalogue_images/ingredients', tags, cleanName(target));
+                                const registry = JSON.parse(localStorage.getItem('td_ingredient_cloudinary') || '{}');
+                                registry[`${cleanName(target)}.png`] = secureUrl;
+                                localStorage.setItem('td_ingredient_cloudinary', JSON.stringify(registry));
+                                uploadedCount++;
+                            } catch(e) { console.error(e); }
+                        } else {
+                            skippedCount++;
+                        }
+                    } else {
+                        skippedCount++;
+                    }
+                }
+            }
+
+            statusDiv.innerHTML = `Batch completed! Uploaded: ${uploadedCount}, Skipped/Failed: ${skippedCount}.<br><span style="color:var(--success-color)">Click the blue 'Save Table' button above to persist database changes.</span>`;
+            
+            // Refresh table & audits
+            populateProductTable();
+            buildIngredientsLibrary();
+            
+            const curIdx = document.getElementById('imgProductSelect').value;
+            if (curIdx !== "") auditSelectedProduct();
+            
+            setTimeout(() => { statusDiv.style.display = 'none'; }, 8000);
+        }
+
+        function detectFileMatch(fileName) {
+            const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+            const lowerName = nameWithoutExt.toLowerCase();
+            const fileClean = cleanName(nameWithoutExt);
+            
+            // 1. Check if it matches an ingredient cutout
+            let matchedIngredient = null;
+            uniqueIngredients.forEach(ing => {
+                const ingClean = cleanName(ing);
+                if (fileClean === ingClean || fileClean.replace(/_/g, '') === ingClean.replace(/_/g, '')) {
+                    matchedIngredient = ing;
+                }
+            });
+            
+            if (matchedIngredient) {
+                return {
+                    type: 'ingredient',
+                    ingredient: matchedIngredient,
+                    tags: ['ingredient', cleanName(matchedIngredient)]
+                };
+            }
+
+            // 2. Check if it's a product image (Pouch vs Jar)
+            let targetField = null;
+            let specificTag = '';
+            if (lowerName.includes('pouch') || lowerName.includes('standup')) {
+                targetField = 'photo_standup_pouch';
+                specificTag = 'pouch';
+            } else if (lowerName.includes('jar') || lowerName.includes('cylindrical')) {
+                targetField = 'photo_glass_jar';
+                specificTag = 'jar';
+            }
+
+            if (targetField) {
+                let bestProductIdx = null;
+                let highestScore = 0;
+                
+                products.forEach((p, idx) => {
+                    const prodName = p.product_name.toLowerCase();
+                    const cleanProd = prodName.replace(/[^a-z0-9]/g, '');
+                    const cleanFile = fileClean.replace(/[^a-z0-9]/g, '');
+                    
+                    if (cleanFile.includes(cleanProd)) {
+                        const score = cleanProd.length;
+                        if (score > highestScore) {
+                            highestScore = score;
+                            bestProductIdx = idx;
+                        }
+                    }
+                });
+
+                if (bestProductIdx !== null) {
+                    return {
+                        type: 'product_image',
+                        productIdx: bestProductIdx,
+                        targetField,
+                        tags: [specificTag, 'product_image', cleanName(products[bestProductIdx].product_name)]
+                    };
+                }
+            }
+
+            return { type: 'unknown' };
+        }
+
+        async function uploadFileToCloudinary(file, folder, tagsList, customPublicId = '') {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            formData.append('folder', folder);
+            if (tagsList && tagsList.length > 0) {
+                formData.append('tags', tagsList.join(','));
+            }
+            if (customPublicId) {
+                formData.append('public_id', customPublicId);
+            }
+
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error?.message || "Upload failed");
+            }
+            
+            const data = await res.json();
+            return data.secure_url;
+        }
+
+
+        function saveCommonBrandingDefaults() {
+            const defaults = {
+                brandName: document.getElementById('cfgBrandName').value,
+                headerSlogan: document.getElementById('cfgHeaderSlogan').value,
+                contactPhone: document.getElementById('cfgContactPhone').value,
+                footerInfo: document.getElementById('cfgFooterInfo').value,
+                websiteUrl: document.getElementById('cfgWebsiteUrl').value,
+                qrText: document.getElementById('cfgQrText').value,
+                whatsInside: document.getElementById('cfgPanelWhatsInside').value,
+                availableSizes: document.getElementById('cfgPanelAvailableSizes').value,
+                perfectPairings: document.getElementById('cfgPanelPerfectPairings').value,
+                healthFacts: document.getElementById('cfgPanelHealthFacts').value
+            };
+            localStorage.setItem('td_common_branding_defaults', JSON.stringify(defaults));
+            alert("Common branding and panel heading defaults saved!");
+            renderPreview();
+        }
+
+        function loadCommonBrandingDefaults() {
+            const saved = localStorage.getItem('td_common_branding_defaults');
+            if (saved) {
+                try {
+                    const defaults = JSON.parse(saved);
+                    if (defaults.brandName) document.getElementById('cfgBrandName').value = defaults.brandName;
+                    if (defaults.headerSlogan) document.getElementById('cfgHeaderSlogan').value = defaults.headerSlogan;
+                    if (defaults.contactPhone) document.getElementById('cfgContactPhone').value = defaults.contactPhone;
+                    if (defaults.footerInfo) document.getElementById('cfgFooterInfo').value = defaults.footerInfo;
+                    if (defaults.websiteUrl) document.getElementById('cfgWebsiteUrl').value = defaults.websiteUrl;
+                    if (defaults.qrText) document.getElementById('cfgQrText').value = defaults.qrText;
+                    if (defaults.whatsInside) document.getElementById('cfgPanelWhatsInside').value = defaults.whatsInside;
+                    if (defaults.availableSizes) document.getElementById('cfgPanelAvailableSizes').value = defaults.availableSizes;
+                    if (defaults.perfectPairings) document.getElementById('cfgPanelPerfectPairings').value = defaults.perfectPairings;
+                    if (defaults.healthFacts) document.getElementById('cfgPanelHealthFacts').value = defaults.healthFacts;
+                } catch(e) {}
+            }
+        }
+
+        // 2. Premium Catalogue Operations (TAB 2)
+        async function renderPreview() {
+            const idx = document.getElementById('prevProductSelect').value;
+            if(idx === "") return;
+            const p = products[idx];
+            
+            const iframe = document.getElementById('previewFrame');
+            
+            iframe.onload = async () => {
+                const doc = iframe.contentDocument;
+                
+                // Inject style into iframe to kill outer body margin/background and scrollbars
+                const cleanStyle = doc.createElement('style');
+                cleanStyle.innerHTML = `
+                    html, body { background-color: transparent !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+                    ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+                    .poster-container { margin: 0 !important; box-shadow: 0 0 25px rgba(0,0,0,0.5) !important; }
+                `;
+                doc.head.appendChild(cleanStyle);
+
+                const jarUrl = await resolveProductImageUrl(p, 'jar');
+                const pouchUrl = await resolveProductImageUrl(p, 'pouch');
+                
+                // Map the structured properties that the premium template expects
+                const renderedProduct = {
+                    ...p,
+                    jarImgUrl: jarUrl,
+                    pouchImgUrl: pouchUrl,
+                    commonBrandName: document.getElementById('cfgBrandName')?.value || 'Telugu Delicacies',
+                    commonHeaderSlogan: document.getElementById('cfgHeaderSlogan')?.value || 'Modern Yet Traditional',
+                    commonContactPhone: document.getElementById('cfgContactPhone')?.value || '+91 96185 19191',
+                    commonFooterInfo: document.getElementById('cfgFooterInfo')?.value || 'Other Sizes & Bulk Quantities Available on Request',
+                    commonWebsiteUrl: document.getElementById('cfgWebsiteUrl')?.value || 'https://telugudelicacies.com',
+                    commonQrText: document.getElementById('cfgQrText')?.value || 'SCAN TO ORDER ONLINE',
+                    commonWhatsInside: document.getElementById('cfgPanelWhatsInside')?.value || "WHAT'S INSIDE",
+                    commonAvailableSizes: document.getElementById('cfgPanelAvailableSizes')?.value || "AVAILABLE SIZES",
+                    commonPerfectPairings: document.getElementById('cfgPanelPerfectPairings')?.value || "PERFECT PAIRINGS",
+                    commonHealthFacts: document.getElementById('cfgPanelHealthFacts')?.value || "HEALTH FACTS"
+                };
+
+                // Resolve hero ingredient cutout urls
+                for (let num of [1, 2, 3]) {
+                    const ing = p[`hero_ingredient_${num}`];
+                    if (ing && ing !== '0' && ing !== '-') {
+                        renderedProduct[`hero${num}ImgUrl`] = await resolveIngredientImageUrl(ing);
+                    }
+                }
+
+                if (iframe.contentWindow.injectProductData) {
+                    iframe.contentWindow.injectProductData(renderedProduct);
+                }
+
+                // Custom category colour border is now handled via injectProductData internally.
+            };
+
+            if (customTemplates['premium']) {
+                iframe.removeAttribute('src');
+                iframe.srcdoc = customTemplates['premium'];
+            } else {
+                iframe.removeAttribute('srcdoc');
+                iframe.src = '../Single Product Generator/premium_catalogue_template.html';
+            }
+        }
+
+        function downloadPremiumPNG() {
+            const iframe = document.getElementById('previewFrame');
+            const doc = iframe.contentDocument;
+            const poster = doc.querySelector('.poster-container');
+            if(!poster) return alert("Please select a product and generate a preview first.");
+            
+            const btn = document.getElementById('btnDownloadPremium');
+            btn.innerText = "Capturing High-Res PNG...";
+            btn.disabled = true;
+
+            const idx = document.getElementById('prevProductSelect').value;
+            const p = products[idx];
+
+            iframe.contentWindow.html2canvas(poster, {
+                scale: 3.0, // High-resolution export
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#f4e8d3'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${cleanName(p ? p.product_name : 'catalogue')}_premium_catalogue.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+                btn.innerText = "Download PNG Image";
+                btn.disabled = false;
+            }).catch(err => {
+                console.error(err);
+                alert("Capture failed: " + err.message);
+                btn.innerText = "Download PNG Image";
+                btn.disabled = false;
+            });
+        }
+
+
+        // 4. Nutrition facts drawing (TAB 4)
+        const NUTRITION_COLORS = {
+            bg:             '#f5edd6',
+            border:         '#0d7377',
+            cornerFill:     '#0d7377',
+            title:          '#5a3e1b',
+            productName:    '#0d7377',
+            headerBg:       '#0d7377',
+            headerText:     '#f5edd6',
+            rowText:        '#3d2e1a',
+            boldText:       '#0d7377',
+            rowLine:        '#d4c9a8',
+            altRowBg:       'rgba(13,115,119,0.06)',
+            servingText:    '#7a5c2e',
+            footerText:     '#6b5d45',
+            vegGreen:       '#008000',
+            accentGold:     '#c9a84c',
+        };
+
+        const RDA_LIMITS = {
+            energy:        2000,
+            total_fat:     67,
+            saturated_fat: 22,
+            trans_fat:     2,
+            added_sugars:  50,
+            sodium:        2,
+        };
+
+        function parseNum(val) {
+            if (!val) return 0;
+            const m = String(val).match(/([\d.]+)/);
+            return m ? parseFloat(m[1]) : 0;
+        }
+
+        function formatVal(val, unit) {
+            if (unit === 'kcal') return `${val.toFixed(2)} kcal`;
+            if (unit === 'mg')   return `${val.toFixed(0)} mg`;
+            return `${val.toFixed(2)} g`;
+        }
+
+        function getRdaPct(perServ, limit) {
+            const pct = (perServ / limit) * 100;
+            return `${pct.toFixed(1)}%`;
+        }
+
+        function renderNutritionLabel() {
+            const idx = document.getElementById('nutriProductSelect').value;
+            if(idx === "") return;
+            const p = products[idx];
+
+            const canvas = document.getElementById('nutritionCanvas');
+            const ctx = canvas.getContext('2d');
+            const SIZE = 1080;
+            const BORDER_INSET = 36;
+            const PADDING = 50;
+
+            // Clear canvas
+            ctx.fillStyle = NUTRITION_COLORS.bg;
+            ctx.fillRect(0,0,SIZE,SIZE);
+
+            // Double Border
+            ctx.strokeStyle = NUTRITION_COLORS.border;
+            ctx.lineWidth = 4;
+            ctx.strokeRect(BORDER_INSET, BORDER_INSET, SIZE - BORDER_INSET * 2, SIZE - BORDER_INSET * 2);
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(BORDER_INSET + 7, BORDER_INSET + 7, SIZE - (BORDER_INSET + 7) * 2, SIZE - (BORDER_INSET + 7) * 2);
+
+            // Corner squares
+            const cs = 16;
+            const corners = [
+                [BORDER_INSET - 2, BORDER_INSET - 2],
+                [SIZE - BORDER_INSET - cs + 2, BORDER_INSET - 2],
+                [BORDER_INSET - 2, SIZE - BORDER_INSET - cs + 2],
+                [SIZE - BORDER_INSET - cs + 2, SIZE - BORDER_INSET - cs + 2]
+            ];
+            ctx.fillStyle = NUTRITION_COLORS.cornerFill;
+            corners.forEach(([cx, cy]) => ctx.fillRect(cx, cy, cs, cs));
+
+            // Veg Badge
+            let y = BORDER_INSET + 25;
+            let textStartX = BORDER_INSET + 30;
+            const vegSize = 48;
+            const vegX = SIZE - BORDER_INSET - 85;
+            ctx.strokeStyle = NUTRITION_COLORS.vegGreen;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(vegX, y, vegSize, vegSize);
+            ctx.fillStyle = NUTRITION_COLORS.vegGreen;
+            ctx.beginPath();
+            ctx.arc(vegX + vegSize / 2, y + vegSize / 2, vegSize / 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font = 'bold 12px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('VEG', vegX + vegSize / 2, y + vegSize + 14);
+
+            // Logo
+            const logoImg = new Image();
+            logoImg.src = "../images/preloader-logo.png";
+            logoImg.onload = () => {
+                const logoWidth = 140;
+                const logoHeight = logoWidth * (logoImg.height / logoImg.width);
+                ctx.drawImage(logoImg, textStartX, y, logoWidth, logoHeight);
+                drawLabelText(p, ctx, SIZE, BORDER_INSET, PADDING, textStartX + logoWidth + 35, y, logoHeight);
+            };
+            logoImg.onerror = () => {
+                drawLabelText(p, ctx, SIZE, BORDER_INSET, PADDING, textStartX, y, 0);
+            };
+        }
+
+        function drawLabelText(p, ctx, SIZE, BORDER_INSET, PADDING, textStartX, y, logoHeight) {
+            let headerY = y + 45;
+            if (logoHeight > 100) {
+                headerY = y + (logoHeight / 2) - 15;
+            }
+
+            ctx.fillStyle = NUTRITION_COLORS.title;
+            ctx.font = 'bold 50px "Georgia", serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('NUTRITION FACTS', textStartX, headerY);
+
+            headerY += 50;
+            ctx.fillStyle = NUTRITION_COLORS.productName;
+            ctx.font = 'italic bold 38px "Georgia", serif';
+            ctx.fillText(p.product_name, textStartX, headerY);
+
+            headerY += 20;
+            ctx.strokeStyle = NUTRITION_COLORS.accentGold;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(textStartX, headerY);
+            ctx.lineTo(SIZE - BORDER_INSET - 40, headerY);
+            ctx.stroke();
+
+            headerY += 35;
+            ctx.fillStyle = NUTRITION_COLORS.servingText;
+            ctx.font = '600 24px Arial, sans-serif';
+            ctx.fillText(`Serving Size: ${p.nutrition_serving_size || '5g'}`, textStartX, headerY);
+
+            // Compute Nutrition Table Rows
+            const servingSizeG = parseNum(p.nutrition_serving_size || '5g');
+            const factor = servingSizeG > 0 ? (100 / servingSizeG) : 1;
+
+            const perServ = {
+                energy:        parseNum(p.nutrition_calories),
+                protein:       parseNum(p.nutrition_protein),
+                carbs:         parseNum(p.nutrition_carbs),
+                sugars:        parseNum(p.nutrition_sugars),
+                added_sugars:  0,
+                total_fat:     parseNum(p.nutrition_total_fat),
+                saturated_fat: parseNum(p.nutrition_saturated_fat),
+                trans_fat:     0,
+                sodium:        parseNum(p.nutrition_sodium),
+                fiber:         parseNum(p.nutrition_fiber)
+            };
+
+            const totalFatPer100g = perServ.total_fat * factor;
+            const showSatTransFat = totalFatPer100g > 0.5;
+
+            const rows = [];
+            rows.push({ label: 'Energy', per100g: formatVal(perServ.energy * factor, 'kcal'), perServ: formatVal(perServ.energy, 'kcal'), rda: getRdaPct(perServ.energy, RDA_LIMITS.energy), bold: true, indent: false });
+            rows.push({ label: 'Protein', per100g: formatVal(perServ.protein * factor, 'g'), perServ: formatVal(perServ.protein, 'g'), rda: '–', bold: false, indent: false });
+            rows.push({ label: 'Carbohydrate', per100g: formatVal(perServ.carbs * factor, 'g'), perServ: formatVal(perServ.carbs, 'g'), rda: '–', bold: false, indent: false });
+            rows.push({ label: 'Total Sugars', per100g: formatVal(perServ.sugars * factor, 'g'), perServ: formatVal(perServ.sugars, 'g'), rda: '–', bold: false, indent: true });
+            rows.push({ label: 'Added Sugars', per100g: formatVal(perServ.added_sugars * factor, 'g'), perServ: formatVal(perServ.added_sugars, 'g'), rda: getRdaPct(perServ.added_sugars, RDA_LIMITS.added_sugars), bold: true, indent: true });
+            rows.push({ label: 'Total Fat', per100g: formatVal(perServ.total_fat * factor, 'g'), perServ: formatVal(perServ.total_fat, 'g'), rda: getRdaPct(perServ.total_fat, RDA_LIMITS.total_fat), bold: false, indent: false });
+
+            if (showSatTransFat) {
+                rows.push({ label: 'Saturated Fat', per100g: formatVal(perServ.saturated_fat * factor, 'g'), perServ: formatVal(perServ.saturated_fat, 'g'), rda: getRdaPct(perServ.saturated_fat, RDA_LIMITS.saturated_fat), bold: true, indent: true });
+                rows.push({ label: 'Trans Fat', per100g: formatVal(perServ.trans_fat * factor, 'g'), perServ: formatVal(perServ.trans_fat, 'g'), rda: getRdaPct(perServ.trans_fat, RDA_LIMITS.trans_fat), bold: true, indent: true });
+            }
+
+            if (perServ.fiber > 0) {
+                rows.push({ label: 'Dietary Fiber', per100g: formatVal(perServ.fiber * factor, 'g'), perServ: formatVal(perServ.fiber, 'g'), rda: '–', bold: false, indent: false });
+            }
+
+            const sodiumMgServ = perServ.sodium * 1000;
+            const sodiumMg100  = sodiumMgServ * factor;
+            rows.push({ label: 'Sodium', per100g: formatVal(sodiumMg100, 'mg'), perServ: formatVal(sodiumMgServ, 'mg'), rda: getRdaPct(perServ.sodium, RDA_LIMITS.sodium), bold: true, indent: false });
+
+            // Table rendering
+            y = Math.max(headerY + 40, (logoHeight > 0 ? (y + logoHeight + 40) : y + 40));
+            const tableX = PADDING + 16;
+            const tableW = SIZE - (PADDING + 16) * 2;
+            const col1W = tableW * 0.36;
+            const col2W = tableW * 0.22;
+            const col3W = tableW * 0.22;
+
+            const headerH = 46;
+            const headerR = 8;
+
+            ctx.fillStyle = NUTRITION_COLORS.headerBg;
+            ctx.beginPath();
+            ctx.moveTo(tableX + headerR, y);
+            ctx.lineTo(tableX + tableW - headerR, y);
+            ctx.quadraticCurveTo(tableX + tableW, y, tableX + tableW, y + headerR);
+            ctx.lineTo(tableX + tableW, y + headerH - headerR);
+            ctx.quadraticCurveTo(tableX + tableW, y + headerH, tableX + tableW - headerR, y + headerH);
+            ctx.lineTo(tableX + headerR, y + headerH);
+            ctx.quadraticCurveTo(tableX, y + headerH, tableX, y + headerH - headerR);
+            ctx.lineTo(tableX, y + headerR);
+            ctx.quadraticCurveTo(tableX, y, tableX + headerR, y);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = NUTRITION_COLORS.headerText;
+            ctx.font = 'bold 22px Arial, sans-serif';
+            ctx.fillText('Nutrient', tableX + 15, y + 31);
+            ctx.fillText('Per 100g', tableX + col1W + 10, y + 31);
+            ctx.fillText('Per Serve', tableX + col1W + col2W + 10, y + 31);
+            ctx.fillText('% RDA*', tableX + col1W + col2W + col3W + 10, y + 31);
+
+            y += headerH;
+            const FOOTER_ZONE = 80;
+            const bottomLimit = SIZE - BORDER_INSET - FOOTER_ZONE;
+            const availableForRows = bottomLimit - y;
+            const ROW_HEIGHT = Math.floor(availableForRows / rows.length);
+
+            rows.forEach((row, i) => {
+                const rowY = y + i * ROW_HEIGHT;
+                if (i % 2 === 0) {
+                    ctx.fillStyle = NUTRITION_COLORS.altRowBg;
+                    ctx.fillRect(tableX, rowY, tableW, ROW_HEIGHT);
+                }
+
+                ctx.strokeStyle = NUTRITION_COLORS.rowLine;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(tableX, rowY + ROW_HEIGHT);
+                ctx.lineTo(tableX + tableW, rowY + ROW_HEIGHT);
+                ctx.stroke();
+
+                const textY = rowY + ROW_HEIGHT * 0.65;
+                const fontSize = Math.min(28, Math.max(20, ROW_HEIGHT * 0.45));
+
+                const labelX = row.indent ? tableX + 35 : tableX + 15;
+                ctx.fillStyle = row.bold ? NUTRITION_COLORS.boldText : NUTRITION_COLORS.rowText;
+                ctx.font = row.bold ? `bold ${fontSize}px Arial, sans-serif` : `${fontSize}px Arial, sans-serif`;
+                ctx.textAlign = 'left';
+                ctx.fillText(row.label, labelX, textY);
+
+                ctx.fillStyle = NUTRITION_COLORS.rowText;
+                ctx.font = `${fontSize}px Arial, sans-serif`;
+                ctx.fillText(row.per100g, tableX + col1W + 10, textY);
+                ctx.fillText(row.perServ, tableX + col1W + col2W + 10, textY);
+
+                ctx.fillStyle = row.rda === '–' ? NUTRITION_COLORS.footerText : NUTRITION_COLORS.rowText;
+                ctx.fillText(row.rda, tableX + col1W + col2W + col3W + 10, textY);
+            });
+
+            const footerY = SIZE - BORDER_INSET - 42;
+            ctx.fillStyle = NUTRITION_COLORS.footerText;
+            ctx.font = '13px Arial, sans-serif';
+            ctx.fillText('*%RDA based on 2000 kcal, 67g total fat, 22g saturated fat, 2g trans fat, 50g added sugar, 2000mg sodium.', tableX + 5, footerY);
+            ctx.fillText('Source: FSSAI (Labelling & Display) Regulations, 2020.', tableX + 5, footerY + 18);
+        }
+
+        function downloadNutritionPNG() {
+            const canvas = document.getElementById('nutritionCanvas');
+            const idx = document.getElementById('nutriProductSelect').value;
+            if(idx === "") return alert("Please select a product first.");
+            const p = products[idx];
+
+            const link = document.createElement('a');
+            link.download = `${cleanName(p.product_name)}_nutrition_facts.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+
+        // End of App Logic
+    </script>
+</body>
+</html>

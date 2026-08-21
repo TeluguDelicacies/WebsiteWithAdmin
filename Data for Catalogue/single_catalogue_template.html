@@ -9,12 +9,12 @@
         :root {
             --copper-dark: #b8623b;
             --copper-primary: #d4af37;
-            --bg-sand: #fbf8f1;
+            --bg-sand: #fffdf5; /* Brighter background */
             --text-dark: #2c1e16;
             --text-light: #ffffff;
             --table-red: #a4161a;
             --table-green: #2d6a4f;
-            --panel-bg: rgba(255, 255, 255, 0.95);
+            --panel-bg: rgba(255, 255, 255, 0.98);
         }
 
         body {
@@ -26,75 +26,103 @@
         }
 
         .poster-container {
-            width: 1080px; height: 1920px;
+            width: 1080px; 
+            height: 1920px;
             background-color: var(--bg-sand);
             position: relative;
             overflow: hidden;
             display: flex; flex-direction: column;
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            border: 15px solid var(--copper-primary);
             box-sizing: border-box;
+            border: 45px solid transparent;
+            border-image: url('../assets/rangoli_border.svg') 30 round;
         }
 
         /* Scattered Ingredients Background */
         .bg-scatter {
             position: absolute;
             z-index: 0;
-            opacity: 0.15;
+            opacity: 0.25; /* Increased opacity for less dullness */
             filter: blur(1px);
         }
 
         /* Top Header */
         .header {
             position: relative; z-index: 2;
-            padding: 20px 40px 5px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(180deg, rgba(251,248,241,1) 0%, rgba(251,248,241,0.95) 70%, rgba(251,248,241,0) 100%);
+            padding: 12px 15px;
+            display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 24px;
+            background: radial-gradient(circle at 20% center, rgba(255,253,245,1) 0%, rgba(255,253,245,0.96) 80%, rgba(255,253,245,0.92) 100%);
+            border-bottom: 4px double var(--copper-primary);
         }
         
-        .header-left {
-            display: flex; flex-direction: column; gap: 5px; margin-right: 20px;
+        .header-logo-container {
+            flex-shrink: 0; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
         }
-        .header-logo { height: 110px; object-fit: contain; }
+        .header-logo { height: 130px; object-fit: contain; }
+        
+        .header-rangoli-bg {
+            position: absolute;
+            top: 50%;
+            left: 15%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            opacity: 0.06;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .header-rangoli-bg img {
+            width: 100%; height: 100%; object-fit: contain;
+        }
         
         .header-right {
             text-align: left; display: flex; flex-direction: column; gap: 2px;
-            flex-grow: 1; justify-content: center;
+            align-items: flex-start; justify-content: center; z-index: 2;
+            flex-grow: 1;
         }
         .brand-title {
-            font-family: 'Cinzel', serif; font-size: 34px; font-weight: 800; color: var(--table-red);
-            margin: 0;
+            font-family: 'Cinzel', serif; font-size: 30px; font-weight: 800; color: var(--table-red);
+            margin: 0; line-height: 1.1; letter-spacing: 1px; text-transform: uppercase;
+            text-shadow: 1px 1px 2px rgba(164, 22, 26, 0.08);
         }
         .brand-subtitle {
-            font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; color: var(--table-green);
-            margin: 0;
+            font-family: 'Playfair Display', serif; font-size: 19px; font-style: italic; color: var(--table-green);
+            margin: 1px 0; font-weight: 700;
         }
-        .brand-telugu {
+        .brand-subtitle-divider {
+            color: var(--copper-primary);
+            font-style: normal;
+            margin: 0 10px;
+        }
+        .brand-telugu-span {
             font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 800; color: var(--copper-dark);
-            margin: 3px 0 2px 0; letter-spacing: 0.5px;
+            font-style: normal;
         }
         .brand-desc {
-            font-family: 'Playfair Display', serif; font-size: 13px; font-style: italic; font-weight: 600; color: #4a3b32;
-            margin: 0 0 4px 0; line-height: 1.4; max-width: 600px; border-left: 3px solid var(--copper-primary); padding-left: 10px;
+            font-family: 'Playfair Display', serif; font-size: 21px; font-style: italic; font-weight: 600; color: #4a3b32;
+            margin: 4px 0; line-height: 1.4; max-width: 780px;
+            border-left: 3px solid var(--copper-primary);
+            padding-left: 10px;
         }
         .contact-info {
             font-size: 14px; font-weight: 700; color: var(--text-dark);
-            display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 4px;
-            background: rgba(164, 22, 26, 0.05); padding: 4px 12px; border-radius: 20px; width: fit-content; border: 1px solid rgba(164,22,26,0.1);
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 2px;
+            background: rgba(164, 22, 26, 0.05); padding: 3px 12px; border-radius: 20px; width: fit-content; border: 1px solid rgba(164,22,26,0.1);
         }
-        .contact-info i { color: var(--table-red); font-size: 16px; }
+        .contact-info i { color: var(--table-red); font-size: 14px; }
 
         .catalogue-heading {
             text-align: center;
             font-family: 'Cinzel', serif;
-            font-size: 34px;
+            font-size: 27px;
             font-weight: 800;
-            margin: 0px 0 10px 0;
+            margin: 10px 0 10px 0;
             background: linear-gradient(90deg, #b8623b, #d4af37, #b8623b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 1px 1px 2px rgba(184, 98, 59, 0.2);
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             position: relative; z-index: 2;
         }
 
@@ -102,47 +130,58 @@
         .content {
             position: relative; z-index: 2;
             flex-grow: 1;
-            padding: 0 40px;
-            display: flex; flex-direction: column; gap: 4px;
+            padding: 0 15px;
+            display: flex; flex-direction: column; gap: 6px;
             overflow: hidden;
-        }
-
-        .category-group {
-            margin-bottom: 2px;
-        }
-        
-        .category-title {
-            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700;
-            color: var(--text-light); background: var(--copper-dark);
-            padding: 2px 14px; border-radius: 20px;
-            display: inline-block; margin-bottom: 6px;
-            box-shadow: 0 2px 5px rgba(184, 98, 59, 0.3);
-            text-transform: uppercase; letter-spacing: 1px;
         }
 
         .products-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 15px;
+            grid-template-columns: 1fr 1fr; /* 2 products per row */
+            gap: 12px 15px; /* Slightly larger gap to balance 2-columns */
+        }
+
+        .product-wrapper {
+            position: relative;
+            padding-left: 32px; /* Space for the vertical title */
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .vertical-category-title {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 26px;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700;
+            color: var(--text-light); background: var(--copper-dark);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 3px rgba(184, 98, 59, 0.3);
+            text-transform: uppercase; letter-spacing: 2px;
         }
 
         /* Compact Card Design */
         .product-card {
+            flex-grow: 1;
             background: var(--panel-bg);
             border: 1px solid rgba(212,175,55,0.4);
             border-radius: 8px;
-            padding: 6px 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex; flex-direction: row; gap: 10px; align-items: center;
+            padding: 6px 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            display: flex; flex-direction: row; gap: 8px; align-items: center;
         }
         
         .card-product-img {
-            width: 45px; height: 55px; flex-shrink: 0;
+            width: 55px; height: 70px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
         }
         .card-product-img img {
             max-width: 100%; max-height: 100%; object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
         }
 
         .card-details {
@@ -150,7 +189,7 @@
         }
 
         .card-header {
-            display: flex; gap: 8px; align-items: center; margin-bottom: 4px;
+            display: flex; gap: 4px; align-items: center; margin-bottom: 2px;
         }
 
         .card-title-group {
@@ -158,8 +197,14 @@
         }
 
         .product-name {
-            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--table-red);
+            font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--table-red);
             margin: 0 0 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        .product-descriptor {
+            font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; color: #555;
+            margin: 0 0 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
         
         .product-tagline {
@@ -168,53 +213,59 @@
         }
 
         .prices-row {
-            display: flex; gap: 5px; align-items: center;
+            display: flex; gap: 4px; align-items: center;
         }
         
         .price-box {
-            display: flex; flex-direction: row; align-items: baseline; justify-content: center; gap: 4px;
-            background: rgba(0,0,0,0.03);
-            border: 1px dashed rgba(212,175,55,0.6);
-            padding: 3px 6px; border-radius: 4px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+            background: rgba(0,0,0,0.02);
+            border: 1px dashed rgba(212,175,55,0.5);
+            padding: 3px 2px; border-radius: 4px;
             flex: 1;
+            text-align: center;
         }
         
-        .price-label { font-size: 9px; font-weight: 700; color: var(--text-dark); text-transform: uppercase; text-align: center; }
+        .price-label { font-size: 9px; font-weight: 700; color: var(--text-dark); text-transform: uppercase; }
         .price-val { font-size: 13px; font-weight: 800; color: var(--table-green); }
         
-        .price-rtc { flex: none; width: 100%; display: flex; justify-content: center; gap: 10px; padding: 2px 10px; box-sizing: border-box; flex-direction: row; }
-        .price-rtc .price-label { font-size: 10px; }
-        .price-rtc .price-val { font-size: 14px; }
+        .price-rtc { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 3px 2px; box-sizing: border-box; }
+        .price-rtc .price-label { font-size: 9px; }
+        .price-rtc .price-val { font-size: 13px; }
+
+
 
         /* Footer */
         .footer {
             position: relative; z-index: 2;
-            margin-top: auto;
-            background: #fff;
-            color: var(--text-dark);
-            padding: 12px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-top: 5px solid var(--copper-primary);
+            padding: 15px 15px 20px 15px;
+            display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 20px; align-items: center;
+            background: #fbf8f1;
+            border-top: 4px double var(--copper-primary);
         }
         
         .footer-left {
-            display: flex; flex-direction: column; justify-content: center;
+            display: flex; align-items: center; gap: 10px;
         }
-        .footer-left .fw-bold { font-size: 14px; font-weight: 700; }
-        .footer-left .fw-small { font-size: 12px; font-weight: 500; }
+        .footer-left i { font-size: 32px; color: var(--table-red); }
+        .footer-left-content {
+            display: flex; flex-direction: column; justify-content: center; gap: 2px;
+        }
+        .footer-left-content .fw-bold { font-size: 16px; font-weight: 700; }
+        .footer-left-content .fw-small { font-size: 13px; font-weight: 600; line-height: 1.3; color: #555; }
         
         .footer-center {
-            display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; line-height: 1.2;
+            display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; line-height: 1.2;
         }
-        .footer-center i { font-size: 32px; color: #25D366; }
+        .footer-center i { font-size: 32px; color: var(--table-red); }
 
         .footer-right {
             text-align: right; display: flex; align-items: center; gap: 12px;
         }
-        .footer-right .fw-bold { font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; gap: 8px;}
+        .footer-right .fw-bold { font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; gap: 6px;}
         .footer-right .fw-bold i { color: var(--table-red); font-size: 20px;}
-        .footer-right .fw-small { font-size: 12px; font-weight: 500; margin-bottom: 3px; }
-        .footer-qr { width: 55px; height: 55px; border: 2px solid var(--copper-primary); border-radius: 4px; padding: 2px; background: #fff; }
+        .footer-right .fw-small { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+        .footer-qr { width: 65px; height: 65px; border: 2px solid var(--copper-primary); border-radius: 6px; padding: 2px; background: #fff; }
+
     </style>
 </head>
 <body>
@@ -224,13 +275,15 @@
 
         <!-- Header -->
         <header class="header">
-            <div class="header-left">
-                <img src="Logos/TD Main Company Logo.png" alt="Telugu Delicacies" class="header-logo">
+            <div class="header-rangoli-bg">
+                <img src="Rangoli%20FOr%20desgn.png" alt="Rangoli">
+            </div>
+            <div class="header-logo-container">
+                <img src="Logos/TD%20Main%20Company%20Logo.png" alt="Telugu Delicacies" class="header-logo">
             </div>
             <div class="header-right">
                 <h1 class="brand-title">Telugu Delicacies</h1>
-                <h2 class="brand-subtitle">Modern Yet Traditional</h2>
-                <p class="brand-telugu">సాంప్రదాయ రుచులు, ఆధునిక శైలి</p>
+                <h2 class="brand-subtitle">Modern Yet Traditional <span class="brand-subtitle-divider">|</span> <span class="brand-telugu-span">సాంప్రదాయ రుచులు, ఆధునిక శైలి</span></h2>
                 <p class="brand-desc">Experience traditional recipes elevated by premium ingredients. We bring you heirloom flavours, perfected with modern care.</p>
                 <div class="contact-info">
                     <i class="fab fa-whatsapp"></i> / <i class="fas fa-phone-alt"></i> +91 96185 19191
@@ -238,7 +291,7 @@
             </div>
         </header>
 
-        <h2 class="catalogue-heading">COMPLETE PRODUCT CATALOGUE</h2>
+        <h2 class="catalogue-heading">PRODUCT CATALOGUE</h2>
 
         <!-- Main Content -->
         <div class="content" id="productContent">
@@ -248,13 +301,19 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-left">
-                <div class="fw-bold">Net Wt: 100Gms & 250Gms |</div>
-                <div class="fw-small">Other Sizes & Bulk Quantities<br>Available on Request</div>
+                <i class="fas fa-box-open"></i>
+                <div class="footer-left-content">
+                    <div class="fw-bold">Net Wt: 100g & 250g</div>
+                    <div class="fw-small">
+                        Other Sizes &<br>
+                        Bulk Quantities Available
+                    </div>
+                </div>
             </div>
             <div class="footer-center">
-                <i class="fab fa-whatsapp"></i>
+                <i class="fas fa-gift"></i>
                 <div>
-                    Order via<br>WhatsApp:<br><span style="color:var(--table-red)">+91 96185 19191</span>
+                    Corporate &<br>Gift Ordering<br>Available
                 </div>
             </div>
             <div class="footer-right">
@@ -298,45 +357,37 @@
                 
                 // Random rotation
                 const rot = Math.floor(Math.random() * 360);
-                img.style.transform = `rotate(${rot}deg)`;
-                
                 bgContainer.appendChild(img);
             });
             
             // 2. Render Products
             const content = document.getElementById('productContent');
+            const grid = document.createElement('div');
+            grid.className = 'products-grid';
+            content.appendChild(grid);
             
             for (const cat of categories) {
-                const group = document.createElement('div');
-                group.className = 'category-group';
+                if (cat.products.length === 0) continue;
                 
-                // Only render category header if there are products
-                if (cat.products.length > 0) {
-                    const title = document.createElement('div');
-                    title.className = 'category-title';
-                    title.innerText = cat.name;
-                    group.appendChild(title);
-                }
-                
-                const grid = document.createElement('div');
-                grid.className = 'products-grid';
-                
-                for (const p of cat.products) {
+                cat.products.forEach((p, idx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'product-wrapper';
+
+                    let catColor = p.Category_Colour ? (p.Category_Colour.startsWith('#') ? p.Category_Colour : '#' + p.Category_Colour) : '#b8623b';
+                    if (catColor.length === 9) catColor = catColor.substring(0, 7);
+
+                    if (idx === 0) {
+                        const title = document.createElement('div');
+                        title.className = 'vertical-category-title';
+                        title.innerText = cat.name;
+                        title.style.background = catColor;
+                        wrapper.appendChild(title);
+                    }
+                    
                     const card = document.createElement('div');
                     card.className = 'product-card';
-                    
-                    let cardBgColor = 'rgba(255, 255, 255, 0.95)';
-                    switch(cat.name) {
-                        case 'General': cardBgColor = 'rgba(255, 225, 215, 0.95)'; break; // Reddish/copper
-                        case 'Nutty': cardBgColor = 'rgba(255, 230, 205, 0.95)'; break; // Orange/brown
-                        case 'Leafy': cardBgColor = 'rgba(215, 245, 220, 0.95)'; break; // Green
-                        case 'Sprinkling': cardBgColor = 'rgba(255, 240, 190, 0.95)'; break; // Yellow
-                        case 'Healthy': cardBgColor = 'rgba(210, 235, 255, 0.95)'; break; // Blue
-                        case 'Tasty Pinch': cardBgColor = 'rgba(255, 220, 240, 0.95)'; break; // Pink
-                        case 'Ready to Cook':
-                        case 'Ready To Cook': cardBgColor = 'rgba(230, 230, 230, 0.95)'; break; // Grey
-                    }
-                    card.style.background = cardBgColor;
+                    card.style.borderColor = catColor;
+                    card.style.background = catColor + '20'; // 12% opacity over the sand background
                     
                     let productPhotoSrc = 'https://via.placeholder.com/45?text=P';
                     if (p.photo_standup && p.photo_standup.trim() !== '') {
@@ -348,7 +399,7 @@
                     } else if (p.photo_one_unit && p.photo_one_unit.trim() !== '') {
                         productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_one_unit}`;
                     }
-
+ 
                     let pricesHtml = '';
                     if (cat.name === 'Ready to Cook' || cat.name === 'Ready To Cook' || p.product_category === 'ready-to-cook') {
                         pricesHtml = `
@@ -362,10 +413,6 @@
                     } else {
                         pricesHtml = `
                             <div class="prices-row">
-                                <div class="price-box">
-                                    <span class="price-label">100g Glass</span>
-                                    <span class="price-val">₹${p.price_100g_glass_jar || '-'}</span>
-                                </div>
                                 <div class="price-box">
                                     <span class="price-label">100g Pouch</span>
                                     <span class="price-val">₹${p.price_100g_standup || '-'}</span>
@@ -386,17 +433,16 @@
                             <div class="card-header">
                                 <div class="card-title-group">
                                     <h4 class="product-name">${p.product_name}</h4>
+                                    ${p.descriptor ? `<div class="product-descriptor">${p.descriptor}</div>` : ''}
                                     <p class="product-tagline">${p.product_tagline || ''}</p>
                                 </div>
                             </div>
                             ${pricesHtml}
                         </div>
                     `;
-                    grid.appendChild(card);
-                }
-                
-                group.appendChild(grid);
-                content.appendChild(group);
+                    wrapper.appendChild(card);
+                    grid.appendChild(wrapper);
+                });
             }
         };
     </script>

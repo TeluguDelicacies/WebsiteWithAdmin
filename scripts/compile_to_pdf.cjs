@@ -88,54 +88,40 @@ async function compilePDF() {
     
     console.log("Sorted order:", files.map(f => `${f} (${fileCategoryMap[f] || 'Uncategorized'})`));
 
-    // 3. Build temporary HTML
-    let htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            @page { margin: 0; size: A4; }
-            body { margin: 0; padding: 0; background: #fff; }
-            img { 
-                width: 100%; 
-                height: 100vh; /* A4 aspect ratio mapped to viewport */
-                object-fit: cover; 
-                display: block; 
-                page-break-after: always;
-                break-after: page;
-            }
-        </style>
-    </head>
-    <body>
-    `;
+    // 3. Compile using python img2pdf for perfect zero-margin A4 mapping
+    const { execSync } = require('child_process');
     
-    for (const file of files) {
-        const imgPath = path.join(outputDir, file).replace(/\\/g, '/');
-        htmlContent += `<img src="file:///${imgPath}" />\n`;
+    // Create a temporary file with the list of sorted image paths
+    const imgPaths = files.map(f => path.join(outputDir, f).replace(/\\/g, '/'));
+    const listPath = path.join(__dirname, 'img_list.txt');
+    fs.writeFileSync(listPath, imgPaths.join('\n'));
+
+    console.log('Compiling to PDF using python img2pdf for perfect margins...');
+    const pyScript = `
+import img2pdf
+import sys
+
+with open(sys.argv[1], 'r') as f:
+    images = [line.strip() for line in f if line.strip()]
+
+a4inpt = (img2pdf.mm_to_pt(210), img2pdf.mm_to_pt(297))
+layout_fun = img2pdf.get_layout_fun(pagesize=a4inpt)
+
+with open(sys.argv[2], 'wb') as f:
+    f.write(img2pdf.convert(images, layout_fun=layout_fun))
+`;
+    const pyScriptPath = path.join(__dirname, 'compile_helper.py');
+    fs.writeFileSync(pyScriptPath, pyScript);
+
+    try {
+        execSync(`python "${pyScriptPath}" "${listPath}" "${pdfPath}"`);
+        console.log(`Successfully compiled sorted PDF to: ${pdfPath}`);
+    } catch (e) {
+        console.error("Error during PDF compilation:", e.message);
+    } finally {
+        if (fs.existsSync(listPath)) fs.unlinkSync(listPath);
+        if (fs.existsSync(pyScriptPath)) fs.unlinkSync(pyScriptPath);
     }
-    
-    htmlContent += `</body></html>`;
-    
-    const tempHtmlPath = path.join(__dirname, 'temp_pdf_builder.html');
-    fs.writeFileSync(tempHtmlPath, htmlContent);
-    
-    // 4. Launch Puppeteer to render the PDF
-    const browser = await puppeteer.launch({ headless: 'new' });
-    const page = await browser.newPage();
-    
-    await page.goto(`file:///${tempHtmlPath.replace(/\\/g, '/')}`, { waitUntil: 'networkidle0', timeout: 0 });
-    
-    await page.pdf({
-        path: pdfPath,
-        format: 'A4',
-        printBackground: true,
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
-    });
-    
-    await browser.close();
-    fs.unlinkSync(tempHtmlPath);
-    
-    console.log(`Successfully compiled sorted PDF to: ${pdfPath}`);
 }
 
 compilePDF().catch(console.error);

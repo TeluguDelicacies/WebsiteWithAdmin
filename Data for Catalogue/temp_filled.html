@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Single Catalogue Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --copper-dark: #b8623b;
+            --copper-primary: #d4af37;
+            --bg-sand: #fffdf5; /* Brighter background */
+            --text-dark: #2c1e16;
+            --text-light: #ffffff;
+            --table-red: #a4161a;
+            --table-green: #2d6a4f;
+            --panel-bg: rgba(255, 255, 255, 0.98);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-sand);
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .poster-container {
+            width: 1080px; 
+            height: 1920px;
+            background-color: var(--bg-sand);
+            position: relative;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            box-sizing: border-box;
+            border: 45px solid transparent;
+            border-image: url('../assets/rangoli_border.svg') 30 round;
+        }
+
+        /* Scattered Ingredients Background */
+        .bg-scatter {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.25; /* Increased opacity for less dullness */
+            filter: blur(1px);
+        }
+
+        /* Top Header */
+        .header {
+            position: relative; z-index: 2;
+            padding: 12px 15px;
+            display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 24px;
+            background: radial-gradient(circle at 20% center, rgba(255,253,245,1) 0%, rgba(255,253,245,0.96) 80%, rgba(255,253,245,0.92) 100%);
+            border-bottom: 4px double var(--copper-primary);
+        }
+        
+        .header-logo-container {
+            flex-shrink: 0; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .header-logo { height: 130px; object-fit: contain; }
+        
+        .header-rangoli-bg {
+            position: absolute;
+            top: 50%;
+            left: 15%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            opacity: 0.06;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .header-rangoli-bg img {
+            width: 100%; height: 100%; object-fit: contain;
+        }
+        
+        .header-right {
+            text-align: left; display: flex; flex-direction: column; gap: 2px;
+            align-items: flex-start; justify-content: center; z-index: 2;
+            flex-grow: 1;
+        }
+        .brand-title {
+            font-family: 'Cinzel', serif; font-size: 30px; font-weight: 800; color: var(--table-red);
+            margin: 0; line-height: 1.1; letter-spacing: 1px; text-transform: uppercase;
+            text-shadow: 1px 1px 2px rgba(164, 22, 26, 0.08);
+        }
+        .brand-subtitle {
+            font-family: 'Playfair Display', serif; font-size: 19px; font-style: italic; color: var(--table-green);
+            margin: 1px 0; font-weight: 700;
+        }
+        .brand-subtitle-divider {
+            color: var(--copper-primary);
+            font-style: normal;
+            margin: 0 10px;
+        }
+        .brand-telugu-span {
+            font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 800; color: var(--copper-dark);
+            font-style: normal;
+        }
+        .brand-desc {
+            font-family: 'Playfair Display', serif; font-size: 21px; font-style: italic; font-weight: 600; color: #4a3b32;
+            margin: 4px 0; line-height: 1.4; max-width: 780px;
+            border-left: 3px solid var(--copper-primary);
+            padding-left: 10px;
+        }
+        .contact-info {
+            font-size: 14px; font-weight: 700; color: var(--text-dark);
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 2px;
+            background: rgba(164, 22, 26, 0.05); padding: 3px 12px; border-radius: 20px; width: fit-content; border: 1px solid rgba(164,22,26,0.1);
+        }
+        .contact-info i { color: var(--table-red); font-size: 14px; }
+
+        .catalogue-heading {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 27px;
+            font-weight: 800;
+            margin: 10px 0 10px 0;
+            background: linear-gradient(90deg, #b8623b, #d4af37, #b8623b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(184, 98, 59, 0.2);
+            letter-spacing: 3px;
+            position: relative; z-index: 2;
+        }
+
+        /* Main Content - Grid of Cards */
+        .content {
+            position: relative; z-index: 2;
+            flex-grow: 1;
+            padding: 0 15px;
+            display: flex; flex-direction: column; gap: 6px;
+            overflow: hidden;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 products per row */
+            gap: 12px 15px; /* Slightly larger gap to balance 2-columns */
+        }
+
+        .product-wrapper {
+            position: relative;
+            padding-left: 32px; /* Space for the vertical title */
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .vertical-category-title {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 26px;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700;
+            color: var(--text-light); background: var(--copper-dark);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 3px rgba(184, 98, 59, 0.3);
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        /* Compact Card Design */
+        .product-card {
+            flex-grow: 1;
+            background: var(--panel-bg);
+            border: 1px solid rgba(212,175,55,0.4);
+            border-radius: 8px;
+            padding: 6px 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            display: flex; flex-direction: row; gap: 8px; align-items: center;
+        }
+        
+        .card-product-img {
+            width: 55px; height: 70px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-product-img img {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
+        }
+
+        .card-details {
+            display: flex; flex-direction: column; justify-content: center; flex-grow: 1; overflow: hidden;
+        }
+
+        .card-header {
+            display: flex; gap: 4px; align-items: center; margin-bottom: 2px;
+        }
+
+        .card-title-group {
+            flex-grow: 1; overflow: hidden;
+        }
+
+        .product-name {
+            font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--table-red);
+            margin: 0 0 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        .product-descriptor {
+            font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; color: #555;
+            margin: 0 0 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        
+        .product-tagline {
+            font-family: 'Playfair Display', serif; font-style: italic; font-size: 11px; color: var(--text-dark);
+            margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .prices-row {
+            display: flex; gap: 4px; align-items: center;
+        }
+        
+        .price-box {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+            background: rgba(0,0,0,0.02);
+            border: 1px dashed rgba(212,175,55,0.5);
+            padding: 3px 2px; border-radius: 4px;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .price-label { font-size: 9px; font-weight: 700; color: var(--text-dark); text-transform: uppercase; }
+        .price-val { font-size: 13px; font-weight: 800; color: var(--table-green); }
+        
+        .price-rtc { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 3px 2px; box-sizing: border-box; }
+        .price-rtc .price-label { font-size: 9px; }
+        .price-rtc .price-val { font-size: 13px; }
+
+
+
+        /* Footer */
+        .footer {
+            position: relative; z-index: 2;
+            padding: 15px 15px 20px 15px;
+            display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 20px; align-items: center;
+            background: #fbf8f1;
+            border-top: 4px double var(--copper-primary);
+        }
+        
+        .footer-left {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .footer-left i { font-size: 32px; color: var(--table-red); }
+        .footer-left-content {
+            display: flex; flex-direction: column; justify-content: center; gap: 2px;
+        }
+        .footer-left-content .fw-bold { font-size: 16px; font-weight: 700; }
+        .footer-left-content .fw-small { font-size: 13px; font-weight: 600; line-height: 1.3; color: #555; }
+        
+        .footer-center {
+            display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; line-height: 1.2;
+        }
+        .footer-center i { font-size: 32px; color: var(--table-red); }
+
+        .footer-right {
+            text-align: right; display: flex; align-items: center; gap: 12px;
+        }
+        .footer-right .fw-bold { font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; gap: 6px;}
+        .footer-right .fw-bold i { color: var(--table-red); font-size: 20px;}
+        .footer-right .fw-small { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+        .footer-qr { width: 65px; height: 65px; border: 2px solid var(--copper-primary); border-radius: 6px; padding: 2px; background: #fff; }
+
+    </style>
+</head>
+<body>
+    <main class="poster-container" id="poster">
+        <!-- Background Ingredients (Injected dynamically) -->
+        <div id="bgScatterContainer"></div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-rangoli-bg">
+                <img src="Rangoli%20FOr%20desgn.png" alt="Rangoli">
+            </div>
+            <div class="header-logo-container">
+                <img src="Logos/TD%20Main%20Company%20Logo.png" alt="Telugu Delicacies" class="header-logo">
+            </div>
+            <div class="header-right">
+                <h1 class="brand-title">Telugu Delicacies</h1>
+                <h2 class="brand-subtitle">Modern Yet Traditional <span class="brand-subtitle-divider">|</span> <span class="brand-telugu-span">సాంప్రదాయ రుచులు, ఆధునిక శైలి</span></h2>
+                <p class="brand-desc">Experience traditional recipes elevated by premium ingredients. We bring you heirloom flavours, perfected with modern care.</p>
+                <div class="contact-info">
+                    <i class="fab fa-whatsapp"></i> / <i class="fas fa-phone-alt"></i> +91 96185 19191
+                </div>
+            </div>
+        </header>
+
+        <h2 class="catalogue-heading">PRODUCT CATALOGUE</h2>
+
+        <!-- Main Content -->
+        <div class="content" id="productContent">
+            <!-- Categories injected here -->
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-left">
+                <i class="fas fa-box-open"></i>
+                <div class="footer-left-content">
+                    <div class="fw-bold">Net Wt: 100g & 250g</div>
+                    <div class="fw-small">
+                        Other Sizes &<br>
+                        Bulk Quantities Available
+                    </div>
+                </div>
+            </div>
+            <div class="footer-center">
+                <i class="fas fa-gift"></i>
+                <div>
+                    Corporate &<br>Gift Ordering<br>Available
+                </div>
+            </div>
+            <div class="footer-right">
+                <div>
+                    <div class="fw-small">Browse & Order online at:</div>
+                    <div class="fw-bold"><i class="fas fa-globe"></i> telugudelicacies.com</div>
+                </div>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=a4161a&data=https://telugudelicacies.com" class="footer-qr" alt="Website QR Code">
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // Will be populated by Puppeteer
+        window.loadCatalogue = function(categories, backgroundImages) {
+            
+            // 1. Scatter Backgrounds densely
+            const bgContainer = document.getElementById('bgScatterContainer');
+            const positions = [];
+            const rows = 10;
+            const cols = 5;
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<cols; c++) {
+                    positions.push({
+                        t: ((r / rows) * 100 + (Math.random() * 4 - 2)) + '%',
+                        l: ((c / cols) * 100 + (Math.random() * 4 - 2)) + '%',
+                        s: 90 + Math.random() * 120
+                    });
+                }
+            }
+            
+            positions.forEach((pos, idx) => {
+                const imgName = backgroundImages[idx % backgroundImages.length];
+                const img = document.createElement('img');
+                img.src = `Ingredient Images/${imgName}`;
+                img.className = 'bg-scatter';
+                img.style.width = pos.s + 'px';
+                img.style.height = 'auto';
+                if(pos.t) img.style.top = pos.t;
+                if(pos.l) img.style.left = pos.l;
+                
+                // Random rotation
+                const rot = Math.floor(Math.random() * 360);
+                bgContainer.appendChild(img);
+            });
+            
+            // 2. Render Products
+            const content = document.getElementById('productContent');
+            const grid = document.createElement('div');
+            grid.className = 'products-grid';
+            content.appendChild(grid);
+            
+            for (const cat of categories) {
+                if (cat.products.length === 0) continue;
+                
+                cat.products.forEach((p, idx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'product-wrapper';
+
+                    let catColor = p.Category_Colour ? (p.Category_Colour.startsWith('#') ? p.Category_Colour : '#' + p.Category_Colour) : '#b8623b';
+                    if (catColor.length === 9) catColor = catColor.substring(0, 7);
+
+                    if (idx === 0) {
+                        const title = document.createElement('div');
+                        title.className = 'vertical-category-title';
+                        title.innerText = cat.name;
+                        title.style.background = catColor;
+                        wrapper.appendChild(title);
+                    }
+                    
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.style.borderColor = catColor;
+                    card.style.background = catColor + '20'; // 12% opacity over the sand background
+                    
+                    let productPhotoSrc = 'https://via.placeholder.com/45?text=P';
+                    if (p.photo_standup && p.photo_standup.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_standup}`;
+                    } else if (p.photo_jar && p.photo_jar.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_jar}`;
+                    } else if (p.photo_1kg && p.photo_1kg.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_1kg}`;
+                    } else if (p.photo_one_unit && p.photo_one_unit.trim() !== '') {
+                        productPhotoSrc = `All Photos Dump NO BackGround/${p.photo_one_unit}`;
+                    }
+ 
+                    let pricesHtml = '';
+                    if (cat.name === 'Ready to Cook' || cat.name === 'Ready To Cook' || p.product_category === 'ready-to-cook') {
+                        pricesHtml = `
+                            <div class="prices-row">
+                                <div class="price-box price-rtc">
+                                    <span class="price-label">1 Unit</span>
+                                    <span class="price-val">₹${p.price_one_unit_pouch}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        pricesHtml = `
+                            <div class="prices-row">
+                                <div class="price-box">
+                                    <span class="price-label">100g Pouch</span>
+                                    <span class="price-val">₹${p.price_100g_standup || '-'}</span>
+                                </div>
+                                <div class="price-box">
+                                    <span class="price-label">250g Pouch</span>
+                                    <span class="price-val">₹${p.price_250g_standup || '-'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="card-product-img">
+                            <img src="${productPhotoSrc}" alt="">
+                        </div>
+                        <div class="card-details">
+                            <div class="card-header">
+                                <div class="card-title-group">
+                                    <h4 class="product-name">${p.product_name}</h4>
+                                    ${p.descriptor ? `<div class="product-descriptor">${p.descriptor}</div>` : ''}
+                                    <p class="product-tagline">${p.product_tagline || ''}</p>
+                                </div>
+                            </div>
+                            ${pricesHtml}
+                        </div>
+                    `;
+                    wrapper.appendChild(card);
+                    grid.appendChild(wrapper);
+                });
+            }
+        };
+    </script>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            window.loadCatalogue([{"name": "General", "products": [{"product_name": "Kadapa Kaaram", "product_name_telugu": "\u0c15\u0c21\u0c2a \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "General", "product_category": "ready-to-eat", "descriptor": "Rayalaseema Multipurpose Podi", "product_tagline": "Bold flavor, rich and hearty!", "product_description": "A signature Andhra blend that balances peanuts, garlic, and dry coconut with a fiery kick of red chili. Rich, hearty, and versatile \u2014 a true taste of Kadapa tradition.", "ingredients": "Peanuts, Garlic, Dry Coconut, Cumin, Dry Red Chilly, Coriander, Jaggery, Salt, Red Chilly Powder, Curry Leaf, Lemon Salt", "hero_ingredient_1": "Dry Coconut", "hero_ingredient_2": "Garlic", "hero_ingredient_3": "Peanuts", "serving_suggestion": "Sprinkle this versatile, sweet-and-spicy blend of peanuts, garlic, and dry coconut over dosas, or mix it into hot rice with ghee.", "serving_size_g": "5", "shelf_life_days": "60", "is_veg": "Yes", "contains_nuts": "Yes (Peanuts)", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/kadapa-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "20.88kcal", "nutrition_protein": "0.7g", "nutrition_total_fat": "1.49g", "nutrition_saturated_fat": "0.75g", "nutrition_carbs": "1.51g", "nutrition_fiber": "0.64g", "nutrition_sugars": "0.31g", "nutrition_sodium": "0.08g", "price_100g_standup": "60", "price_250g_standup": "145", "price_500g_pouch": "280", "price_1kg_pouch": "540", "price_100g_glass_jar": "110", "price_one_unit_pouch": "", "photo_standup_pouch": "Kadapa Kaaram_Standup_Pouch.png", "photo_glass_jar": "Kadapa Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "e6b201ff", "photo_standup": "Kadapa Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Kandi Podi", "product_name_telugu": "\u0c15\u0c02\u0c26\u0c3f \u0c2a\u0c4a\u0c21\u0c3f", "catalogue_category": "General", "product_category": "ready-to-eat", "descriptor": "Traditional Roasted Gram Powder", "product_tagline": "Roasted Lentils,.Pure Comfort!", "product_description": "Traditional Andhra spice powder prepared from sun-dried tamarind leaves, roasted lentils, and dried chilies. Brings a rich, tangy punch to meals.", "ingredients": "Red Gram, Chickpea, Dry Red Chilly, Coriander, Urad Dal, Garlic, Cumin, Curry Leaf, White Sesame Seeds, Salt, Mung Bean, Fresh Coriander, Red Chilly Powder, Asafoetida", "hero_ingredient_1": "Chana Dal", "hero_ingredient_2": "Mirchi Dry", "hero_ingredient_3": "Toor Dal", "serving_suggestion": "Enjoy the traditional flavor of this multipurpose blend of roasted dals, garlic, and a hint of hing. Mix it into hot rice with a spoonful of ghee, or pair it with your daily tiffins!", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/kandi-podi", "nutrition_serving_size": "5g", "nutrition_calories": "16.02kcal", "nutrition_protein": "0.92g", "nutrition_total_fat": "0.29g", "nutrition_saturated_fat": "0.04g", "nutrition_carbs": "2.71g", "nutrition_fiber": "0.92g", "nutrition_sugars": "0.12g", "nutrition_sodium": "0.08g", "price_100g_standup": "55", "price_250g_standup": "135", "price_500g_pouch": "255", "price_1kg_pouch": "495", "price_100g_glass_jar": "105", "price_one_unit_pouch": "", "photo_standup_pouch": "Kandi Podi_Standup_Pouch.png", "photo_glass_jar": "Kandi Podi_Cylindrical_Glass_Jar.png", "Category_Colour": "e6b201ff", "photo_standup": "Kandi Podi_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Koora Kaaram", "product_name_telugu": "\u0c15\u0c42\u0c30 \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "General", "product_category": "ready-to-eat", "descriptor": "Rayalaseema Fry Podi", "product_tagline": "Saut\u00e9. Sprinkle. Savor Garlic!", "product_description": "The essential Telugu multi-purpose spice mix used for seasoning daily curries, fries, and gravies. Perfect balance of spices.", "ingredients": "Dry Coconut, Garlic, Red Chilly Powder, Coriander, Salt", "hero_ingredient_1": "Garlic", "hero_ingredient_2": "Red Chilly Powder", "hero_ingredient_3": "Coriander Seeds", "serving_suggestion": "Saut\u00e9 your everyday vegetables, sprinkle this rich blend of garlic and dry coconut over the top, and savor the bold flavor!", "serving_size_g": "5", "shelf_life_days": "45", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/koora-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "20.76kcal", "nutrition_protein": "0.39g", "nutrition_total_fat": "1.64g", "nutrition_saturated_fat": "1.37g", "nutrition_carbs": "1.55g", "nutrition_fiber": "0.95g", "nutrition_sugars": "0.23g", "nutrition_sodium": "0.2g", "price_100g_standup": "60", "price_250g_standup": "145", "price_500g_pouch": "280", "price_1kg_pouch": "540", "price_100g_glass_jar": "110", "price_one_unit_pouch": "", "photo_standup_pouch": "Koora Kaaram_Standup_Pouch.png", "photo_glass_jar": "Koora Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "e6b201ff", "photo_standup": "Koora Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Velluli Kaaram", "product_name_telugu": "\u0c35\u0c46\u0c32\u0c4d\u0c32\u0c41\u0c32\u0c4d\u0c32\u0c3f \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "General", "product_category": "ready-to-eat", "descriptor": "Garlic Kaaram Podi", "product_tagline": "Three Ingredients. Infinite Flavor!", "product_description": "A garlicky podi with dry coconut and spices, a staple in every Kadapa household. Adds delicious flavor to saut\u00e9ed vegetables or can be used as a base for curries.", "ingredients": "Garlic, Red Chilly Powder, Salt, Sunflower Oil", "hero_ingredient_1": "Garlic", "hero_ingredient_2": "Red Chilly Powder", "hero_ingredient_3": "0", "serving_suggestion": "Smear this savory garlic blend onto hot dosas, or toss it with hot rice and ghee to bring out the roasted aroma.", "serving_size_g": "5", "shelf_life_days": "60", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/velluli-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "10.59kcal", "nutrition_protein": "0.42g", "nutrition_total_fat": "0.45g", "nutrition_saturated_fat": "0.07g", "nutrition_carbs": "1.77g", "nutrition_fiber": "0.75g", "nutrition_sugars": "0.17g", "nutrition_sodium": "0.25g", "price_100g_standup": "60", "price_250g_standup": "145", "price_500g_pouch": "280", "price_1kg_pouch": "540", "price_100g_glass_jar": "110", "price_one_unit_pouch": "", "photo_standup_pouch": "Velluli Kaaram_Standup_Pouch.png", "photo_glass_jar": "Velluli Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "e6b201ff", "photo_standup": "Velluli Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}]}, {"name": "Nutty", "products": [{"product_name": "Palli Kaaram", "product_name_telugu": "\u0c2a\u0c32\u0c4d\u0c32\u0c3f \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Nutty", "product_category": "ready-to-eat", "descriptor": "Peanut Kaaram Podi", "product_tagline": "Palli Kaaram. Boldly Telugu!", "product_description": "A nutty and spicy Kadapa classic made with peanuts, chili, and curry leaves. A true part of local culture \u2014 delicious with rice or even as a snack on its own.", "ingredients": "Peanuts, Curry Leaf, Dry Red Chilly, Garlic, Red Chilly Powder, Salt, Cumin", "hero_ingredient_1": "Peanuts", "hero_ingredient_2": "Garlic", "hero_ingredient_3": "0", "serving_suggestion": "Add this unique Rayalaseema blend of roasted peanuts, garlic, and curry leaves to hot rice. Mix in a spoonful of ghee and serve warm!", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "Yes (Peanuts)", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/palli-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "25.87kcal", "nutrition_protein": "1.24g", "nutrition_total_fat": "2.04g", "nutrition_saturated_fat": "0.36g", "nutrition_carbs": "1.02g", "nutrition_fiber": "0.64g", "nutrition_sugars": "0.2g", "nutrition_sodium": "0.07g", "price_100g_standup": "55", "price_250g_standup": "135", "price_500g_pouch": "255", "price_1kg_pouch": "495", "price_100g_glass_jar": "105", "price_one_unit_pouch": "", "photo_standup_pouch": "Palli Kaaram_Standup_Pouch.png", "photo_glass_jar": "Palli Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "e64456ff", "photo_standup": "Palli Kaaram_Standup_Pouch.png", "photo_jar": "Palli Kaaram_Cylindrical_Glass_Jar.png", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Special Godhuma Kaaram", "product_name_telugu": "\u0c38\u0c4d\u0c2a\u0c46\u0c37\u0c32\u0c4d \u0c17\u0c4b\u0c27\u0c41\u0c2e \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Nutty", "product_category": "ready-to-eat", "descriptor": "Special Nutty Kaaram Podi", "product_tagline": "Tasty, Light & Fresh!", "product_description": "A wholesome, nutty podi made with chakki atta, dals, coconut, and garlic. Perfectly balanced, it brings a bold, hearty flavor to your meals.", "ingredients": "Chakki Atta, Urad Dal, Red Chilly Powder, Dry Coconut, Flax Seed, Garlic, Salt", "hero_ingredient_1": "Chakki Atta", "hero_ingredient_2": "Dry Coconut", "hero_ingredient_3": "Flax Seed", "serving_suggestion": "Smear this unique, nutty mix of whole wheat, urad dal, and garlic onto dosas, or pair it with melted ghee for the perfect savory idli dip.", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic Cut)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/special-godhuma-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "17.24kcal", "nutrition_protein": "0.68g", "nutrition_total_fat": "0.41g", "nutrition_saturated_fat": "0.2g", "nutrition_carbs": "2.93g", "nutrition_fiber": "0.76g", "nutrition_sugars": "0.09g", "nutrition_sodium": "0.07g", "price_100g_standup": "45", "price_250g_standup": "110", "price_500g_pouch": "210", "price_1kg_pouch": "405", "price_100g_glass_jar": "95", "price_one_unit_pouch": "", "photo_standup_pouch": "Special Godhuma Kaaram_Standup_Pouch.png", "photo_glass_jar": "Special Godhuma Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "e64456ff", "photo_standup": "Special Godhuma Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Special Palli Kaaram", "product_name_telugu": "\u0c38\u0c4d\u0c2a\u0c46\u0c37\u0c32\u0c4d \u0c2a\u0c32\u0c4d\u0c32\u0c3f \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Nutty", "product_category": "ready-to-eat", "descriptor": "Special Peanut Kaaram Podi", "product_tagline": "Rustic. Rich. Ridiculously Good!", "product_description": "Our best-reviewed podi! A rustic blend of peanuts, coriander, and jaggery that delivers mellow, nutty flavors. Smooth and balanced, it\u2019s even loved by kids when mixed with hot rice and ghee.", "ingredients": "Peanuts, Fried Gram, Coriander, Jaggery, Dry Red Chilly, Salt, Tamarind", "hero_ingredient_1": "Peanuts", "hero_ingredient_2": "Coriander Seeds", "hero_ingredient_3": "Mirchi Dry", "serving_suggestion": "Toss this flavorful mix of peanuts, fried gram, and coriander with hot rice and a good serving of ghee to beautifully bring out the sweet and tangy notes.", "serving_size_g": "5", "shelf_life_days": "60", "is_veg": "Yes", "contains_nuts": "Yes (Peanuts)", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/special-palli-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "19.99kcal", "nutrition_protein": "0.87g", "nutrition_total_fat": "1.03g", "nutrition_saturated_fat": "0.16g", "nutrition_carbs": "2.23g", "nutrition_fiber": "0.69g", "nutrition_sugars": "0.85g", "nutrition_sodium": "0.13g", "price_100g_standup": "60", "price_250g_standup": "145", "price_500g_pouch": "280", "price_1kg_pouch": "540", "price_100g_glass_jar": "110", "price_one_unit_pouch": "", "photo_standup_pouch": "Special Palli Kaaram_Standup_Pouch.png", "photo_glass_jar": "Special Palli Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "e64456ff", "photo_standup": "Special Palli Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}]}, {"name": "Leafy", "products": [{"product_name": "Chinthaku Podi", "product_name_telugu": "\u0c1a\u0c3f\u0c02\u0c24\u0c3e\u0c15\u0c41 \u0c2a\u0c4a\u0c21\u0c3f", "catalogue_category": "Leafy", "product_category": "ready-to-eat", "descriptor": "Tamarind Leaf Kaaram Podi", "product_tagline": "Tangy. Nutty. Traditionally Bold!", "product_description": "Traditional Andhra spice powder prepared from sun-dried tamarind leaves, roasted lentils, and dried chilies. Brings a rich, tangy punch to meals.", "ingredients": "Peanuts, Black Sesame Seeds, Tamarind Leaves, Dry Red Chilly, Garlic, Coriander, Salt", "hero_ingredient_1": "Tamarind Leaf", "hero_ingredient_2": "Garlic", "hero_ingredient_3": "Peanuts", "serving_suggestion": "Add this tangy blend of chinthaku, roasted peanuts, and black sesame to hot rice. Mix in a good serving of ghee and serve warm.", "serving_size_g": "5", "shelf_life_days": "60", "is_veg": "Yes", "contains_nuts": "Yes (Peanuts)", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/chinthaku-podi", "nutrition_serving_size": "5g", "nutrition_calories": "24.99kcal", "nutrition_protein": "0.96g", "nutrition_total_fat": "1.86g", "nutrition_saturated_fat": "0.3g", "nutrition_carbs": "1.46g", "nutrition_fiber": "0.61g", "nutrition_sugars": "0.13g", "nutrition_sodium": "0.06g", "price_100g_standup": "70", "price_250g_standup": "170", "price_500g_pouch": "325", "price_1kg_pouch": "630", "price_100g_glass_jar": "120", "price_one_unit_pouch": "", "photo_standup_pouch": "Chintaku Podi_Standup_Pouch.png", "photo_glass_jar": "Chintaku Podi_Cylindrical_Glass_Jar.png", "Category_Colour": "2d5a27ff", "photo_standup": "Chintaku Podi_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Karivepaku Podi", "product_name_telugu": "\u0c15\u0c30\u0c3f\u0c35\u0c47\u0c2a\u0c3e\u0c15\u0c41 \u0c2a\u0c4a\u0c21\u0c3f", "catalogue_category": "Leafy", "product_category": "ready-to-eat", "descriptor": "Curryleaf Kaaram Podi", "product_tagline": "Earthy.Spicy. Naturally Good!", "product_description": "A must-try Andhra specialty made with fragrant curry leaves, dals, and spices. Earthy and wholesome, this podi pairs beautifully with hot rice and ghee for a nourishing meal.", "ingredients": "Curry Leaf, Garlic, Urad Dal, Dry Red Chilly, Chickpea, Coriander, Tamarind, Salt, Cumin, Fenugreek", "hero_ingredient_1": "Curry Leaf", "hero_ingredient_2": "Garlic", "hero_ingredient_3": "Chana Dal", "serving_suggestion": "Mix the desired amount of this earthy curry leaf, garlic, and tamarind blend into hot rice. Stir in a generous serving of ghee for a comforting, traditional meal.", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/karivepaku-podi", "nutrition_serving_size": "5g", "nutrition_calories": "12.71kcal", "nutrition_protein": "0.81g", "nutrition_total_fat": "0.2g", "nutrition_saturated_fat": "0.05g", "nutrition_carbs": "2.39g", "nutrition_fiber": "1.33g", "nutrition_sugars": "0.23g", "nutrition_sodium": "0.13g", "price_100g_standup": "60", "price_250g_standup": "145", "price_500g_pouch": "280", "price_1kg_pouch": "540", "price_100g_glass_jar": "110", "price_one_unit_pouch": "", "photo_standup_pouch": "Karivepaku Podi_Standup_Pouch.png", "photo_glass_jar": "Karivepaku Podi_Cylindrical_Glass_Jar.png", "Category_Colour": "2d5a27ff", "photo_standup": "Karivepaku Podi_Standup_Pouch.png", "photo_jar": "Karivepaku Podi_Cylindrical_Glass_Jar.png", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Kothimera Kaaram", "product_name_telugu": "\u0c15\u0c4a\u0c24\u0c4d\u0c24\u0c3f\u0c2e\u0c40\u0c30 \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Leafy", "product_category": "ready-to-eat", "descriptor": "Coriander Leaves Kaaram Podi", "product_tagline": "Zesty coriander Spark \u2013 Freshness in Every Spoon!", "product_description": "A vibrant, aromatic spice powder made with fresh sun-dried coriander leaves, roasted dals, and garlic. Earthy and fresh.", "ingredients": "Red Chilly Powder, Fresh Coriander, Red Gram, Urad Dal, Salt, Poha, Dry Red Chilly, Cumin, Jaggery, Tamarind", "hero_ingredient_1": "Coriander", "hero_ingredient_2": "Mirchi Dry", "hero_ingredient_3": "Jaggery", "serving_suggestion": "Toss this flavorful mix of coriander and roasted dals with hot rice and ghee to bring out the rich, herby aroma.", "serving_size_g": "5", "shelf_life_days": "60", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/kothimera-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "12.34kcal", "nutrition_protein": "0.54g", "nutrition_total_fat": "0.23g", "nutrition_saturated_fat": "0.04g", "nutrition_carbs": "2.37g", "nutrition_fiber": "0.77g", "nutrition_sugars": "0.48g", "nutrition_sodium": "0.26g", "price_100g_standup": "60", "price_250g_standup": "145", "price_500g_pouch": "280", "price_1kg_pouch": "540", "price_100g_glass_jar": "110", "price_one_unit_pouch": "", "photo_standup_pouch": "Kothimeera Kaaram_Standup_Pouch.png", "photo_glass_jar": "Kothimeera Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "2d5a27ff", "photo_standup": "Kothimeera Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Pudina Kaaram", "product_name_telugu": "\u0c2a\u0c41\u0c26\u0c3f\u0c28 \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Leafy", "product_category": "ready-to-eat", "descriptor": "Mint Leaf Kaaram Podi", "product_tagline": "Light, Lively & Minty-Perfect!", "product_description": "A refreshing and aromatic South Indian spice blend featuring sun-dried mint, garlic, and roasted lentils for a zesty, herbaceous kick. This flavorful podi acts as a natural palate cleanser while providing a cooling, gut-friendly boost to your daily meals.", "ingredients": "Red Chilly Powder, Mint Leaves, Urad Dal, Red Gram, Poha, Salt, Dry Red Chilly, Cumin, Tamarind, Jaggery", "hero_ingredient_1": "Mint Leaves", "hero_ingredient_2": "Jaggery", "hero_ingredient_3": "Red Gram", "serving_suggestion": "Add this refreshing blend of mint leaves, roasted dals, and a hint of tamarind to hot rice. Mix in a spoonful of ghee and serve warm!", "serving_size_g": "5", "shelf_life_days": "60", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/pudina-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "13.89kcal", "nutrition_protein": "0.65g", "nutrition_total_fat": "0.26g", "nutrition_saturated_fat": "0.05g", "nutrition_carbs": "2.65g", "nutrition_fiber": "0.95g", "nutrition_sugars": "0.47g", "nutrition_sodium": "0.26g", "price_100g_standup": "60", "price_250g_standup": "145", "price_500g_pouch": "280", "price_1kg_pouch": "540", "price_100g_glass_jar": "110", "price_one_unit_pouch": "", "photo_standup_pouch": "Pudina Kaaram_Standup_Pouch.png", "photo_glass_jar": "Pudina Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "2d5a27ff", "photo_standup": "Pudina Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}]}, {"name": "Sprinkling", "products": [{"product_name": "Dosa Kaaram", "product_name_telugu": "\u0c26\u0c4b\u0c36 \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Sprinkling", "product_category": "ready-to-eat", "descriptor": "", "product_tagline": "Perfect Spice for Crispy Dosas!", "product_description": "A flavorful podi crafted for crispy dosas. Made with poha, lentils, and aromatic spices, it adds a nutty, spicy kick that enhances every bite with ghee.", "ingredients": "Poha, Chickpea, Urad Dal, Coriander, Red Chilly Powder, Dry Red Chilly, Salt, Cumin, Curry Leaf, Garlic, Marathi Moggu, Cinnamon", "hero_ingredient_1": "Coriander Seeds", "hero_ingredient_2": "Mirchi Dry", "hero_ingredient_3": "Curry Leaf", "serving_suggestion": "Evenly dust this vibrant mix of spices onto your roasting dosa. Finish with a touch of ghee for a spicy, flavorful bite.", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/dosa-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "16.16kcal", "nutrition_protein": "0.67g", "nutrition_total_fat": "0.2g", "nutrition_saturated_fat": "0.02g", "nutrition_carbs": "3.13g", "nutrition_fiber": "0.83g", "nutrition_sugars": "0.17g", "nutrition_sodium": "0.09g", "price_100g_standup": "45", "price_250g_standup": "110", "price_500g_pouch": "210", "price_1kg_pouch": "405", "price_100g_glass_jar": "95", "price_one_unit_pouch": "", "photo_standup_pouch": "Dosa Kaaram_Standup_Pouch.png", "photo_glass_jar": "Dosa Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "007c81ff", "photo_standup": "Dosa Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Karnataka Idli Podi", "product_name_telugu": "\u0c15\u0c30\u0c4d\u0c23\u0c3e\u0c1f\u0c15 \u0c07\u0c21\u0c4d\u0c32\u0c40 \u0c2a\u0c4a\u0c21\u0c3f", "catalogue_category": "Sprinkling", "product_category": "ready-to-eat", "descriptor": "", "product_tagline": "Idli\u2019s Best Friends: Ghee & Podi!", "product_description": "A classic South Indian podi made with chickpeas, urad dal, and spices. Perfectly balanced for hot idlis with ghee, adding a nutty, mildly spicy flavor every time.", "ingredients": "Chickpea, Urad Dal, Dry Red Chilly, Salt, Cumin, Black Pepper, Red Chilly Powder, Curry Leaf", "hero_ingredient_1": "Urad Dal", "hero_ingredient_2": "Cumin", "hero_ingredient_3": "Curry Leaf", "serving_suggestion": "Mix this classic blend of roasted dals and black pepper with a generous spoonful of ghee. Spread it right on top for a perfect bite!", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/karnataka-idli-podi", "nutrition_serving_size": "5g", "nutrition_calories": "17.22kcal", "nutrition_protein": "1.03g", "nutrition_total_fat": "0.16g", "nutrition_saturated_fat": "0.02g", "nutrition_carbs": "2.91g", "nutrition_fiber": "1.02g", "nutrition_sugars": "0.32g", "nutrition_sodium": "0.08g", "price_100g_standup": "50", "price_250g_standup": "120", "price_500g_pouch": "230", "price_1kg_pouch": "450", "price_100g_glass_jar": "100", "price_one_unit_pouch": "", "photo_standup_pouch": "Karnataka Idli Podi_Standup_Pouch.png", "photo_glass_jar": "Karnataka Idli Podi_Cylindrical_Glass_Jar.png", "Category_Colour": "007c81ff", "photo_standup": "Karnataka Idli Podi_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Nalla Kaaram", "product_name_telugu": "\u0c28\u0c32\u0c4d\u0c32 \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Sprinkling", "product_category": "ready-to-eat", "descriptor": "Hotel Style Idli & Dosa Kaaram", "product_tagline": "High fiber, gut-friendly spice!", "product_description": "A wholesome Andhra classic made with tamarind, dals, and garlic. High in fiber and flavor, this podi adds a tangy, spicy twist to everyday favorites.", "ingredients": "Dry Red Chilly, Chickpea, Urad Dal, Tamarind, Garlic, Coriander, Cumin, Salt, Ghee, Ginger, Jaggery, Curry Leaf", "hero_ingredient_1": "Mirchi Dry", "hero_ingredient_2": "Tamarind", "hero_ingredient_3": "Ghee", "serving_suggestion": "Enjoy this hotel-style blend of roasted dals, fiery chilies, and garlic. Mix it with ghee to dip soft idlis, or sprinkle it over a roasting dosa!", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic, Ginger)", "is_vegan": "No (Ghee)", "webpage_url": "https://telugudelicacies.com/ready-to-eat/nalla-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "14.95kcal", "nutrition_protein": "0.63g", "nutrition_total_fat": "0.47g", "nutrition_saturated_fat": "0.15g", "nutrition_carbs": "2.47g", "nutrition_fiber": "0.91g", "nutrition_sugars": "0.52g", "nutrition_sodium": "0.11g", "price_100g_standup": "55", "price_250g_standup": "135", "price_500g_pouch": "255", "price_1kg_pouch": "495", "price_100g_glass_jar": "105", "price_one_unit_pouch": "", "photo_standup_pouch": "Nalla Kaaram_Standup_Pouch.png", "photo_glass_jar": "Nalla Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "007c81ff", "photo_standup": "Nalla Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Putnala Podi", "product_name_telugu": "\u0c2a\u0c41\u0c1f\u0c4d\u0c28\u0c3e\u0c32 \u0c2a\u0c4a\u0c21\u0c3f", "catalogue_category": "Sprinkling", "product_category": "ready-to-eat", "descriptor": "Gunpowder", "product_tagline": "Flavor-packed, protein-rich!", "product_description": "A protein-rich lentil blend from Kadapa, this podi combines fried gram, coconut, and garlic for a nutty, savory taste. Traditionally enjoyed with pickle rice and ghee for an extra flavor boost.", "ingredients": "Fried Gram, Dry Coconut, Garlic, Red Chilly Powder, Salt", "hero_ingredient_1": "Putna", "hero_ingredient_2": "Garlic", "hero_ingredient_3": "Mirchi Dry", "serving_suggestion": "Add this classic blend of fried gram, dry coconut, and garlic to hot rice. Mix in a spoonful of ghee and pair with your favorite pickle for a perfect meal!", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/putnala-podi", "nutrition_serving_size": "5g", "nutrition_calories": "18kcal", "nutrition_protein": "0.9g", "nutrition_total_fat": "0.55g", "nutrition_saturated_fat": "0.31g", "nutrition_carbs": "2.53g", "nutrition_fiber": "0.6g", "nutrition_sugars": "0.45g", "nutrition_sodium": "0.06g", "price_100g_standup": "50", "price_250g_standup": "120", "price_500g_pouch": "230", "price_1kg_pouch": "450", "price_100g_glass_jar": "100", "price_one_unit_pouch": "", "photo_standup_pouch": "Putnala Podi_Standup_Pouch.png", "photo_glass_jar": "Putnala Podi_Cylindrical_Glass_Jar.png", "Category_Colour": "007c81ff", "photo_standup": "Putnala Podi_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}]}, {"name": "Healthy", "products": [{"product_name": "Avisaginjala Kaaram", "product_name_telugu": "\u0c05\u0c35\u0c3f\u0c38\u0c17\u0c3f\u0c02\u0c1c\u0c32 \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Healthy", "product_category": "ready-to-eat", "descriptor": "Flaxseed Kaaram Podi", "product_tagline": "Healthy Bite, Enriched with Ragi!", "product_description": "A wholesome podi enriched with flax seeds and finger millet (ragi). Nutty, spicy, and lightly sweet, it delivers nutrition and taste in every bite.", "ingredients": "Flax Seed, Urad Dal, Peanuts, Finger Millet, Dry Red Chilly, Salt, Garlic, Cloves, Tamarind, Jaggery, Cardamom, Curry Leaf, Cinnamon", "hero_ingredient_1": "Flax Seed", "hero_ingredient_2": "Finger Millet", "hero_ingredient_3": "Cardamom", "serving_suggestion": "Add the desired amount of podi to hot rice. Mix in a spoonful of ghee to enhance the flavor and aroma. Serve warm!", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "Yes (Peanuts)", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/avisaginjala-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "20.84kcal", "nutrition_protein": "0.85g", "nutrition_total_fat": "1.13g", "nutrition_saturated_fat": "0.14g", "nutrition_carbs": "2.03g", "nutrition_fiber": "1.1g", "nutrition_sugars": "0.21g", "nutrition_sodium": "0.1g", "price_100g_standup": "55", "price_250g_standup": "135", "price_500g_pouch": "255", "price_1kg_pouch": "495", "price_100g_glass_jar": "105", "price_one_unit_pouch": "", "photo_standup_pouch": "Avisaginjala Kaaram_Standup_Pouch.png", "photo_glass_jar": "Avisaginjala Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "cc7722ff", "photo_standup": "Avisaginjala Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Moringa Kaaram", "product_name_telugu": "\u0c2e\u0c41\u0c28\u0c17\u0c3e\u0c15\u0c41 \u0c15\u0c3e\u0c30\u0c02", "catalogue_category": "Healthy", "product_category": "ready-to-eat", "descriptor": "Drumstick Leaf Kaaram Podi", "product_tagline": "Moringa Magic: Nutritious. Natural. Delicious!", "product_description": "A nutrient-dense South Indian spice blend combining superfood Moringa leaves with roasted lentils and seeds for a savory, earthy flavor. This all-natural \"miracle podi\" delivers a potent boost of vitamins and antioxidants in every spoonful.", "ingredients": "Red Gram, Moringa, Chickpea, Pumpkin Seeds, Salt, Dry Red Chilly, Cumin, Black Pepper, Curry Leaf, Mint Leaves, Lemon Salt", "hero_ingredient_1": "Moringa", "hero_ingredient_2": "Pumpkin Seeds", "hero_ingredient_3": "Black Pepper", "serving_suggestion": "Mix the desired amount of this moringa, pumpkin seed blend into hot rice. Stir in a generous serving of ghee for a nutritious meal.", "serving_size_g": "5", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-eat/moringa-kaaram", "nutrition_serving_size": "5g", "nutrition_calories": "13.43kcal", "nutrition_protein": "0.85g", "nutrition_total_fat": "0.39g", "nutrition_saturated_fat": "0.06g", "nutrition_carbs": "1.85g", "nutrition_fiber": "0.62g", "nutrition_sugars": "0.09g", "nutrition_sodium": "0.22g", "price_100g_standup": "65", "price_250g_standup": "160", "price_500g_pouch": "300", "price_1kg_pouch": "585", "price_100g_glass_jar": "115", "price_one_unit_pouch": "", "photo_standup_pouch": "Moringa Kaaram_Standup_Pouch.png", "photo_glass_jar": "Moringa Kaaram_Cylindrical_Glass_Jar.png", "Category_Colour": "cc7722ff", "photo_standup": "Moringa Kaaram_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}]}, {"name": "Tasty Pinch", "products": [{"product_name": "Chutney Premix", "product_name_telugu": "\u0c1a\u0c1f\u0c4d\u0c28\u0c40 \u0c2a\u0c4d\u0c30\u0c40\u0c2e\u0c3f\u0c15\u0c4d\u0c38\u0c4d", "catalogue_category": "Tasty Pinch", "product_category": "ready-to-use", "descriptor": "Ready to Use Peanut Chutney", "product_tagline": "Fresh Chutney in a Snap!", "product_description": "A quick and easy blend of peanuts, gram, and spices. Just add water and grind to make a smooth, flavorful Palli (groundnut) chutney in minutes.", "ingredients": "Peanuts, Fried Gram, Dry Red Chilly, Salt, Ginger, Tamarind, Coriander Powder", "hero_ingredient_1": "Peanuts", "hero_ingredient_2": "Ginger", "hero_ingredient_3": "Tamarind", "serving_suggestion": "Simply add water gradually to this flavorful blend until you reach your desired consistency.Ready in seconds to pair with hot tiffin.", "serving_size_g": "40", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "Yes (Peanuts)", "is_jain": "No (Ginger)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-use/chutney-premix", "nutrition_serving_size": "40g", "nutrition_calories": "178.61kcal", "nutrition_protein": "9.01g", "nutrition_total_fat": "10.89g", "nutrition_saturated_fat": "1.83g", "nutrition_carbs": "13.74g", "nutrition_fiber": "5.08g", "nutrition_sugars": "2.74g", "nutrition_sodium": "0.64g", "price_100g_standup": "45", "price_250g_standup": "110", "price_500g_pouch": "210", "price_1kg_pouch": "405", "price_100g_glass_jar": "95", "price_one_unit_pouch": "", "photo_standup_pouch": "Chutney Premix_Standup_Pouch.png", "photo_glass_jar": "Chutney Premix_Cylindrical_Glass_Jar.png", "Category_Colour": "cc7722ff", "photo_standup": "Chutney Premix_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "MultiGrain Mix", "product_name_telugu": "\u0c2e\u0c32\u0c4d\u0c1f\u0c40 \u0c17\u0c4d\u0c30\u0c46\u0c2f\u0c3f\u0c28\u0c4d \u0c2e\u0c3f\u0c15\u0c4d\u0c38\u0c4d", "catalogue_category": "Tasty Pinch", "product_category": "ready-to-use", "descriptor": "Nutritious Multigrain Flour Additive Enhanced with Ashwagandha", "product_tagline": "Power of 13 Grains, Strength in Every Bite!", "product_description": "A wholesome blend of 13 grains and legumes, designed to make multigrain chapatis at home. Nutritious and flavorful, it turns every bite into a healthy delight.", "ingredients": "Horse Gram, Red Gram, Cornflour, Oats, Finger Millet, Soybean, Pearl Millet, Chickpea, Mung Bean, White Sesame Seeds, Urad Dal, Red Chilly Powder, Garlic, Coriander", "hero_ingredient_1": "Horse Gram", "hero_ingredient_2": "Oats", "hero_ingredient_3": "Finger Millet", "serving_suggestion": "Add this mix to chakki atta in 1:5 ratio before making the dough, to get the health benefits of 13 grains in every bite.", "serving_size_g": "40", "shelf_life_days": "90", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Garlic)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-use/multigrain-mix", "nutrition_serving_size": "40g", "nutrition_calories": "146.89kcal", "nutrition_protein": "7.23g", "nutrition_total_fat": "2.84g", "nutrition_saturated_fat": "0.42g", "nutrition_carbs": "23.55g", "nutrition_fiber": "4.57g", "nutrition_sugars": "0.89g", "nutrition_sodium": "0.04g", "price_100g_standup": "40", "price_250g_standup": "95", "price_500g_pouch": "185", "price_1kg_pouch": "360", "price_100g_glass_jar": "90", "price_one_unit_pouch": "", "photo_standup_pouch": "MUltigrain Mix_Standup_Pouch.png", "photo_glass_jar": "MUltigrain Mix_Cylindrical_Glass_Jar.png", "Category_Colour": "cc7722ff", "photo_standup": "MUltigrain Mix_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Peri Peri Masala", "product_name_telugu": "\u0c2a\u0c46\u0c30\u0c3f \u0c2a\u0c46\u0c30\u0c3f \u0c2e\u0c38\u0c3e\u0c32\u0c3e", "catalogue_category": "Tasty Pinch", "product_category": "ready-to-use", "descriptor": "Ready to Use Spicy Seasoning", "product_tagline": "Fiery, Tangy, Totally Irresistible!", "product_description": "A fiery, zesty fusion blend of African bird's eye chilies, garlic, herbs, and spices. Perfect for fries, chips, and snacks.", "ingredients": "Sugar, Salt, Red Chilly Powder, Onion Powder, Kashmiri Red Chilly Powder, Garlic Powder, Amchur Powder, Black Pepper, Oregano", "hero_ingredient_1": "Onion", "hero_ingredient_2": "Kashmiri Red Chilly", "hero_ingredient_3": "Garlic", "serving_suggestion": "Dust this zesty chili and herb mix generously over popcorn, makhana, or roasted nuts for a perfectly spicy snack.", "serving_size_g": "5", "shelf_life_days": "120", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "No (Onion Powder, Garlic Powder)", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-use/peri-peri-masala", "nutrition_serving_size": "5g", "nutrition_calories": "13.46kcal", "nutrition_protein": "0.32g", "nutrition_total_fat": "0.14g", "nutrition_saturated_fat": "0.04g", "nutrition_carbs": "3.08g", "nutrition_fiber": "0.6g", "nutrition_sugars": "0.92g", "nutrition_sodium": "0.3g", "price_100g_standup": "80", "price_250g_standup": "195", "price_500g_pouch": "370", "price_1kg_pouch": "720", "price_100g_glass_jar": "130", "price_one_unit_pouch": "", "photo_standup_pouch": "Peri Peri Masala_Standup_Pouch.png", "photo_glass_jar": "Peri Peri Masala_Cylindrical_Glass_Jar.png", "Category_Colour": "cc7722ff", "photo_standup": "Peri Peri Masala_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Sambar Premix", "product_name_telugu": "\u0c38\u0c3e\u0c02\u0c2c\u0c3e\u0c30\u0c4d \u0c2a\u0c4d\u0c30\u0c40\u0c2e\u0c3f\u0c15\u0c4d\u0c38\u0c4d", "catalogue_category": "Tasty Pinch", "product_category": "ready-to-use", "descriptor": "Ready to Use Tiffin Sambar", "product_tagline": "Authentic Sambar in a Snap!", "product_description": "A convenient, ready-to-use blend of rice, lentils, spices, and tamarind. Just add vegetables and boil to enjoy a flavorful, authentic South Indian sambar in minutes.", "ingredients": "Rice, Dry Red Chilly, Coriander, Red Gram, Urad Dal, Chickpea, Tamarind, Salt, Dry Coconut, Cumin, Fenugreek, Cinnamon, Curry Leaf", "hero_ingredient_1": "Toor Dal ", "hero_ingredient_2": "Menthi", "hero_ingredient_3": "Cinnamon", "serving_suggestion": "Add 40g of this authentic blend to 1 liter of water along with your favorite fresh vegetables. Boil until tender for fresh sambar.", "serving_size_g": "40", "shelf_life_days": "120", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-use/sambar-premix", "nutrition_serving_size": "40g", "nutrition_calories": "127.92kcal", "nutrition_protein": "5.03g", "nutrition_total_fat": "3.08g", "nutrition_saturated_fat": "1.3g", "nutrition_carbs": "22.92g", "nutrition_fiber": "7.42g", "nutrition_sugars": "2.16g", "nutrition_sodium": "1.13g", "price_100g_standup": "50", "price_250g_standup": "120", "price_500g_pouch": "230", "price_1kg_pouch": "450", "price_100g_glass_jar": "100", "price_one_unit_pouch": "", "photo_standup_pouch": "Sambar Premix_Standup_Pouch.png", "photo_glass_jar": "Sambar Premix_Cylindrical_Glass_Jar.png", "Category_Colour": "cc7722ff", "photo_standup": "Sambar Premix_Standup_Pouch.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}]}, {"name": "Ready to Cook", "products": [{"product_name": "Malabar Parota (10pcs)", "product_name_telugu": "\u0c2e\u0c32\u0c2c\u0c3e\u0c30\u0c4d \u0c2a\u0c30\u0c4b\u0c1f\u0c3e", "catalogue_category": "Ready to Cook", "product_category": "ready-to-cook", "descriptor": "", "product_tagline": "Flaky. Buttery. Irresistibly South Indian!", "product_description": "Traditional flaky layered Malabar parottas made with premium ingredients, delivering authentic Kerala street-food taste at home.", "ingredients": "All-Purpose Flour, Sunflower Oil, Vanaspati, Water, Salt", "hero_ingredient_1": "Chakki Atta", "hero_ingredient_2": "", "hero_ingredient_3": "", "serving_suggestion": "Remove the parotta from the pack and heat on a preheated tawa for 30\u201340 seconds on each side. Store in the refrigerator.", "serving_size_g": "80", "shelf_life_days": "14", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-cook/malabar-parota-10pcs", "nutrition_serving_size": "80g", "nutrition_calories": "211.73kcal", "nutrition_protein": "5.03g", "nutrition_total_fat": "4.16g", "nutrition_saturated_fat": "0.89g", "nutrition_carbs": "37.25g", "nutrition_fiber": "1.32g", "nutrition_sugars": "0.13g", "nutrition_sodium": "0.19g", "price_100g_standup": "", "price_250g_standup": "", "price_500g_pouch": "", "price_1kg_pouch": "", "price_100g_glass_jar": "", "price_one_unit_pouch": "155", "photo_standup_pouch": "malabar_parota__10pcs.png", "photo_glass_jar": "", "Category_Colour": "ddab82d2", "photo_standup": "malabar_parota__10pcs.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Malabar Parota (5pcs)", "product_name_telugu": "\u0c2e\u0c32\u0c2c\u0c3e\u0c30\u0c4d \u0c2a\u0c30\u0c4b\u0c1f\u0c3e", "catalogue_category": "Ready to Cook", "product_category": "ready-to-cook", "descriptor": "", "product_tagline": "Flaky. Buttery. Irresistibly South Indian!", "product_description": "Traditional flaky layered Malabar parottas made with premium ingredients, delivering authentic Kerala street-food taste at home.", "ingredients": "All-Purpose Flour, Sunflower Oil, Vanaspati, Water, Salt", "hero_ingredient_1": "Chakki Atta", "hero_ingredient_2": "", "hero_ingredient_3": "", "serving_suggestion": "Remove the parotta from the pack and heat on a preheated tawa for 30\u201340 seconds on each side. Store in the refrigerator.", "serving_size_g": "80", "shelf_life_days": "14", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-cook/malabar-parota-5pcs", "nutrition_serving_size": "80g", "nutrition_calories": "201.24kcal", "nutrition_protein": "6.48g", "nutrition_total_fat": "4.79g", "nutrition_saturated_fat": "1.03g", "nutrition_carbs": "35.36g", "nutrition_fiber": "5.26g", "nutrition_sugars": "0.2g", "nutrition_sodium": "0.98g", "price_100g_standup": "", "price_250g_standup": "", "price_500g_pouch": "", "price_1kg_pouch": "", "price_100g_glass_jar": "", "price_one_unit_pouch": "85", "photo_standup_pouch": "malabar_parota__5pcs.png", "photo_glass_jar": "", "Category_Colour": "ddab82d3", "photo_standup": "malabar_parota__5pcs.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Poori", "product_name_telugu": "\u0c2a\u0c42\u0c30\u0c3f", "catalogue_category": "Ready to Cook", "product_category": "ready-to-cook", "descriptor": "", "product_tagline": "Wholesome Puri! Full Chakki Atta  freshness!", "product_description": "Golden, fluffy puris made from 100% whole wheat chakki atta. These ready-to-fry delights offer a light, airy texture and authentic home-style taste, perfect for festive meals or weekend breakfasts.", "ingredients": "Poori Atta, Chakki Atta, Samolina, Water, Salt, Sunflower Oil", "hero_ingredient_1": "Chakki Atta", "hero_ingredient_2": "", "hero_ingredient_3": "", "serving_suggestion": "", "serving_size_g": "25", "shelf_life_days": "7", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-cook/poori", "nutrition_serving_size": "25g", "nutrition_calories": "108.33kcal", "nutrition_protein": "3.87g", "nutrition_total_fat": "1.22g", "nutrition_saturated_fat": "0.18g", "nutrition_carbs": "21.72g", "nutrition_fiber": "3.46g", "nutrition_sugars": "0.12g", "nutrition_sodium": "0.11g", "price_100g_standup": "", "price_250g_standup": "", "price_500g_pouch": "", "price_1kg_pouch": "", "price_100g_glass_jar": "", "price_one_unit_pouch": "65", "photo_standup_pouch": "poori.png", "photo_glass_jar": "", "Category_Colour": "ddab82d4", "photo_standup": "poori.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Wheat Chapathi", "product_name_telugu": "\u0c17\u0c4b\u0c27\u0c41\u0c2e \u0c1a\u0c2a\u0c3e\u0c24\u0c40", "catalogue_category": "Ready to Cook", "product_category": "ready-to-cook", "descriptor": "", "product_tagline": "Soft Rotis. Pure Home Taste!", "product_description": "Soft, wholesome wheat chapathi made from carefully selected wheat flour. Perfect balance of nutrition and taste, ideal for wrapping curries or enjoying with dal and vegetables.", "ingredients": "Chakki Atta, Water, Salt, Sunflower Oil", "hero_ingredient_1": "Chakki Atta", "hero_ingredient_2": "", "hero_ingredient_3": "", "serving_suggestion": "Remove the chapathi from the pack and heat on a preheated tawa for 20\u201330 seconds on each side. Store in the refrigerator.", "serving_size_g": "45", "shelf_life_days": "7", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-cook/wheat-chapathi", "nutrition_serving_size": "45g", "nutrition_calories": "88.32kcal", "nutrition_protein": "3.03g", "nutrition_total_fat": "1.58g", "nutrition_saturated_fat": "0.22g", "nutrition_carbs": "16.55g", "nutrition_fiber": "2.46g", "nutrition_sugars": "0.09g", "nutrition_sodium": "0.09g", "price_100g_standup": "", "price_250g_standup": "", "price_500g_pouch": "", "price_1kg_pouch": "", "price_100g_glass_jar": "", "price_one_unit_pouch": "85", "photo_standup_pouch": "wheat_chapathi.png", "photo_glass_jar": "", "Category_Colour": "ddab82d5", "photo_standup": "wheat_chapathi.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}, {"product_name": "Whole Wheat Parota", "product_name_telugu": "\u0c35\u0c40\u0c1f\u0c4d \u0c2a\u0c30\u0c4b\u0c1f\u0c3e", "catalogue_category": "Ready to Cook", "product_category": "ready-to-cook", "descriptor": "", "product_tagline": "Whole Grain Power. Guilt-Free Indulgence!", "product_description": "Healthy whole wheat parottas with rich layers and hearty flavour, combining nutrition and indulgent South Indian taste.", "ingredients": "Whole Wheat Atta, Sunflower Oil, Vanaspati, Water, Salt", "hero_ingredient_1": "Chakki Atta", "hero_ingredient_2": "", "hero_ingredient_3": "", "serving_suggestion": "Remove the parotta from the pack and heat on a preheated tawa for 30\u201340 seconds on each side. Store in the refrigerator.", "serving_size_g": "80", "shelf_life_days": "14", "is_veg": "Yes", "contains_nuts": "No", "is_jain": "Yes", "is_vegan": "Yes", "webpage_url": "https://telugudelicacies.com/ready-to-cook/whole-wheat-parota", "nutrition_serving_size": "80g", "nutrition_calories": "201.24kcal", "nutrition_protein": "6.48g", "nutrition_total_fat": "4.79g", "nutrition_saturated_fat": "1.03g", "nutrition_carbs": "35.36g", "nutrition_fiber": "5.26g", "nutrition_sugars": "0.2g", "nutrition_sodium": "0.98g", "price_100g_standup": "", "price_250g_standup": "", "price_500g_pouch": "", "price_1kg_pouch": "", "price_100g_glass_jar": "", "price_one_unit_pouch": "165", "photo_standup_pouch": "whole_wheat_parota.png", "photo_glass_jar": "", "Category_Colour": "ddab82d6", "photo_standup": "whole_wheat_parota.png", "photo_jar": "", "photo_1kg": "", "photo_one_unit": ""}]}], ["Red Gram.png", "Jaggery.png", "Tamarind Leaf.png", "Oats.png", "Toor Dal.png", "Tamarind.png", "Ginger.png", "Ghee.png", "Cardamom.png", "Red Chilly Powder.png", "Curry Leaf.png", "Pumpkin Seeds.png", "Chakki Atta.png", "Kashmiri Red Chilly.png", "Peanuts.png", "Onion.png", "Mint Leaves.png", "Chana Dal.png", "Coriander.png", "Dry Coconut.png", "Finger Millet.png", "Putna.png", "Urad Dal.png", "Cumin.png", "Mirchi Dry.png", "Garlic.png", "Flax Seed.png", "Horse Gram.png", "Moringa.png", "Methi.png", "Black Pepper.png", "Coriander Seeds.png", "Cinnamon.png"]);
+        });
+    </script>
+    </body>
+    
+    
+

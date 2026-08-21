@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .border-box {
+    width: 600px;
+    height: 800px;
+    margin: 50px auto;
+    background-color: #f4e8d3;
+    /* Create a border using multiple backgrounds for the border area */
+    border: 20px solid transparent;
+    border-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="3" fill="%23b8623b"/><path d="M0,0 Q20,40 40,0 T80,0" fill="none" stroke="%23b8623b" stroke-width="2"/></svg>') 20 round;
+  }
+
+  .border-box-2 {
+    width: 600px;
+    height: 800px;
+    margin: 50px auto;
+    background-color: #f4e8d3;
+    padding: 20px;
+    position: relative;
+  }
+  .border-box-2::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    border: 2px solid #b8623b;
+    /* We can use an SVG pattern in the border-image */
+  }
+</style>
+</head>
+<body>
+  <div class="border-box"></div>
+</body>
+</html>

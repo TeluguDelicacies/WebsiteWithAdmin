@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Catalogue Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-sand: #f4e8d3;
+            --copper-primary: #b8623b;
+            --copper-dark: #8c4222;
+            --text-dark: #3a2214;
+            --text-light: #fef7ec;
+            --wood-bg: #5c3a21;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: transparent !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 0;
+            padding: 0;
+            overflow: hidden !important;
+        }
+
+        /* Direct Click-to-Edit Visual Indicators */
+        [contenteditable="true"] {
+            transition: outline 0.15s ease-in-out, background 0.15s ease-in-out;
+            border-radius: 3px;
+        }
+        [contenteditable="true"]:hover {
+            outline: 1.5px dashed var(--copper-primary);
+            cursor: text;
+        }
+        [contenteditable="true"]:focus {
+            outline: 2px solid var(--copper-primary);
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 5px rgba(0,0,0,0.15);
+        }
+
+        .poster-container {
+            width: 794px; /* A4 width at 96dpi */
+            height: 1123px; /* A4 height at 96dpi */
+            background-color: var(--bg-sand);
+            position: relative;
+            margin: 0;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 45px 30px 45px;
+            border-radius: 4px;
+            border: none;
+        }
+
+        /* 1:1 Exact Rangoli Border Overlay Frame (100% html2canvas export compatible) */
+        .rangoli-frame {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .rangoli-corner {
+            position: absolute;
+            width: 36px; height: 36px;
+            background-size: 36px 36px;
+            background-repeat: no-repeat;
+        }
+        .rangoli-corner-tl { top: 0; left: 0; }
+        .rangoli-corner-tr { top: 0; right: 0; }
+        .rangoli-corner-bl { bottom: 0; left: 0; }
+        .rangoli-corner-br { bottom: 0; right: 0; }
+
+        .rangoli-strip-top {
+            position: absolute; top: 0; left: 36px; right: 36px; height: 36px;
+            background-size: 36px 36px; background-repeat: repeat-x;
+        }
+        .rangoli-strip-bottom {
+            position: absolute; bottom: 0; left: 36px; right: 36px; height: 36px;
+            background-size: 36px 36px; background-repeat: repeat-x;
+        }
+        .rangoli-strip-left {
+            position: absolute; left: 0; top: 36px; bottom: 36px; width: 36px;
+            background-size: 36px 36px; background-repeat: repeat-y;
+        }
+        .rangoli-strip-right {
+            position: absolute; right: 0; top: 36px; bottom: 36px; width: 36px;
+            background-size: 36px 36px; background-repeat: repeat-y;
+        }
+
+        /* Background Pattern */
+        .poster-container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                url('../../../Data for Catalogue/Rangoli FOr desgn.png'),
+                url('../../../Data for Catalogue/Rangoli FOr desgn.png'),
+                url('../../../Data for Catalogue/Rangoli FOr desgn.png');
+            background-position: -100px -100px, 85% -20px, 110% 110%;
+            background-size: 400px, 220px, 380px;
+            background-repeat: no-repeat;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Typography */
+        .category-badge {
+            display: inline-block; color: white; padding: 4px 15px; border-radius: 12px;
+            font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; z-index: 10;
+            background-color: var(--copper-primary);
+        }
+        .title-section { text-align: center; position: relative; z-index: 10; width: 100%; text-shadow: 0 0 10px var(--bg-sand), 0 0 20px var(--bg-sand); padding: 0 30px; }
+        .title-text-box { margin: 0 130px; }
+        .product-title-combined {
+            font-size: 36px; 
+            margin-bottom: 6px;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        .product-title-combined #pTitleEn {
+            font-family: 'Cinzel', serif;
+            color: var(--copper-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        .product-title-combined .title-sep {
+            color: var(--copper-primary);
+            opacity: 0.6;
+            margin: 0 10px;
+            font-weight: 300;
+        }
+        .product-title-combined #pTitleTe {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75em; 
+            color: var(--copper-primary);
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+        .product-descriptor {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--copper-dark);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            padding: 3px 15px;
+            border-top: 1px solid var(--copper-primary);
+            border-bottom: 1px solid var(--copper-primary);
+            background: rgba(255,255,255,0.4);
+            text-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+        }
+        .product-tagline { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text-dark); font-style: italic; margin-bottom: 8px; }
+        .product-desc { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text-dark); margin: 0 auto; line-height: 1.5; font-weight: 500; max-width: 450px; }
+
+        .hero-container {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 250px;
+            margin-bottom: 10px;
+            margin-top: 5px;
+            padding-top: 5px;
+            flex-shrink: 0;
+        }
+        .hero-stage {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+        }
+        .product-jar, .product-pouch {
+            position: relative;
+            z-index: 2;
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.4));
+        }
+        .product-col { position: absolute; z-index: 2; bottom: -30px; display: flex; flex-direction: column; align-items: center; }
+        .product-col.jar { left: -5%; }
+        .product-col.pouch { right: -5%; }
+        .product-jar { height: 210px; margin-bottom: 5px; transform: scale(1.2); }
+        .product-pouch { height: 220px; }
+
+        /* Panels Cleaned for html2canvas without pseudo-element artifacts */
+        .copper-panel {
+            background: linear-gradient(135deg, #fcf4e8, #e3cdb1);
+            padding: 14px 16px;
+            position: relative;
+            margin-bottom: 12px;
+            border: 3px solid var(--copper-primary);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .panel-title {
+            position: absolute;
+            top: -14px; left: 50%; transform: translateX(-50%);
+            background: var(--copper-dark);
+            color: var(--text-light);
+            padding: 2px 20px;
+            border-radius: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border: 2px solid var(--bg-sand);
+            white-space: nowrap;
+        }
+
+        /* Ingredients */
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 20px;
+            margin-top: 10px;
+            align-items: center;
+        }
+        .hero-ingredients {
+            display: flex; gap: 20px; align-items: center; justify-content: center;
+        }
+        .hero-ing-item { text-align: center; }
+        .hero-ing-item img {
+            width: 80px; height: 80px; object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        }
+        .hero-ing-name { font-size: 13px; font-weight: 700; margin-top: 6px; color: var(--copper-dark); text-transform: uppercase; }
+        .all-ingredients { font-size: 13px; line-height: 1.5; color: var(--text-dark); }
+        .ingredients-grid strong { color: var(--copper-dark); }
+        
+        /* Badges */
+        .badges-container {
+            display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; position: relative; z-index: 1;
+        }
+        .badge {
+            background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(212,175,55,0.6);
+            padding: 5px 12px; border-radius: 20px; font-size: 11px;
+            font-weight: 700; color: var(--copper-dark);
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-transform: uppercase;
+        }
+        .badge i { font-size: 14px; }
+
+        /* Pricing */
+        .pricing-grid {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 25px; margin-top: 5px;
+        }
+        .price-col { display: flex; flex-direction: column; align-items: center; padding: 0 15px; }
+        .price-details { display: flex; flex-direction: column; text-align: center; align-items: center; width: 100%; }
+        .price-details h4 { font-family: 'Cinzel', serif; font-size: 13px; color: var(--copper-dark); margin-bottom: 5px; }
+        .price-line { font-size: 11px; font-weight: 600; margin-bottom: 0px; white-space: nowrap; display: flex; justify-content: space-between; gap: 15px; align-items: center; padding: 3px 0; border-bottom: 1px dashed rgba(212,175,55,0.3); width: 100%; }
+        .price-line span { color: var(--copper-dark); margin-left: 4px; font-size: 12px; font-weight:700; }
+
+        /* How to Use */
+        .how-to-use { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+        .how-to-icons { display: flex; gap: 10px; font-size: 24px; color: var(--copper-dark); }
+        .how-to-text { font-size: 13px; line-height: 1.4; font-weight: 500; }
+
+        /* Nutrition */
+        .nutrition-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        .nutrition-table td { padding: 8px 10px; border-bottom: 1px dashed rgba(184, 98, 59, 0.4); color: var(--text-dark); }
+        .nutrition-table tr:last-child td { border-bottom: none; }
+        .nutrition-table td span { font-weight: 700; color: var(--copper-dark); float: right; }
+        .nutrition-header { text-align: right; font-weight: 700; color: var(--copper-dark); font-size: 11px; padding-bottom: 5px; }
+
+        /* Footer */
+        .footer-grid { margin-top: auto; position: relative; z-index: 1; padding-top: 15px; border-top: 2px solid var(--copper-primary); display: flex; justify-content: space-between; align-items: stretch; gap: 15px; }
+        .footer-logo { flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+        .footer-info { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; text-align: left; }
+        .footer-brand { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--copper-dark); }
+        .footer-tag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--text-dark); margin-bottom: 4px; }
+        .footer-details { font-size: 11px; font-weight: 600; color: var(--text-dark); line-height: 1.4; }
+        .website-qr { text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+        .website-qr img { height: 70px; border: 2px solid var(--copper-primary); border-radius: 4px; padding: 2px; background: white; margin-bottom: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .website-qr div { font-size: 11px; font-weight: 700; color: var(--copper-dark); letter-spacing: 0.5px; text-transform: uppercase; }
+        .shelf-life { background: var(--copper-dark); color: white; padding: 4px 12px; border-radius: 4px; text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px; display: inline-block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <main class="poster-container" id="poster" role="main" aria-label="Product Catalogue Poster">
+        
+        <!-- Exact 1:1 Rangoli Border Frame (4 Corners + 4 Edge Strips from rangoli_border.svg) -->
+        <div class="rangoli-frame">
+            <div class="rangoli-corner rangoli-corner-tl"></div>
+            <div class="rangoli-corner rangoli-corner-tr"></div>
+            <div class="rangoli-corner rangoli-corner-bl"></div>
+            <div class="rangoli-corner rangoli-corner-br"></div>
+            <div class="rangoli-strip-top"></div>
+            <div class="rangoli-strip-bottom"></div>
+            <div class="rangoli-strip-left"></div>
+            <div class="rangoli-strip-right"></div>
+        </div>
+
+        <div class="hero-container">
+            <div class="hero-stage">
+                <div class="product-col jar" id="jarCol">
+                    <img id="jarImg" class="product-jar" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Glass Jar">
+                </div>
+                <div class="product-col pouch" id="pouchCol">
+                    <img id="pouchImg" class="product-pouch" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Standup Pouch">
+                </div>
+            </div>
+
+            <div class="title-section">
+                <div class="category-badge" id="pCategory" contenteditable="true" style="margin-bottom: 5px;">GENERAL</div>
+                <h1 class="product-title-combined">
+                    <span id="pTitleEn" contenteditable="true">Product Name</span>
+                    <span class="title-sep">|</span>
+                    <span id="pTitleTe" contenteditable="true">ఉత్పత్తి పేరు</span>
+                </h1>
+                <div class="title-text-box">
+                    <div class="product-descriptor" id="pDescriptor" contenteditable="true"></div>
+                    <p class="product-tagline" id="pTagline" contenteditable="true"></p>
+                    <div class="product-desc" id="pDesc" contenteditable="true"></div>
+                    <div class="badges-container">
+                        <div class="badge"><i class="fas fa-leaf" style="color: #27ae60;"></i> <span id="pVeg" contenteditable="true">Veg</span></div>
+                        <div class="badge"><i class="fas fa-seedling" style="color: #1e8449;"></i> <span id="pVegan" contenteditable="true">Vegan</span></div>
+                        <div class="badge"><i class="fas fa-shield-alt" style="color: var(--copper-primary);"></i> Zero Preservatives</div>
+                        <div class="badge"><i class="fas fa-exclamation-circle" style="color: #e74c3c;"></i> <span id="pNuts" contenteditable="true">Nut Free</span></div>
+                        <div class="badge"><i class="fas fa-om" style="color: #d35400;"></i> <span id="pJain" contenteditable="true">Jain Friendly</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel">
+            <div class="panel-title" id="pPanelWhatsInside" contenteditable="true">WHAT'S INSIDE</div>
+            <div class="ingredients-grid">
+                <div>
+                    <div class="hero-ingredients">
+                        <div class="hero-ing-item" id="hero1Container">
+                            <img id="hero1Img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">
+                            <div class="hero-ing-name" id="pHero1Name" contenteditable="true"></div>
+                        </div>
+                        <div class="hero-ing-item" id="hero2Container">
+                            <img id="hero2Img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">
+                            <div class="hero-ing-name" id="pHero2Name" contenteditable="true"></div>
+                        </div>
+                        <div class="hero-ing-item" id="hero3Container">
+                            <img id="hero3Img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="">
+                            <div class="hero-ing-name" id="pHero3Name" contenteditable="true"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <strong style="font-size: 14px;">Ingredients:</strong>
+                    <div class="all-ingredients" id="pIngredients" contenteditable="true"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel">
+            <div class="panel-title" id="pPanelAvailableSizes" contenteditable="true">AVAILABLE SIZES</div>
+            <div class="pricing-grid">
+                <div class="price-col" id="jarPriceCol">
+                    <div class="price-details">
+                        <h4 contenteditable="true">GLASS JAR:</h4>
+                        <div class="price-line" id="pPriceJar" contenteditable="true"></div>
+                    </div>
+                </div>
+                <div class="price-col" id="standupPriceCol">
+                    <div class="price-details">
+                        <h4 contenteditable="true">STAND-UP POUCH:</h4>
+                        <div class="price-line" id="pPrice100" contenteditable="true"></div>
+                        <div class="price-line" id="pPrice250" contenteditable="true"></div>
+                    </div>
+                </div>
+                <div class="price-col" id="pouchPriceCol">
+                    <div class="price-details">
+                        <h4 contenteditable="true">POUCH:</h4>
+                        <div class="price-line" id="pPrice500" contenteditable="true"></div>
+                        <div class="price-line" id="pPrice1000" contenteditable="true"></div>
+                        <div class="price-line" id="pPriceOnePouch" contenteditable="true"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="copper-panel" id="perfectPairingsPanel">
+            <div class="panel-title" id="pPanelPerfectPairings" contenteditable="true">PERFECT PAIRINGS</div>
+            <div class="how-to-use">
+                <div class="how-to-icons">
+                    <i class="fas fa-bowl-rice"></i>
+                    <i class="fas fa-spoon"></i>
+                </div>
+                <div class="how-to-text" id="pHowToUse" contenteditable="true"></div>
+            </div>
+        </div>
+
+        <div class="copper-panel" style="padding-top: 20px;" id="healthFactsPanel">
+            <div class="panel-title" id="pPanelHealthFacts" contenteditable="true">HEALTH FACTS</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <div class="shelf-life">Shelf Life: <span id="pShelf" contenteditable="true">90 Days</span></div>
+                <div class="nutrition-header" id="pNutriServing">(Per serving 5g)</div>
+            </div>
+            <table class="nutrition-table" id="nutritionTable">
+                <tr>
+                    <td>Calories: <span id="pCal" contenteditable="true">-</span></td>
+                    <td>Total Fat: <span id="pFat" contenteditable="true">-</span></td>
+                    <td>Saturated Fat: <span id="pSatFat" contenteditable="true">-</span></td>
+                    <td>Sugars: <span id="pSugar" contenteditable="true">-</span></td>
+                </tr>
+                <tr>
+                    <td>Protein: <span id="pPro" contenteditable="true">-</span></td>
+                    <td>Carbs: <span id="pCarb" contenteditable="true">-</span></td>
+                    <td>Fiber: <span id="pFiber" contenteditable="true">-</span></td>
+                    <td>Sodium: <span id="pSod" contenteditable="true">-</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer-grid">
+            <div class="footer-logo">
+                <img id="mainLogo" src="../../../Data for Catalogue/Logos/TD%20Main%20Company%20Logo.png" alt="Company Logo" style="height: 70px; object-fit: contain;" onerror="this.onerror=null; if(!this.src.includes('../../Data')) this.src='../../Data for Catalogue/Logos/TD%20Main%20Company%20Logo.png'; else if(!this.src.includes('/Data')) this.src='/Data for Catalogue/Logos/TD%20Main%20Company%20Logo.png'; else this.src='https://res.cloudinary.com/telugudelicacies/image/upload/catalogue_images/logos/TD_Main_Company_Logo.png';">
+            </div>
+            <div class="footer-info">
+                <div class="footer-brand" contenteditable="true">Telugu Delicacies</div>
+                <div class="footer-tag" contenteditable="true">Modern Yet Traditional</div>
+                <div class="footer-details" id="footerDetailsBlock" contenteditable="true">
+                    <i class="fas fa-phone-alt" style="color:var(--copper-primary)"></i> / <i class="fab fa-whatsapp" style="color:#25D366"></i> +91 96185 19191<br>
+                    Other Sizes & Bulk Quantities Available on Request<br>
+                    Browse & Order online at: telugudelicacies.com
+                </div>
+            </div>
+            <div class="website-qr">
+                <img id="pWebQR" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://telugudelicacies.com" alt="QR Code">
+                <div id="pWeb" contenteditable="true">SCAN TO ORDER ONLINE</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const safeStr = (val) => val === null || val === undefined ? '' : String(val).trim();
+
+        function getDarkShade(hex) {
+            if (!hex || !hex.startsWith('#')) return '#8c4222';
+            let c = hex.substring(1);
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            let num = parseInt(c, 16);
+            let r = Math.max(0, (num >> 16) - 50);
+            let g = Math.max(0, ((num >> 8) & 0x00FF) - 50);
+            let b = Math.max(0, (num & 0x0000FF) - 50);
+            return '#' + (g | (b << 8) | (r << 16)).toString(16).padStart(6, '0');
+        }
+
+        window.injectProductData = function(p) {
+            if (!p) return;
+            const cat = safeStr(p.catalogue_category) || 'General';
+            const catBadge = document.getElementById('pCategory');
+            if (catBadge) catBadge.innerText = cat.toUpperCase();
+            
+            let catColor = p.themeCatColor || p.category_colour || p.Category_Colour || '#e6b201';
+            if (catColor && !catColor.startsWith('#')) catColor = '#' + catColor;
+            if (catColor && catColor.length === 9) catColor = catColor.substring(0, 7);
+
+            let darkColor = p.themeDarkColor || getDarkShade(catColor);
+
+            if (!p.themeCatColor && !p.category_colour && !p.Category_Colour) {
+                if(cat.toLowerCase().includes('health')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+                else if(cat.toLowerCase().includes('sprinkling')) { catColor = '#007c81'; darkColor = '#00595d'; }
+                else if(cat.toLowerCase().includes('leafy')) { catColor = '#2d5a27'; darkColor = '#1a3b16'; }
+                else if(cat.toLowerCase().includes('nutty')) { catColor = '#e64456'; darkColor = '#b83443'; }
+                else if(cat.toLowerCase().includes('tasty')) { catColor = '#cc7722'; darkColor = '#9a5511'; }
+                else if(cat.toLowerCase().includes('ready')) { catColor = '#ddab82'; darkColor = '#a87b5d'; }
+            }
+            
+            if (catBadge) catBadge.style.backgroundColor = catColor;
+            document.documentElement.style.setProperty('--copper-primary', catColor);
+            document.documentElement.style.setProperty('--copper-dark', darkColor);
+
+            // Dynamic Panel Headings
+            if (p.commonWhatsInside && document.getElementById('pPanelWhatsInside')) {
+                document.getElementById('pPanelWhatsInside').innerText = p.commonWhatsInside;
+            }
+            if (p.commonAvailableSizes && document.getElementById('pPanelAvailableSizes')) {
+                document.getElementById('pPanelAvailableSizes').innerText = p.commonAvailableSizes;
+            }
+            if (p.commonPerfectPairings && document.getElementById('pPanelPerfectPairings')) {
+                document.getElementById('pPanelPerfectPairings').innerText = p.commonPerfectPairings;
+            }
+            if (p.commonHealthFacts && document.getElementById('pPanelHealthFacts')) {
+                document.getElementById('pPanelHealthFacts').innerText = p.commonHealthFacts;
+            }
+
+            // Reconstruct 1:1 Exact Rangoli Border (4 Corners + 4 Edge Strips from rangoli_border.svg)
+            const makeSvgUri = (viewBox, bodyContent) => {
+                const raw = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="${viewBox}">${bodyContent}</svg>`;
+                return 'data:image/svg+xml;utf8,' + encodeURIComponent(raw);
+            };
+
+            const topEdgeSvg = makeSvgUri('30 0 30 30', `
+                <path d="M 30 15 C 40 5, 50 25, 60 15" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 30 15 C 40 25, 50 5, 60 15" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="45" cy="8" r="3" fill="${catColor}"/>
+                <circle cx="45" cy="22" r="3" fill="${catColor}"/>
+            `);
+
+            const bottomEdgeSvg = makeSvgUri('30 60 30 30', `
+                <path d="M 30 75 C 40 65, 50 85, 60 75" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 30 75 C 40 85, 50 65, 60 75" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="45" cy="68" r="3" fill="${catColor}"/>
+                <circle cx="45" cy="82" r="3" fill="${catColor}"/>
+            `);
+
+            const leftEdgeSvg = makeSvgUri('0 30 30 30', `
+                <path d="M 15 30 C 5 40, 25 50, 15 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 15 30 C 25 40, 5 50, 15 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="8" cy="45" r="3" fill="${catColor}"/>
+                <circle cx="22" cy="45" r="3" fill="${catColor}"/>
+            `);
+
+            const rightEdgeSvg = makeSvgUri('60 30 30 30', `
+                <path d="M 75 30 C 65 40, 85 50, 75 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 75 30 C 85 40, 65 50, 75 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="68" cy="45" r="3" fill="${catColor}"/>
+                <circle cx="82" cy="45" r="3" fill="${catColor}"/>
+            `);
+
+            const tlCornerSvg = makeSvgUri('0 0 30 30', `
+                <path d="M 30 15 C 20 15, 15 20, 15 30" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 30 15 C 5 0, 0 5, 15 30" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="3" fill="${catColor}"/>
+            `);
+
+            const trCornerSvg = makeSvgUri('60 0 30 30', `
+                <path d="M 60 15 C 70 15, 75 20, 75 30" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 60 15 C 85 0, 90 5, 75 30" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="78" cy="12" r="3" fill="${catColor}"/>
+            `);
+
+            const blCornerSvg = makeSvgUri('0 60 30 30', `
+                <path d="M 30 75 C 20 75, 15 70, 15 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 30 75 C 5 90, 0 85, 15 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="12" cy="78" r="3" fill="${catColor}"/>
+            `);
+
+            const brCornerSvg = makeSvgUri('60 60 30 30', `
+                <path d="M 60 75 C 70 75, 75 70, 75 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 60 75 C 85 90, 90 85, 75 60" fill="none" stroke="${catColor}" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="78" cy="78" r="3" fill="${catColor}"/>
+            `);
+
+            if (document.querySelector('.rangoli-strip-top')) document.querySelector('.rangoli-strip-top').style.backgroundImage = `url("${topEdgeSvg}")`;
+            if (document.querySelector('.rangoli-strip-bottom')) document.querySelector('.rangoli-strip-bottom').style.backgroundImage = `url("${bottomEdgeSvg}")`;
+            if (document.querySelector('.rangoli-strip-left')) document.querySelector('.rangoli-strip-left').style.backgroundImage = `url("${leftEdgeSvg}")`;
+            if (document.querySelector('.rangoli-strip-right')) document.querySelector('.rangoli-strip-right').style.backgroundImage = `url("${rightEdgeSvg}")`;
+
+            if (document.querySelector('.rangoli-corner-tl')) document.querySelector('.rangoli-corner-tl').style.backgroundImage = `url("${tlCornerSvg}")`;
+            if (document.querySelector('.rangoli-corner-tr')) document.querySelector('.rangoli-corner-tr').style.backgroundImage = `url("${trCornerSvg}")`;
+            if (document.querySelector('.rangoli-corner-bl')) document.querySelector('.rangoli-corner-bl').style.backgroundImage = `url("${blCornerSvg}")`;
+            if (document.querySelector('.rangoli-corner-br')) document.querySelector('.rangoli-corner-br').style.backgroundImage = `url("${brCornerSvg}")`;
+
+            if (document.getElementById('pCategory')) document.getElementById('pCategory').innerText = cat.toUpperCase();
+            if (document.getElementById('pTitleEn')) document.getElementById('pTitleEn').innerText = safeStr(p.product_name) || 'Product Name';
+            if (document.getElementById('pTitleTe')) document.getElementById('pTitleTe').innerText = safeStr(p.product_name_telugu) || 'ఉత్పత్తి పేరు';
+            
+            // Auto-scale title font size
+            const titleEl = document.querySelector('.product-title-combined');
+            if (titleEl) {
+                let fontSize = 36;
+                titleEl.style.fontSize = fontSize + 'px';
+                while (titleEl.scrollWidth > titleEl.clientWidth && fontSize > 14) {
+                    fontSize -= 1;
+                    titleEl.style.fontSize = fontSize + 'px';
+                }
+            }
+            
+            const descStr = safeStr(p.descriptor);
+            if (descStr !== '') {
+                if (document.getElementById('pDescriptor')) {
+                    document.getElementById('pDescriptor').innerText = descStr;
+                    document.getElementById('pDescriptor').style.display = 'inline-block';
+                }
+            } else {
+                if (document.getElementById('pDescriptor')) document.getElementById('pDescriptor').style.display = 'none';
+            }
+
+            if (document.getElementById('pTagline')) document.getElementById('pTagline').innerText = safeStr(p.product_tagline);
+            if (document.getElementById('pDesc')) document.getElementById('pDesc').innerText = safeStr(p.product_description);        
+            if (document.getElementById('pHero1Name')) document.getElementById('pHero1Name').innerText = safeStr(p.hero_ingredient_1);
+            if (document.getElementById('pHero2Name')) document.getElementById('pHero2Name').innerText = safeStr(p.hero_ingredient_2);
+            if (document.getElementById('pHero3Name')) document.getElementById('pHero3Name').innerText = safeStr(p.hero_ingredient_3);
+            if (document.getElementById('pIngredients')) document.getElementById('pIngredients').innerText = safeStr(p.ingredients);
+            
+            const isVegStr = safeStr(p.is_veg);
+            if (document.getElementById('pVeg')) document.getElementById('pVeg').innerText = isVegStr === 'Yes' ? 'Veg' : (isVegStr === 'No' ? 'Non-Veg' : 'Veg');
+            const isVeganStr = safeStr(p.is_vegan);
+            if (document.getElementById('pVegan')) document.getElementById('pVegan').innerText = isVeganStr === 'Yes' ? 'Vegan' : (isVeganStr === 'No' ? 'Non-Vegan' : 'Vegan');
+            
+            const nutBadge = document.getElementById('pNuts');
+            if (nutBadge) {
+                const nutIcon = nutBadge.previousElementSibling;
+                const nutsVal = safeStr(p.contains_nuts);
+                if (nutsVal !== '' && nutsVal.toLowerCase() !== 'no' && nutsVal !== '0') {
+                    nutBadge.innerText = 'Contains Nuts';
+                    if (nutIcon) { nutIcon.className = 'fas fa-exclamation-circle'; nutIcon.style.color = '#e74c3c'; }
+                } else {
+                    nutBadge.innerText = 'Nut Free';
+                    if (nutIcon) { nutIcon.className = 'fas fa-check-circle'; nutIcon.style.color = '#27ae60'; }
+                }
+            }
+
+            const jainVal = safeStr(p.is_jain);
+            if (document.getElementById('pJain')) document.getElementById('pJain').innerText = jainVal === 'Yes' ? 'Jain Friendly' : 'Not Jain';
+
+            const setPrice = (id, label, price) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const pStr = safeStr(price);
+                if (pStr !== '' && pStr !== '-' && pStr !== '0') {
+                    el.innerHTML = `${label} <span>₹${pStr}</span>`;
+                    el.style.display = 'flex';
+                } else {
+                    el.style.display = 'none';
+                }
+            };
+
+            setPrice('pPriceJar', '100g Glass Jar', p.price_100g_glass_jar);
+            setPrice('pPrice100', '100g Standup', p.price_100g_standup);
+            setPrice('pPrice250', '250g Standup', p.price_250g_standup);
+            setPrice('pPrice500', '500g Pouch', p.price_500g_pouch);
+            setPrice('pPrice1000', '1kg Pouch', p.price_1kg_pouch);
+            setPrice('pPriceOnePouch', '1 Unit', p.price_one_unit_pouch);
+
+            const isVisible = (id) => { const el = document.getElementById(id); return el && el.style.display !== 'none'; };
+            const updatePricingColumns = () => {
+                if (document.getElementById('jarPriceCol')) document.getElementById('jarPriceCol').style.display = isVisible('pPriceJar') ? 'block' : 'none';
+                if (document.getElementById('standupPriceCol')) document.getElementById('standupPriceCol').style.display = (isVisible('pPrice100') || isVisible('pPrice250')) ? 'block' : 'none';
+                if (document.getElementById('pouchPriceCol')) document.getElementById('pouchPriceCol').style.display = (isVisible('pPrice500') || isVisible('pPrice1000') || isVisible('pPriceOnePouch')) ? 'block' : 'none';
+            };
+            updatePricingColumns();
+
+            const servSugStr = safeStr(p.serving_suggestion);
+            if (servSugStr !== '') {
+                if (document.getElementById('pHowToUse')) document.getElementById('pHowToUse').innerText = servSugStr;
+                if (document.getElementById('perfectPairingsPanel')) document.getElementById('perfectPairingsPanel').style.display = 'block';
+            } else {
+                if (document.getElementById('perfectPairingsPanel')) document.getElementById('perfectPairingsPanel').style.display = 'none';
+            }
+
+            const calStr = safeStr(p.nutrition_calories);
+            const hasNutrition = calStr !== '' && calStr !== 'N/A' && calStr !== '-';
+            if (hasNutrition) {
+                if (document.getElementById('healthFactsPanel')) document.getElementById('healthFactsPanel').style.display = 'block';
+                if (document.getElementById('pNutriServing')) document.getElementById('pNutriServing').innerText = `(Per serving ${safeStr(p.nutrition_serving_size) || '5g'})`;
+                if (document.getElementById('pCal')) document.getElementById('pCal').innerText = calStr || '-';
+                if (document.getElementById('pFat')) document.getElementById('pFat').innerText = safeStr(p.nutrition_total_fat) || '-';
+                if (document.getElementById('pSatFat')) document.getElementById('pSatFat').innerText = safeStr(p.nutrition_saturated_fat) || '-';
+                if (document.getElementById('pSugar')) document.getElementById('pSugar').innerText = safeStr(p.nutrition_sugars) || '-';
+                if (document.getElementById('pPro')) document.getElementById('pPro').innerText = safeStr(p.nutrition_protein) || '-';
+                if (document.getElementById('pCarb')) document.getElementById('pCarb').innerText = safeStr(p.nutrition_carbs) || '-';
+                if (document.getElementById('pFiber')) document.getElementById('pFiber').innerText = safeStr(p.nutrition_fiber) || '-';
+                if (document.getElementById('pSod')) document.getElementById('pSod').innerText = safeStr(p.nutrition_sodium) || '-';
+            } else {
+                if (document.getElementById('healthFactsPanel')) document.getElementById('healthFactsPanel').style.display = 'none';
+            }
+
+            if (document.getElementById('pShelf')) document.getElementById('pShelf').innerText = (safeStr(p.shelf_life_days) || '90') + ' Days';
+            const webUrl = safeStr(p.commonWebsiteUrl) || safeStr(p.webpageUrl) || safeStr(p.webpage_url) || 'https://telugudelicacies.com';
+            if (document.getElementById('pWebQR')) document.getElementById('pWebQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(webUrl)}`;
+
+            // Apply Common Branding Overrides if provided
+            if (p.commonBrandName && document.querySelector('.footer-brand')) {
+                document.querySelector('.footer-brand').innerText = p.commonBrandName;
+            }
+            if (p.commonHeaderSlogan && document.querySelector('.footer-tag')) {
+                document.querySelector('.footer-tag').innerText = p.commonHeaderSlogan;
+            }
+            if (p.commonContactPhone && document.getElementById('footerDetailsBlock')) {
+                document.getElementById('footerDetailsBlock').innerHTML = `
+                    <i class="fas fa-phone-alt" style="color:var(--copper-primary)"></i> / <i class="fab fa-whatsapp" style="color:#25D366"></i> ${p.commonContactPhone}<br>
+                    ${p.commonFooterInfo || 'Other Sizes & Bulk Quantities Available on Request'}<br>
+                    Browse & Order online at: ${p.commonWebsiteUrl || 'telugudelicacies.com'}
+                `;
+            }
+            if (p.commonQrText && document.getElementById('pWeb')) {
+                document.getElementById('pWeb').innerText = p.commonQrText;
+            }
+
+            // Images and Columns
+            const setImg = (id, url) => {
+                const img = document.getElementById(id);
+                if (!img) return;
+                if (url.startsWith('http')) img.crossOrigin = "anonymous";
+                else img.removeAttribute('crossOrigin');
+                img.src = url;
+            };
+
+            if (p.jarImgUrl && document.getElementById('jarImg')) {
+                setImg('jarImg', p.jarImgUrl);
+                if (document.getElementById('jarCol')) document.getElementById('jarCol').style.display = 'block';
+            } else {
+                if (document.getElementById('jarCol')) document.getElementById('jarCol').style.display = 'none';
+            }
+            
+            if (p.pouchImgUrl && document.getElementById('pouchImg')) {
+                setImg('pouchImg', p.pouchImgUrl);
+                if (document.getElementById('pouchCol')) document.getElementById('pouchCol').style.display = 'block';
+            } else {
+                if (document.getElementById('pouchCol')) document.getElementById('pouchCol').style.display = 'none';
+            }
+            
+            updatePricingColumns();
+            
+            // Hero Ingredients
+            const setHero = (num, name, imgUrl) => {
+                const container = document.getElementById(`hero${num}Container`);
+                const img = document.getElementById(`hero${num}Img`);
+                const text = document.getElementById(`pHero${num}Name`);
+                
+                const nStr = safeStr(name);
+                if (nStr !== '' && imgUrl) {
+                    if (container) container.style.display = 'block';
+                    if (img) {
+                        if (imgUrl.startsWith('http')) img.crossOrigin = "anonymous";
+                        else img.removeAttribute('crossOrigin');
+                        img.src = imgUrl;
+                    }
+                    if (text) text.innerText = nStr;
+                } else {
+                    if (container) container.style.display = 'none';
+                }
+            };
+            
+            setHero(1, p.hero_ingredient_1, p.hero1ImgUrl);
+            setHero(2, p.hero_ingredient_2, p.hero2ImgUrl);
+            setHero(3, p.hero_ingredient_3, p.hero3ImgUrl);
+        };
+    </script>
+</body>
+</html>
