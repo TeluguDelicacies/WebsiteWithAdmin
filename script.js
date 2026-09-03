@@ -171,7 +171,8 @@ window.shareCatalogue = async function () {
         console.error('Share failed, switching to fallback:', err);
 
         // Check device type again for the fallback
-        const isMobileFallback = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isMobileFallback = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
 
         if (isMobileFallback) {
             // --- MOBILE FALLBACK ---
@@ -3104,8 +3105,21 @@ window.addComboToCart = addComboToCart;
 function buyComboViaWhatsApp(comboName, price, products) {
     const message = `Hi! I'd like to order the "${comboName}" combo bundle.\n\nItems: ${products}\nPrice: ₹${price}\n\nPlease confirm availability.`;
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+    const phone = WHATSAPP_NUMBER || '919618519191';
+    const whatsappUrl = isMobile
+        ? `https://wa.me/${phone}?text=${encodedMessage}`
+        : `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
+
+    if (isMobile) {
+        window.location.href = whatsappUrl;
+    } else {
+        const win = window.open(whatsappUrl, '_blank');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+            window.location.href = whatsappUrl;
+        }
+    }
 }
 // Make function globally accessible
 window.buyComboViaWhatsApp = buyComboViaWhatsApp;
@@ -3295,6 +3309,21 @@ window.initComboFanCarousels = function () {
  * @param {number} discountPercent - Discount percentage
  */
 window.addComboToOrder = async function (comboId, comboName, offerPrice, discountPercent) {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+
+    let desktopTab = null;
+    if (!isMobile) {
+        try {
+            desktopTab = window.open('about:blank', '_blank');
+            if (desktopTab) {
+                desktopTab.document.write('<p style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;text-align:center;margin-top:20%;font-size:16px;color:#444;">Connecting to WhatsApp...</p>');
+            }
+        } catch (e) {
+            desktopTab = null;
+        }
+    }
+
     try {
         // Fetch combo items for the message
         const { data: items } = await supabase
@@ -3317,15 +3346,40 @@ window.addComboToOrder = async function (comboId, comboName, offerPrice, discoun
         message += `Please confirm my order!`;
 
         // Get WhatsApp number from settings
-        const phone = window.currentSiteSettings?.contact_phone_primary?.replace(/\s/g, '') || '919876543210';
-        const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        const rawPhone = window.currentSiteSettings?.contact_phone_primary?.replace(/\s/g, '') || WHATSAPP_NUMBER || '919618519191';
+        const phone = rawPhone.replace(/[^\d]/g, '');
+        const encodedMessage = encodeURIComponent(message);
+        const waUrl = isMobile
+            ? `https://wa.me/${phone}?text=${encodedMessage}`
+            : `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
 
-        window.open(waUrl, '_blank');
+        if (isMobile) {
+            window.location.href = waUrl;
+        } else if (desktopTab && !desktopTab.closed) {
+            desktopTab.location.href = waUrl;
+        } else {
+            const win = window.open(waUrl, '_blank');
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                window.location.href = waUrl;
+            }
+        }
     } catch (err) {
         console.error('Error creating combo order:', err);
         // Fallback to basic WhatsApp
-        const phone = window.currentSiteSettings?.contact_phone_primary?.replace(/\s/g, '') || '919876543210';
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(`I'd like to order the ${comboName} combo!`)}`, '_blank');
+        const rawPhone = window.currentSiteSettings?.contact_phone_primary?.replace(/\s/g, '') || WHATSAPP_NUMBER || '919618519191';
+        const phone = rawPhone.replace(/[^\d]/g, '');
+        const fallbackMsg = encodeURIComponent(`I'd like to order the ${comboName} combo!`);
+        const fallbackUrl = isMobile
+            ? `https://wa.me/${phone}?text=${fallbackMsg}`
+            : `https://web.whatsapp.com/send?phone=${phone}&text=${fallbackMsg}`;
+
+        if (isMobile) {
+            window.location.href = fallbackUrl;
+        } else if (desktopTab && !desktopTab.closed) {
+            desktopTab.location.href = fallbackUrl;
+        } else {
+            window.open(fallbackUrl, '_blank');
+        }
     }
 };
 
@@ -4451,11 +4505,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Explicitly expose for onclick attributes if any
 window.openWhatsAppCatalog = function () {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
     if (isMobile) {
-        window.open(WHATSAPP_CATALOG_URL, '_blank');
+        window.location.href = WHATSAPP_CATALOG_URL;
     } else {
-        window.open(WHATSAPP_DESKTOP_URL, '_blank');
+        const win = window.open(WHATSAPP_DESKTOP_URL, '_blank');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+            window.location.href = WHATSAPP_DESKTOP_URL;
+        }
     }
 };
 
@@ -4705,11 +4763,12 @@ window.orderOnWhatsApp = async function () {
         return;
     }
 
+    // Accurate mobile and touch-device detection (including modern iPadOS which mimics Mac)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+
     // Show loading state
     window.showToast('Preparing your order...', 'info');
-
-    // optional: validation logic can be added here if needed, 
-    // but for the main page we keep it fast and simple.
 
     // Construct Message
     let message = `👋 Hi Telugu Delicacies! I would like to place an order.\n\n🛒 *ORDER SUMMARY*`;
@@ -4723,14 +4782,11 @@ window.orderOnWhatsApp = async function () {
     message += `\n\n💰 *Item Total: ₹${total}* (Shipping calculated later)`;
     message += `\n\nPlease confirm availability and share payment details! ✅`;
 
-    const phone = WHATSAPP_NUMBER || '919618519191';
-
-    // Use web.whatsapp for desktop, api.whatsapp for mobile
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const baseUrl = isMobile ? 'https://api.whatsapp.com/send' : 'https://web.whatsapp.com/send';
-    const whatsappUrl = `${baseUrl}?phone=${phone}&text=${encodeURIComponent(message)}`;
-
-    window.open(whatsappUrl, '_blank');
+    const phone = (WHATSAPP_NUMBER || '919618519191').replace(/[^\d]/g, '');
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = isMobile
+        ? `https://wa.me/${phone}?text=${encodedMessage}`
+        : `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
 
     // Immediate Actions
     window.clearMainCart(); // Handles reset and toast
@@ -4738,6 +4794,16 @@ window.orderOnWhatsApp = async function () {
 
     // Close the cart drawer
     window.toggleMainCartDrawer();
+
+    // Mobile (iOS Safari / Android) uses window.location.href to reliably invoke WhatsApp Universal Link without popup blocking
+    if (isMobile) {
+        window.location.href = whatsappUrl;
+    } else {
+        const win = window.open(whatsappUrl, '_blank');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+            window.location.href = whatsappUrl;
+        }
+    }
 };
 
 // Initialize cart UI on page load (delegated to main init; only update UI here)
