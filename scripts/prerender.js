@@ -41,7 +41,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     process.exit(1);
 }
 
-const SITE_URL = process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://telugudelicacies.com';
+const SITE_URL = (process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://telugudelicacies.com').replace(/\/+$/, '');
 const DIST_DIR = path.resolve(__dirname, '../dist');
 const TEMPLATE_FILE = path.resolve(__dirname, '../dist/sales.html');
 
@@ -207,12 +207,13 @@ function getProductImage(product, defaultImages) {
 function fixAssetPaths($) {
     // Fix <link href="./..."> and <link href="relative/...">
     $('link[href]').each((_, el) => {
+        if ($(el).attr('rel') === 'canonical') return; // Canonical URLs are absolute
         const href = $(el).attr('href');
         if (href && (href.startsWith('./') || href.startsWith('../'))) {
             // Remove ./ or ../ and make absolute
             const absolutePath = '/' + href.replace(/^\.\.?\//, '');
             $(el).attr('href', absolutePath);
-        } else if (href && !href.startsWith('/') && !href.startsWith('http') && !href.startsWith('data:')) {
+        } else if (href && !href.startsWith('/') && !href.startsWith('http') && !href.startsWith('data:') && !href.startsWith('//')) {
             // Plain relative path like "styles.css" or "assets/style.css"
             $(el).attr('href', '/' + href);
         }
@@ -263,7 +264,8 @@ function fixAssetPaths($) {
 function injectMetaTags($, product, imageUrl, categories) {
     const title = generateMetaTitle(product);
     const description = generateMetaDescription(product);
-    const cSlug = getCatSlug(product, categories); const productUrl = `\${SITE_URL}/${cSlug ? cSlug + "/" : ""}\${product.slug}`;
+    const cSlug = getCatSlug(product, categories);
+    const productUrl = `${SITE_URL}/${cSlug ? cSlug + "/" : ""}${product.slug}`;
     const imageAlt = product.image_alt_text || `${product.product_name} - Telugu Delicacies`;
 
     // Update <title>
@@ -273,10 +275,23 @@ function injectMetaTags($, product, imageUrl, categories) {
     $('meta[name="description"]').attr('content', description);
 
     // Update Open Graph tags
+    $('meta[property="og:type"]').attr('content', 'website');
     $('meta[property="og:title"]').attr('content', title);
     $('meta[property="og:description"]').attr('content', description);
     $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:image"]').attr('content', imageUrl);
+
+    if ($('meta[property="og:site_name"]').length === 0) {
+        $('head').append(`<meta property="og:site_name" content="Telugu Delicacies" />`);
+    } else {
+        $('meta[property="og:site_name"]').attr('content', 'Telugu Delicacies');
+    }
+
+    if ($('meta[property="og:image:secure_url"]').length === 0) {
+        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${imageUrl}" />`);
+    } else {
+        $('meta[property="og:image:secure_url"]').attr('content', imageUrl);
+    }
 
     // Add og:image:alt if not present
     if ($('meta[property="og:image:alt"]').length === 0) {
@@ -300,6 +315,11 @@ function injectMetaTags($, product, imageUrl, categories) {
             <meta name="twitter:description" content="${description}" />
             <meta name="twitter:image" content="${imageUrl}" />
         `);
+    } else {
+        $('meta[name="twitter:card"]').attr('content', 'summary_large_image');
+        $('meta[name="twitter:title"]').attr('content', title);
+        $('meta[name="twitter:description"]').attr('content', description);
+        $('meta[name="twitter:image"]').attr('content', imageUrl);
     }
 
     // FIX BROKEN ASSET PATHS - Critical for nested directories
@@ -314,20 +334,47 @@ function injectMetaTags($, product, imageUrl, categories) {
 function injectComboMetaTags($, combo) {
     const title = generateComboMetaTitle(combo);
     const description = generateComboMetaDescription(combo);
-    const productUrl = `\${SITE_URL}/combo-offers/\${combo.slug}`;
+    const productUrl = `${SITE_URL}/combo-offers/${combo.slug}`;
     const imageUrl = combo.image_url || `${SITE_URL}/images/placeholder-combo.jpg`;
 
     $('title').text(title);
     $('meta[name="description"]').attr('content', description);
+    $('meta[property="og:type"]').attr('content', 'website');
     $('meta[property="og:title"]').attr('content', title);
     $('meta[property="og:description"]').attr('content', description);
     $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:image"]').attr('content', imageUrl);
 
+    if ($('meta[property="og:site_name"]').length === 0) {
+        $('head').append(`<meta property="og:site_name" content="Telugu Delicacies" />`);
+    } else {
+        $('meta[property="og:site_name"]').attr('content', 'Telugu Delicacies');
+    }
+
+    if ($('meta[property="og:image:secure_url"]').length === 0) {
+        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${imageUrl}" />`);
+    } else {
+        $('meta[property="og:image:secure_url"]').attr('content', imageUrl);
+    }
+
     if ($('link[rel="canonical"]').length === 0) {
         $('head').append(`<link rel="canonical" href="${productUrl}" />`);
     } else {
         $('link[rel="canonical"]').attr('href', productUrl);
+    }
+
+    if ($('meta[name="twitter:card"]').length === 0) {
+        $('head').append(`
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="${title}" />
+            <meta name="twitter:description" content="${description}" />
+            <meta name="twitter:image" content="${imageUrl}" />
+        `);
+    } else {
+        $('meta[name="twitter:card"]').attr('content', 'summary_large_image');
+        $('meta[name="twitter:title"]').attr('content', title);
+        $('meta[name="twitter:description"]').attr('content', description);
+        $('meta[name="twitter:image"]').attr('content', imageUrl);
     }
 
     fixAssetPaths($);
@@ -357,6 +404,14 @@ function generateSitemap(products, categories, combos) {
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
+
+    <!-- Combo Offers Page -->
+    <url>
+        <loc>${SITE_URL}/combo-offers</loc>
+        <lastmod>${today}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
 `;
 
     // Add category pages
@@ -370,22 +425,38 @@ function generateSitemap(products, categories, combos) {
     </url>`;
     }
 
-    // Add product pages
+    // Add product pages (both direct slug and category slug)
     for (const product of products) {
+        const cSlug = getCatSlug(product, categories);
         xml += `
     <url>
-        <loc>\${SITE_URL}/\${getCatSlug(product, categories) ? getCatSlug(product, categories) + "/" : ""}\${product.slug}</loc>
+        <loc>${SITE_URL}/${product.slug}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>`;
+        if (cSlug) {
+            xml += `
+    <url>
+        <loc>${SITE_URL}/${cSlug}/${product.slug}</loc>
+        <lastmod>${today}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>`;
+        }
     }
 
     // Add combo pages
     for (const combo of combos || []) {
         xml += `
     <url>
-        <loc>\${SITE_URL}/combo-offers/\${combo.slug}</loc>
+        <loc>${SITE_URL}/combo-offers/${combo.slug}</loc>
+        <lastmod>${today}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>${SITE_URL}/${combo.slug}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -556,16 +627,28 @@ async function prerender() {
             // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
             $('#app').append(productHtml);
 
-            // Create output directory
-            const outputDir = path.join(DIST_DIR, 'sales', product.slug);
-            await ensureDir(outputDir);
+            const htmlContent = $.html();
+            const cSlug = getCatSlug(product, categories);
 
-            // Write the HTML file
-            const outputFile = path.join(outputDir, 'index.html');
-            await fs.writeFile(outputFile, $.html(), 'utf-8');
+            // 1. Root slug path: dist/${product.slug}/index.html (e.g. /koora-kaaram)
+            const rootDir = path.join(DIST_DIR, product.slug);
+            await ensureDir(rootDir);
+            await fs.writeFile(path.join(rootDir, 'index.html'), htmlContent, 'utf-8');
+
+            // 2. Category-nested path: dist/${cSlug}/${product.slug}/index.html (e.g. /ready-to-eat/koora-kaaram)
+            if (cSlug) {
+                const catDir = path.join(DIST_DIR, cSlug, product.slug);
+                await ensureDir(catDir);
+                await fs.writeFile(path.join(catDir, 'index.html'), htmlContent, 'utf-8');
+            }
+
+            // 3. Legacy sales path: dist/sales/${product.slug}/index.html
+            const salesDir = path.join(DIST_DIR, 'sales', product.slug);
+            await ensureDir(salesDir);
+            await fs.writeFile(path.join(salesDir, 'index.html'), htmlContent, 'utf-8');
 
             pagesGenerated++;
-            console.log(`   ✅ Generated: /${product.slug}/index.html`);
+            console.log(`   ✅ Generated: /${product.slug}/index.html${cSlug ? ` & /${cSlug}/${product.slug}/index.html` : ''}`);
         }
 
         console.log(`\n   📊 Generated ${pagesGenerated} product pages\n`);
@@ -609,14 +692,25 @@ async function prerender() {
             // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
             $('#app').append(comboHtml);
 
-            const outputDir = path.join(DIST_DIR, 'sales', combo.slug);
-            await ensureDir(outputDir);
+            const htmlContent = $.html();
 
-            const outputFile = path.join(outputDir, 'index.html');
-            await fs.writeFile(outputFile, $.html(), 'utf-8');
+            // 1. Combo offers path: dist/combo-offers/${combo.slug}/index.html
+            const comboOffersDir = path.join(DIST_DIR, 'combo-offers', combo.slug);
+            await ensureDir(comboOffersDir);
+            await fs.writeFile(path.join(comboOffersDir, 'index.html'), htmlContent, 'utf-8');
+
+            // 2. Root slug path: dist/${combo.slug}/index.html
+            const rootDir = path.join(DIST_DIR, combo.slug);
+            await ensureDir(rootDir);
+            await fs.writeFile(path.join(rootDir, 'index.html'), htmlContent, 'utf-8');
+
+            // 3. Legacy sales path: dist/sales/${combo.slug}/index.html
+            const salesDir = path.join(DIST_DIR, 'sales', combo.slug);
+            await ensureDir(salesDir);
+            await fs.writeFile(path.join(salesDir, 'index.html'), htmlContent, 'utf-8');
 
             comboPagesGenerated++;
-            console.log(`   ✅ Generated: /${combo.slug}/index.html`);
+            console.log(`   ✅ Generated: /combo-offers/${combo.slug}/index.html & /${combo.slug}/index.html`);
         }
 
         console.log(`\n   📊 Generated ${comboPagesGenerated} combo pages\n`);
@@ -632,12 +726,16 @@ async function prerender() {
             // Update meta tags for category
             $('title').text(`${category.title} | Telugu Delicacies`);
             $('meta[name="description"]').attr('content', `Explore our ${category.title} collection. Authentic Telugu flavors made with traditional recipes.`);
+            $('meta[property="og:type"]').attr('content', 'website');
             $('meta[property="og:title"]').attr('content', `${category.title} | Telugu Delicacies`);
+            $('meta[property="og:description"]').attr('content', `Explore our ${category.title} collection. Authentic Telugu flavors made with traditional recipes.`);
             $('meta[property="og:url"]').attr('content', `${SITE_URL}/${category.slug}`);
 
             // Add canonical
             if ($('link[rel="canonical"]').length === 0) {
                 $('head').append(`<link rel="canonical" href="${SITE_URL}/${category.slug}" />`);
+            } else {
+                $('link[rel="canonical"]').attr('href', `${SITE_URL}/${category.slug}`);
             }
 
             // Fix asset paths for category pages too
@@ -662,29 +760,75 @@ async function prerender() {
             // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
             $('#app').append(categoryHtml);
 
-            const outputDir = path.join(DIST_DIR, 'sales', category.slug);
-            await ensureDir(outputDir);
+            const htmlContent = $.html();
 
-            const outputFile = path.join(outputDir, 'index.html');
-            await fs.writeFile(outputFile, $.html(), 'utf-8');
+            // 1. Root category path: dist/${category.slug}/index.html
+            const catDir = path.join(DIST_DIR, category.slug);
+            await ensureDir(catDir);
+            await fs.writeFile(path.join(catDir, 'index.html'), htmlContent, 'utf-8');
+
+            // 2. Legacy sales path: dist/sales/${category.slug}/index.html
+            const salesDir = path.join(DIST_DIR, 'sales', category.slug);
+            await ensureDir(salesDir);
+            await fs.writeFile(path.join(salesDir, 'index.html'), htmlContent, 'utf-8');
 
             console.log(`   ✅ Generated: /${category.slug}/index.html`);
         }
 
         // Generate all-products page
-        const $ = cheerio.load(templateHtml);
-        $('title').text('All Products | Telugu Delicacies');
-        $('meta[name="description"]').attr('content', 'Browse our complete collection of authentic Telugu delicacies. Podis, chapatis, parotas and more.');
-        $('meta[property="og:title"]').attr('content', 'All Products | Telugu Delicacies');
-        $('meta[property="og:url"]').attr('content', `${SITE_URL}/all-products`);
+        const $all = cheerio.load(templateHtml);
+        $all('title').text('All Products | Telugu Delicacies');
+        $all('meta[name="description"]').attr('content', 'Browse our complete collection of authentic Telugu delicacies. Podis, chapatis, parotas and more.');
+        $all('meta[property="og:type"]').attr('content', 'website');
+        $all('meta[property="og:title"]').attr('content', 'All Products | Telugu Delicacies');
+        $all('meta[property="og:description"]').attr('content', 'Browse our complete collection of authentic Telugu delicacies. Podis, chapatis, parotas and more.');
+        $all('meta[property="og:url"]').attr('content', `${SITE_URL}/all-products`);
+
+        if ($all('link[rel="canonical"]').length === 0) {
+            $all('head').append(`<link rel="canonical" href="${SITE_URL}/all-products" />`);
+        } else {
+            $all('link[rel="canonical"]').attr('href', `${SITE_URL}/all-products`);
+        }
 
         // Fix asset paths
-        fixAssetPaths($);
+        fixAssetPaths($all);
 
-        const allProductsDir = path.join(DIST_DIR, 'sales', 'all-products');
+        // 1. Root path: dist/all-products/index.html
+        const allProductsDir = path.join(DIST_DIR, 'all-products');
         await ensureDir(allProductsDir);
-        await fs.writeFile(path.join(allProductsDir, 'index.html'), $.html(), 'utf-8');
-        console.log(`   ✅ Generated: /all-products/index.html\n`);
+        await fs.writeFile(path.join(allProductsDir, 'index.html'), $all.html(), 'utf-8');
+
+        // 2. Legacy sales path: dist/sales/all-products/index.html
+        const salesAllProductsDir = path.join(DIST_DIR, 'sales', 'all-products');
+        await ensureDir(salesAllProductsDir);
+        await fs.writeFile(path.join(salesAllProductsDir, 'index.html'), $all.html(), 'utf-8');
+        console.log(`   ✅ Generated: /all-products/index.html`);
+
+        // Generate combo-offers landing page
+        const $combos = cheerio.load(templateHtml);
+        $combos('title').text('Combo Offers & Value Packs | Telugu Delicacies');
+        $combos('meta[name="description"]').attr('content', 'Save more with authentic Telugu Delicacies combo offers and value packs.');
+        $combos('meta[property="og:type"]').attr('content', 'website');
+        $combos('meta[property="og:title"]').attr('content', 'Combo Offers & Value Packs | Telugu Delicacies');
+        $combos('meta[property="og:description"]').attr('content', 'Save more with authentic Telugu Delicacies combo offers and value packs.');
+        $combos('meta[property="og:url"]').attr('content', `${SITE_URL}/combo-offers`);
+
+        if ($combos('link[rel="canonical"]').length === 0) {
+            $combos('head').append(`<link rel="canonical" href="${SITE_URL}/combo-offers" />`);
+        } else {
+            $combos('link[rel="canonical"]').attr('href', `${SITE_URL}/combo-offers`);
+        }
+
+        fixAssetPaths($combos);
+
+        const combosDir = path.join(DIST_DIR, 'combo-offers');
+        await ensureDir(combosDir);
+        await fs.writeFile(path.join(combosDir, 'index.html'), $combos.html(), 'utf-8');
+
+        const salesCombosDir = path.join(DIST_DIR, 'sales', 'combo-offers');
+        await ensureDir(salesCombosDir);
+        await fs.writeFile(path.join(salesCombosDir, 'index.html'), $combos.html(), 'utf-8');
+        console.log(`   ✅ Generated: /combo-offers/index.html\n`);
 
         // ---------------------------------------------------------------------
         // Step 5: Generate sitemap.xml
