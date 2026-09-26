@@ -260,14 +260,14 @@ function fixAssetPaths($) {
 
 /**
  * Optimizes image URL for social media cards (1.91:1 ratio, 1200x630, <100KB)
- * If Cloudinary image, applies on-the-fly padding and auto-compression.
+ * If Cloudinary image, applies on-the-fly padding matching the border background and auto-compression.
  */
 function optimizeOgImage(imageUrl) {
     if (!imageUrl) return `${SITE_URL}/images/placeholder-product.jpg`;
 
     if (imageUrl.includes('res.cloudinary.com') && imageUrl.includes('/upload/')) {
-        if (!imageUrl.includes('b_white,c_pad,h_630,w_1200')) {
-            return imageUrl.replace('/upload/', '/upload/b_white,c_pad,h_630,w_1200,q_auto,f_jpg/');
+        if (!imageUrl.includes('c_pad,h_630,w_1200')) {
+            return imageUrl.replace('/upload/', '/upload/b_auto:border,c_pad,h_630,w_1200,q_auto,f_jpg/');
         }
     }
 
