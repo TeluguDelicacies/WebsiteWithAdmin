@@ -277,11 +277,10 @@ function optimizeOgImage(imageUrl) {
 /**
  * Injects product meta tags into HTML template using Cheerio
  */
-function injectMetaTags($, product, imageUrl, categories) {
+function injectMetaTags($, product, imageUrl, targetUrl) {
     const title = generateMetaTitle(product);
     const description = generateMetaDescription(product);
-    const cSlug = getCatSlug(product, categories);
-    const productUrl = `${SITE_URL}/${cSlug ? cSlug + "/" : ""}${product.slug}`;
+    const productUrl = targetUrl;
     const imageAlt = product.image_alt_text || `${product.product_name} - Telugu Delicacies`;
     const ogImageUrl = optimizeOgImage(imageUrl);
 
@@ -297,6 +296,18 @@ function injectMetaTags($, product, imageUrl, categories) {
     $('meta[property="og:description"]').attr('content', description);
     $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:image"]').attr('content', ogImageUrl);
+
+    if ($('meta[property="og:image:secure_url"]').length === 0) {
+        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${ogImageUrl}" />`);
+    } else {
+        $('meta[property="og:image:secure_url"]').attr('content', ogImageUrl);
+    }
+
+    if ($('meta[property="og:image:type"]').length === 0) {
+        $('meta[property="og:image"]').after(`<meta property="og:image:type" content="image/jpeg" />`);
+    } else {
+        $('meta[property="og:image:type"]').attr('content', 'image/jpeg');
+    }
 
     // Set 1.91:1 dimensions (1200x630)
     if ($('meta[property="og:image:width"]').length === 0) {
@@ -314,12 +325,6 @@ function injectMetaTags($, product, imageUrl, categories) {
         $('head').append(`<meta property="og:site_name" content="Telugu Delicacies" />`);
     } else {
         $('meta[property="og:site_name"]').attr('content', 'Telugu Delicacies');
-    }
-
-    if ($('meta[property="og:image:secure_url"]').length === 0) {
-        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${ogImageUrl}" />`);
-    } else {
-        $('meta[property="og:image:secure_url"]').attr('content', ogImageUrl);
     }
 
     // Add og:image:alt if not present
@@ -360,10 +365,10 @@ function injectMetaTags($, product, imageUrl, categories) {
 /**
  * Injects combo meta tags into HTML template
  */
-function injectComboMetaTags($, combo) {
+function injectComboMetaTags($, combo, targetUrl) {
     const title = generateComboMetaTitle(combo);
     const description = generateComboMetaDescription(combo);
-    const productUrl = `${SITE_URL}/combo-offers/${combo.slug}`;
+    const productUrl = targetUrl || `${SITE_URL}/combo-offers/${combo.slug}`;
     const rawImageUrl = combo.image_url || `${SITE_URL}/images/placeholder-combo.jpg`;
     const ogImageUrl = optimizeOgImage(rawImageUrl);
 
@@ -374,6 +379,18 @@ function injectComboMetaTags($, combo) {
     $('meta[property="og:description"]').attr('content', description);
     $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:image"]').attr('content', ogImageUrl);
+
+    if ($('meta[property="og:image:secure_url"]').length === 0) {
+        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${ogImageUrl}" />`);
+    } else {
+        $('meta[property="og:image:secure_url"]').attr('content', ogImageUrl);
+    }
+
+    if ($('meta[property="og:image:type"]').length === 0) {
+        $('meta[property="og:image"]').after(`<meta property="og:image:type" content="image/jpeg" />`);
+    } else {
+        $('meta[property="og:image:type"]').attr('content', 'image/jpeg');
+    }
 
     // Set 1.91:1 dimensions (1200x630)
     if ($('meta[property="og:image:width"]').length === 0) {
@@ -391,12 +408,6 @@ function injectComboMetaTags($, combo) {
         $('head').append(`<meta property="og:site_name" content="Telugu Delicacies" />`);
     } else {
         $('meta[property="og:site_name"]').attr('content', 'Telugu Delicacies');
-    }
-
-    if ($('meta[property="og:image:secure_url"]').length === 0) {
-        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${ogImageUrl}" />`);
-    } else {
-        $('meta[property="og:image:secure_url"]').attr('content', ogImageUrl);
     }
 
     if ($('link[rel="canonical"]').length === 0) {
@@ -632,65 +643,76 @@ async function prerender() {
                 continue;
             }
 
-            // Parse template with Cheerio
-            const $ = cheerio.load(templateHtml);
-
-            // Get product image
             const imageUrl = getProductImage(product, defaultImages);
+            const cSlug = getCatSlug(product, categories);
 
-            // Inject meta tags AND fix asset paths
-            injectMetaTags($, product, imageUrl, categories);
+            // Generator for product HTML with specified canonical/OG URL
+            const getRenderedProductHtml = (targetUrl) => {
+                const $ = cheerio.load(templateHtml);
+                injectMetaTags($, product, imageUrl, targetUrl);
 
-            // Inject Body Content for SEO (Google Indexing)
-            const productHtml = `
-                <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
-                    <nav style="margin-bottom: 20px;">
-                        <a href="/">Home</a> &gt; <a href="/all-products">Products</a> &gt; ${product.product_name}
-                    </nav>
-                    <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
-                        <div style="flex: 1; min-width: 300px;">
-                             <img src="${imageUrl}" alt="${product.product_name}" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                        </div>
-                        <div style="flex: 1.5; min-width: 300px;">
-                            <h1 style="font-size: 2.5rem; margin: 0 0 10px; color: #1e293b;">${product.product_name}</h1>
-                            ${product.product_tagline ? `<p style="font-size: 1.2rem; color: #64748b; font-style: italic; margin-bottom: 20px;">${product.product_tagline}</p>` : ''}
-                            <div style="font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 30px;">
-                                ${product.product_description || ''}
+                // Inject Body Content for SEO (Google Indexing)
+                const productHtml = `
+                    <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+                        <nav style="margin-bottom: 20px;">
+                            <a href="/">Home</a> &gt; <a href="/all-products">Products</a> &gt; ${product.product_name}
+                        </nav>
+                        <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
+                            <div style="flex: 1; min-width: 300px;">
+                                 <img src="${imageUrl}" alt="${product.product_name}" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                             </div>
-                            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <p style="font-weight: bold; margin: 0;">Order Authentic Telugu Flavors</p>
-                                <p style="margin: 5px 0 0; color: #64748b;">Available in various sizes with traditional recipes and modern hygiene.</p>
+                            <div style="flex: 1.5; min-width: 300px;">
+                                <h1 style="font-size: 2.5rem; margin: 0 0 10px; color: #1e293b;">${product.product_name}</h1>
+                                ${product.product_tagline ? `<p style="font-size: 1.2rem; color: #64748b; font-style: italic; margin-bottom: 20px;">${product.product_tagline}</p>` : ''}
+                                <div style="font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 30px;">
+                                    ${product.product_description || ''}
+                                </div>
+                                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <p style="font-weight: bold; margin: 0;">Order Authentic Telugu Flavors</p>
+                                    <p style="margin: 5px 0 0; color: #64748b;">Available in various sizes with traditional recipes and modern hygiene.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+                $('#app').append(productHtml);
+                return $.html();
+            };
 
-            // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
-            $('#app').append(productHtml);
-
-            const htmlContent = $.html();
-            const cSlug = getCatSlug(product, categories);
-
-            // 1. Root slug path: dist/${product.slug}/index.html (e.g. /koora-kaaram)
+            // 1. Root slug path: e.g. /koora-kaaram
+            // Write BOTH dist/koora-kaaram.html AND dist/koora-kaaram/index.html
+            // Having .html directly in dist ensures /koora-kaaram returns 200 OK immediately with 0 redirects!
+            const rootUrl = `${SITE_URL}/${product.slug}`;
+            const rootContent = getRenderedProductHtml(rootUrl);
+            await fs.writeFile(path.join(DIST_DIR, `${product.slug}.html`), rootContent, 'utf-8');
             const rootDir = path.join(DIST_DIR, product.slug);
             await ensureDir(rootDir);
-            await fs.writeFile(path.join(rootDir, 'index.html'), htmlContent, 'utf-8');
+            await fs.writeFile(path.join(rootDir, 'index.html'), rootContent, 'utf-8');
 
-            // 2. Category-nested path: dist/${cSlug}/${product.slug}/index.html (e.g. /ready-to-eat/koora-kaaram)
+            // 2. Category-nested path: e.g. /ready-to-eat/koora-kaaram
             if (cSlug) {
+                const catUrl = `${SITE_URL}/${cSlug}/${product.slug}`;
+                const catContent = getRenderedProductHtml(catUrl);
+                const catBaseDir = path.join(DIST_DIR, cSlug);
+                await ensureDir(catBaseDir);
+                await fs.writeFile(path.join(catBaseDir, `${product.slug}.html`), catContent, 'utf-8');
                 const catDir = path.join(DIST_DIR, cSlug, product.slug);
                 await ensureDir(catDir);
-                await fs.writeFile(path.join(catDir, 'index.html'), htmlContent, 'utf-8');
+                await fs.writeFile(path.join(catDir, 'index.html'), catContent, 'utf-8');
             }
 
-            // 3. Legacy sales path: dist/sales/${product.slug}/index.html
+            // 3. Legacy sales path: e.g. /sales/koora-kaaram
+            const salesUrl = `${SITE_URL}/sales/${product.slug}`;
+            const salesContent = getRenderedProductHtml(salesUrl);
+            const salesBaseDir = path.join(DIST_DIR, 'sales');
+            await ensureDir(salesBaseDir);
+            await fs.writeFile(path.join(salesBaseDir, `${product.slug}.html`), salesContent, 'utf-8');
             const salesDir = path.join(DIST_DIR, 'sales', product.slug);
             await ensureDir(salesDir);
-            await fs.writeFile(path.join(salesDir, 'index.html'), htmlContent, 'utf-8');
+            await fs.writeFile(path.join(salesDir, 'index.html'), salesContent, 'utf-8');
 
             pagesGenerated++;
-            console.log(`   ✅ Generated: /${product.slug}/index.html${cSlug ? ` & /${cSlug}/${product.slug}/index.html` : ''}`);
+            console.log(`   ✅ Generated: /${product.slug} & /${product.slug}/index.html${cSlug ? ` & /${cSlug}/${product.slug}` : ''}`);
         }
 
         console.log(`\n   📊 Generated ${pagesGenerated} product pages\n`);
@@ -704,55 +726,68 @@ async function prerender() {
         for (const combo of combos || []) {
             if (!combo.slug) continue;
 
-            const $ = cheerio.load(templateHtml);
-            injectComboMetaTags($, combo);
+            const getRenderedComboHtml = (targetUrl) => {
+                const $ = cheerio.load(templateHtml);
+                injectComboMetaTags($, combo, targetUrl);
 
-            // Inject Body Content for SEO (Combos)
-            const comboHtml = `
-                <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
-                    <nav style="margin-bottom: 20px;">
-                        <a href="/">Home</a> &gt; <a href="/all-products">Products</a> &gt; ${combo.name}
-                    </nav>
-                    <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
-                        <div style="flex: 1; min-width: 300px;">
-                             <img src="${combo.image_url || '/images/placeholder-combo.jpg'}" alt="${combo.name}" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                        </div>
-                        <div style="flex: 1.5; min-width: 300px;">
-                            <h1 style="font-size: 2.5rem; margin: 0 0 10px; color: #1e293b;">${combo.name}</h1>
-                            ${combo.tagline ? `<p style="font-size: 1.2rem; color: #64748b; font-style: italic; margin-bottom: 20px;">${combo.tagline}</p>` : ''}
-                            <div style="font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 30px;">
-                                ${combo.description || ''}
+                // Inject Body Content for SEO (Combos)
+                const comboHtml = `
+                    <div class="prerendered-content" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
+                        <nav style="margin-bottom: 20px;">
+                            <a href="/">Home</a> &gt; <a href="/all-products">Products</a> &gt; ${combo.name}
+                        </nav>
+                        <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: start;">
+                            <div style="flex: 1; min-width: 300px;">
+                                 <img src="${combo.image_url || '/images/placeholder-combo.jpg'}" alt="${combo.name}" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                             </div>
-                            <div style="background: #fff7ed; padding: 20px; border-radius: 8px; border: 1px solid #ffedd5;">
-                                <p style="font-weight: bold; margin: 0; color: #9a3412;">Special Combo Offer</p>
-                                <p style="margin: 5px 0 0; color: #c2410c;">Save more with our curated traditional bundles.</p>
+                            <div style="flex: 1.5; min-width: 300px;">
+                                <h1 style="font-size: 2.5rem; margin: 0 0 10px; color: #1e293b;">${combo.name}</h1>
+                                ${combo.tagline ? `<p style="font-size: 1.2rem; color: #64748b; font-style: italic; margin-bottom: 20px;">${combo.tagline}</p>` : ''}
+                                <div style="font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 30px;">
+                                    ${combo.description || ''}
+                                </div>
+                                <div style="background: #fff7ed; padding: 20px; border-radius: 8px; border: 1px solid #ffedd5;">
+                                    <p style="font-weight: bold; margin: 0; color: #9a3412;">Special Combo Offer</p>
+                                    <p style="margin: 5px 0 0; color: #c2410c;">Save more with our curated traditional bundles.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-            // Append the prerendered HTML instead of replacing (preserves the spinner for real users)
-            $('#app').append(comboHtml);
+                `;
+                $('#app').append(comboHtml);
+                return $.html();
+            };
 
-            const htmlContent = $.html();
-
-            // 1. Combo offers path: dist/combo-offers/${combo.slug}/index.html
+            // 1. Combo offers path: dist/combo-offers/${combo.slug}.html & /index.html
+            const comboOffersUrl = `${SITE_URL}/combo-offers/${combo.slug}`;
+            const comboOffersContent = getRenderedComboHtml(comboOffersUrl);
+            const comboOffersBaseDir = path.join(DIST_DIR, 'combo-offers');
+            await ensureDir(comboOffersBaseDir);
+            await fs.writeFile(path.join(comboOffersBaseDir, `${combo.slug}.html`), comboOffersContent, 'utf-8');
             const comboOffersDir = path.join(DIST_DIR, 'combo-offers', combo.slug);
             await ensureDir(comboOffersDir);
-            await fs.writeFile(path.join(comboOffersDir, 'index.html'), htmlContent, 'utf-8');
+            await fs.writeFile(path.join(comboOffersDir, 'index.html'), comboOffersContent, 'utf-8');
 
-            // 2. Root slug path: dist/${combo.slug}/index.html
+            // 2. Root slug path: dist/${combo.slug}.html & /index.html
+            const rootComboUrl = `${SITE_URL}/${combo.slug}`;
+            const rootComboContent = getRenderedComboHtml(rootComboUrl);
+            await fs.writeFile(path.join(DIST_DIR, `${combo.slug}.html`), rootComboContent, 'utf-8');
             const rootDir = path.join(DIST_DIR, combo.slug);
             await ensureDir(rootDir);
-            await fs.writeFile(path.join(rootDir, 'index.html'), htmlContent, 'utf-8');
+            await fs.writeFile(path.join(rootDir, 'index.html'), rootComboContent, 'utf-8');
 
-            // 3. Legacy sales path: dist/sales/${combo.slug}/index.html
+            // 3. Legacy sales path: dist/sales/${combo.slug}.html & /index.html
+            const salesComboUrl = `${SITE_URL}/sales/${combo.slug}`;
+            const salesComboContent = getRenderedComboHtml(salesComboUrl);
+            const salesBaseDir = path.join(DIST_DIR, 'sales');
+            await ensureDir(salesBaseDir);
+            await fs.writeFile(path.join(salesBaseDir, `${combo.slug}.html`), salesComboContent, 'utf-8');
             const salesDir = path.join(DIST_DIR, 'sales', combo.slug);
             await ensureDir(salesDir);
-            await fs.writeFile(path.join(salesDir, 'index.html'), htmlContent, 'utf-8');
+            await fs.writeFile(path.join(salesDir, 'index.html'), salesComboContent, 'utf-8');
 
             comboPagesGenerated++;
-            console.log(`   ✅ Generated: /combo-offers/${combo.slug}/index.html & /${combo.slug}/index.html`);
+            console.log(`   ✅ Generated: /combo-offers/${combo.slug} & /${combo.slug}`);
         }
 
         console.log(`\n   📊 Generated ${comboPagesGenerated} combo pages\n`);
@@ -766,18 +801,19 @@ async function prerender() {
             const $ = cheerio.load(templateHtml);
 
             // Update meta tags for category
+            const catUrl = `${SITE_URL}/${category.slug}`;
             $('title').text(`${category.title} | Telugu Delicacies`);
             $('meta[name="description"]').attr('content', `Explore our ${category.title} collection. Authentic Telugu flavors made with traditional recipes.`);
             $('meta[property="og:type"]').attr('content', 'website');
             $('meta[property="og:title"]').attr('content', `${category.title} | Telugu Delicacies`);
             $('meta[property="og:description"]').attr('content', `Explore our ${category.title} collection. Authentic Telugu flavors made with traditional recipes.`);
-            $('meta[property="og:url"]').attr('content', `${SITE_URL}/${category.slug}`);
+            $('meta[property="og:url"]').attr('content', catUrl);
 
             // Add canonical
             if ($('link[rel="canonical"]').length === 0) {
-                $('head').append(`<link rel="canonical" href="${SITE_URL}/${category.slug}" />`);
+                $('head').append(`<link rel="canonical" href="${catUrl}" />`);
             } else {
-                $('link[rel="canonical"]').attr('href', `${SITE_URL}/${category.slug}`);
+                $('link[rel="canonical"]').attr('href', catUrl);
             }
 
             // Fix asset paths for category pages too
@@ -804,17 +840,21 @@ async function prerender() {
 
             const htmlContent = $.html();
 
-            // 1. Root category path: dist/${category.slug}/index.html
+            // 1. Root category path: dist/${category.slug}.html & dist/${category.slug}/index.html
+            await fs.writeFile(path.join(DIST_DIR, `${category.slug}.html`), htmlContent, 'utf-8');
             const catDir = path.join(DIST_DIR, category.slug);
             await ensureDir(catDir);
             await fs.writeFile(path.join(catDir, 'index.html'), htmlContent, 'utf-8');
 
-            // 2. Legacy sales path: dist/sales/${category.slug}/index.html
+            // 2. Legacy sales path: dist/sales/${category.slug}.html & dist/sales/${category.slug}/index.html
+            const salesBaseDir = path.join(DIST_DIR, 'sales');
+            await ensureDir(salesBaseDir);
+            await fs.writeFile(path.join(salesBaseDir, `${category.slug}.html`), htmlContent, 'utf-8');
             const salesDir = path.join(DIST_DIR, 'sales', category.slug);
             await ensureDir(salesDir);
             await fs.writeFile(path.join(salesDir, 'index.html'), htmlContent, 'utf-8');
 
-            console.log(`   ✅ Generated: /${category.slug}/index.html`);
+            console.log(`   ✅ Generated: /${category.slug}`);
         }
 
         // Generate all-products page
@@ -835,16 +875,20 @@ async function prerender() {
         // Fix asset paths
         fixAssetPaths($all);
 
-        // 1. Root path: dist/all-products/index.html
+        // 1. Root path: dist/all-products.html & dist/all-products/index.html
+        await fs.writeFile(path.join(DIST_DIR, 'all-products.html'), $all.html(), 'utf-8');
         const allProductsDir = path.join(DIST_DIR, 'all-products');
         await ensureDir(allProductsDir);
         await fs.writeFile(path.join(allProductsDir, 'index.html'), $all.html(), 'utf-8');
 
-        // 2. Legacy sales path: dist/sales/all-products/index.html
+        // 2. Legacy sales path: dist/sales/all-products.html & dist/sales/all-products/index.html
+        const salesAllBaseDir = path.join(DIST_DIR, 'sales');
+        await ensureDir(salesAllBaseDir);
+        await fs.writeFile(path.join(salesAllBaseDir, 'all-products.html'), $all.html(), 'utf-8');
         const salesAllProductsDir = path.join(DIST_DIR, 'sales', 'all-products');
         await ensureDir(salesAllProductsDir);
         await fs.writeFile(path.join(salesAllProductsDir, 'index.html'), $all.html(), 'utf-8');
-        console.log(`   ✅ Generated: /all-products/index.html`);
+        console.log(`   ✅ Generated: /all-products`);
 
         // Generate combo-offers landing page
         const $combos = cheerio.load(templateHtml);
@@ -863,14 +907,16 @@ async function prerender() {
 
         fixAssetPaths($combos);
 
+        await fs.writeFile(path.join(DIST_DIR, 'combo-offers.html'), $combos.html(), 'utf-8');
         const combosDir = path.join(DIST_DIR, 'combo-offers');
         await ensureDir(combosDir);
         await fs.writeFile(path.join(combosDir, 'index.html'), $combos.html(), 'utf-8');
 
+        await fs.writeFile(path.join(salesAllBaseDir, 'combo-offers.html'), $combos.html(), 'utf-8');
         const salesCombosDir = path.join(DIST_DIR, 'sales', 'combo-offers');
         await ensureDir(salesCombosDir);
         await fs.writeFile(path.join(salesCombosDir, 'index.html'), $combos.html(), 'utf-8');
-        console.log(`   ✅ Generated: /combo-offers/index.html\n`);
+        console.log(`   ✅ Generated: /combo-offers\n`);
 
         // ---------------------------------------------------------------------
         // Step 5: Generate sitemap.xml
