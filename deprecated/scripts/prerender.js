@@ -259,6 +259,22 @@ function fixAssetPaths($) {
 }
 
 /**
+ * Optimizes image URL for social media cards (1.91:1 ratio, 1200x630, <100KB)
+ * If Cloudinary image, applies on-the-fly padding and auto-compression.
+ */
+function optimizeOgImage(imageUrl) {
+    if (!imageUrl) return `${SITE_URL}/images/placeholder-product.jpg`;
+
+    if (imageUrl.includes('res.cloudinary.com') && imageUrl.includes('/upload/')) {
+        if (!imageUrl.includes('b_white,c_pad,h_630,w_1200')) {
+            return imageUrl.replace('/upload/', '/upload/b_white,c_pad,h_630,w_1200,q_auto,f_jpg/');
+        }
+    }
+
+    return imageUrl;
+}
+
+/**
  * Injects product meta tags into HTML template using Cheerio
  */
 function injectMetaTags($, product, imageUrl, categories) {
@@ -267,6 +283,7 @@ function injectMetaTags($, product, imageUrl, categories) {
     const cSlug = getCatSlug(product, categories);
     const productUrl = `${SITE_URL}/${cSlug ? cSlug + "/" : ""}${product.slug}`;
     const imageAlt = product.image_alt_text || `${product.product_name} - Telugu Delicacies`;
+    const ogImageUrl = optimizeOgImage(imageUrl);
 
     // Update <title>
     $('title').text(title);
@@ -279,7 +296,19 @@ function injectMetaTags($, product, imageUrl, categories) {
     $('meta[property="og:title"]').attr('content', title);
     $('meta[property="og:description"]').attr('content', description);
     $('meta[property="og:url"]').attr('content', productUrl);
-    $('meta[property="og:image"]').attr('content', imageUrl);
+    $('meta[property="og:image"]').attr('content', ogImageUrl);
+
+    // Set 1.91:1 dimensions (1200x630)
+    if ($('meta[property="og:image:width"]').length === 0) {
+        $('head').append(`<meta property="og:image:width" content="1200" />`);
+    } else {
+        $('meta[property="og:image:width"]').attr('content', '1200');
+    }
+    if ($('meta[property="og:image:height"]').length === 0) {
+        $('head').append(`<meta property="og:image:height" content="630" />`);
+    } else {
+        $('meta[property="og:image:height"]').attr('content', '630');
+    }
 
     if ($('meta[property="og:site_name"]').length === 0) {
         $('head').append(`<meta property="og:site_name" content="Telugu Delicacies" />`);
@@ -288,9 +317,9 @@ function injectMetaTags($, product, imageUrl, categories) {
     }
 
     if ($('meta[property="og:image:secure_url"]').length === 0) {
-        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${imageUrl}" />`);
+        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${ogImageUrl}" />`);
     } else {
-        $('meta[property="og:image:secure_url"]').attr('content', imageUrl);
+        $('meta[property="og:image:secure_url"]').attr('content', ogImageUrl);
     }
 
     // Add og:image:alt if not present
@@ -313,13 +342,13 @@ function injectMetaTags($, product, imageUrl, categories) {
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content="${title}" />
             <meta name="twitter:description" content="${description}" />
-            <meta name="twitter:image" content="${imageUrl}" />
+            <meta name="twitter:image" content="${ogImageUrl}" />
         `);
     } else {
         $('meta[name="twitter:card"]').attr('content', 'summary_large_image');
         $('meta[name="twitter:title"]').attr('content', title);
         $('meta[name="twitter:description"]').attr('content', description);
-        $('meta[name="twitter:image"]').attr('content', imageUrl);
+        $('meta[name="twitter:image"]').attr('content', ogImageUrl);
     }
 
     // FIX BROKEN ASSET PATHS - Critical for nested directories
@@ -335,7 +364,8 @@ function injectComboMetaTags($, combo) {
     const title = generateComboMetaTitle(combo);
     const description = generateComboMetaDescription(combo);
     const productUrl = `${SITE_URL}/combo-offers/${combo.slug}`;
-    const imageUrl = combo.image_url || `${SITE_URL}/images/placeholder-combo.jpg`;
+    const rawImageUrl = combo.image_url || `${SITE_URL}/images/placeholder-combo.jpg`;
+    const ogImageUrl = optimizeOgImage(rawImageUrl);
 
     $('title').text(title);
     $('meta[name="description"]').attr('content', description);
@@ -343,7 +373,19 @@ function injectComboMetaTags($, combo) {
     $('meta[property="og:title"]').attr('content', title);
     $('meta[property="og:description"]').attr('content', description);
     $('meta[property="og:url"]').attr('content', productUrl);
-    $('meta[property="og:image"]').attr('content', imageUrl);
+    $('meta[property="og:image"]').attr('content', ogImageUrl);
+
+    // Set 1.91:1 dimensions (1200x630)
+    if ($('meta[property="og:image:width"]').length === 0) {
+        $('head').append(`<meta property="og:image:width" content="1200" />`);
+    } else {
+        $('meta[property="og:image:width"]').attr('content', '1200');
+    }
+    if ($('meta[property="og:image:height"]').length === 0) {
+        $('head').append(`<meta property="og:image:height" content="630" />`);
+    } else {
+        $('meta[property="og:image:height"]').attr('content', '630');
+    }
 
     if ($('meta[property="og:site_name"]').length === 0) {
         $('head').append(`<meta property="og:site_name" content="Telugu Delicacies" />`);
@@ -352,9 +394,9 @@ function injectComboMetaTags($, combo) {
     }
 
     if ($('meta[property="og:image:secure_url"]').length === 0) {
-        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${imageUrl}" />`);
+        $('meta[property="og:image"]').after(`<meta property="og:image:secure_url" content="${ogImageUrl}" />`);
     } else {
-        $('meta[property="og:image:secure_url"]').attr('content', imageUrl);
+        $('meta[property="og:image:secure_url"]').attr('content', ogImageUrl);
     }
 
     if ($('link[rel="canonical"]').length === 0) {
@@ -368,13 +410,13 @@ function injectComboMetaTags($, combo) {
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content="${title}" />
             <meta name="twitter:description" content="${description}" />
-            <meta name="twitter:image" content="${imageUrl}" />
+            <meta name="twitter:image" content="${ogImageUrl}" />
         `);
     } else {
         $('meta[name="twitter:card"]').attr('content', 'summary_large_image');
         $('meta[name="twitter:title"]').attr('content', title);
         $('meta[name="twitter:description"]').attr('content', description);
-        $('meta[name="twitter:image"]').attr('content', imageUrl);
+        $('meta[name="twitter:image"]').attr('content', ogImageUrl);
     }
 
     fixAssetPaths($);
