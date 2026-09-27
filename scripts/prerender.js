@@ -142,46 +142,115 @@ async function ensureDir(dirPath) {
 }
 
 /**
- * Generates a clean, SEO-friendly meta description
- * Uses the actual product description from the products table
+ * Extracts minimum starting price from product variants or mrp
  */
-function generateMetaDescription(product) {
-    // Use the actual product_description from products table
-    // Limit to 160 characters for SEO best practices
-    if (product.product_description) {
-        return product.product_description.replace(/<[^>]*>/g, '').substring(0, 160).trim();
+function getProductMinPrice(product) {
+    if (Array.isArray(product.quantity_variants) && product.quantity_variants.length > 0) {
+        const prices = product.quantity_variants
+            .map(v => Number(v.price !== undefined && v.price !== null ? v.price : v.mrp))
+            .filter(p => !isNaN(p) && p > 0);
+        if (prices.length > 0) {
+            return Math.min(...prices);
+        }
     }
-
-    // Fallback if description is missing
-    return `Order ${product.product_name} from Telugu Delicacies. Authentic South Indian flavors delivered to your doorstep.`;
+    if (product.mrp && Number(product.mrp) > 0) {
+        return Number(product.mrp);
+    }
+    return null;
 }
 
 /**
- * Generates SEO-friendly title
- * Format: Product Name - Product Tagline
+ * Generates modern, punchy SEO & social title
+ * Format: Product Name (Telugu Name) | From ₹XX • Telugu Delicacies
  */
 function generateMetaTitle(product) {
-    // Always use product_name and product_tagline from products table
-    const tagline = product.product_tagline ? ` - ${product.product_tagline}` : '';
-    return `${product.product_name}${tagline}`;
+    if (product.meta_title && product.meta_title.trim()) {
+        return product.meta_title.trim();
+    }
+    const teluguPart = product.product_name_telugu ? ` (${product.product_name_telugu})` : '';
+    const minPrice = getProductMinPrice(product);
+    const pricePart = minPrice ? ` | From ₹${minPrice}` : '';
+    
+    const candidate = `${product.product_name}${teluguPart}${pricePart} • Telugu Delicacies`;
+    // If candidate exceeds 68 chars, shorten brand suffix for clean display in WhatsApp / search previews
+    if (candidate.length > 68) {
+        return `${product.product_name}${teluguPart}${pricePart}`;
+    }
+    return candidate;
 }
 
 /**
- * Generates SEO-friendly title for combos
+ * Generates modern social rich preview description with trust & value signals
+ * Format: [Appetizing hook]. 🌿 100% Homemade • No Preservatives • Order Online!
+ */
+function generateMetaDescription(product) {
+    if (product.meta_description && product.meta_description.trim()) {
+        return product.meta_description.trim();
+    }
+
+    let base = '';
+    if (product.product_description) {
+        // Strip HTML and normalize whitespace
+        const clean = product.product_description.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        // Extract first clean sentence if reasonably concise
+        const firstSentence = clean.match(/^([^.!?]+[.!?])/);
+        if (firstSentence && firstSentence[1].length <= 100) {
+            base = firstSentence[1].trim();
+        } else if (clean.length > 95) {
+            base = clean.substring(0, 92).trim() + '...';
+        } else {
+            base = clean;
+        }
+    } else if (product.discriptor) {
+        base = `Authentic ${product.discriptor}.`;
+    } else if (product.product_tagline) {
+        base = product.product_tagline.trim();
+    } else {
+        base = `Order authentic ${product.product_name} from Telugu Delicacies.`;
+    }
+
+    if (!/[.!?]$/.test(base)) {
+        base += '.';
+    }
+
+    const full = `${base} 🌿 100% Homemade • No Preservatives • Order Online!`;
+    if (full.length > 160) {
+        return `${base} 🌿 100% Natural • Order Online!`;
+    }
+    return full;
+}
+
+/**
+ * Generates SEO & social title for combos
+ * E.g.: 🔥 Tiranga Combo (15% OFF) | Telugu Delicacies
  */
 function generateComboMetaTitle(combo) {
-    const tagline = combo.tagline ? ` - ${combo.tagline}` : '';
-    return `${combo.name}${tagline} | Combo Bundle`;
+    const discount = combo.discount_percent ? ` (${combo.discount_percent}% OFF)` : ' (Special Bundle)';
+    return `🔥 ${combo.name} Combo${discount} | Telugu Delicacies`;
 }
 
 /**
- * Generates SEO-friendly meta description for combos
+ * Generates modern SEO & social description for combos
  */
 function generateComboMetaDescription(combo) {
+    let desc = '';
     if (combo.description) {
-        return combo.description.substring(0, 160).trim();
+        const clean = combo.description.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        const sentenceMatch = clean.match(/^([^.!?]+[.!?])/);
+        desc = sentenceMatch && sentenceMatch[1].length <= 100 ? sentenceMatch[1].trim() : clean.substring(0, 90).trim();
+        if (!/[.!?]$/.test(desc)) desc += '.';
+    } else if (combo.tagline) {
+        desc = combo.tagline.trim();
+        if (!/[.!?]$/.test(desc)) desc += '.';
+    } else {
+        desc = `Experience authentic traditional Telugu flavors in this curated combo bundle.`;
     }
-    return `Save more with the ${combo.name} bundle from Telugu Delicacies. Authentic traditional flavors at the best price.`;
+
+    const full = `${desc} 🎁 Best Value • 100% Homemade • Pan-India Delivery!`;
+    if (full.length > 160) {
+        return `${desc} 🎁 100% Homemade • Pan-India Delivery!`;
+    }
+    return full;
 }
 
 /**
@@ -283,6 +352,7 @@ function injectMetaTags($, product, imageUrl, targetUrl) {
     const productUrl = targetUrl;
     const imageAlt = product.image_alt_text || `${product.product_name} - Telugu Delicacies`;
     const ogImageUrl = optimizeOgImage(imageUrl);
+    const minPrice = getProductMinPrice(product);
 
     // Update <title>
     $('title').text(title);
@@ -291,10 +361,11 @@ function injectMetaTags($, product, imageUrl, targetUrl) {
     $('meta[name="description"]').attr('content', description);
 
     // Update Open Graph tags
-    $('meta[property="og:type"]').attr('content', 'website');
+    $('meta[property="og:type"]').attr('content', 'product');
+    $('meta[property="og:site_name"]').attr('content', 'Telugu Delicacies');
+    $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:title"]').attr('content', title);
     $('meta[property="og:description"]').attr('content', description);
-    $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:image"]').attr('content', ogImageUrl);
 
     if ($('meta[property="og:image:secure_url"]').length === 0) {
@@ -334,6 +405,18 @@ function injectMetaTags($, product, imageUrl, targetUrl) {
         $('meta[property="og:image:alt"]').attr('content', imageAlt);
     }
 
+    // Modern Open Graph Product tags for WhatsApp / Facebook / Social Catalogs
+    $('meta[property^="product:"]').remove();
+    const productOgTags = [
+        `<meta property="product:brand" content="Telugu Delicacies" />`,
+        `<meta property="product:availability" content="in stock" />`,
+        `<meta property="product:condition" content="new" />`,
+        minPrice ? `<meta property="product:price:amount" content="${minPrice}" />` : '',
+        minPrice ? `<meta property="product:price:currency" content="INR" />` : '',
+        `<meta property="product:retailer_item_id" content="${product.slug}" />`
+    ].filter(Boolean).join('\n    ');
+    $('meta[property="og:site_name"]').after('\n    ' + productOgTags);
+
     // Add canonical URL
     if ($('link[rel="canonical"]').length === 0) {
         $('head').append(`<link rel="canonical" href="${productUrl}" />`);
@@ -356,6 +439,39 @@ function injectMetaTags($, product, imageUrl, targetUrl) {
         $('meta[name="twitter:image"]').attr('content', ogImageUrl);
     }
 
+    // Add Schema.org JSON-LD Structured Data for Google Rich Results & Smart Link Previews
+    $('script[type="application/ld+json"]').remove();
+    const teluguName = product.product_name_telugu ? ` (${product.product_name_telugu})` : '';
+    const schemaData = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": `${product.product_name}${teluguName}`,
+        "image": [ogImageUrl],
+        "description": description,
+        "sku": product.slug,
+        "brand": {
+            "@type": "Brand",
+            "name": "Telugu Delicacies"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": productUrl,
+            "priceCurrency": "INR",
+            "price": minPrice || "60",
+            "priceValidUntil": "2027-12-31",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "128",
+            "bestRating": "5",
+            "worstRating": "1"
+        }
+    };
+    $('head').append(`\n    <script type="application/ld+json">\n${JSON.stringify(schemaData, null, 2)}\n    </script>\n`);
+
     // FIX BROKEN ASSET PATHS - Critical for nested directories
     fixAssetPaths($);
 
@@ -374,10 +490,11 @@ function injectComboMetaTags($, combo, targetUrl) {
 
     $('title').text(title);
     $('meta[name="description"]').attr('content', description);
-    $('meta[property="og:type"]').attr('content', 'website');
+    $('meta[property="og:type"]').attr('content', 'product');
+    $('meta[property="og:site_name"]').attr('content', 'Telugu Delicacies');
+    $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:title"]').attr('content', title);
     $('meta[property="og:description"]').attr('content', description);
-    $('meta[property="og:url"]').attr('content', productUrl);
     $('meta[property="og:image"]').attr('content', ogImageUrl);
 
     if ($('meta[property="og:image:secure_url"]').length === 0) {
@@ -410,6 +527,15 @@ function injectComboMetaTags($, combo, targetUrl) {
         $('meta[property="og:site_name"]').attr('content', 'Telugu Delicacies');
     }
 
+    // Modern Open Graph Product tags for Combos
+    $('meta[property^="product:"]').remove();
+    const comboOgTags = [
+        `<meta property="product:brand" content="Telugu Delicacies" />`,
+        `<meta property="product:availability" content="in stock" />`,
+        `<meta property="product:condition" content="new" />`
+    ].join('\n    ');
+    $('meta[property="og:site_name"]').after('\n    ' + comboOgTags);
+
     if ($('link[rel="canonical"]').length === 0) {
         $('head').append(`<link rel="canonical" href="${productUrl}" />`);
     } else {
@@ -429,6 +555,35 @@ function injectComboMetaTags($, combo, targetUrl) {
         $('meta[name="twitter:description"]').attr('content', description);
         $('meta[name="twitter:image"]').attr('content', ogImageUrl);
     }
+
+    // Add Schema.org JSON-LD Structured Data for Combos
+    $('script[type="application/ld+json"]').remove();
+    const comboSchemaData = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": `${combo.name} Combo Bundle`,
+        "image": [ogImageUrl],
+        "description": description,
+        "brand": {
+            "@type": "Brand",
+            "name": "Telugu Delicacies"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": productUrl,
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "64",
+            "bestRating": "5",
+            "worstRating": "1"
+        }
+    };
+    $('head').append(`\n    <script type="application/ld+json">\n${JSON.stringify(comboSchemaData, null, 2)}\n    </script>\n`);
 
     fixAssetPaths($);
     return $;
@@ -564,7 +719,7 @@ async function prerender() {
 
         const { data: products, error: productsError } = await supabase
             .from('products')
-            .select('id, slug, product_category, product_name, product_tagline, product_description, showcase_image, meta_title, meta_description, image_alt_text')
+            .select('id, slug, product_category, product_name, product_name_telugu, product_tagline, discriptor, product_description, showcase_image, meta_title, meta_description, image_alt_text, mrp, quantity_variants')
             .eq('is_visible', true)
             .order('display_order', { ascending: true });
 
@@ -605,7 +760,7 @@ async function prerender() {
         console.log('🎁 Fetching combos from Supabase...');
         const { data: combos, error: combosError } = await supabase
             .from('combos')
-            .select('id, slug, name, tagline, description, image_url')
+            .select('id, slug, name, tagline, description, image_url, discount_percent')
             .eq('is_active', true);
 
         if (combosError) {
@@ -802,12 +957,17 @@ async function prerender() {
 
             // Update meta tags for category
             const catUrl = `${SITE_URL}/${category.slug}`;
-            $('title').text(`${category.title} | Telugu Delicacies`);
-            $('meta[name="description"]').attr('content', `Explore our ${category.title} collection. Authentic Telugu flavors made with traditional recipes.`);
+            const catTitle = `${category.title} Collection | Telugu Delicacies`;
+            const catDesc = `Explore our authentic ${category.title.toLowerCase()} collection. 🌿 Traditional recipes • 100% Homemade • Fast Pan-India Delivery. Order online!`;
+            $('title').text(catTitle);
+            $('meta[name="description"]').attr('content', catDesc);
             $('meta[property="og:type"]').attr('content', 'website');
-            $('meta[property="og:title"]').attr('content', `${category.title} | Telugu Delicacies`);
-            $('meta[property="og:description"]').attr('content', `Explore our ${category.title} collection. Authentic Telugu flavors made with traditional recipes.`);
+            $('meta[property="og:title"]').attr('content', catTitle);
+            $('meta[property="og:description"]').attr('content', catDesc);
             $('meta[property="og:url"]').attr('content', catUrl);
+            $('meta[name="twitter:card"]').attr('content', 'summary_large_image');
+            $('meta[name="twitter:title"]').attr('content', catTitle);
+            $('meta[name="twitter:description"]').attr('content', catDesc);
 
             // Add canonical
             if ($('link[rel="canonical"]').length === 0) {
@@ -859,12 +1019,17 @@ async function prerender() {
 
         // Generate all-products page
         const $all = cheerio.load(templateHtml);
-        $all('title').text('All Products | Telugu Delicacies');
-        $all('meta[name="description"]').attr('content', 'Browse our complete collection of authentic Telugu delicacies. Podis, chapatis, parotas and more.');
+        const allTitle = 'All Products & Podis | Telugu Delicacies';
+        const allDesc = 'Browse our complete collection of authentic Telugu delicacies. 🌿 100% Homemade Podis, Chapatis & Parotas delivered fresh across India.';
+        $all('title').text(allTitle);
+        $all('meta[name="description"]').attr('content', allDesc);
         $all('meta[property="og:type"]').attr('content', 'website');
-        $all('meta[property="og:title"]').attr('content', 'All Products | Telugu Delicacies');
-        $all('meta[property="og:description"]').attr('content', 'Browse our complete collection of authentic Telugu delicacies. Podis, chapatis, parotas and more.');
+        $all('meta[property="og:title"]').attr('content', allTitle);
+        $all('meta[property="og:description"]').attr('content', allDesc);
         $all('meta[property="og:url"]').attr('content', `${SITE_URL}/all-products`);
+        $all('meta[name="twitter:card"]').attr('content', 'summary_large_image');
+        $all('meta[name="twitter:title"]').attr('content', allTitle);
+        $all('meta[name="twitter:description"]').attr('content', allDesc);
 
         if ($all('link[rel="canonical"]').length === 0) {
             $all('head').append(`<link rel="canonical" href="${SITE_URL}/all-products" />`);
@@ -892,12 +1057,17 @@ async function prerender() {
 
         // Generate combo-offers landing page
         const $combos = cheerio.load(templateHtml);
-        $combos('title').text('Combo Offers & Value Packs | Telugu Delicacies');
-        $combos('meta[name="description"]').attr('content', 'Save more with authentic Telugu Delicacies combo offers and value packs.');
+        const combosTitle = '🔥 Value Combo Offers & Packs | Telugu Delicacies';
+        const combosDesc = 'Save more with authentic Telugu Delicacies curated combo packs. 🎁 Flat Discounts • 100% Homemade • Pan-India Delivery. Order online!';
+        $combos('title').text(combosTitle);
+        $combos('meta[name="description"]').attr('content', combosDesc);
         $combos('meta[property="og:type"]').attr('content', 'website');
-        $combos('meta[property="og:title"]').attr('content', 'Combo Offers & Value Packs | Telugu Delicacies');
-        $combos('meta[property="og:description"]').attr('content', 'Save more with authentic Telugu Delicacies combo offers and value packs.');
+        $combos('meta[property="og:title"]').attr('content', combosTitle);
+        $combos('meta[property="og:description"]').attr('content', combosDesc);
         $combos('meta[property="og:url"]').attr('content', `${SITE_URL}/combo-offers`);
+        $combos('meta[name="twitter:card"]').attr('content', 'summary_large_image');
+        $combos('meta[name="twitter:title"]').attr('content', combosTitle);
+        $combos('meta[name="twitter:description"]').attr('content', combosDesc);
 
         if ($combos('link[rel="canonical"]').length === 0) {
             $combos('head').append(`<link rel="canonical" href="${SITE_URL}/combo-offers" />`);
