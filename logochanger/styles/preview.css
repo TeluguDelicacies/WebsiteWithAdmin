@@ -1,0 +1,188 @@
+/* Preview Canvas Area */
+.preview-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #080b12;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Floating Stage Toolbar (Zoom, Center, Pan, Grid toggle) */
+.stage-toolbar {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 30;
+}
+
+.stage-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.stage-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.stage-btn.active {
+  color: var(--accent-gold);
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid var(--border-accent);
+}
+
+.stage-zoom-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 48px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stage Bottom Info Pill */
+.stage-info-pill {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  z-index: 30;
+}
+
+.stage-info-pill span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stage-info-pill strong {
+  color: var(--text-secondary);
+}
+
+/* The Viewport Container */
+.viewport-wrapper {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.viewport-wrapper.panning {
+  cursor: grabbing;
+}
+
+/* Checkerboard Background for Transparency */
+.canvas-checkerboard {
+  background-color: #121722;
+  background-image: 
+    linear-gradient(45deg, #182030 25%, transparent 25%), 
+    linear-gradient(-45deg, #182030 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #182030 75%), 
+    linear-gradient(-45deg, transparent 75%, #182030 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Main Artboard Canvas Box */
+.artboard-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.05s linear;
+  transform-origin: center center;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+}
+
+/* Boundary Box and Dimension Tag */
+.artboard-box::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* SVG Rendering Container */
+#logoRendererSvg {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.35));
+  transition: filter var(--transition-base);
+}
+
+/* Loading Overlay */
+.stage-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(12px);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.stage-loader.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(245, 158, 11, 0.2);
+  border-top-color: var(--accent-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

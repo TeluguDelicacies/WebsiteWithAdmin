@@ -1,41 +1,55 @@
-# Telugu Delicacies Logo Customizer
+# Logo Studio Pro (Telugu Delicacies)
 
-A powerful, responsive web application for customizing brand logos under the "Telugu Delicacies" umbrella. This tool allows for real-time manipulation of logo colors, strokes, and dimensions, with high-quality export options for both web and print use.
+A modern, high-performance vector logo customizer, mockup studio, and multi-format HD export suite built completely from scratch using Vanilla JS (ES Modules) and modern CSS.
+
+## Architecture
+
+```
+logochanger/
+├── index.html                 # Slim, semantic entry point (HTML5)
+├── README.md                  # System documentation
+├── logos/                     # Standalone vector SVG brandmarks
+│   ├── td.svg                 # Telugu Delicacies primary mark
+│   ├── akshaya.svg            # Akshaya Sweets & Savouries
+│   ├── tasty.svg              # Tasty Pinch
+│   └── teepi.svg              # Teepi Gurthu
+├── styles/                    # Modern modular CSS design system
+│   ├── variables.css          # Design tokens (colors, radii, elevations)
+│   ├── base.css               # Reset, typography, app container
+│   ├── preview.css            # Interactive viewport, checkerboard, zoom
+│   ├── controls.css           # Sidebar panels, color pickers, range sliders
+│   ├── effects.css            # 3D tilt, neon glow, gold sheen, emboss
+│   ├── portal.css             # Realistic packaging environments
+│   ├── export.css             # Multi-DPI export options & toasts
+│   ├── components.css         # Badges, tooltips, switch toggles
+│   └── main.css               # CSS aggregator
+└── js/                        # ES Modules logic
+    ├── config.js              # Logo metadata, palette presets & portal configs
+    ├── state.js               # Reactive state manager with undo/redo
+    ├── utils.js               # Color convertors, download triggers & DOM helpers
+    ├── svg-parser.js          # SVG auto-layer parser for custom uploads
+    ├── logo-loader.js         # SVG loader with offline fallback
+    ├── styles-applier.js      # Color overrides & vector transform engine
+    ├── effects.js             # Visual effects controller
+    ├── portal.js              # Packaging environment controller
+    ├── controls.js            # Sidebar UI generator & interaction binder
+    ├── export.js              # Multi-resolution rasterizer & clipboard engine
+    └── app.js                 # Central orchestrator & keyboard shortcuts
+```
 
 ## Features
 
-### 🎨 Customization
-- **Multi-Brand Support**: Customize logos for:
-  - **Akshaya**
-  - **Tasty Pinch**
-  - **Teepi Gurthu**
-  - **Telugu Delicacies**
-- **Fine-Grained Control**: Adjust fill colors, stroke colors, and stroke widths for individual logo elements.
-- **Smart Tools**:
-  - **Randomize**: Generate aesthetically pleasing color combinations instantly.
-  - **Complementary Colors**: Get automatic suggestions for matching colors.
-  - **History**: Undo/Redo support to experiment without fear.
-  - **Reset**: Quickly return to brand default colors.
-
-### 📱 Responsive Design
-- **Mobile-First Experience**: Optimized touch controls, stacked layouts, and preventative scroll locking for a native app feel on mobile devices.
-- **Desktop Workflow**: Square preview area, organized 2x2 control grid, and sticky layouts for efficient editing on larger screens.
-
-### 💾 Export Options
-- **HD PNG Export**: Download high-resolution PNGs with selectable scale factors (1x up to 6x) for crisp quality on any display.
-- **SVG Export**: Get scalable vector graphics for professional use and infinite resizing.
-
-## Usage
-
-1. **Select a Brand**: Choose a logo from the top dropdown menu.
-2. **Modify**: Use the color pickers to change fills and strokes. Adjust stroke width using the +/- stepper buttons.
-3. **Preview**: See changes instantly in the preview pane.
-4. **Download**:
-   - Click **Save PNG** for a standard web-ready image.
-   - Select a scale (e.g., 4x) and click **Download HD PNG** for high-quality print versions.
-   - Click **Save SVG** for the vector source file.
-
-## Tech Stack
-- HTML5, CSS3 (Custom Variables & Grid/Flexbox), Vanilla JavaScript.
-- No external frameworks - lightweight and fast.
-- Uses `localStorage` to save your preferences automatically.
+- **Brandmark Library**: Built-in support for Telugu Delicacies, Akshaya Sweets, Tasty Pinch, and Teepi Gurthu.
+- **Custom SVG Upload**: Drag-and-drop any custom SVG vector file with automatic color layer detection.
+- **Curated Palette Presets**: Instant one-click color themes (Classic Heritage, Royal Gold, Emerald & Saffron, Neon, etc.).
+- **Vector Transformations**: Real-time scale (20% to 250%), 360° rotation, opacity control, and horizontal/vertical flips.
+- **Visual Effects**: 3D tilt perspective, ambient neon glow, drop shadows, metallic gold sheen, and soft emboss.
+- **Packaging Mockups**: Preview logos directly on luxury dark sweet boxes, golden gift tins, kraft pouches, and white cards.
+- **Ultra HD Export**:
+  - Pure Vector SVG download
+  - PNG with alpha transparency at 1x, 2x (Retina HD), 4x (Print 300DPI), and 8x (Studio 600DPI)
+  - JPG with adjustable quality slider
+  - WebP for modern web delivery
+  - Copy to Clipboard shortcut (`Ctrl+C` / `Cmd+C`)
+- **Interactive Canvas**: Mouse wheel zoom (15% to 800%), drag pan, transparency checkerboard toggle, and reset view.
+- **History**: Full undo/redo (`Ctrl+Z`, `Ctrl+Y`).

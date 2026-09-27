@@ -1,0 +1,101 @@
+/* Realistic Background & Packaging Mockup Preview Styles */
+.portal-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.portal-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: center;
+}
+
+.portal-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.portal-card.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.2);
+}
+
+.portal-thumbnail {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.portal-name {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.portal-card.active .portal-name {
+  color: var(--accent-gold);
+}
+
+/* Specific Portal Environments on the Artboard or Viewport */
+/* 1. Transparent Checkerboard */
+.portal-env-transparent {
+  background: transparent !important;
+}
+
+/* 2. Luxury Dark Sweet Box */
+.portal-env-dark-box {
+  background: linear-gradient(145deg, #161a23 0%, #0d1017 100%) !important;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9), inset 0 0 40px rgba(245, 158, 11, 0.08) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* 3. Royal Golden Festive Box */
+.portal-env-gold-box {
+  background: radial-gradient(circle at 50% 30%, #fef3c7 0%, #d97706 70%, #78350f 100%) !important;
+  box-shadow: 0 35px 80px rgba(120, 53, 15, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.4) !important;
+  border: 2px solid #fbbf24 !important;
+}
+
+/* 4. Natural Brown Kraft Paper Pouch */
+.portal-env-kraft-pouch {
+  background: #c89d66 !important;
+  background-image: radial-gradient(rgba(0,0,0,0.06) 1px, transparent 0), radial-gradient(rgba(0,0,0,0.04) 1px, #c89d66 0) !important;
+  background-size: 10px 10px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 0 50px rgba(80, 45, 15, 0.35) !important;
+  border: 1px solid #a67c48 !important;
+}
+
+/* 5. Minimalist Crisp White Card */
+.portal-env-clean-white {
+  background: #ffffff !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35), inset 0 0 20px rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* 6. Crimson Velvet Festive Package */
+.portal-env-crimson-velvet {
+  background: radial-gradient(circle at 40% 40%, #991b1b 0%, #450a0a 100%) !important;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85), inset 0 0 60px rgba(254, 202, 202, 0.15) !important;
+  border: 1.5px solid #ef4444 !important;
+}
+
+/* 7. Deep Emerald Silk Box */
+.portal-env-emerald-silk {
+  background: radial-gradient(circle at 50% 40%, #065f46 0%, #022c22 100%) !important;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85), inset 0 0 40px rgba(52, 211, 153, 0.2) !important;
+  border: 1.5px solid #10b981 !important;
+}

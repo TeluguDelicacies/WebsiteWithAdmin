@@ -1,0 +1,53 @@
+:root {
+  /* Core Color Palette */
+  --bg-primary: #0a0d14;
+  --bg-secondary: #111726;
+  --bg-tertiary: #182238;
+  --bg-card: rgba(20, 28, 48, 0.7);
+  --bg-card-hover: rgba(27, 39, 66, 0.85);
+  --bg-glass: rgba(16, 23, 40, 0.65);
+  --bg-glass-heavy: rgba(10, 14, 26, 0.85);
+
+  /* Borders & Dividers */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.16);
+  --border-focus: #f59e0b;
+  --border-accent: rgba(245, 158, 11, 0.4);
+
+  /* Brand & Accent Colors */
+  --accent-gold: #f59e0b;
+  --accent-gold-glow: rgba(245, 158, 11, 0.35);
+  --accent-amber: #d97706;
+  --accent-red: #ef4444;
+  --accent-ruby: #dc2626;
+  --accent-green: #10b981;
+  --accent-cyan: #06b6d4;
+  --accent-indigo: #6366f1;
+  --accent-purple: #a855f7;
+
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0f172a;
+
+  /* Shadows & Elevations */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 25px var(--accent-gold-glow);
+
+  /* Dimensions & Spacing */
+  --sidebar-width: 440px;
+  --header-height: 64px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
