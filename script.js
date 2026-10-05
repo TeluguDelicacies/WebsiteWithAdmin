@@ -712,6 +712,7 @@ Last Updated: 2024 - Updated for comprehensive font and scaling strategy
 */
 
 import { supabase } from './lib/supabase.js';
+window.supabase = supabase;
 
 /*
 ========================================
@@ -2582,7 +2583,7 @@ window.currentSiteSettings = {};
  */
 async function fetchSiteSettings() {
     try {
-        const { data, error } = await supabase
+        const { data: rawData, error } = await supabase
             .from('site_settings')
             .select('*')
             .single();
@@ -2592,6 +2593,7 @@ async function fetchSiteSettings() {
             return null;
         }
 
+        let data = rawData;
         if (data) {
             if (typeof window.deepProxyUrls === 'function') {
                 data = window.deepProxyUrls(data);
@@ -2605,7 +2607,14 @@ async function fetchSiteSettings() {
             // Logo
             if (data.logo_url) {
                 const logoImgs = document.querySelectorAll('.logo');
-                logoImgs.forEach(img => img.src = data.logo_url);
+                logoImgs.forEach(img => {
+                    img.src = data.logo_url;
+                    img.style.display = '';
+                    const fallback = img.nextElementSibling;
+                    if (fallback && fallback.classList.contains('logo-fallback')) {
+                        fallback.style.display = 'none';
+                    }
+                });
             }
 
             // Header Titles
@@ -2703,14 +2712,14 @@ async function fetchSiteSettings() {
             if (data.company_address) {
                 const el = document.getElementById('contact-address');
                 if (el) {
-                    el.innerHTML = `<p>${data.company_address}</p>`;
+                    el.innerHTML = `<p>${escapeHTML(data.company_address).replace(/\n/g, '<br>')}</p>`;
                 }
             } else if (data.address_line1 || data.address_line2) {
                 const el = document.getElementById('contact-address');
                 if (el) {
                     el.innerHTML = `
-                        <p>${data.address_line1 || ''}</p>
-                        <p>${data.address_line2 || ''}</p>
+                        <p>${escapeHTML(data.address_line1 || '')}</p>
+                        <p>${escapeHTML(data.address_line2 || '')}</p>
                     `;
                 }
             }
