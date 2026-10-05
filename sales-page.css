@@ -3553,93 +3553,89 @@ textarea {
     }
 }
 
-/* Category Header Row */
-.category-header-simple {
+/* =========================================
+   2. CATEGORY & ALL PRODUCTS GRID PAGE HEADER
+========================================= */
+/* Row 1: Breadcrumbs on Left, Sleek Brand Logos on Right */
+.cat-header-top-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    margin: 4px 0 10px 0;
-    flex-wrap: wrap;
+    padding: 14px 0 4px 0;
+    width: 100%;
 }
 
-.category-header-simple h1 {
-    font-size: 1.85rem;
+.cat-header-top-row .smart-breadcrumbs {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Sleek Borderless Category Brand Logos */
+.cat-brand-accents {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.cat-brand-accents .cat-brand-logo-item {
+    max-height: 38px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.05));
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cat-brand-accents .cat-brand-logo-item:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 640px) {
+    .cat-header-top-row {
+        gap: 8px;
+        padding: 8px 0 2px 0;
+    }
+    .cat-brand-accents {
+        gap: 8px;
+    }
+    .cat-brand-accents .cat-brand-logo-item {
+        max-height: 28px;
+    }
+}
+
+/* Row 2: Category Title & Short Description */
+.cat-header-title-row {
+    margin: 4px 0 8px 0;
+}
+
+.cat-header-title-row .cat-title {
+    font-size: 1.75rem;
     font-weight: 800;
     color: var(--color-brand-blue-primary);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.18;
     letter-spacing: -0.3px;
     font-family: 'Outfit', sans-serif;
-}
-
-.category-header-simple .category-short-desc,
-.category-header-simple p {
-    font-size: 0.95rem;
-    color: #64748b;
-    margin: 4px 0 0 0;
-    line-height: 1.4;
-}
-
-/* Sub-Brand Badges on Right */
-.desktop-brand-grid {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 6px 14px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.desktop-brand-grid img,
-.desktop-brand-grid .brand-logo-item {
-    max-height: 42px !important;
-    width: auto !important;
-    object-fit: contain !important;
-}
-
-/* Mobile Carousel */
-.mobile-brand-carousel {
-    position: relative;
-    width: 70px;
-    height: 42px;
-    margin-left: auto;
-    flex-shrink: 0;
-    display: none;
-}
-
-.mobile-brand-carousel .brand-logo-item {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.mobile-brand-carousel .brand-logo-item.active {
-    opacity: 1;
-    visibility: visible;
+.cat-header-title-row .cat-short-desc {
+    font-size: 0.92rem;
+    color: #64748b;
+    margin: 3px 0 0 0;
+    line-height: 1.35;
 }
 
 @media (max-width: 768px) {
-    .desktop-brand-grid {
-        display: none !important;
+    .cat-header-title-row .cat-title {
+        font-size: 1.35rem;
     }
-    .mobile-brand-carousel {
-        display: block !important;
-    }
-    .category-header-simple h1 {
-        font-size: 1.4rem !important;
-    }
-    .category-header-simple .category-short-desc,
-    .category-header-simple p {
-        font-size: 0.85rem !important;
+    .cat-header-title-row .cat-short-desc {
+        font-size: 0.82rem;
     }
 }
 
@@ -3648,7 +3644,7 @@ textarea {
 ========================================= */
 .subcategory-filters-container {
     width: 100%;
-    margin: 12px 0 24px 0;
+    margin: 4px 0 16px 0;
 }
 
 .subcategory-filters {

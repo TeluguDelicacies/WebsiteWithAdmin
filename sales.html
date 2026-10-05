@@ -50,7 +50,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="/sales-page.css?v=2.8">
+    <link rel="stylesheet" href="/sales-page.css?v=2.9">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -854,23 +854,25 @@ window.generateProductLink = function(product, variantQuantity) {
             });
 
             app.innerHTML = `
-                <div class="breadcrumb-section">
-                    ${window.renderSmartBreadcrumbs('all-products', '')}
-                </div>
-
                 <section class="category-grid-container">
-                    <!-- Widget Header -->
-                    ${window.renderBrandWidget()}
+                    <!-- Row 1: Breadcrumbs on Left, Brand Logos on Right -->
+                    <div class="cat-header-top-row">
+                        ${window.renderSmartBreadcrumbs('all-products', '')}
+                        ${window.renderCategoryBrandLogos({ slug: 'all-products' })}
+                    </div>
 
-                    <!-- New Grid Container -->
+                    <!-- Row 2: Title & Description -->
+                    <div class="cat-header-title-row">
+                        <h1 class="cat-title">All Products</h1>
+                        <p class="cat-short-desc">${state.settings?.all_products_tagline || 'Featuring our authentic Telugu delicacies and premium brands'}</p>
+                    </div>
+
+                    <!-- Grid Container -->
                     <div class="category-grid">
                         ${allVisible.map(p => renderProductCard(p, { title: 'All Products' })).join('')}
                     </div>
                 </section>
             `;
-
-            // Start Widget Cycle
-            window.startBrandWidgetCycle();
 
             // Scroll breadcrumbs
             window.updateBreadcrumbScroll();
@@ -989,49 +991,33 @@ window.generateProductLink = function(product, variantQuantity) {
                 `;
             }
 
-            // Use the NEW Quick Commerce HTML Structure
+            // Use the NEW Compact 2-Row Split HTML Structure
             app.innerHTML = `
-                <div class="breadcrumb-section">
-                    ${window.renderSmartBreadcrumbs(slug, '')}
-                </div>
-
                 <section class="category-grid-container">
-                    <!-- Header -->
-                    <div class="category-header-simple">
-                        <div>
-                            <h1 style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
-                                ${category.title}
-                                <span id="mobileSubCategoryHeading" style="display:none; font-size: 0.65em; color: var(--color-brand-blue-secondary); font-weight: 600;"></span>
-                            </h1>
-                            <p class="category-short-desc">${category.short_description || ''}</p>
-                        </div>
-                        ${category.slug === 'ready-to-eat' 
-                          ? `
-                             <!-- Desktop Grid -->
-                             <div class="desktop-brand-grid hide-on-mobile" style="display:flex; gap:10px; align-items:center;">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" style="max-height: 46px; object-fit: contain;">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" style="max-height: 46px; object-fit: contain;">
-                             </div>
-                             <!-- Mobile Carousel -->
-                             <div class="mobile-brand-carousel hide-on-desktop">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || ''}" class="brand-logo-item active" style="max-height: 46px; object-fit: contain;">
-                                <img src="${state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || ''}" class="brand-logo-item" style="max-height: 46px; object-fit: contain;">
-                             </div>
-                            `
-                          : (category.sub_brand_logo_url ? `<img src="${category.sub_brand_logo_url}">` : '')}
+                    <!-- Row 1: Breadcrumbs on Left, Brand Logos on Right -->
+                    <div class="cat-header-top-row">
+                        ${window.renderSmartBreadcrumbs(slug, '')}
+                        ${window.renderCategoryBrandLogos(category)}
                     </div>
 
+                    <!-- Row 2: Category Title & Description -->
+                    <div class="cat-header-title-row">
+                        <h1 class="cat-title">
+                            ${category.title}
+                            <span id="mobileSubCategoryHeading" style="display:none; font-size: 0.65em; color: var(--color-brand-blue-secondary); font-weight: 600;"></span>
+                        </h1>
+                        ${category.short_description ? `<p class="cat-short-desc">${category.short_description}</p>` : ''}
+                    </div>
+
+                    <!-- Row 3: Subcategory Filter Pills -->
                     ${subCategoryHtml}
 
-                    <!-- New Grid Container -->
+                    <!-- Product Grid -->
                     <div class="category-grid">
                         ${catProducts.map(p => renderProductCard(p, category)).join('')}
                     </div>
                 </section>
             `;
-
-            // Start Widget Cycle
-            window.startBrandWidgetCycle();
 
             // Scroll breadcrumbs
             window.updateBreadcrumbScroll();
@@ -3774,6 +3760,52 @@ window.generateProductLink = function(product, variantQuantity) {
 
             html += `</nav>`;
             return html;
+        };
+
+        // --- Category Brand Logos Helper ---
+        window.renderCategoryBrandLogos = function (category) {
+            if (!category) return '';
+
+            // Ready To Eat has 2 sub-brands (Teepi Gurtu & Akshaya)
+            if (category.slug === 'ready-to-eat') {
+                const rteLogo = state.categories.find(c => c.slug === 'ready-to-eat')?.sub_brand_logo_url || '';
+                const rtcLogo = state.categories.find(c => c.slug === 'ready-to-cook')?.sub_brand_logo_url || '';
+                return `
+                    <div class="cat-brand-accents">
+                        ${rteLogo ? `<img src="${rteLogo}" alt="Teepi Gurtu" class="cat-brand-logo-item" title="Teepi Gurtu">` : ''}
+                        ${rtcLogo ? `<img src="${rtcLogo}" alt="Akshaya" class="cat-brand-logo-item" title="Akshaya">` : ''}
+                    </div>
+                `;
+            }
+
+            // All Products shows unique sub-brand logos
+            if (category.slug === 'all-products') {
+                const brands = [];
+                const seen = new Set();
+                state.categories.forEach(c => {
+                    if (c.sub_brand && c.sub_brand_logo_url && !seen.has(c.sub_brand)) {
+                        brands.push(c);
+                        seen.add(c.sub_brand);
+                    }
+                });
+                if (brands.length === 0) return '';
+                return `
+                    <div class="cat-brand-accents">
+                        ${brands.map(b => `<img src="${b.sub_brand_logo_url}" alt="${escapeHTML(b.sub_brand)}" class="cat-brand-logo-item" title="${escapeHTML(b.sub_brand)}">`).join('')}
+                    </div>
+                `;
+            }
+
+            // Specific category with a sub-brand logo
+            if (category.sub_brand_logo_url) {
+                return `
+                    <div class="cat-brand-accents">
+                        <img src="${category.sub_brand_logo_url}" alt="${escapeHTML(category.sub_brand || category.title)}" class="cat-brand-logo-item" title="${escapeHTML(category.sub_brand || category.title)}">
+                    </div>
+                `;
+            }
+
+            return '';
         };
 
         // --- Portal Dropdown Logic ---
