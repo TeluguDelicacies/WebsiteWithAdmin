@@ -67,13 +67,15 @@ Instead, we route all Supabase database requests through our **own domain** (`te
 ## 🛠️ Code Changes Made
 
 ### 1. `public/_redirects` & `dist/_redirects`
-Added the rewrite rule at the very top of the redirects file:
+Added the rewrite rules at the very top of the redirects file:
 ```text
-# 0. Supabase API Proxy (bypasses Indian ISP DNS poisoning / blocking of *.supabase.co)
-/api/supabase/*  https://pfffotghmcofyrvqynbl.supabase.co/:splat  200!
+# 0. Supabase API & Storage Proxy (bypasses Indian ISP DNS poisoning / blocking of *.supabase.co)
+/storage/*       https://pfffotghmcofyrvqynbl.supabase.co/storage/:splat  200!
+/api/supabase/*  https://pfffotghmcofyrvqynbl.supabase.co/:splat         200!
 ```
 * **Status Code `200!`**: Tells Netlify to act as an HTTP proxy (a rewrite), fetching data from Supabase behind the scenes without changing the browser URL.
-* **The `:splat` token**: Forwards everything after `/api/supabase/` (e.g. `rest/v1/products?select=*`) straight to Supabase.
+* **The `/storage/*` rule**: Proxies all uploaded images (logos, hero background, favicons) directly through `telugudelicacies.com/storage/...`.
+* **The `/api/supabase/*` rule**: Proxies all database REST API queries and assets through `telugudelicacies.com/api/supabase/...`.
 
 ### 2. `lib/supabase.js`
 Updated the frontend configuration so that in production, all requests automatically use the proxy URL:

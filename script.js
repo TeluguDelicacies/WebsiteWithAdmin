@@ -35,6 +35,16 @@ const WHATSAPP_DESKTOP_URL = `https://web.whatsapp.com/send?phone=${WHATSAPP_NUM
 function optimizeImage(url, options = {}) {
     if (!url) return url;
 
+    // Route Supabase storage URLs through proxy in production if needed
+    if (typeof window.deepProxyUrls === 'function') {
+        url = window.deepProxyUrls(url);
+    } else if (url.includes('pfffotghmcofyrvqynbl.supabase.co')) {
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (!isLocalhost) {
+            url = url.replace('https://pfffotghmcofyrvqynbl.supabase.co', `${window.location.origin}/api/supabase`);
+        }
+    }
+
     // Only transform Cloudinary URLs
     if (!url.includes('cloudinary.com') && !url.includes('res.cloudinary')) {
         return url;
@@ -2583,6 +2593,9 @@ async function fetchSiteSettings() {
         }
 
         if (data) {
+            if (typeof window.deepProxyUrls === 'function') {
+                data = window.deepProxyUrls(data);
+            }
             window.currentSiteSettings = data; // Cache globally
             preloadCatalogue(); // Pre-load catalogue after settings are ready
 

@@ -10,6 +10,11 @@ export default defineConfig({
         target: 'https://pfffotghmcofyrvqynbl.supabase.co',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/supabase/, '')
+      },
+      '/storage': {
+        target: 'https://pfffotghmcofyrvqynbl.supabase.co/storage',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/storage/, '')
       }
     }
   },
