@@ -50,7 +50,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="/sales-page.css?v=2.5">
+    <link rel="stylesheet" href="/sales-page.css?v=2.6">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -2554,44 +2554,38 @@ window.generateProductLink = function(product, variantQuantity) {
                     { k: ['sodium', 'Sodium'], label: 'Sodium' }
                 ];
 
-                // 1. Check if ACTUAL nutrition data exists (not just serving info)
-                const hasActualNutritionData = fields.some(f => getVal(f.k) !== null);
-
-                // Build serving meta
-                const metaParts = [];
-                if (hasActualNutritionData) {
-                    if (servingSize) metaParts.push(`<strong>Serving:</strong> ${servingSize}`);
-
-                    // Calculate Servings per pack from variant
-                    let displayedServings = null;
-                    if (currentVariant && currentVariant.quantity && servingSize) {
-                        const packWeight = parseWeight(currentVariant.quantity);
-                        const sSize = parseWeight(servingSize);
-                        if (packWeight > 0 && sSize > 0) {
-                            displayedServings = Math.round(packWeight / sSize);
-                        }
-                    }
-                    if (!displayedServings && totalServings) {
-                        displayedServings = totalServings;
-                    }
-
-                    if (displayedServings) metaParts.push(`<strong>~${displayedServings} servings</strong>`);
-                }
-
-                // Build modern chip badges
-                const chipItems = [];
+                const items = [];
                 fields.forEach(f => {
                     const val = getVal(f.k);
                     if (val !== null) {
-                        chipItems.push(`<div class="nutrition-chip"><span class="chip-label">${f.label}</span><span class="chip-val">${val}</span></div>`);
+                        items.push(`<strong>${f.label}:</strong> ${val}`);
                     }
                 });
 
-                if (chipItems.length === 0) return '';
+                if (items.length === 0) return '';
 
-                const metaHtml = metaParts.length > 0 ? `<div class="nutrition-serving-meta">${metaParts.join(' &nbsp;•&nbsp; ')}</div>` : '';
+                // Calculate Servings per pack from variant
+                let displayedServings = null;
+                if (currentVariant && currentVariant.quantity && servingSize) {
+                    const packWeight = parseWeight(currentVariant.quantity);
+                    const sSize = parseWeight(servingSize);
+                    if (packWeight > 0 && sSize > 0) {
+                        displayedServings = Math.round(packWeight / sSize);
+                    }
+                }
+                if (!displayedServings && totalServings) {
+                    displayedServings = totalServings;
+                }
 
-                return `<div class="nutrition-panel">${metaHtml}<div class="nutrition-chips-grid">${chipItems.join('')}</div></div>`;
+                let servingText = '';
+                if (servingSize) {
+                    servingText = `Per Serving (${servingSize}${displayedServings ? `, ~${displayedServings} servings` : ''}):`;
+                }
+
+                return `<p class="nutrition-plain-text" style="margin:0; line-height:1.6; color:#334155; font-size:0.95rem;">
+                    ${servingText ? `<span class="nutrition-serving-lead" style="display:inline-block; margin-bottom:4px; font-weight:600; color:#0f172a;">${servingText}</span><br>` : ''}
+                    ${items.join(' &nbsp;|&nbsp; ')}
+                </p>`;
             };
 
             // Count actual nutrition values (not serving info)

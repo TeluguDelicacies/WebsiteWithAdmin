@@ -238,8 +238,16 @@ textarea {
 
 @media (min-width: 1440px) {
     .header.sales-header .container {
-        width: 95vw !important;
-        max-width: 1380px !important;
+        width: 92vw !important;
+        max-width: 1460px !important;
+        padding: 0 var(--space-4) !important;
+    }
+}
+
+@media (min-width: 1680px) {
+    .header.sales-header .container {
+        width: 90vw !important;
+        max-width: 1560px !important;
         padding: 0 var(--space-4) !important;
     }
 }
@@ -4277,52 +4285,17 @@ textarea {
    ======================================== */
 
 /* Nutrition Panel & Chips (All devices) */
-.nutrition-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
+/* Plain text nutrition presentation */
+.nutrition-plain-text {
+    margin: 0 !important;
+    line-height: 1.6 !important;
+    color: #334155 !important;
+    font-size: 0.95rem !important;
 }
 
-.nutrition-serving-meta {
-    font-size: 0.82rem;
-    color: #64748b;
-    font-weight: 500;
-    padding-bottom: 2px;
-}
-
-.nutrition-chips-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.nutrition-chip {
-    display: inline-flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: #FFFFFF;
-    border: 1px solid var(--border-light);
-    border-radius: 6px;
-    padding: 4px 10px;
-    min-width: 60px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.nutrition-chip .chip-label {
-    font-size: 0.65rem;
+.nutrition-serving-lead {
     font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 1px;
-}
-
-.nutrition-chip .chip-val {
-    font-size: 0.84rem;
-    font-weight: 700;
-    color: var(--color-brand-blue-primary);
+    color: #0f172a;
 }
 
 /* Hide desktop purchase actions & subtle disclaimer on mobile */
@@ -4795,15 +4768,15 @@ textarea {
     }
 
     .info-content-block {
-        padding: 10px 14px !important;
-        min-height: 55px !important;
-        max-height: 110px !important;
-        overflow-y: auto !important;
+        padding: 12px 16px !important;
+        min-height: 48px !important;
+        max-height: none !important;
+        overflow: visible !important;
         background: #F8FAFC !important;
         border-radius: 10px !important;
         border: 1px solid var(--border-light) !important;
-        font-size: 0.88rem !important;
-        line-height: 1.45 !important;
+        font-size: 0.92rem !important;
+        line-height: 1.55 !important;
     }
 
     .info-content-block.active {
@@ -4865,7 +4838,7 @@ textarea {
         padding-right: 4px !important;
         scrollbar-width: thin !important;
         scrollbar-color: rgba(0, 0, 0, 0.15) transparent !important;
-        max-height: 380px;
+        max-height: 480px !important;
     }
 
     #side-content::-webkit-scrollbar {
@@ -5062,32 +5035,163 @@ textarea {
     }
 }
 
-/* === LARGE DESKTOP (1440px and wider: Full HD 1080p, 2K, 4K) === */
+/* === LARGE DESKTOP (1440px to 1679px) === */
 @media (min-width: 1440px) {
     .grid-layout {
-        grid-template-columns: minmax(0, 1fr) 320px !important;
-        gap: 26px !important;
-        max-width: 1380px !important;
+        grid-template-columns: minmax(0, 1fr) 330px !important;
+        gap: 28px !important;
+        width: 92vw !important;
+        max-width: 1460px !important;
     }
 
     .main-product-area {
-        grid-template-columns: 360px minmax(0, 1fr) !important;
-        gap: 28px !important;
-        padding: 22px 28px !important;
+        grid-template-columns: 390px minmax(0, 1fr) !important;
+        gap: 30px !important;
+        padding: 24px 30px !important;
+        border-radius: 20px !important;
     }
 
     .main-product-area .gallery-wrapper,
     .main-product-area .product-gallery {
-        max-width: 360px !important;
+        max-width: 390px !important;
     }
 
     .gallery-wrapper .image-thumbnail-strip,
     .product-disclaimer-subtle {
-        max-width: 360px !important;
+        max-width: 390px !important;
+    }
+
+    .product-title {
+        font-size: 1.7rem !important;
+    }
+
+    .current-price {
+        font-size: 1.95rem !important;
     }
 
     #side-content {
-        max-height: 500px !important;
+        max-height: 540px !important;
+    }
+}
+
+/* === FULL HD PC & HIGH RESOLUTION (1680px and wider: 1080p, 2K, 4K) === */
+@media (min-width: 1680px) {
+    .grid-layout {
+        grid-template-columns: minmax(0, 1fr) 360px !important;
+        gap: 34px !important;
+        width: 90vw !important;
+        max-width: 1560px !important;
+    }
+
+    .main-product-area {
+        grid-template-columns: 440px minmax(0, 1fr) !important;
+        gap: 36px !important;
+        padding: 28px 36px !important;
+        border-radius: 22px !important;
+    }
+
+    .main-product-area .gallery-wrapper,
+    .main-product-area .product-gallery {
+        max-width: 440px !important;
+    }
+
+    .gallery-wrapper .image-thumbnail-strip,
+    .product-disclaimer-subtle {
+        max-width: 440px !important;
+    }
+
+    .gallery-wrapper .image-thumb {
+        width: 48px !important;
+        height: 48px !important;
+        border-radius: 10px !important;
+    }
+
+    .product-title {
+        font-size: 1.95rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .telugu-title {
+        font-size: 1.2rem !important;
+    }
+
+    .product-descriptor {
+        font-size: 0.9rem !important;
+    }
+
+    .product-tagline {
+        font-size: 1rem !important;
+    }
+
+    .current-price {
+        font-size: 2.2rem !important;
+    }
+
+    .qty-counter-desktop {
+        height: 44px !important;
+    }
+
+    .qty-counter-desktop .qty-btn,
+    .qty-counter-desktop button {
+        width: 38px !important;
+        font-size: 1.25rem !important;
+    }
+
+    .qty-counter-desktop .qty-val {
+        min-width: 34px !important;
+        font-size: 1.05rem !important;
+    }
+
+    .btn-add-desktop {
+        height: 44px !important;
+        font-size: 0.98rem !important;
+        padding: 0 24px !important;
+    }
+
+    .selection-area select,
+    .selection-area .variant-dropdown {
+        height: 44px !important;
+        font-size: 0.98rem !important;
+    }
+
+    .info-btn {
+        height: 34px !important;
+        padding: 0 14px !important;
+        font-size: 0.88rem !important;
+    }
+
+    .info-content-block {
+        padding: 16px 20px !important;
+        font-size: 0.98rem !important;
+        line-height: 1.65 !important;
+    }
+
+    .sidebar {
+        max-height: calc(100vh - 120px) !important;
+    }
+
+    #side-content {
+        max-height: 600px !important;
+    }
+
+    .sim-thumb {
+        width: 58px !important;
+        height: 58px !important;
+        min-width: 58px !important;
+    }
+
+    .sim-title {
+        font-size: 0.94rem !important;
+    }
+
+    .sim-price {
+        font-size: 0.94rem !important;
+    }
+
+    .sim-btn-add {
+        height: 32px !important;
+        padding: 0 16px !important;
+        font-size: 0.85rem !important;
     }
 }
 
