@@ -50,7 +50,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="/sales-page.css?v=2.9">
+    <link rel="stylesheet" href="/sales-page.css?v=3.0">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -1036,20 +1036,21 @@ window.generateProductLink = function(product, variantQuantity) {
         window.filterSubCategory = function(subCategory, btnElement) {
             // Update active pill
             const container = btnElement.closest('.subcategory-filters');
-            container.querySelectorAll('.subcategory-pill').forEach(btn => btn.classList.remove('active'));
+            if (container) {
+                container.querySelectorAll('.subcategory-pill').forEach(btn => btn.classList.remove('active'));
+            }
             btnElement.classList.add('active');
 
             // Filter products
             const cards = document.querySelectorAll('.category-grid .product-card');
+            const targetSub = (subCategory || '').trim().toLowerCase();
+
             cards.forEach(card => {
-                if (subCategory === 'all') {
-                    card.style.display = 'flex';
+                const cardSub = (card.getAttribute('data-subcategory') || '').trim().toLowerCase();
+                if (targetSub === 'all' || cardSub === targetSub) {
+                    card.style.setProperty('display', 'flex', 'important');
                 } else {
-                    if (card.dataset.subcategory === subCategory) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                    card.style.setProperty('display', 'none', 'important');
                 }
             });
         };
@@ -1144,15 +1145,14 @@ window.generateProductLink = function(product, variantQuantity) {
 
             // Filter products
             const cards = document.querySelectorAll('.category-grid .product-card');
+            const targetSub = (subCategory || '').trim().toLowerCase();
+
             cards.forEach(card => {
-                if (subCategory === 'all') {
-                    card.style.display = 'flex';
+                const cardSub = (card.getAttribute('data-subcategory') || '').trim().toLowerCase();
+                if (targetSub === 'all' || cardSub === targetSub) {
+                    card.style.setProperty('display', 'flex', 'important');
                 } else {
-                    if (card.dataset.subcategory === subCategory) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                    card.style.setProperty('display', 'none', 'important');
                 }
             });
             
@@ -1160,9 +1160,10 @@ window.generateProductLink = function(product, variantQuantity) {
             const pills = document.querySelectorAll('.subcategory-pill');
             pills.forEach(pill => {
                 pill.classList.remove('active');
-                if (subCategory === 'all' && pill.textContent.trim() === 'All') {
+                const pText = pill.textContent.trim().toLowerCase();
+                if (targetSub === 'all' && pText === 'all') {
                     pill.classList.add('active');
-                } else if (pill.textContent.trim() === subCategory) {
+                } else if (pText === targetSub) {
                     pill.classList.add('active');
                 }
             });
