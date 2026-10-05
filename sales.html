@@ -50,7 +50,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="/sales-page.css?v=2.2">
+    <link rel="stylesheet" href="/sales-page.css?v=2.3">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -1661,7 +1661,7 @@ window.generateProductLink = function(product, variantQuantity) {
                                         <!-- Dots -->
                                         <div class="carousel-dots" id="carouselDots"></div>
                                         
-                                        <div class="product-disclaimer-overlay">All images are representative, change in colour expected due to variability in ingredients</div>
+                                        <div class="product-disclaimer-overlay mobile-only-disclaimer">All images are representative, change in colour expected due to variability in ingredients</div>
                                         
                                         <!-- Mobile Variant Dropdown REMOVED FROM GALLERY per user request -->
                                         
@@ -1694,8 +1694,13 @@ window.generateProductLink = function(product, variantQuantity) {
 
                             
                             <!-- Image Thumbnail Strip (Populated by JS if multiple images exist) -->
-                            <div class="image-thumbnail-strip" id="imageThumbnailStrip" style="display:none; margin-top:15px;">
+                            <div class="image-thumbnail-strip" id="imageThumbnailStrip" style="display:none; margin-top:10px;">
                                 <!-- Thumbnails will be injected here -->
+                            </div>
+
+                            <!-- Desktop Subtle Disclaimer (Under image gallery/thumbnails) -->
+                            <div class="product-disclaimer-subtle desktop-only-disclaimer">
+                                *All images are representative, change in colour expected due to variability in ingredients
                             </div>
                         </div>
 
@@ -1744,18 +1749,18 @@ window.generateProductLink = function(product, variantQuantity) {
                         </div>
                     </div>
 
-                    <!-- Desktop Add to Cart & Qty Counter (Prominent next to price) -->
+                    <!-- Desktop Add to Cart & Qty Counter: Stepper on LEFT, Add to Cart on RIGHT -->
                     <div class="desktop-action-container" onclick="event.stopPropagation()">
+                        <div class="qty-counter-desktop" id="detailQtyCounterDesktop"
+                            onclick="event.stopPropagation()">
+                            <button type="button" class="qty-btn qty-minus" onclick="event.stopPropagation(); window.updateDetailQtyDesktop(-1)" aria-label="Decrease quantity">−</button>
+                            <span class="qty-val" id="detailQtyValDesktop">1</span>
+                            <button type="button" class="qty-btn qty-plus" onclick="event.stopPropagation(); window.updateDetailQtyDesktop(1)" aria-label="Increase quantity">+</button>
+                        </div>
                         <button class="btn-add-desktop" id="detailAddBtnDesktop" 
                             onclick="event.stopPropagation(); window.addToCartFromDetail()">
                             <i class="fas fa-shopping-cart"></i> <span>Add to Cart</span>
                         </button>
-                        <div class="qty-counter-desktop" id="detailQtyCounterDesktop" style="display:none;"
-                            onclick="event.stopPropagation()">
-                            <button onclick="event.stopPropagation(); window.updateDetailQty(-1)">-</button>
-                            <span class="qty-val" id="detailQtyValDesktop">1</span>
-                            <button onclick="event.stopPropagation(); window.updateDetailQty(1)">+</button>
-                        </div>
                     </div>
                 </div>
 
@@ -3044,6 +3049,8 @@ window.generateProductLink = function(product, variantQuantity) {
             }
         };
 
+        window._desktopSelectedQty = 1;
+
         window.updateDetailQty = function (delta) {
             if (!state.currentProduct) return;
 
@@ -3064,6 +3071,41 @@ window.generateProductLink = function(product, variantQuantity) {
 
             // Sync detail page UI (ADD button vs Qty counter)
             window.syncDetailPageCart(variant);
+        };
+
+        window.updateDetailQtyDesktop = function (delta) {
+            if (!state.currentProduct) return;
+
+            // Get selected variant
+            const variants = window.getValidVariants(state.currentProduct.quantity_variants);
+            let idx = 0;
+            if (typeof window._detailActiveVariantIdx === 'number') {
+                idx = window._detailActiveVariantIdx;
+            } else {
+                const select = document.getElementById('variantSelect');
+                idx = select ? parseInt(select.value, 10) || 0 : 0;
+            }
+            const variant = variants[idx];
+
+            // Check if product/variant is already in cart
+            const cartItem = state.cart.find(item =>
+                item.id == state.currentProduct.id &&
+                (item.variant && variant ?
+                    (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) :
+                    true)
+            );
+
+            if (cartItem) {
+                // Already in cart: adjust cart quantity directly
+                window.updateDetailQty(delta);
+            } else {
+                // Not in cart yet: adjust pre-selection quantity (min 1, max 99)
+                const qtyEl = document.getElementById('detailQtyValDesktop');
+                let current = parseInt(qtyEl?.innerText || '1', 10) || 1;
+                let next = Math.max(1, Math.min(99, current + delta));
+                window._desktopSelectedQty = next;
+                if (qtyEl) qtyEl.innerText = next;
+            }
         };
 
 
@@ -3175,11 +3217,30 @@ window.generateProductLink = function(product, variantQuantity) {
                 selectedVariant = variants[variantIdx];
             }
 
+            // Desktop stepper support: read quantity from stepper when on desktop
+            const desktopQtyEl = document.getElementById('detailQtyValDesktop');
             const qtyInput = document.getElementById('detailQty');
-            const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+            let qty = 1;
+            if (desktopQtyEl && window.innerWidth >= 1024) {
+                qty = parseInt(desktopQtyEl.innerText, 10) || 1;
+            } else if (qtyInput) {
+                qty = parseInt(qtyInput.value, 10) || 1;
+            }
 
             window.addToCart(state.currentProduct, selectedVariant, qty);
             window.syncDetailPageCart(selectedVariant);
+
+            // Visual confirmation feedback on desktop Add to Cart button
+            const desktopBtn = document.getElementById('detailAddBtnDesktop');
+            if (desktopBtn) {
+                desktopBtn.classList.add('added-success');
+                const origHtml = desktopBtn.innerHTML;
+                desktopBtn.innerHTML = '<i class="fas fa-check"></i> <span>Added!</span>';
+                setTimeout(() => {
+                    desktopBtn.classList.remove('added-success');
+                    desktopBtn.innerHTML = origHtml;
+                }, 1300);
+            }
         };
 
         window.updateCartItemQty = function (index, deltaOrVal, isDirect = false) {
@@ -3257,16 +3318,22 @@ window.generateProductLink = function(product, variantQuantity) {
                 }
             };
 
+            // Sync mobile image overlay action pair
             syncBtnPair(
                 document.getElementById('detailAddBtnOverlay'),
                 document.getElementById('detailQtyCounterOverlay'),
                 document.getElementById('detailQtyValOverlay')
             );
-            syncBtnPair(
-                document.getElementById('detailAddBtnDesktop'),
-                document.getElementById('detailQtyCounterDesktop'),
-                document.getElementById('detailQtyValDesktop')
-            );
+
+            // Sync desktop stepper: reflect live cart qty if present, else keep selected pre-qty
+            const desktopQtyVal = document.getElementById('detailQtyValDesktop');
+            if (desktopQtyVal) {
+                if (qty > 0) {
+                    desktopQtyVal.innerText = qty;
+                } else {
+                    desktopQtyVal.innerText = window._desktopSelectedQty || 1;
+                }
+            }
         };
 
         window.removeItem = function (index) {

@@ -3095,8 +3095,8 @@ textarea {
 
     .sim-item img,
     .sidebar-product-thumb {
-        width: 80px;
-        height: 80px;
+        width: 54px;
+        height: 54px;
     }
 }
 
@@ -3273,12 +3273,15 @@ textarea {
 }
 
 .sim-item .btn-add {
-    width: 75px !important;
-    /* Match reduced width */
-    border-radius: 8px !important;
-    display: flex;
+    width: auto;
+    min-width: 52px;
+    padding: 0 10px;
+    border-radius: 6px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .sim-item .sidebar-qty-controls button {
@@ -4312,9 +4315,10 @@ textarea {
     color: var(--color-brand-blue-primary);
 }
 
-/* Hide desktop purchase actions on mobile */
+/* Hide desktop purchase actions & subtle disclaimer on mobile */
 @media (max-width: 1023px) {
-    .desktop-action-container {
+    .desktop-action-container,
+    .desktop-only-disclaimer {
         display: none !important;
     }
 }
@@ -4347,7 +4351,7 @@ textarea {
         grid-template-areas:
             "bread bread"
             "main  side";
-        grid-template-columns: minmax(0, 1fr) 280px !important;
+        grid-template-columns: minmax(0, 1fr) 300px !important;
         grid-template-rows: auto 1fr !important;
         gap: 14px 22px !important;
         width: 95vw !important;
@@ -4389,7 +4393,9 @@ textarea {
         height: auto !important;
     }
 
-    /* Gallery (Left Column) - Clean, Uncluttered Image */
+    /* ========================================================
+       1. IMAGE SECTION (HERO PRODUCT PRESENTATION)
+       ======================================================== */
     .main-product-area .gallery-wrapper {
         position: relative;
         width: 100% !important;
@@ -4403,6 +4409,7 @@ textarea {
     }
 
     .main-product-area .product-gallery {
+        position: relative !important;
         width: 100% !important;
         max-width: 340px !important;
         aspect-ratio: 1 / 1 !important;
@@ -4413,14 +4420,75 @@ textarea {
         overflow: hidden !important;
         border: 1px solid var(--border-light) !important;
         background: #FFFFFF !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important;
     }
 
-    /* Hide the image overlay Add button on desktop (moved to price section) */
+    .main-product-area .gallery-inner {
+        width: 100% !important;
+        height: 100% !important;
+        position: relative !important;
+    }
+
+    .main-product-area .gallery-front {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        overflow: hidden !important;
+        background: #FFFFFF !important;
+        cursor: crosshair;
+    }
+
+    .main-product-area .gallery-front .image-carousel {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+    }
+
+    .main-product-area .gallery-front .carousel-item {
+        width: 100% !important;
+        height: 100% !important;
+        flex: 0 0 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #FFFFFF !important;
+    }
+
+    .main-product-area .gallery-front .carousel-img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        padding: 8px !important;
+        background: #FFFFFF !important;
+    }
+
+    /* Sub-brand watermark logo cleanly anchored at top-right */
+    .main-product-area .product-gallery .overlay-logo {
+        position: absolute !important;
+        top: 10px !important;
+        right: 10px !important;
+        max-width: 82px !important;
+        max-height: 40px !important;
+        width: auto !important;
+        height: auto !important;
+        z-index: 25 !important;
+        padding: 4px 8px !important;
+        background: rgba(255, 255, 255, 0.94) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        border: 1px solid rgba(0, 0, 0, 0.04) !important;
+        object-fit: contain !important;
+    }
+
+    /* Hide the mobile image overlay Add button on desktop */
     .main-product-area .gallery-front .card-action-container {
         display: none !important;
     }
 
-    /* Desktop Thumbnails: Clean strip UNDER the image, no dark overlay */
+    /* Desktop Thumbnails: Clean strip under image */
     .gallery-wrapper .image-thumbnail-strip {
         position: relative !important;
         top: auto !important;
@@ -4429,8 +4497,9 @@ textarea {
         flex-direction: row !important;
         justify-content: center !important;
         align-items: center !important;
+        flex-wrap: wrap !important;
         gap: 8px !important;
-        margin: 10px auto 0 auto !important;
+        margin: 10px auto 4px auto !important;
         padding: 0 !important;
         background: transparent !important;
         backdrop-filter: none !important;
@@ -4444,8 +4513,8 @@ textarea {
     }
 
     .gallery-wrapper .image-thumb {
-        width: 48px !important;
-        height: 48px !important;
+        width: 44px !important;
+        height: 44px !important;
         border-radius: 8px !important;
         border: 2px solid var(--border-light) !important;
         overflow: hidden !important;
@@ -4453,6 +4522,16 @@ textarea {
         transition: all 0.2s ease !important;
         background: white !important;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 2px !important;
+    }
+
+    .gallery-wrapper .image-thumb img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
     }
 
     .gallery-wrapper .image-thumb:hover {
@@ -4469,22 +4548,24 @@ textarea {
         display: none !important;
     }
 
-    /* Subtle caption disclaimer under image on desktop */
-    .product-disclaimer-overlay {
-        position: relative !important;
-        bottom: auto !important;
-        left: auto !important;
-        width: 100% !important;
-        background: transparent !important;
-        border: none !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+    /* Disclaimer visibility toggles */
+    .mobile-only-disclaimer {
+        display: none !important;
+    }
+
+    .desktop-only-disclaimer {
+        display: block !important;
+    }
+
+    .product-disclaimer-subtle {
         font-size: 0.72rem !important;
         color: #94a3b8 !important;
-        padding: 4px 0 0 0 !important;
-        margin: 4px auto 0 auto !important;
-        text-align: center !important;
         font-style: italic !important;
+        text-align: center !important;
+        margin-top: 6px !important;
+        line-height: 1.35 !important;
+        padding: 0 4px !important;
+        max-width: 340px !important;
     }
 
     /* Product Details (Right Column) */
@@ -4551,69 +4632,111 @@ textarea {
         margin-bottom: 2px !important;
     }
 
-    /* Prominent Desktop Add-to-Cart Button */
+    /* ========================================================
+       2. PURCHASE ACTIONS (STEPPER ON LEFT, ADD TO CART ON RIGHT)
+       ======================================================== */
     .desktop-action-container {
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    .btn-add-desktop {
-        background: var(--color-brand-blue-primary) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 700 !important;
-        font-size: 0.92rem !important;
-        padding: 9px 18px !important;
         display: inline-flex !important;
         align-items: center !important;
+        gap: 10px !important;
+    }
+
+    /* Stepper on LEFT */
+    .qty-counter-desktop {
+        display: inline-flex !important;
+        align-items: center !important;
+        height: 42px !important;
+        background: #f8fafc !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+        transition: border-color 0.2s, box-shadow 0.2s !important;
+    }
+
+    .qty-counter-desktop:hover {
+        border-color: #94a3b8 !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    .qty-counter-desktop .qty-btn,
+    .qty-counter-desktop button {
+        background: transparent !important;
+        border: none !important;
+        color: #334155 !important;
+        width: 36px !important;
+        height: 100% !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: background 0.15s, color 0.15s !important;
+        user-select: none !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+    }
+
+    .qty-counter-desktop .qty-btn:hover,
+    .qty-counter-desktop button:hover {
+        background: #e2e8f0 !important;
+        color: var(--color-brand-blue-primary) !important;
+    }
+
+    .qty-counter-desktop .qty-btn:active,
+    .qty-counter-desktop button:active {
+        background: #cbd5e1 !important;
+    }
+
+    .qty-counter-desktop .qty-val {
+        min-width: 32px !important;
+        text-align: center !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        font-size: 0.96rem !important;
+        padding: 0 4px !important;
+        user-select: none !important;
+    }
+
+    /* Add to Cart Button on RIGHT */
+    .btn-add-desktop {
+        height: 42px !important;
+        background: linear-gradient(135deg, #0077b6 0%, #0096c7 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 0.92rem !important;
+        letter-spacing: 0.2px !important;
+        padding: 0 22px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         gap: 8px !important;
         cursor: pointer !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25) !important;
+        white-space: nowrap !important;
     }
 
     .btn-add-desktop:hover {
-        background: var(--color-primary-dark, #005f92) !important;
+        background: linear-gradient(135deg, #005f92 0%, #0077b6 100%) !important;
         transform: translateY(-1px) !important;
         box-shadow: 0 6px 16px rgba(0, 119, 182, 0.35) !important;
     }
 
-    .qty-counter-desktop {
-        display: flex !important;
-        align-items: center !important;
-        background: white !important;
-        border: 2px solid var(--color-brand-blue-primary) !important;
-        border-radius: 8px !important;
-        overflow: hidden !important;
-        box-shadow: 0 4px 12px rgba(0, 119, 182, 0.15) !important;
+    .btn-add-desktop:active {
+        transform: translateY(0) !important;
+        box-shadow: 0 2px 8px rgba(0, 119, 182, 0.25) !important;
     }
 
-    .qty-counter-desktop button {
-        background: #f0f9ff !important;
-        border: none !important;
-        color: var(--color-brand-blue-primary) !important;
-        width: 34px !important;
-        height: 36px !important;
-        font-size: 1.1rem !important;
-        font-weight: 700 !important;
-        cursor: pointer !important;
-        transition: background 0.2s !important;
+    .btn-add-desktop.added-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
     }
 
-    .qty-counter-desktop button:hover {
-        background: #e0f2fe !important;
-    }
-
-    .qty-counter-desktop .qty-val {
-        min-width: 30px !important;
-        text-align: center !important;
-        font-weight: 700 !important;
-        color: var(--color-brand-blue-primary) !important;
-        font-size: 0.95rem !important;
-    }
-
-    /* Info Tabs (Pill row on top, comfortable content below) */
+    /* Info Tabs */
     .info-tabs {
         margin-top: 8px !important;
         display: flex !important;
@@ -4655,7 +4778,9 @@ textarea {
         display: block !important;
     }
 
-    /* Sidebar (Sticky & Refined) */
+    /* ========================================================
+       3. SIDEBAR (SIMILAR & TRENDING CARDS REWORK)
+       ======================================================== */
     .sidebar {
         grid-area: side;
         display: flex !important;
@@ -4672,7 +4797,7 @@ textarea {
         flex-direction: column !important;
         background: #FFFFFF !important;
         border-radius: 16px !important;
-        padding: 14px !important;
+        padding: 12px !important;
         border: 1px solid rgba(220, 180, 0, 0.25) !important;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04) !important;
         max-height: 100% !important;
@@ -4703,18 +4828,202 @@ textarea {
     #side-content {
         flex: 1 1 auto;
         overflow-y: auto !important;
-        overflow-x: hidden;
-        padding-right: 4px;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+        overflow-x: hidden !important;
+        padding-right: 4px !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(0, 0, 0, 0.15) transparent !important;
         max-height: 380px;
+    }
+
+    #side-content::-webkit-scrollbar {
+        width: 4px !important;
+    }
+
+    #side-content::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15) !important;
+        border-radius: 4px !important;
+    }
+
+    /* Refined Similar / Trending Cards on Desktop */
+    .sim-item {
+        display: flex !important;
+        align-items: center !important;
+        padding: 8px !important;
+        gap: 10px !important;
+        border-radius: 10px !important;
+        border: 1px solid #f1f5f9 !important;
+        background: #ffffff !important;
+        margin-bottom: 8px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.2s ease !important;
+        min-width: 0 !important;
+    }
+
+    .sim-item:hover {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .sim-item img,
+    .sim-item .sim-img,
+    .sidebar-product-thumb {
+        width: 54px !important;
+        height: 54px !important;
+        min-width: 54px !important;
+        max-width: 54px !important;
+        border-radius: 8px !important;
+        object-fit: contain !important;
+        background: #f8fafc !important;
+        border: 1px solid #f1f5f9 !important;
+        flex-shrink: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .sim-info {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .sim-info .product-descriptor {
+        font-size: 0.64rem !important;
+        font-weight: 700 !important;
+        color: #94a3b8 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.4px !important;
+        margin: 0 0 1px 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.2 !important;
+    }
+
+    .sim-info h4 {
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        line-height: 1.25 !important;
+        color: #1e293b !important;
+        margin: 0 0 2px 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .sim-info .product-tagline,
+    .sim-info > span {
+        font-size: 0.72rem !important;
+        color: #64748b !important;
+        margin: 0 0 4px 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+    }
+
+    .price-action-row {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        margin-top: 3px !important;
+        min-width: 0 !important;
+    }
+
+    .price-action-row > span {
+        font-size: 0.82rem !important;
+        font-weight: 800 !important;
+        color: var(--color-brand-blue-primary) !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    .price-action-row > span span {
+        font-size: 0.72rem !important;
+        font-weight: 500 !important;
+        color: #64748b !important;
+    }
+
+    .sim-item .btn-add,
+    .sim-item .sidebar-add-btn {
+        width: auto !important;
+        min-width: 52px !important;
+        height: 26px !important;
+        line-height: 26px !important;
+        padding: 0 10px !important;
+        font-size: 0.76rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.3px !important;
+        border-radius: 6px !important;
+        background: var(--color-brand-blue-primary) !important;
+        color: #ffffff !important;
+        border: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        cursor: pointer !important;
+        box-shadow: 0 2px 6px rgba(0, 119, 182, 0.2) !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .sim-item .btn-add:hover,
+    .sim-item .sidebar-add-btn:hover {
+        background: #005f92 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 10px rgba(0, 119, 182, 0.3) !important;
+    }
+
+    .sim-item .sidebar-qty-controls {
+        height: 26px !important;
+        min-width: 62px !important;
+        border-radius: 6px !important;
+        background: var(--color-brand-blue-primary) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+        border: none !important;
+    }
+
+    .sim-item .sidebar-qty-controls button {
+        width: 20px !important;
+        height: 100% !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        transition: background 0.15s !important;
+    }
+
+    .sim-item .sidebar-qty-controls button:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .sim-item .sidebar-qty-controls .qty-val {
+        min-width: 18px !important;
+        text-align: center !important;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        padding: 0 2px !important;
     }
 }
 
 /* === LARGE DESKTOP (1440px and wider) === */
 @media (min-width: 1440px) {
     .grid-layout {
-        grid-template-columns: minmax(0, 1fr) 300px !important;
+        grid-template-columns: minmax(0, 1fr) 320px !important;
         gap: 26px !important;
         max-width: 1380px !important;
     }
@@ -4734,7 +5043,7 @@ textarea {
 /* === COMPACT LAPTOPS (1024px to 1200px) === */
 @media (min-width: 1024px) and (max-width: 1200px) {
     .grid-layout {
-        grid-template-columns: minmax(0, 1fr) 240px !important;
+        grid-template-columns: minmax(0, 1fr) 270px !important;
         gap: 16px !important;
         width: 96vw !important;
     }
