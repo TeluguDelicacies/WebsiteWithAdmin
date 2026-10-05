@@ -50,7 +50,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="/sales-page.css?v=2.1">
+    <link rel="stylesheet" href="/sales-page.css?v=2.2">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -1727,19 +1727,35 @@ window.generateProductLink = function(product, variantQuantity) {
 
             <!-- GROUP 2: Price, Variant Dropdown -->
             <div class="detail-group detail-group-price">
-                <div class="price-row-container">
-                    <div class="price-row">
-                        <span class="current-price" id="view-price">₹${defaultV.price}</span>
-                        <span class="mrp-strike" id="view-mrp"
-                            style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}">₹${defaultV.mrp}</span>
-                        <span class="discount-badge" id="view-discount"
-                            style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}"></span>
-                        <div class="packaging-type-inline" id="view-pkg-inline" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'none' : 'block'};">
+                <div class="price-action-cluster">
+                    <div class="price-row-container">
+                        <div class="price-row">
+                            <span class="current-price" id="view-price">₹${defaultV.price}</span>
+                            <span class="mrp-strike" id="view-mrp"
+                                style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}">₹${defaultV.mrp}</span>
+                            <span class="discount-badge" id="view-discount"
+                                style="${defaultV.mrp > defaultV.price ? '' : 'display:none'}"></span>
+                            <div class="packaging-type-inline" id="view-pkg-inline" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'none' : 'block'};">
+                                (${defaultV.packaging_type || ''})
+                            </div>
+                        </div>
+                        <div class="packaging-type-block" id="view-pkg-block" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'block' : 'none'};">
                             (${defaultV.packaging_type || ''})
                         </div>
                     </div>
-                    <div class="packaging-type-block" id="view-pkg-block" style="font-size: 0.9rem; color: #64748b; font-weight: 500; display: ${defaultV.mrp > defaultV.price ? 'block' : 'none'};">
-                        (${defaultV.packaging_type || ''})
+
+                    <!-- Desktop Add to Cart & Qty Counter (Prominent next to price) -->
+                    <div class="desktop-action-container" onclick="event.stopPropagation()">
+                        <button class="btn-add-desktop" id="detailAddBtnDesktop" 
+                            onclick="event.stopPropagation(); window.addToCartFromDetail()">
+                            <i class="fas fa-shopping-cart"></i> <span>Add to Cart</span>
+                        </button>
+                        <div class="qty-counter-desktop" id="detailQtyCounterDesktop" style="display:none;"
+                            onclick="event.stopPropagation()">
+                            <button onclick="event.stopPropagation(); window.updateDetailQty(-1)">-</button>
+                            <span class="qty-val" id="detailQtyValDesktop">1</span>
+                            <button onclick="event.stopPropagation(); window.updateDetailQty(1)">+</button>
+                        </div>
                     </div>
                 </div>
 
@@ -1757,10 +1773,10 @@ window.generateProductLink = function(product, variantQuantity) {
                 </div>
             </div>
 
-            <!-- GROUP 3: About Product Button, Info Tabs -->
+            <!-- GROUP 3: Info Tabs -->
             <div class="detail-group detail-group-actions">
-                <!-- About Product Toggle Button (Desktop Only) -->
-                <div class="toggle-btn-container toggle-desktop">
+                <!-- About Product Toggle Button (Hidden on desktop in favor of integrated tab) -->
+                <div class="toggle-btn-container toggle-desktop" style="display:none !important;">
                     <button id="toggleDescriptionBtnDesktop" onclick="toggleFlip()" class="action-btn-pill outline toggleDescriptionBtn">
                         <i class="fas fa-info-circle"></i> About Product
                     </button>
@@ -1771,9 +1787,10 @@ window.generateProductLink = function(product, variantQuantity) {
                         <!-- Buttons injected here -->
                     </div>
                     <div class="info-content-wrapper">
-                        <div id="ingredients-content" class="info-content-block"></div>
+                        <div id="about-content" class="info-content-block"></div>
                         <div id="nutrition-content" class="info-content-block"></div>
                         <div id="usage-content" class="info-content-block"></div>
+                        <div id="ingredients-content" class="info-content-block"></div>
                         <div id="shelf-life-content" class="info-content-block"></div>
                     </div>
                 </div>
@@ -2535,12 +2552,10 @@ window.generateProductLink = function(product, variantQuantity) {
                 // 1. Check if ACTUAL nutrition data exists (not just serving info)
                 const hasActualNutritionData = fields.some(f => getVal(f.k) !== null);
 
-                // Build inline text with separators
-                const items = [];
-
-                // 2. Only calculate/show servings if actual nutrition data exists
+                // Build serving meta
+                const metaParts = [];
                 if (hasActualNutritionData) {
-                    if (servingSize) items.push(`<strong>Serving:</strong> ${servingSize}`);
+                    if (servingSize) metaParts.push(`<strong>Serving:</strong> ${servingSize}`);
 
                     // Calculate Servings per pack from variant
                     let displayedServings = null;
@@ -2551,27 +2566,27 @@ window.generateProductLink = function(product, variantQuantity) {
                             displayedServings = Math.round(packWeight / sSize);
                         }
                     }
-                    // Fallback to totalServings if calculation failed
                     if (!displayedServings && totalServings) {
                         displayedServings = totalServings;
                     }
 
-                    if (displayedServings) items.push(`<strong>~${displayedServings} servings</strong>`);
+                    if (displayedServings) metaParts.push(`<strong>~${displayedServings} servings</strong>`);
                 }
 
-                // Add nutrition fields
+                // Build modern chip badges
+                const chipItems = [];
                 fields.forEach(f => {
                     const val = getVal(f.k);
                     if (val !== null) {
-                        items.push(`<strong>${f.label}:</strong> ${val}`);
+                        chipItems.push(`<div class="nutrition-chip"><span class="chip-label">${f.label}</span><span class="chip-val">${val}</span></div>`);
                     }
                 });
 
-                // 3. If no items to show, return empty
-                if (items.length === 0) return '';
+                if (chipItems.length === 0) return '';
 
-                // Return as inline wrapped text with comma separators
-                return `<p style="color:var(--text-secondary); margin:0; text-align:justify;">${items.join(', ')}</p>`;
+                const metaHtml = metaParts.length > 0 ? `<div class="nutrition-serving-meta">${metaParts.join(' &nbsp;•&nbsp; ')}</div>` : '';
+
+                return `<div class="nutrition-panel">${metaHtml}<div class="nutrition-chips-grid">${chipItems.join('')}</div></div>`;
             };
 
             // Count actual nutrition values (not serving info)
@@ -2580,9 +2595,20 @@ window.generateProductLink = function(product, variantQuantity) {
                 nutritionData[k] !== undefined && nutritionData[k] !== null && nutritionData[k] !== ''
             ).length : 0;
 
-            // === BUILD SECTIONS IN ORDER: Nutrition, Usage, Ingredients, Use By ===
+            // === BUILD SECTIONS IN ORDER: About, Nutrition, Usage, Ingredients, Use By ===
 
-            // 1. Nutrition (first tab)
+            // 0. About Product (First tab)
+            if (p.product_description) {
+                sections.push({
+                    id: 'about',
+                    label: 'About',
+                    icon: 'fas fa-info-circle',
+                    target: 'about-content',
+                    html: `<p style="margin:0; line-height:1.6; color:#334155; font-size:0.95rem;">${p.product_description.replace(/\n/g, '<br>')}</p>`
+                });
+            }
+
+            // 1. Nutrition
             if (actualNutritionCount > 0) {
                 sections.push({
                     id: 'nut',
@@ -2596,7 +2622,7 @@ window.generateProductLink = function(product, variantQuantity) {
             // 2. Usage
             if (p.serving_suggestion) {
                 sections.push({
-                    id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p style="text-align:justify;">
+                    id: 'use', label: 'Usage', icon: 'fas fa-utensils', target: 'usage-content', html: `<p style="margin:0; line-height:1.6; color:#334155; font-size:0.95rem;">
             ${p.serving_suggestion}</p>`
                 });
             }
@@ -2605,13 +2631,13 @@ window.generateProductLink = function(product, variantQuantity) {
             if (p.ingredients) {
                 sections.push({
                     id: 'ing', label: 'Ingredients', icon: 'fas fa-carrot', target: 'ingredients-content', html: `
-        <p style="text-align:justify;">${p.ingredients}</p>`
+        <p style="margin:0; line-height:1.6; color:#334155; font-size:0.95rem;">${p.ingredients}</p>`
                 });
             }
 
             // 4. Use By (Shelf Life)
             if (p.shelf_life && p.shelf_life.toString().trim() !== '') {
-                let shelfText = `<p style="text-align:justify; margin:0;">The product is best consumed within <strong>${p.shelf_life}</strong> days from the date of packing.</p>`;
+                let shelfText = `<p style="margin:0; line-height:1.6; color:#334155; font-size:0.95rem;">The product is best consumed within <strong>${p.shelf_life}</strong> days from the date of packing.</p>`;
 
                 // Refrigeration Alert Append (Visual Icon/Box)
                 if (p.is_refrigerated) {
@@ -2691,12 +2717,13 @@ window.generateProductLink = function(product, variantQuantity) {
                 }
             };
 
-            // Auto-activate default tab (Nutrition if available, else first available)
+            // Auto-activate default tab (About if available, else Nutrition, else first available)
             setTimeout(() => {
                 if (!btnContainer) return;
+                const aboutBtn = document.getElementById('btn-about');
                 const nutBtn = document.getElementById('btn-nut');
                 const firstBtn = btnContainer.querySelector('.info-btn');
-                const activeBtn = nutBtn || firstBtn;
+                const activeBtn = aboutBtn || nutBtn || firstBtn;
                 if (activeBtn) activeBtn.click();
             }, 100);
         }
@@ -3217,23 +3244,29 @@ window.generateProductLink = function(product, variantQuantity) {
 
             const qty = cartItem ? cartItem.qty : 0;
 
-            const btnAdd = document.getElementById('detailAddBtnOverlay');
-            const qtyCounter = document.getElementById('detailQtyCounterOverlay');
-            const qtyVal = document.getElementById('detailQtyValOverlay');
-
-            if (btnAdd && qtyCounter && qtyVal) {
-                if (qty > 0) {
-                    btnAdd.style.display = 'none';
-                    qtyCounter.style.display = 'flex';
-                    qtyVal.innerText = qty;
-                } else {
-                    btnAdd.style.display = 'block';
-                    qtyCounter.style.display = 'none';
-                    // Reset add input to 1?
-                    const detailQtyInput = document.getElementById('detailQty');
-                    if (detailQtyInput) detailQtyInput.value = 1;
+            const syncBtnPair = (btnAdd, qtyCounter, qtyVal) => {
+                if (btnAdd && qtyCounter && qtyVal) {
+                    if (qty > 0) {
+                        btnAdd.style.display = 'none';
+                        qtyCounter.style.display = 'flex';
+                        qtyVal.innerText = qty;
+                    } else {
+                        btnAdd.style.display = '';
+                        qtyCounter.style.display = 'none';
+                    }
                 }
-            }
+            };
+
+            syncBtnPair(
+                document.getElementById('detailAddBtnOverlay'),
+                document.getElementById('detailQtyCounterOverlay'),
+                document.getElementById('detailQtyValOverlay')
+            );
+            syncBtnPair(
+                document.getElementById('detailAddBtnDesktop'),
+                document.getElementById('detailQtyCounterDesktop'),
+                document.getElementById('detailQtyValDesktop')
+            );
         };
 
         window.removeItem = function (index) {

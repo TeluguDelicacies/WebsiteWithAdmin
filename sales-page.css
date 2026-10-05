@@ -4259,10 +4259,67 @@ textarea {
 }
 
 /* ========================================
-   DESKTOP RESPONSIVE LAYOUT SYSTEM
-   Optimized for varying desktop resolutions:
-   1024px, 1280px, 1366px, 1440px, 1920px+
+   DESKTOP RESPONSIVE LAYOUT SYSTEM (REFINED)
+   Optimized for Laptop (1024px-1366px), Standard (1440px), & Ultrawide (1920px+)
    ======================================== */
+
+/* Nutrition Panel & Chips (All devices) */
+.nutrition-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.nutrition-serving-meta {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
+    padding-bottom: 2px;
+}
+
+.nutrition-chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.nutrition-chip {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 4px 10px;
+    min-width: 60px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.nutrition-chip .chip-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 1px;
+}
+
+.nutrition-chip .chip-val {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--color-brand-blue-primary);
+}
+
+/* Hide desktop purchase actions on mobile */
+@media (max-width: 1023px) {
+    .desktop-action-container {
+        display: none !important;
+    }
+}
+
+/* === DESKTOP VIEWPORT LAYOUT === */
 @media (min-width: 1024px) {
 
     /* Normal smooth scrolling on desktop */
@@ -4272,15 +4329,16 @@ textarea {
         height: auto !important;
     }
 
-    /* Main container: Generous clearance below fixed header */
+    /* Main container: Clean 76px clearance + soft warm background */
     .sales-page-container {
-        min-height: calc(100vh - 100px);
+        min-height: calc(100vh - 76px);
         display: flex !important;
         flex-direction: column !important;
         overflow: visible !important;
-        padding-top: 100px !important; /* 75-80px header + 20-25px safe buffer */
-        padding-bottom: 40px !important;
+        padding-top: 76px !important;
+        padding-bottom: 24px !important;
         width: 100%;
+        background: linear-gradient(180deg, #FDFCF9 0%, #F7F3E9 100%) !important;
     }
 
     /* Outer Grid: Balanced 2-column layout (Product Card + Sidebar) */
@@ -4291,9 +4349,9 @@ textarea {
             "main  side";
         grid-template-columns: minmax(0, 1fr) 280px !important;
         grid-template-rows: auto 1fr !important;
-        gap: 20px 24px !important;
+        gap: 14px 22px !important;
         width: 95vw !important;
-        max-width: 1400px !important;
+        max-width: 1320px !important;
         margin: 0 auto !important;
         overflow: visible !important;
         min-height: 0;
@@ -4301,41 +4359,41 @@ textarea {
         max-height: none !important;
     }
 
-    /* Breadcrumb section */
+    /* Breadcrumb section - Compact */
     .breadcrumb-section {
         grid-area: bread;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
-        min-height: 40px;
-        margin-top: 0 !important;
+        min-height: 32px !important;
+        margin-top: 4px !important;
         margin-bottom: 4px !important;
         padding: 0 !important;
     }
 
-    /* Main Product Card */
+    /* Main Product Card - Fits within laptop viewport */
     .main-product-area {
         grid-area: main;
         display: grid !important;
-        grid-template-columns: minmax(340px, 440px) minmax(0, 1fr) !important;
-        gap: 28px !important;
+        grid-template-columns: 340px minmax(0, 1fr) !important;
+        gap: 24px !important;
         align-items: start !important;
-        padding: 24px 28px !important;
+        padding: 20px 24px !important;
         background: #FFFFFF !important;
-        border-radius: 20px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-        border: 1px solid var(--border-light) !important;
+        border-radius: 18px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04) !important;
+        border: 1px solid rgba(0, 0, 0, 0.06) !important;
         overflow: visible !important;
         min-height: 0 !important;
         max-height: none !important;
         height: auto !important;
     }
 
-    /* Gallery (Left Column) */
+    /* Gallery (Left Column) - Clean, Uncluttered Image */
     .main-product-area .gallery-wrapper {
         position: relative;
         width: 100% !important;
-        max-width: 440px !important;
+        max-width: 340px !important;
         margin: 0 auto !important;
         display: flex !important;
         flex-direction: column !important;
@@ -4346,18 +4404,94 @@ textarea {
 
     .main-product-area .product-gallery {
         width: 100% !important;
-        max-width: 440px !important;
+        max-width: 340px !important;
         aspect-ratio: 1 / 1 !important;
         height: auto !important;
         perspective: 1200px;
         border-right: none !important;
+        border-radius: 14px !important;
+        overflow: hidden !important;
+        border: 1px solid var(--border-light) !important;
+        background: #FFFFFF !important;
+    }
+
+    /* Hide the image overlay Add button on desktop (moved to price section) */
+    .main-product-area .gallery-front .card-action-container {
+        display: none !important;
+    }
+
+    /* Desktop Thumbnails: Clean strip UNDER the image, no dark overlay */
+    .gallery-wrapper .image-thumbnail-strip {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin: 10px auto 0 auto !important;
+        padding: 0 !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 340px !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .gallery-wrapper .image-thumb {
+        width: 48px !important;
+        height: 48px !important;
+        border-radius: 8px !important;
+        border: 2px solid var(--border-light) !important;
+        overflow: hidden !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        background: white !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .gallery-wrapper .image-thumb:hover {
+        border-color: var(--color-brand-blue-primary) !important;
+        transform: translateY(-2px) !important;
+    }
+
+    .gallery-wrapper .image-thumb.active {
+        border-color: var(--color-brand-blue-primary) !important;
+        box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.25) !important;
+    }
+
+    .gallery-wrapper .image-thumb .thumb-tag {
+        display: none !important;
+    }
+
+    /* Subtle caption disclaimer under image on desktop */
+    .product-disclaimer-overlay {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        font-size: 0.72rem !important;
+        color: #94a3b8 !important;
+        padding: 4px 0 0 0 !important;
+        margin: 4px auto 0 auto !important;
+        text-align: center !important;
+        font-style: italic !important;
     }
 
     /* Product Details (Right Column) */
     .main-product-area .product-details {
         display: flex !important;
         flex-direction: column !important;
-        gap: 16px !important;
+        gap: 10px !important;
         min-width: 0 !important;
         overflow: visible !important;
         max-height: none !important;
@@ -4372,38 +4506,175 @@ textarea {
         padding: 0 !important;
     }
 
-    /* Info Tabs (Full Width, No Nested Scrollbars) */
+    /* Compact Typography */
+    .product-title {
+        font-size: 1.55rem !important;
+        line-height: 1.25 !important;
+        font-weight: 700 !important;
+        margin: 0 0 2px 0 !important;
+    }
+
+    .telugu-title {
+        font-size: 1.05rem !important;
+        color: var(--color-brand-blue-secondary) !important;
+        font-weight: 600 !important;
+        margin: 0 0 2px 0 !important;
+    }
+
+    .product-tagline {
+        font-size: 0.92rem !important;
+        color: #64748b !important;
+        font-style: italic !important;
+        margin: 0 0 6px 0 !important;
+    }
+
+    /* Price & Purchase Action Cluster */
+    .price-action-cluster {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 14px !important;
+        padding: 6px 0 !important;
+        border-bottom: 1px dashed var(--border-light) !important;
+        margin-bottom: 6px !important;
+    }
+
+    .current-price {
+        font-size: 1.8rem !important;
+        font-weight: 800 !important;
+        color: var(--color-brand-blue-primary) !important;
+    }
+
+    .price-row {
+        align-items: baseline !important;
+        gap: 8px !important;
+        margin-bottom: 2px !important;
+    }
+
+    /* Prominent Desktop Add-to-Cart Button */
+    .desktop-action-container {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .btn-add-desktop {
+        background: var(--color-brand-blue-primary) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        font-size: 0.92rem !important;
+        padding: 9px 18px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        cursor: pointer !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 12px rgba(0, 119, 182, 0.25) !important;
+    }
+
+    .btn-add-desktop:hover {
+        background: var(--color-primary-dark, #005f92) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 16px rgba(0, 119, 182, 0.35) !important;
+    }
+
+    .qty-counter-desktop {
+        display: flex !important;
+        align-items: center !important;
+        background: white !important;
+        border: 2px solid var(--color-brand-blue-primary) !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 12px rgba(0, 119, 182, 0.15) !important;
+    }
+
+    .qty-counter-desktop button {
+        background: #f0f9ff !important;
+        border: none !important;
+        color: var(--color-brand-blue-primary) !important;
+        width: 34px !important;
+        height: 36px !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        transition: background 0.2s !important;
+    }
+
+    .qty-counter-desktop button:hover {
+        background: #e0f2fe !important;
+    }
+
+    .qty-counter-desktop .qty-val {
+        min-width: 30px !important;
+        text-align: center !important;
+        font-weight: 700 !important;
+        color: var(--color-brand-blue-primary) !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Info Tabs (Pill row on top, comfortable content below) */
     .info-tabs {
+        margin-top: 8px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
         max-height: none !important;
         overflow: visible !important;
-        margin-top: 12px !important;
+    }
+
+    .info-btns-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        margin: 0 !important;
+    }
+
+    .info-btn {
+        height: 32px !important;
+        padding: 0 12px !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        border-radius: 6px !important;
+    }
+
+    .info-content-block {
+        padding: 12px 16px !important;
+        min-height: 65px !important;
+        max-height: 125px !important;
+        overflow-y: auto !important;
+        background: #F8FAFC !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border-light) !important;
+        font-size: 0.9rem !important;
+        line-height: 1.5 !important;
     }
 
     .info-content-block.active {
-        max-height: none !important;
-        overflow: visible !important;
+        display: block !important;
     }
 
-    /* Sidebar (Sticky on Desktop) */
+    /* Sidebar (Sticky & Refined) */
     .sidebar {
         grid-area: side;
         display: flex !important;
         flex-direction: column !important;
         position: sticky !important;
-        top: 100px !important;
+        top: 86px !important;
         align-self: start !important;
-        max-height: calc(100vh - 120px) !important;
+        max-height: calc(100vh - 100px) !important;
         overflow: hidden !important;
     }
 
     .sidebar-card {
         display: flex !important;
         flex-direction: column !important;
-        background: var(--color-brand-yellow-light, #FFF9C4) !important;
-        border-radius: 20px !important;
-        padding: 16px !important;
-        border: 1px solid rgba(220, 180, 0, 0.2) !important;
-        box-shadow: 0 8px 24px rgba(220, 180, 0, 0.12) !important;
+        background: #FFFFFF !important;
+        border-radius: 16px !important;
+        padding: 14px !important;
+        border: 1px solid rgba(220, 180, 0, 0.25) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04) !important;
         max-height: 100% !important;
         overflow: hidden !important;
     }
@@ -4411,8 +4682,22 @@ textarea {
     .sidebar-tabs {
         flex-shrink: 0;
         display: flex;
-        gap: 8px;
-        margin-bottom: 12px;
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+
+    .sidebar-tab {
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .sidebar-tab.active {
+        background: var(--color-brand-yellow);
+        color: #0F172A;
     }
 
     #side-content {
@@ -4421,50 +4706,52 @@ textarea {
         overflow-x: hidden;
         padding-right: 4px;
         scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+        max-height: 380px;
     }
 }
 
 /* === LARGE DESKTOP (1440px and wider) === */
 @media (min-width: 1440px) {
     .grid-layout {
-        grid-template-columns: minmax(0, 1fr) 320px !important;
-        gap: 28px !important;
-        max-width: 1440px !important;
+        grid-template-columns: minmax(0, 1fr) 300px !important;
+        gap: 26px !important;
+        max-width: 1380px !important;
     }
 
     .main-product-area {
-        grid-template-columns: 460px minmax(0, 1fr) !important;
-        gap: 36px !important;
-        padding: 30px 36px !important;
+        grid-template-columns: 380px minmax(0, 1fr) !important;
+        gap: 30px !important;
+        padding: 24px 30px !important;
     }
 
     .main-product-area .gallery-wrapper,
     .main-product-area .product-gallery {
-        max-width: 460px !important;
+        max-width: 380px !important;
     }
 }
 
-/* === SMALL DESKTOP / COMPACT LAPTOPS (1024px to 1200px) === */
+/* === COMPACT LAPTOPS (1024px to 1200px) === */
 @media (min-width: 1024px) and (max-width: 1200px) {
     .grid-layout {
-        grid-template-columns: minmax(0, 1fr) 250px !important;
+        grid-template-columns: minmax(0, 1fr) 240px !important;
         gap: 16px !important;
         width: 96vw !important;
     }
 
     .main-product-area {
-        grid-template-columns: 320px minmax(0, 1fr) !important;
-        gap: 20px !important;
-        padding: 18px 20px !important;
+        grid-template-columns: 290px minmax(0, 1fr) !important;
+        gap: 18px !important;
+        padding: 16px 18px !important;
     }
 
     .main-product-area .gallery-wrapper,
     .main-product-area .product-gallery {
-        max-width: 320px !important;
+        max-width: 290px !important;
     }
 
     .product-title {
-        font-size: 1.5rem !important;
+        font-size: 1.4rem !important;
     }
 }
 
