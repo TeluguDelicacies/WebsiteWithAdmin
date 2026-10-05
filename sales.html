@@ -50,7 +50,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="/sales-page.css?v=2.6">
+    <link rel="stylesheet" href="/sales-page.css?v=2.7">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -858,7 +858,7 @@ window.generateProductLink = function(product, variantQuantity) {
                     ${window.renderSmartBreadcrumbs('all-products', '')}
                 </div>
 
-                <section class="category-grid-container" style="width:95%; max-width:95%; margin:0 auto; padding-bottom:50px;">
+                <section class="category-grid-container">
                     <!-- Widget Header -->
                     ${window.renderBrandWidget()}
 
@@ -995,7 +995,7 @@ window.generateProductLink = function(product, variantQuantity) {
                     ${window.renderSmartBreadcrumbs(slug, '')}
                 </div>
 
-                <section class="category-grid-container" style="width:95%; max-width:95%; margin:0 auto; padding-bottom:50px;">
+                <section class="category-grid-container">
                     <!-- Header -->
                     <div class="category-header-simple">
                         <div>
@@ -1296,79 +1296,76 @@ window.generateProductLink = function(product, variantQuantity) {
             return `
             <article class="product-card" id="card-${product.id}" data-subcategory="${escapeHTML(product.sub_category || '')}" data-variants='${JSON.stringify(sortedVariants).replace(/'/g, "&apos;")}' data-current-idx="0">
                 
-                 <!-- Image Area -->
+                <!-- Image Area (Clean, Unobstructed Image with Optional Subtle Discount Badge) -->
                 <div class="card-image-container">
                     <img src="${displayImg}" 
-                         alt="${product.product_name}" 
+                         alt="${escapeHTML(product.product_name)}" 
                          class="product-image" 
                          loading="lazy"
                          onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
-                    
-                    <!-- Floating Action -->
-                    <div class="card-action-container">
-                         <!-- Add Button (Visible if Qty 0) -->
-                        <button class="btn-add" id="btn-add-${product.id}" 
-                                style="${qty > 0 ? 'display:none' : ''}"
-                                onclick="window.gridAddToCart('${product.id}')">
-                            ADD
-                        </button>
-                        
-                        <!-- Qty Counter (Visible if Qty > 0) -->
-                        <div class="qty-counter" id="qty-counter-${product.id}" 
-                             style="${qty > 0 ? 'display:flex' : 'display:none'}">
-                            <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', -1)">-</button>
-                            <span class="qty-val" id="qty-val-${product.id}">${qty}</span>
-                            <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', 1)">+</button>
-                        </div>
-                    </div>
+                    ${discountTag ? `<div class="card-badge-container">${discountTag}</div>` : ''}
                 </div>
 
                 <!-- Info Area -->
                 <div class="card-info">
-                     <!-- 1. Sub-Brand (Top) -->
-                     <!-- Sub-brand removed per user request -->
-
-                     <!-- 2. English Title -->
-                    ${product.discriptor ? `<p class="product-descriptor" title="${product.discriptor}">${product.discriptor}</p>` : ''}
+                    ${product.discriptor ? `<p class="product-descriptor" title="${escapeHTML(product.discriptor)}">${escapeHTML(product.discriptor)}</p>` : ''}
+                    
                     <h3 class="product-title" onclick="navigateToProduct('${product.slug || product.id}', 'fade')">
-                        ${product.product_name}
+                        ${escapeHTML(product.product_name)}
                     </h3>
 
-                    <!-- 3. Telugu Title -->
-                    <p class="product-subtitle">${product.product_name_telugu || category.telugu_title || ''}</p>
+                    <p class="product-subtitle">${escapeHTML(product.product_name_telugu || category.telugu_title || '')}</p>
 
-                    <!-- 4. Variant Selector (Relocated below tagline) -->
+                    <!-- Variant Selector Dropdown -->
                     ${sortedVariants.length > 0 ? `
-                        <div class="variant-selector" onclick="window.toggleGridVariantDropdown('${product.id}')" tabindex="0">
-                            <span class="current-variant" id="var-label-${product.id}">${defaultVar.quantity || 'Standard'}</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <!-- Dropdown List -->
-                        <div class="variant-dropdown-list" id="var-list-${product.id}" style="display:none; position:absolute; bottom:50px; left:12px; background:white; border:1px solid #eee; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:20; width:150px; overflow:hidden;">
-                            ${sortedVariants.map((v, idx) => `
-                                <div class="var-option" 
-                                     style="padding:8px 14px; font-size:0.8rem; cursor:pointer; color:#333; border-bottom:1px solid #f0f0f0;" 
-                                     onclick="window.selectGridVariant('${product.id}', ${idx})">
-                                    <div class="variant-info">
-                                        <div class="variant-qty" style="font-weight:600; font-size:0.85rem;">${v.quantity}</div>
-                                        ${v.packaging_type ? `<div class="variant-pkg" style="font-size:0.7rem; color:#666;">${v.packaging_type}</div>` : ''}
+                        <div class="card-variant-selector-wrapper">
+                            <div class="variant-selector" onclick="window.toggleGridVariantDropdown('${product.id}')" tabindex="0">
+                                <span class="current-variant" id="var-label-${product.id}">${defaultVar.quantity}${defaultVar.packaging_type ? ` • ${defaultVar.packaging_type}` : ''}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <!-- Dropdown List -->
+                            <div class="variant-dropdown-list" id="var-list-${product.id}">
+                                ${sortedVariants.map((v, idx) => `
+                                    <div class="var-option" onclick="window.selectGridVariant('${product.id}', ${idx})">
+                                        <div class="variant-info">
+                                            <div class="variant-qty">${v.quantity}</div>
+                                            ${v.packaging_type ? `<div class="variant-pkg">${v.packaging_type}</div>` : ''}
+                                        </div>
+                                        <div class="var-price">₹${v.price}</div>
                                     </div>
-                                    <div style="font-size:0.75rem; color:#666; font-weight:700;">₹${v.price}</div>
-                                </div>
-                            `).join('')}
+                                `).join('')}
+                            </div>
                         </div>
                     ` : ''}
 
-                     <!-- 5. Price Row -->
-                    <div class="price-row">
-                        <span class="price-pill" id="price-${product.id}">₹${defaultVar.price}</span>
-                        ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
-                        ${discountTag}
-                    </div>
+                    <!-- Footer: Price on Left, ADD Action on Right -->
+                    <div class="card-footer-cta">
+                        <div class="price-cluster">
+                            <div class="price-main">
+                                <span class="price-amount" id="price-${product.id}">₹${defaultVar.price}</span>
+                                ${defaultVar.mrp > defaultVar.price ? `<span class="mrp" id="mrp-${product.id}">₹${defaultVar.mrp}</span>` : ''}
+                            </div>
+                            <div class="packaging-type" id="pkg-${product.id}">
+                                ${defaultVar.packaging_type || ''}
+                            </div>
+                        </div>
 
-                    <!-- 6. Packaging Type (New) -->
-                    <div class="packaging-type" id="pkg-${product.id}" style="font-size: 0.75rem; color: #64748b; margin-top: 4px; font-weight: 500;">
-                        ${defaultVar.packaging_type || ''}
+                        <div class="card-action-container">
+                            <!-- Add Button (Visible if Qty 0) -->
+                            <button class="btn-add" id="btn-add-${product.id}" 
+                                    style="${qty > 0 ? 'display:none' : 'display:inline-flex'}"
+                                    onclick="window.gridAddToCart('${product.id}')">
+                                <i class="fas fa-plus"></i> ADD
+                            </button>
+                            
+                            <!-- Qty Counter (Visible if Qty > 0) -->
+                            <div class="qty-counter" id="qty-counter-${product.id}" 
+                                 style="${qty > 0 ? 'display:inline-flex' : 'display:none'}">
+                                <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', -1)" aria-label="Decrease quantity">−</button>
+                                <span class="qty-val" id="qty-val-${product.id}">${qty}</span>
+                                <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', 1)" aria-label="Increase quantity">+</button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -1441,10 +1438,10 @@ window.generateProductLink = function(product, variantQuantity) {
 
             if (qty > 0) {
                 btnAdd.style.display = 'none';
-                qtyCounter.style.display = 'flex';
+                qtyCounter.style.display = 'inline-flex';
                 qtyVal.innerText = qty;
             } else {
-                btnAdd.style.display = 'block';
+                btnAdd.style.display = 'inline-flex';
                 qtyCounter.style.display = 'none';
             }
         };
@@ -1471,7 +1468,7 @@ window.generateProductLink = function(product, variantQuantity) {
 
             // Update UI Labels
             const label = document.getElementById(`var-label-${productId}`);
-            if (label) label.innerText = variant.quantity;
+            if (label) label.innerText = variant.quantity + (variant.packaging_type ? ` • ${variant.packaging_type}` : '');
 
             const priceEl = document.getElementById(`price-${productId}`);
             if (priceEl) priceEl.innerText = `₹${variant.price}`;
@@ -3737,30 +3734,26 @@ window.generateProductLink = function(product, variantQuantity) {
             }
         });
 
-        // --- Smart Breadcrumbs Helper (Native Select) ---
-        // --- Smart Breadcrumbs Helper (Custom Portal) ---
+        // --- Smart Breadcrumbs Helper ---
         window.renderSmartBreadcrumbs = function (activeCategorySlug, activeProductName) {
-            // 1. Home Link (Desktop & Mobile)
-            // Mobile: Icon only (via CSS classes)
-            // Desktop: Text "Home" (via CSS classes)
-            let html = `<div class="smart-breadcrumbs">
+            let html = `<nav class="smart-breadcrumbs" aria-label="Breadcrumb">
                 <span class="sb-desktop-root">
-                    <a href="/" class="sb-home-link">
-                        <i class="fas fa-home sb-mobile-icon"></i>
+                    <a href="/" class="sb-link sb-home-link" title="Home">
+                        <i class="fas fa-home"></i>
                         <span class="sb-desktop-text">Home</span>
                     </a>
-                    <span class="sep">/</span>
-                    <a href="/all-products" class="sb-all-link" onclick="event.preventDefault(); window.navigateToCategory('all-products')">
-                        <span class="sb-mobile-text">All</span>
+                    <span class="sb-sep"><i class="fas fa-chevron-right"></i></span>
+                    <a href="/all-products" class="sb-link sb-all-link" onclick="event.preventDefault(); window.navigateToCategory('all-products')" title="All Products">
                         <span class="sb-desktop-text">All Products</span>
+                        <span class="sb-mobile-text">All</span>
                     </a>
-                    <span class="sep">/</span>
+                    <span class="sb-sep"><i class="fas fa-chevron-right"></i></span>
                 </span>`;
 
             // 2. Category Dropdown Trigger
             const categories = state.categories;
             let activeCat = categories.find(c => c.slug === activeCategorySlug);
-            let label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'Select Category' : 'Select Category');
+            let label = activeCat ? activeCat.title : (activeCategorySlug === 'all-products' ? 'All Products' : 'Select Category');
 
             if (activeCategorySlug === 'combo-offers') {
                 label = 'Combo Offers';
@@ -3768,17 +3761,18 @@ window.generateProductLink = function(product, variantQuantity) {
 
             // Pass active slug to the opener to highlight it
             html += `
-                <div class="sb-select-wrapper" onclick="event.stopPropagation(); window.openCategoryDropdown(this, '${activeCategorySlug}')">
-                    <span class="sb-label">${label} <i class="fas fa-caret-down"></i></span>
+                <div class="sb-select-pill" onclick="event.stopPropagation(); window.openCategoryDropdown(this, '${activeCategorySlug}')" role="button" tabindex="0" title="Switch Category">
+                    <span class="sb-pill-label">${label}</span>
+                    <i class="fas fa-chevron-down sb-arrow"></i>
                 </div>
             `;
 
             // 3. Product Name (if present)
             if (activeProductName) {
-                html += `<span class="sep">/</span> <span class="current">${activeProductName}</span>`;
+                html += `<span class="sb-sep"><i class="fas fa-chevron-right"></i></span> <span class="sb-current" title="${escapeHTML(activeProductName)}">${escapeHTML(activeProductName)}</span>`;
             }
 
-            html += `</div>`;
+            html += `</nav>`;
             return html;
         };
 
