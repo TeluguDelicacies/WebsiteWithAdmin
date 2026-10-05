@@ -1,5 +1,8 @@
 # Netlify Redirects for Telugu Delicacies
 # -----------------------------------------------------------------------------
+# 0. Supabase API Proxy (bypasses Indian ISP DNS poisoning / blocking of *.supabase.co)
+/api/supabase/*  https://pfffotghmcofyrvqynbl.supabase.co/:splat  200!
+
 # 1. Essential SEO files (serve as is)
 /sitemap.xml    /sitemap.xml    200
 /robots.txt     /robots.txt     200

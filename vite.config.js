@@ -4,7 +4,14 @@ export default defineConfig({
   root: '.',
   server: {
     port: 8000,
-    open: false
+    open: false,
+    proxy: {
+      '/api/supabase': {
+        target: 'https://pfffotghmcofyrvqynbl.supabase.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/supabase/, '')
+      }
+    }
   },
   build: {
     outDir: 'dist',
