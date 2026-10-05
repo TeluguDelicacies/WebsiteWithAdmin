@@ -50,7 +50,7 @@
         href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="dynamic-favicon">
 
     <!-- Isolated Page Styles -->
-    <link rel="stylesheet" href="/sales-page.css?v=2.7">
+    <link rel="stylesheet" href="/sales-page.css?v=2.8">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -1353,14 +1353,14 @@ window.generateProductLink = function(product, variantQuantity) {
                         <div class="card-action-container">
                             <!-- Add Button (Visible if Qty 0) -->
                             <button class="btn-add" id="btn-add-${product.id}" 
-                                    style="${qty > 0 ? 'display:none' : 'display:inline-flex'}"
+                                    style="${qty > 0 ? 'display:none !important;' : 'display:inline-flex !important;'}"
                                     onclick="window.gridAddToCart('${product.id}')">
                                 <i class="fas fa-plus"></i> ADD
                             </button>
                             
                             <!-- Qty Counter (Visible if Qty > 0) -->
                             <div class="qty-counter" id="qty-counter-${product.id}" 
-                                 style="${qty > 0 ? 'display:inline-flex' : 'display:none'}">
+                                 style="${qty > 0 ? 'display:inline-flex !important;' : 'display:none !important;'}">
                                 <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', -1)" aria-label="Decrease quantity">−</button>
                                 <span class="qty-val" id="qty-val-${product.id}">${qty}</span>
                                 <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', 1)" aria-label="Increase quantity">+</button>
@@ -1437,12 +1437,12 @@ window.generateProductLink = function(product, variantQuantity) {
             const qtyVal = document.getElementById(`qty-val-${productId}`);
 
             if (qty > 0) {
-                btnAdd.style.display = 'none';
-                qtyCounter.style.display = 'inline-flex';
+                btnAdd.style.setProperty('display', 'none', 'important');
+                qtyCounter.style.setProperty('display', 'inline-flex', 'important');
                 qtyVal.innerText = qty;
             } else {
-                btnAdd.style.display = 'inline-flex';
-                qtyCounter.style.display = 'none';
+                btnAdd.style.setProperty('display', 'inline-flex', 'important');
+                qtyCounter.style.setProperty('display', 'none', 'important');
             }
         };
 
@@ -3880,7 +3880,7 @@ window.generateProductLink = function(product, variantQuantity) {
                 <div class="breadcrumb-section">
                     ${window.renderSmartBreadcrumbs('combo-offers', '')}
                 </div>
-                <section class="category-grid-container" style="width:95%; max-width:1200px; margin:0 auto; padding-bottom:100px;">
+                <section class="category-grid-container" style="padding-bottom:100px;">
                     <div class="category-header-clean">
                         <div class="cat-title-row">
                             <h2 class="cat-title">Special Combo Offers</h2>

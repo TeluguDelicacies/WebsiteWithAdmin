@@ -3406,6 +3406,10 @@ textarea {
     background: rgba(0, 119, 182, 0.08);
 }
 
+.sb-home-link {
+    margin-left: -6px;
+}
+
 .sb-home-link i {
     font-size: 0.85rem;
     color: #64748b;
@@ -3995,7 +3999,7 @@ textarea {
     font-size: 0.84rem !important;
     letter-spacing: 0.3px !important;
     cursor: pointer !important;
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center !important;
     justify-content: center !important;
     gap: 5px !important;
@@ -4019,7 +4023,7 @@ textarea {
 /* Stepper Counter in Card Footer */
 .card-footer-cta .qty-counter {
     height: 36px !important;
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center !important;
     background: linear-gradient(135deg, #0077b6 0%, #0096c7 100%) !important;
     border-radius: 8px !important;
