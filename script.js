@@ -2479,17 +2479,6 @@ function initializeHeaderNavigation() {
         if (e.key === 'Escape') {
             closeMobileMenu();
             closeWhatsAppQR();
-
-            // Close any open product overlays
-            const openCard = document.querySelector('.master-card.show-product');
-            if (openCard) {
-                const category = openCard.dataset.category;
-                const selectId = `select-${category}`;
-                // Usage of existing closeOverlay function if available
-                if (typeof window.closeOverlay === 'function') {
-                    window.closeOverlay(category, selectId);
-                }
-            }
         }
     });
 }
@@ -2657,40 +2646,27 @@ async function fetchSiteSettings() {
                 if (heroSection) heroSection.style.backgroundImage = `url('${data.hero_background_url}')`;
             }
 
-            // Quick Layout from site_settings (kept for backward compatibility with hero styling)
-            // The actual section visibility is handled by fetchWebsiteSections()
+            // Quick Commerce Hero Styling (Standard E-Commerce Mode)
+            const heroSection = document.querySelector('.hero');
+            const descContainer = document.getElementById('hero-description-container');
 
-            // QUICK COMMERCE HERO STYLING
-            // This only handles the hero visual changes, not section visibility
-            if (data.show_quick_layout) {
-                const heroSection = document.querySelector('.hero');
-                const descContainer = document.getElementById('hero-description-container');
-
-                if (heroSection) {
-                    heroSection.classList.add('hero-quick-commerce');
-                    const bgUrl = data.quick_hero_image_url || './images/quick_commerce_hero.png';
-                    heroSection.style.backgroundImage = `url('${bgUrl}')`;
-                }
-
-                document.body.classList.add('quick-commerce-mode');
-
-                const titleEl = document.getElementById('hero-title');
-                const teluguSubtitleEl = document.getElementById('hero-telugu-subtitle');
-                const subtitleEl = document.getElementById('hero-subtitle');
-
-                if (titleEl) titleEl.innerText = data.quick_hero_title || "Groceries in Minutes";
-                if (teluguSubtitleEl) teluguSubtitleEl.innerText = data.quick_hero_telugu_subtitle || "అవసరమైన సరుకులు, నిమిషాల్లో మీ ఇంటికి";
-                if (subtitleEl) subtitleEl.innerText = data.quick_hero_subtitle || "Freshness delivered at the speed of life.";
-
-                if (descContainer) descContainer.style.display = 'none';
-            } else {
-                const heroSection = document.querySelector('.hero');
-                const descContainer = document.getElementById('hero-description-container');
-
-                if (heroSection) heroSection.classList.remove('hero-quick-commerce');
-                document.body.classList.remove('quick-commerce-mode');
-                if (descContainer) descContainer.style.display = 'block';
+            if (heroSection) {
+                heroSection.classList.add('hero-quick-commerce');
+                const bgUrl = data.quick_hero_image_url || data.hero_background_url || './images/quick_commerce_hero.png';
+                heroSection.style.backgroundImage = `url('${bgUrl}')`;
             }
+
+            document.body.classList.add('quick-commerce-mode');
+
+            const titleEl = document.getElementById('hero-title');
+            const teluguSubtitleEl = document.getElementById('hero-telugu-subtitle');
+            const subtitleEl = document.getElementById('hero-subtitle');
+
+            if (titleEl) titleEl.innerText = data.quick_hero_title || data.hero_title || "Modern Yet Traditional";
+            if (teluguSubtitleEl) teluguSubtitleEl.innerText = data.quick_hero_telugu_subtitle || data.hero_telugu_subtitle || "సాంప్రదాయ రుచులు, ఆధునిక శైలి";
+            if (subtitleEl) subtitleEl.innerText = data.quick_hero_subtitle || data.hero_subtitle || "Timeless tradition, created for today.";
+
+            if (descContainer) descContainer.style.display = 'none';
 
             // Contact Info
             if (data.contact_phone_primary) {
@@ -2834,12 +2810,8 @@ async function fetchWebsiteSections() {
                 collectionsSection.style.display = data.show_collections === false ? 'none' : '';
             }
 
-            // Quick Commerce Layout
-            if (data.show_quick_layout === true) {
-                document.body.classList.add('quick-commerce-mode');
-            } else {
-                document.body.classList.remove('quick-commerce-mode');
-            }
+            // Modern E-Commerce Quick Layout (Standard)
+            document.body.classList.add('quick-commerce-mode');
 
             // Testimonials
             const testimonialsSection = document.querySelector('.testimonials-showcase');
@@ -3592,257 +3564,13 @@ function renderProducts(products, categories) {
         }
     }
 
-    // 2. Render Categories
+    // 2. Render Categories (Modern E-Commerce Quick Layout)
     if (categoriesContainer && categories.length > 0) {
-        // QUICK COMMERCE LAYOUT CHECK
-        // Use newly separated website_sections settings
-        if (window.currentSectionSettings?.show_quick_layout) {
-            renderQuickLayout(products, categories, categoriesContainer);
-            return;
-        }
-
-        categoriesContainer.innerHTML = '';
-
-        categories.forEach(category => {
-            // Filter products for this category
-            // Normalize slug and product category string comparison
-            const catProducts = products.filter(p => {
-                const pCat = (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
-                return pCat === category.slug;
-            });
-
-            // Create Category Card HTML
-            const card = document.createElement('div');
-            card.className = 'master-card';
-            card.dataset.category = category.slug;
-
-            const cardImage = optimizeImage(category.image_url, { width: 400 }) || `./images/categories/${category.slug}.jpg`;
-
-            card.innerHTML = `
-                <div class="card-face card-front">
-                    <div class="card-hero-image" style="position: relative;">
-                        <img src="${escapeHTML(cardImage)}" alt="${escapeHTML(category.title)}" onerror="this.src='./images/placeholder-product-portrait.jpg'">
-                        
-                        <!-- Sub-brand Overlay -->
-                        <div class="sub-brand-overlay">
-                             ${category.sub_brand_logo_url
-                    ? `<img src="${escapeHTML(category.sub_brand_logo_url)}" class="sub-brand-logo-overlay-img" alt="${escapeHTML(category.sub_brand || 'Sub Brand')}">`
-                    : (category.sub_brand ? `<span class="sub-brand-text">${escapeHTML(category.sub_brand)}</span>` : '')}
-                        </div>
-                    </div>
-                    
-                    <div class="card-body">
-                        <div style="margin-bottom: 0.5rem;">
-                            <h3 class="card-title">${escapeHTML(category.title)}</h3>
-                            <p class="telugu-subtitle category-short-desc">${escapeHTML(category.short_description || '')}</p>
-                        </div>
-                        
-                        <p class="card-desc">${escapeHTML(category.description || '')}</p>
-                        <div class="dropdown-wrapper">
-                            <div class="custom-dropdown-container">
-                                <button class="custom-dropdown-trigger" id="trigger-${escapeHTML(category.slug)}" onclick="toggleCardDropdown('${escapeHTML(category.slug)}')">
-                                    <span id="label-${escapeHTML(category.slug)}">Select Product</span> <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <div class="custom-dropdown-menu" id="dropdown-${escapeHTML(category.slug)}">
-                                    <!-- Options populated via JS -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Back Face (Overlay) -->
-                <div class="card-face card-back" id="view-${escapeHTML(category.slug)}"></div>
-            `;
-
-            categoriesContainer.appendChild(card);
-
-            // Populate Dropdown
-            const selectEl = card.querySelector(`#select-${category.slug}`);
-            const viewContainer = card.querySelector(`#view-${category.slug}`);
-
-            // Custom Dropdown Population
-            const dropdown = document.getElementById(`dropdown-${category.slug}`);
-            if (dropdown) {
-                catProducts.forEach(product => {
-                    const option = document.createElement('div');
-                    option.className = 'custom-option';
-
-                    const telugu = product.product_name_telugu ? ` <span style="font-size:0.85em; opacity:0.8;">(${escapeHTML(product.product_name_telugu)})</span>` : '';
-                    option.innerHTML = `<span>${escapeHTML(product.product_name)}</span>${telugu}`;
-
-                    option.onclick = (e) => {
-                        // Close all dropdowns
-                        document.querySelectorAll('.custom-dropdown-menu').forEach(el => el.classList.remove('show'));
-
-                        // Update Trigger Label
-                        const label = document.getElementById(`label-${category.slug}`);
-                        if (label) label.textContent = product.product_name;
-
-                        // SALES MODE CHECK
-                        if (window.currentSiteSettings?.sales_mode_enabled) {
-                            window.location.href = window.generateProductLink(product);
-                            return;
-                        }
-
-                        // Trigger Render Interaction
-                        const currentIndex = catProducts.findIndex(p => p.id === product.id);
-                        renderOverlayProduct(product, viewContainer, null, card, catProducts, currentIndex);
-                    };
-
-                    dropdown.appendChild(option);
-                });
-            }
-        });
+        renderQuickLayout(products, categories, categoriesContainer);
     } else if (categoriesContainer) {
         categoriesContainer.innerHTML = '<p style="text-align:center; padding: 2rem;">No categories found.</p>';
     }
 }
-
-// Global Dropdown Toggler
-window.toggleCardDropdown = function (slug) {
-    // Close others
-    document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
-        if (el.id !== `dropdown-${slug}`) el.classList.remove('show');
-    });
-
-    const target = document.getElementById(`dropdown-${slug}`);
-    if (target) target.classList.toggle('show');
-};
-
-// Close on outside click is handled by document listener elsewhere if needed, or we add one:
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.custom-dropdown-container')) {
-        document.querySelectorAll('.custom-dropdown-menu').forEach(el => el.classList.remove('show'));
-    }
-});
-
-function renderOverlayProduct(product, container, selectEl, cardElement, allProducts = [], currentIndex = -1) {
-    const contentIngId = `content-ing-${product.id}`;
-    const contentNutId = `content-nut-${product.id}`;
-    const categoryName = cardElement.dataset.category;
-    const productImages = (window.allProductImagesCache || []).filter(img => img.product_id === product.id);
-    let localImage = productImages.find(img => img.is_default)?.image_url || productImages[0]?.image_url;
-
-    if (!localImage) {
-        // Fallback to generic placeholders if no specific image is set
-        localImage = window.currentSiteSettings?.product_placeholder_url;
-    }
-
-    let nutInfo = {};
-    try { nutInfo = typeof product.nutrition_info === 'string' ? JSON.parse(product.nutrition_info) : product.nutrition_info; } catch (e) { nutInfo = {}; }
-
-    // Use sorted variants for consistent display logic
-    const variants = window.getSortedVariants(product);
-
-    // Generate quantities text
-    let quantitiesText = '';
-    if (variants && variants.length > 0) {
-        quantitiesText = variants.map(v => v.quantity).join(', ');
-    } else {
-        quantitiesText = product.net_weight || 'Standard';
-    }
-
-    // Navigation Logic
-    let navButtons = '';
-    if (allProducts.length > 1 && currentIndex !== -1) {
-        const prevIndex = (currentIndex - 1 + allProducts.length) % allProducts.length;
-        const nextIndex = (currentIndex + 1) % allProducts.length;
-        const prevProduct = allProducts[prevIndex];
-        const nextProduct = allProducts[nextIndex];
-
-        navButtons = `
-            <div class="overlay-nav-controls">
-                <button class="nav-arrow-btn prev-btn" onclick="navigateNeighbor('${product.id}', '${categoryName}', 'prev')" aria-label="Previous Product">
-                    <i class="fas fa-chevron-left"></i> Prev
-                </button>
-                <span class="nav-label">Other Products</span>
-                <button class="nav-arrow-btn next-btn" onclick="navigateNeighbor('${product.id}', '${categoryName}', 'next')" aria-label="Next Product">
-                    Next <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        `;
-    }
-
-    // HTML Structure for BACK face
-    // HTML Structure for BACK face
-    container.innerHTML = `
-        <div class="back-btn-wrapper">
-             <button class="back-btn" onclick="closeOverlay('${escapeHTML(cardElement.dataset.category)}')">
-                <i class="fas fa-arrow-left"></i> Back to ${escapeHTML(cardElement.querySelector('.card-title').innerText)}
-            </button>
-        </div>
-        <div class="revealed-product">
-            <img src="${escapeHTML(localImage)}" class="revealed-img" alt="${escapeHTML(product.product_name)}" onerror="this.src='${escapeHTML(window.currentSiteSettings?.product_placeholder_url || '')}'">
-            <div class="revealed-info">
-                ${product.discriptor ? `<p class="product-descriptor" title="${escapeHTML(product.discriptor)}">${escapeHTML(product.discriptor)}</p>` : ''}
-                <h4>${escapeHTML(product.product_name)}</h4>
-                <p class="revealed-tagline">${escapeHTML(product.product_tagline || '')}</p>
-                <p class="card-desc" style="margin-bottom: 15px;">${escapeHTML(product.product_description || '')}</p>
-                
-                <div class="info-toggles">
-                    ${product.ingredients ? `<button class="toggle-btn" onclick="switchInfoTab('${escapeHTML(contentIngId)}', this)">Ingredients</button>` : ''}
-                    ${Object.keys(nutInfo).length >= 3 ? `<button class="toggle-btn" onclick="switchInfoTab('${escapeHTML(contentNutId)}', this)">Nutrition</button>` : ''}
-                    ${product.serving_suggestion ? `<button class="toggle-btn" onclick="switchInfoTab('content-usage-${escapeHTML(product.id)}', this)">Usage</button>` : ''}
-                </div>
-
-                <div id="${escapeHTML(contentIngId)}" class="info-content-box" style="display: none;">
-                    <strong>Ingredients:</strong><br>
-                    ${escapeHTML(product.ingredients || '')}
-                </div>
-
-                <div id="${escapeHTML(contentNutId)}" class="info-content-box" style="display: none;">
-                    <strong>Nutrition (per serving):</strong><br>
-                    ${nutInfo.serving_size ? `<em>Serving Size: ${escapeHTML(nutInfo.serving_size)}</em><br>` : (nutInfo.details ? `<em>${escapeHTML(nutInfo.details)}</em><br>` : '')}
-                    ${nutInfo.calories ? `Calories: ${escapeHTML(nutInfo.calories)}<br>` : ''}
-                    ${nutInfo.protein ? `Protein: ${escapeHTML(nutInfo.protein)}<br>` : ''}
-                    ${(nutInfo.sat_fat || nutInfo.satFat || nutInfo.saturated_fat) ? `Saturated Fat: ${escapeHTML(nutInfo.sat_fat || nutInfo.satFat || nutInfo.saturated_fat)}<br>` : ''}
-                    ${(nutInfo.fat || nutInfo.total_fat) ? `Total Fat: ${escapeHTML(nutInfo.fat || nutInfo.total_fat)}<br>` : ''}
-                    ${nutInfo.carbs ? `Carbs: ${escapeHTML(nutInfo.carbs)}<br>` : ''}
-                    ${nutInfo.fiber ? `Fiber: ${escapeHTML(nutInfo.fiber)}<br>` : ''}
-                    ${nutInfo.sugars ? `Sugars: ${escapeHTML(nutInfo.sugars)}<br>` : ''}
-                    ${nutInfo.sodium ? `Sodium: ${escapeHTML(nutInfo.sodium)}<br>` : ''}
-                </div>
-
-                <div id="content-usage-${escapeHTML(product.id)}" class="info-content-box" style="display: none;">
-                    <strong>Usage Instructions:</strong><br>
-                    ${escapeHTML(product.serving_suggestion || '')}
-                </div>
-
-                <div class="variant-info" style="margin-bottom: 20px;">
-                    <span style="font-weight: 600; color: var(--text-primary);">Available From: </span>
-                    <span style="color: var(--text-secondary);">${escapeHTML(quantitiesText)}</span>
-                </div>
-
-                <button class="add-btn" onclick="window.openWhatsAppCatalog()">
-                    <i class="fab fa-whatsapp"></i> Buy on WhatsApp
-                </button>
-            </div>
-            ${navButtons}
-        </div>
-    `;
-
-    // Trigger Overlay
-    // Force a reflow to ensure transitions work if needed, though simple class add is usually fine
-    requestAnimationFrame(() => {
-        cardElement.classList.add('show-product');
-    });
-}
-
-// Function to close overlay
-window.closeOverlay = function (category) {
-    // Note: 'category' here is actually the slug
-    // We should probably pass the slug directly or ensure dataset.category is the slug
-    // Looking at renderProducts: card.dataset.category = category.slug
-    // So 'category' arg IS the slug. Use it to find ID.
-
-    const card = document.querySelector(`.master-card[data-category="${category}"]`);
-    if (card) {
-        card.classList.remove('show-product');
-        // Reset dropdown label
-        const label = document.getElementById(`label-${category}`);
-        if (label) label.textContent = "Select Product";
-    }
-};
 
 // Global toggle function
 // Global switch tab function
@@ -3873,16 +3601,6 @@ window.switchInfoTab = function (contentId, btn) {
     // If it WAS active, we did the reset, so now it's closed (Toggle behavior preserved)
 };
 
-// Global switch product function
-window.switchProduct = function (category, productId) {
-    const selectId = `select-${category}`;
-    const selectEl = document.getElementById(selectId);
-    if (selectEl) {
-        selectEl.value = productId;
-        // Dispatch event to trigger listeners
-        selectEl.dispatchEvent(new Event('change'));
-    }
-};
 
 /*
 ========================================
@@ -4542,72 +4260,6 @@ window.openWhatsAppCatalog = function () {
 
 
 /**
- * ------------------------------------------------------------------
- * Refactored Next/Previous Logic (Neighbor Search)
- * Per User Requirement: Uses specific Supabase queries to find neighbors
- * based on display_order rather than array index.
- * ------------------------------------------------------------------
- */
-window.navigateNeighbor = async function (currentId, categorySlug, direction) {
-    // 1. Get Current Product Details
-    const currentProduct = (window.allProductsCache || []).find(p => String(p.id) === String(currentId));
-
-    if (!currentProduct) {
-        console.error("Current product not found in cache for navigation.");
-        return;
-    }
-
-    const isNext = direction === 'next';
-    const currentOrder = currentProduct.display_order !== null ? currentProduct.display_order : 0;
-
-    // 2. Build the Query
-    // Logic: Same Category AND Greater/Less than current display_order
-    let query = supabase
-        .from('products')
-        .select('id')
-        .eq('product_category', currentProduct.product_category);
-
-    if (isNext) {
-        // Find next: > display_order, Order Ascending (get the closest larger value)
-        query = query
-            .gt('display_order', currentOrder)
-            .order('display_order', { ascending: true });
-    } else {
-        // Find prev: < display_order, Order Descending (get the closest smaller value)
-        query = query
-            .lt('display_order', currentOrder)
-            .order('display_order', { ascending: false });
-    }
-
-    const { data, error } = await query.limit(1).maybeSingle();
-
-    if (error) {
-        console.error("Error fetching neighbor product:", error);
-        return;
-    }
-
-    if (data) {
-        // Found a direct neighbor
-        window.switchProduct(categorySlug, data.id);
-    } else {
-        // 3. Loop Logic (Fallback)
-        let loopQuery = supabase
-            .from('products')
-            .select('id')
-            .eq('product_category', currentProduct.product_category);
-
-        if (isNext) {
-            loopQuery = loopQuery.order('display_order', { ascending: true });
-        } else {
-            loopQuery = loopQuery.order('display_order', { ascending: false });
-        }
-
-        const { data: loopData } = await loopQuery.limit(1).maybeSingle();
-        if (loopData && loopData.id !== currentId) {
-            window.switchProduct(categorySlug, loopData.id);
-        }
-    }
-};
 
 /*
 ========================================

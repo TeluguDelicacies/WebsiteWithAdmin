@@ -4574,7 +4574,7 @@ window.saveBulkImages = async function () {
             show_hero_section: document.getElementById('secShowHero')?.checked ?? true,
             show_product_carousel: document.getElementById('secShowTicker')?.checked ?? true,
             show_collections: document.getElementById('secShowCollections')?.checked ?? true,
-            show_quick_layout: document.getElementById('secShowQuickLayout')?.checked ?? true,
+            show_quick_layout: true,
             show_testimonials: document.getElementById('secShowTestimonials')?.checked ?? true,
             show_why_us: document.getElementById('secShowWhyUs')?.checked ?? true,
             show_contact_form: document.getElementById('secShowContact')?.checked ?? true,
