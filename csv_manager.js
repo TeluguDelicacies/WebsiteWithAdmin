@@ -377,16 +377,24 @@ const CsvManager = {
                     'product_name', 'product_name_telugu', 'product_category', 'sub_category',
                     'product_tagline', 'product_description', 'ingredients',
                     'serving_suggestion', 'is_trending', 'is_visible',
-                    'shelf_life', 'is_refrigerated'
+                    'shelf_life', 'is_refrigerated', 'discriptor', 'slug',
+                    'display_order', 'total_stock'
                 ];
 
                 // Merge base fields (take from first row or common values)
                 productFields.forEach(field => {
-                    const value = firstRow[field];
+                    const value = firstRow[field] !== undefined && firstRow[field] !== '' 
+                        ? firstRow[field] 
+                        : (firstRow[field.charAt(0).toUpperCase() + field.slice(1)] !== undefined && firstRow[field.charAt(0).toUpperCase() + field.slice(1)] !== '' 
+                            ? firstRow[field.charAt(0).toUpperCase() + field.slice(1)] 
+                            : undefined);
+
                     if (value !== undefined && value !== '') {
                         if (field === 'is_refrigerated' || field === 'is_visible' || field === 'is_trending') {
                             const valStr = value.toString().toLowerCase();
                             payload[field] = (valStr === 'true' || valStr === '1' || valStr === 'yes');
+                        } else if (field === 'display_order' || field === 'total_stock' || field === 'shelf_life') {
+                            payload[field] = isNaN(Number(value)) ? value : Number(value);
                         } else {
                             payload[field] = value;
                         }
@@ -397,12 +405,22 @@ const CsvManager = {
                 const nutri = {};
                 if (firstRow.serving_size) nutri.serving_size = firstRow.serving_size;
                 if (firstRow.nutrition) {
-                    firstRow.nutrition.split(',').forEach(p => {
-                        const [k, v] = p.split(':').map(s => s.trim());
-                        if (k && v) nutri[k.toLowerCase().replace(/\s+/g, '_')] = v;
+                    firstRow.nutrition.split(/[,|]/).forEach(p => {
+                        const trimmed = p.trim();
+                        if (!trimmed) return;
+                        if (trimmed.includes(':')) {
+                            const [k, v] = trimmed.split(':').map(s => s.trim());
+                            if (k && v) nutri[k.toLowerCase().replace(/\s+/g, '_')] = v;
+                        } else {
+                            // Match like "Calories 11.76kcal" or "Total Fat 0.32g"
+                            const m = trimmed.match(/^(.*?)\s+([\d.]+\s*[a-zA-Z%]*)$/);
+                            if (m) {
+                                nutri[m[1].toLowerCase().trim().replace(/\s+/g, '_')] = m[2].trim();
+                            }
+                        }
                     });
                 }
-                const nutritionCols = ['calories', 'protein', 'total_fat', 'saturated_fat', 'carbs', 'fiber', 'sugars', 'sodium'];
+                const nutritionCols = ['calories', 'protein', 'total_fat', 'saturated_fat', 'carbs', 'fiber', 'sugars', 'sodium', 'serving_size', 'total_servings'];
                 nutritionCols.forEach(col => {
                     if (firstRow[col] !== undefined && firstRow[col] !== '') nutri[col] = firstRow[col];
                 });
@@ -444,11 +462,11 @@ const CsvManager = {
                     // Insertion - Ensure slug for products
                     if (type === 'products') {
                         if (!payload.slug && payload.product_name) {
-                            // Simple slug generation if missing
+                            // Clean slug generation
                             payload.slug = payload.product_name.toLowerCase().trim()
                                 .replace(/[^a-z0-9\s-]/g, '')
                                 .replace(/\s+/g, '-')
-                                .replace(/-+/g, '-') + '-' + Math.random().toString(36).substring(7);
+                                .replace(/-+/g, '-');
                         }
                     }
 

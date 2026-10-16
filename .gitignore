@@ -96,6 +96,7 @@ e2e-results/
 # Temporary Folders
 temp/
 tmp/
+scratch/
 
 # Marketing and Catalog feeds
 facebook/
