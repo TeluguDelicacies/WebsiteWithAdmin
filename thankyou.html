@@ -39,9 +39,6 @@
         href="https://fonts.googleapis.com/css2?family=Mallanna&family=Montserrat:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="page-thankyou">
@@ -52,7 +49,7 @@
         <div class="container">
             <div class="header-content">
                 <a href="/" class="logo-section">
-                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    <img src="/images/preloader-logo.png"
                         id="headerLogo" alt="Telugu Delicacies Logo" class="logo"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <div class="logo-fallback" style="display: none;">TD</div>
@@ -140,6 +137,17 @@
                     Write a Google Review
                 </a>
             </div>
+
+            <div class="ty-support-bar">
+                <div class="ty-support-item">
+                    <i class="fas fa-utensils"></i>
+                    <span><strong>Serving Tip:</strong> Best enjoyed with hot steamed rice & pure ghee!</span>
+                </div>
+                <div class="ty-support-item">
+                    <i class="fas fa-headset"></i>
+                    <span>Need help with your packet? <a href="#" id="supportHelpBtn" target="_blank" rel="noopener noreferrer">Chat with Support</a></span>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -209,7 +217,7 @@
          PAGE SCRIPT
          ======================================== -->
     <script type="module">
-        import { supabase } from './lib/supabase.js';
+        import { supabase, deepProxyUrls } from './lib/supabase.js';
 
         // ── Helpers ──────────────────────────────────
         function optimizeImage(url, opts = {}) {
@@ -277,9 +285,12 @@
 
         // ── Render Trending Products ─────────────────
         function renderTrendingProducts(products, images, placeholder) {
-            // Filter to only trending products
-            const trending = products.filter(p => p.is_trending);
-            if (trending.length === 0) {
+            // Filter to trending products, or fall back to visible products so the section is never blank
+            let displayProducts = products.filter(p => p.is_trending);
+            if (displayProducts.length === 0) {
+                displayProducts = products.slice(0, 6);
+            }
+            if (displayProducts.length === 0) {
                 document.getElementById('ty-reorder').style.display = 'none';
                 return;
             }
@@ -287,7 +298,7 @@
             const scroll = document.getElementById('productScroll');
             if (!scroll) return;
 
-            scroll.innerHTML = trending.map(p => {
+            scroll.innerHTML = displayProducts.map(p => {
                 // Get cheapest variant first
                 let cheapestVariant = null;
                 try {
@@ -317,14 +328,14 @@
 
                 const imageUrl = optimizeImage(img?.image_url || placeholder, { width: 300 });
                 const slug = p.slug || p.id;
-                const price = cheapestVariant?.price || '';
+                const price = cheapestVariant?.price ? `From ₹${cheapestVariant.price}` : '';
 
                 return `
                     <a href="/${slug}" class="ty-product-card">
                         <img src="${imageUrl}" alt="${p.product_name}" loading="lazy">
                         <div class="ty-product-card-info">
                             <div class="ty-product-card-name">${p.product_name}</div>
-                            ${price ? `<div class="ty-product-card-price">₹${price}</div>` : ''}
+                            ${price ? `<div class="ty-product-card-price">${price}</div>` : ''}
                         </div>
                     </a>
                 `;
@@ -340,7 +351,16 @@
                     supabase.from('product_images').select('product_id, image_url, is_default, tags').order('display_order', { ascending: true })
                 ]);
 
-                const settings = settingsRes.data || {};
+                let settings = settingsRes.data || {};
+                let productsData = productsRes.data || [];
+                let imagesData = imagesRes.data || [];
+
+                // Rewrites Supabase storage URLs for Indian ISP DNS reliability (Jio, Airtel, ACT)
+                if (typeof deepProxyUrls === 'function') {
+                    settings = deepProxyUrls(settings);
+                    productsData = deepProxyUrls(productsData);
+                    imagesData = deepProxyUrls(imagesData);
+                }
                 
                 // Helper to validate variants
                 const getValidVariants = (rawVariants) => {
@@ -362,7 +382,7 @@
 
                 // Filter out images that match globally disabled types
                 const disabledTypesImages = (settings.disabled_variant_types || []).map(t => typeof t === 'string' ? t.trim().toLowerCase() : t);
-                let images = imagesRes.data || [];
+                let images = imagesData;
                 if (disabledTypesImages.length > 0) {
                     images = images.filter(img => {
                         if (!img.tags || img.tags.length === 0) return true;
@@ -375,7 +395,7 @@
                 }
 
                 // Filter out products and update their quantity_variants
-                const products = (productsRes.data || []).map(p => {
+                const products = productsData.map(p => {
                     const originalVars = typeof p.quantity_variants === 'string' ? JSON.parse(p.quantity_variants || '[]') : (p.quantity_variants || []);
                     const filteredVars = getValidVariants(p.quantity_variants);
                     p.quantity_variants = filteredVars;
@@ -410,14 +430,21 @@
                 if (teluguEl && settings.thankyou_title_telugu) teluguEl.textContent = settings.thankyou_title_telugu;
                 if (subEl && settings.thankyou_subtitle) subEl.textContent = settings.thankyou_subtitle;
 
-                // ── WhatsApp Order Button ──
+                // ── WhatsApp Order & Support Buttons with Pre-filled Messages ──
+                let waNumber = settings.whatsapp_url || '919618519191';
+                const cleanWa = waNumber.replace(/[\s\+]/g, '');
+                const baseWa = /^\d+$/.test(cleanWa) ? `https://wa.me/${cleanWa}` : (waNumber.startsWith('http') ? waNumber : `https://wa.me/${cleanWa}`);
+
                 const whatsappBtn = document.getElementById('whatsappOrderBtn');
                 if (whatsappBtn) {
-                    let waUrl = settings.whatsapp_url || '919618519191';
-                    if (/^\d+$/.test(waUrl.replace(/[\s\+]/g, ''))) {
-                        waUrl = `https://wa.me/${waUrl.replace(/[\s\+]/g, '')}`;
-                    }
-                    whatsappBtn.href = waUrl;
+                    const reorderMsg = encodeURIComponent("Hi Telugu Delicacies! I just enjoyed your product and would like to place a reorder / check out what's fresh.");
+                    whatsappBtn.href = `${baseWa}?text=${reorderMsg}`;
+                }
+
+                const supportBtn = document.getElementById('supportHelpBtn');
+                if (supportBtn) {
+                    const supportMsg = encodeURIComponent("Hi Telugu Delicacies, I have a query/feedback regarding my product packet:");
+                    supportBtn.href = `${baseWa}?text=${supportMsg}`;
                 }
 
                 // ── Google Review URL ──

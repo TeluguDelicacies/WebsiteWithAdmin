@@ -284,6 +284,17 @@ window.generateProductLink = function(product, variantQuantity) {
         // Also make it available directly without window. just in case
         const escapeHTML = window.escapeHTML;
 
+        // Delivery Availability Checker
+        window.isProductDeliverable = function(product) {
+            if (!product) return true;
+            if (product.is_delivery_available === false) return false;
+            const undeliverable = (state.settings && state.settings.undeliverable_product_ids) || [];
+            if (undeliverable.includes(product.id) || undeliverable.includes(String(product.id))) {
+                return false;
+            }
+            return true;
+        };
+
         // Initialize header cart button visibility
         window.initHeaderCartButton = function () {
             try {
@@ -1242,6 +1253,8 @@ window.generateProductLink = function(product, variantQuantity) {
 
         // --- Helper: Render Individual Card ---
         function renderProductCard(product, category) {
+            const isDeliverable = window.isProductDeliverable(product);
+
             // Sort variants: Matching Tag first, then Cheapest to Costliest
             const sortedVariants = window.getSortedVariants(product);
 
@@ -1258,7 +1271,9 @@ window.generateProductLink = function(product, variantQuantity) {
 
             // 3. Discount Logic
             let discountTag = '';
-            if (defaultVar.mrp > defaultVar.price) {
+            if (!isDeliverable) {
+                discountTag = `<span class="badge-delivery-paused"><i class="fas fa-truck-slash"></i> Delivery Unavailable</span>`;
+            } else if (defaultVar.mrp > defaultVar.price) {
                 const off = Math.round(((defaultVar.mrp - defaultVar.price) / defaultVar.mrp) * 100);
                 discountTag = `<span class="discount" id="disc-${product.id}">${off}% OFF</span>`;
             }
@@ -1338,20 +1353,26 @@ window.generateProductLink = function(product, variantQuantity) {
                         </div>
 
                         <div class="card-action-container">
-                            <!-- Add Button (Visible if Qty 0) -->
-                            <button class="btn-add" id="btn-add-${product.id}" 
-                                    style="${qty > 0 ? 'display:none !important;' : 'display:inline-flex !important;'}"
-                                    onclick="window.gridAddToCart('${product.id}')">
-                                <i class="fas fa-plus"></i> ADD
-                            </button>
-                            
-                            <!-- Qty Counter (Visible if Qty > 0) -->
-                            <div class="qty-counter" id="qty-counter-${product.id}" 
-                                 style="${qty > 0 ? 'display:inline-flex !important;' : 'display:none !important;'}">
-                                <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', -1)" aria-label="Decrease quantity">−</button>
-                                <span class="qty-val" id="qty-val-${product.id}">${qty}</span>
-                                <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', 1)" aria-label="Increase quantity">+</button>
-                            </div>
+                            ${!isDeliverable ? `
+                                <button class="btn-add btn-undeliverable" disabled title="Currently available for browsing only (delivery unavailable)">
+                                    <i class="fas fa-ban"></i> Delivery Paused
+                                </button>
+                            ` : `
+                                <!-- Add Button (Visible if Qty 0) -->
+                                <button class="btn-add" id="btn-add-${product.id}" 
+                                        style="${qty > 0 ? 'display:none !important;' : 'display:inline-flex !important;'}"
+                                        onclick="window.gridAddToCart('${product.id}')">
+                                    <i class="fas fa-plus"></i> ADD
+                                </button>
+                                
+                                <!-- Qty Counter (Visible if Qty > 0) -->
+                                <div class="qty-counter" id="qty-counter-${product.id}" 
+                                     style="${qty > 0 ? 'display:inline-flex !important;' : 'display:none !important;'}">
+                                    <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', -1)" aria-label="Decrease quantity">−</button>
+                                    <span class="qty-val" id="qty-val-${product.id}">${qty}</span>
+                                    <button class="qty-btn" onclick="window.gridUpdateQty('${product.id}', 1)" aria-label="Increase quantity">+</button>
+                                </div>
+                            `}
                         </div>
                     </div>
 
@@ -1374,6 +1395,11 @@ window.generateProductLink = function(product, variantQuantity) {
             if (!data) return;
             const product = state.allProducts.find(p => p.id == productId);
             if (!product) return;
+
+            if (!window.isProductDeliverable(product)) {
+                window.showToast('This product is available for browsing only and not for delivery.', 'info');
+                return;
+            }
 
             const variant = data.variants[data.currentIdx];
 
@@ -1553,6 +1579,7 @@ window.generateProductLink = function(product, variantQuantity) {
             // Set global current product for cart actions & share context
             state.currentProduct = product;
             state.detailQty = 1;
+            const isDeliverable = window.isProductDeliverable(product);
 
             // Update Category Context (for navigation/breadcrumbs)
             const catSlug = (product.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
@@ -1650,16 +1677,24 @@ window.generateProductLink = function(product, variantQuantity) {
                                         <!-- Mobile Variant Dropdown REMOVED FROM GALLERY per user request -->
                                         
                                         <!-- Overlay Action Bar (Add/Qty) - Bottom-Right -->
-                                        <div class="card-action-container" onclick="event.stopPropagation()">
-                                            <button class="btn-add" id="detailAddBtnOverlay" 
-                                                onclick="event.stopPropagation(); window.addToCartFromDetail()">Add</button>
-                                            <div class="qty-counter" id="detailQtyCounterOverlay" style="display:none;"
-                                                onclick="event.stopPropagation()">
-                                                <button onclick="event.stopPropagation(); window.updateDetailQty(-1)">-</button>
-                                                <span class="qty-val" id="detailQtyValOverlay" onclick="event.stopPropagation()">1</span>
-                                                <button onclick="event.stopPropagation(); window.updateDetailQty(1)">+</button>
+                                        ${!isDeliverable ? `
+                                            <div class="card-action-container" onclick="event.stopPropagation()">
+                                                <button class="btn-add btn-undeliverable" disabled style="opacity:0.85;">
+                                                    <i class="fas fa-ban"></i> Unavailable
+                                                </button>
                                             </div>
-                                        </div>
+                                        ` : `
+                                            <div class="card-action-container" onclick="event.stopPropagation()">
+                                                <button class="btn-add" id="detailAddBtnOverlay" 
+                                                    onclick="event.stopPropagation(); window.addToCartFromDetail()">Add</button>
+                                                <div class="qty-counter" id="detailQtyCounterOverlay" style="display:none;"
+                                                    onclick="event.stopPropagation()">
+                                                    <button onclick="event.stopPropagation(); window.updateDetailQty(-1)">-</button>
+                                                    <span class="qty-val" id="detailQtyValOverlay" onclick="event.stopPropagation()">1</span>
+                                                    <button onclick="event.stopPropagation(); window.updateDetailQty(1)">+</button>
+                                                </div>
+                                            </div>
+                                        `}
                                     </div>
                                     <!-- Back: Description -->
                                     <div class="gallery-back">
@@ -1734,19 +1769,39 @@ window.generateProductLink = function(product, variantQuantity) {
                     </div>
 
                     <!-- Desktop Add to Cart & Qty Counter: Stepper on LEFT, Add to Cart on RIGHT -->
-                    <div class="desktop-action-container" onclick="event.stopPropagation()">
-                        <div class="qty-counter-desktop" id="detailQtyCounterDesktop"
-                            onclick="event.stopPropagation()">
-                            <button type="button" class="qty-btn qty-minus" onclick="event.stopPropagation(); window.updateDetailQtyDesktop(-1)" aria-label="Decrease quantity">−</button>
-                            <span class="qty-val" id="detailQtyValDesktop">1</span>
-                            <button type="button" class="qty-btn qty-plus" onclick="event.stopPropagation(); window.updateDetailQtyDesktop(1)" aria-label="Increase quantity">+</button>
+                    ${!isDeliverable ? `
+                        <div class="desktop-action-container" onclick="event.stopPropagation()">
+                            <button class="btn-add-desktop btn-undeliverable" disabled style="cursor:not-allowed; opacity:0.85; background:#f1f5f9; color:#94a3b8; border:1px dashed #cbd5e1; padding: 10px 20px;">
+                                <i class="fas fa-ban"></i> <span>Delivery Unavailable</span>
+                            </button>
                         </div>
-                        <button class="btn-add-desktop" id="detailAddBtnDesktop" 
-                            onclick="event.stopPropagation(); window.addToCartFromDetail()">
-                            <i class="fas fa-shopping-cart"></i> <span>Add to Cart</span>
-                        </button>
-                    </div>
+                    ` : `
+                        <div class="desktop-action-container" onclick="event.stopPropagation()">
+                            <div class="qty-counter-desktop" id="detailQtyCounterDesktop"
+                                onclick="event.stopPropagation()">
+                                <button type="button" class="qty-btn qty-minus" onclick="event.stopPropagation(); window.updateDetailQtyDesktop(-1)" aria-label="Decrease quantity">−</button>
+                                <span class="qty-val" id="detailQtyValDesktop">1</span>
+                                <button type="button" class="qty-btn qty-plus" onclick="event.stopPropagation(); window.updateDetailQtyDesktop(1)" aria-label="Increase quantity">+</button>
+                            </div>
+                            <button class="btn-add-desktop" id="detailAddBtnDesktop" 
+                                onclick="event.stopPropagation(); window.addToCartFromDetail()">
+                                <i class="fas fa-shopping-cart"></i> <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    `}
                 </div>
+
+                ${!isDeliverable ? `
+                    <div class="delivery-paused-banner">
+                        <i class="fas fa-truck-slash"></i>
+                        <div>
+                            <strong>Browsing Only — Delivery Unavailable</strong>
+                            <p style="margin:2px 0 0; font-size:0.82rem; color:#b45309;">
+                                This product is currently active on our website for exploring authentic flavors, ingredients, and nutrition details. Home delivery is temporarily paused.
+                            </p>
+                        </div>
+                    </div>
+                ` : ''}
 
                 <!-- Mobile Variant Selector -->
                 <div class="mobile-variant-container" id="mobileVariantContainer" style="display:none;">
@@ -3172,6 +3227,10 @@ window.generateProductLink = function(product, variantQuantity) {
 
         window.addToCartFromDetail = function () {
             if (!state.currentProduct) return;
+            if (!window.isProductDeliverable(state.currentProduct)) {
+                window.showToast('This product is available for browsing only and not for delivery.', 'info');
+                return;
+            }
 
             let variants = [];
             try {
@@ -3558,6 +3617,18 @@ window.generateProductLink = function(product, variantQuantity) {
         window.sendToWhatsApp = async function () {
             if (state.cart.length === 0) {
                 window.showToast('Your cart is empty!', 'error');
+                return;
+            }
+
+            // Check delivery availability of cart items
+            const undeliverableItems = state.cart.filter(item => {
+                const prod = (state.allProducts || []).find(p => String(p.id) === String(item.id));
+                return prod && !window.isProductDeliverable(prod);
+            });
+
+            if (undeliverableItems.length > 0) {
+                const names = undeliverableItems.map(i => i.name).join(', ');
+                window.showToast(`Delivery paused for: ${names}. Please remove from cart to proceed.`, 'error');
                 return;
             }
 

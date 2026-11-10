@@ -1050,6 +1050,204 @@
             transform: translateY(-2px);
         }
 
+        /* Delivery Availability Management Styles */
+        .delivery-toolbar {
+            background: var(--color-bg-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .delivery-toolbar-top {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .delivery-search-box {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .delivery-search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .delivery-search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 34px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: var(--color-white);
+            color: var(--text-primary);
+        }
+
+        .delivery-bulk-quick-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        .delivery-toolbar-batch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-top: 1px solid var(--border-light);
+            padding-top: 12px;
+        }
+
+        .delivery-select-all-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .deliv-stat-card {
+            background: var(--color-bg-light);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .deliv-stat-active {
+            border-color: #86efac;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .deliv-stat-paused {
+            border-color: #fde68a;
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .delivery-product-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .delivery-card-row {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: grid;
+            grid-template-columns: 28px 48px 1fr 140px 140px 180px;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .delivery-card-row:hover {
+            border-color: var(--color-secondary-blue);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .delivery-card-row.is-paused {
+            background: #fffcf5;
+            border-color: #fed7aa;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-deliverable {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+
+        .status-paused {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .status-visible {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .status-hidden {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        @media (max-width: 900px) {
+            .delivery-card-row {
+                grid-template-columns: 24px 44px 1fr auto;
+                gap: 10px;
+            }
+            .delivery-col-category,
+            .delivery-col-visibility {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .delivery-toolbar-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .delivery-toolbar-top select {
+                max-width: 100% !important;
+            }
+            .delivery-bulk-quick-btns {
+                margin-left: 0;
+                width: 100%;
+            }
+            .delivery-bulk-quick-btns button {
+                flex: 1;
+            }
+            .delivery-card-row {
+                grid-template-columns: 24px 40px 1fr;
+                gap: 8px;
+            }
+            .delivery-col-toggle {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-top: 1px dashed #e2e8f0;
+                padding-top: 8px;
+                margin-top: 4px;
+            }
+        }
+
         /* Image Management Grid */
         #imagesProductGrid {
             display: grid;
@@ -1368,6 +1566,7 @@
                         <button id="viewCombosBtn" class="admin-btn" onclick="switchView('combos')">Combos</button>
                         <button id="viewSectionsBtn" class="admin-btn" onclick="switchView('sections')">Website
                             Sections</button>
+                        <button id="viewDeliveryBtn" class="admin-btn" onclick="switchView('delivery')"><i class="fas fa-truck" style="margin-right: 4px;"></i>Delivery</button>
                         <button id="viewSettingsBtn" class="admin-btn"
                             onclick="switchView('settings')">Settings</button>
                     </div>
@@ -1831,6 +2030,78 @@
 
                 </div>
             </div>
+
+            <!-- Delivery Availability Control Panel -->
+            <div id="deliveryContainer" class="view-container" style="display: none;">
+                <!-- Header -->
+                <div style="border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; color: var(--color-primary-blue); display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-truck" style="color: #10b981;"></i> Product Delivery Availability
+                            </h3>
+                            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem; max-width: 780px;">
+                                Manage delivery availability at bulk and individual product levels. Products with delivery paused <strong>remain active and visible</strong> on the website for browsing and discovery, but are marked as "Delivery Unavailable" so customers cannot place orders.
+                            </p>
+                        </div>
+                        <div class="delivery-stats-row" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div class="deliv-stat-card">Total: <strong id="delivStatTotal">0</strong></div>
+                            <div class="deliv-stat-card deliv-stat-active"><i class="fas fa-check-circle"></i> Deliverable: <strong id="delivStatActive">0</strong></div>
+                            <div class="deliv-stat-card deliv-stat-paused"><i class="fas fa-pause-circle"></i> Delivery Paused: <strong id="delivStatPaused">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls & Bulk Toolbar -->
+                <div class="delivery-toolbar">
+                    <div class="delivery-toolbar-top">
+                        <div class="delivery-search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="deliverySearchInput" placeholder="Search product name or category..." oninput="filterDeliveryProductsUI()">
+                        </div>
+                        <select id="deliveryCategoryFilter" onchange="filterDeliveryProductsUI()" class="form-input" style="max-width: 200px;">
+                            <option value="">All Categories</option>
+                        </select>
+                        <select id="deliveryStatusFilter" onchange="filterDeliveryProductsUI()" class="form-input" style="max-width: 190px;">
+                            <option value="all">All Delivery Statuses</option>
+                            <option value="deliverable">Deliverable Only</option>
+                            <option value="paused">Delivery Paused Only</option>
+                        </select>
+                        <div class="delivery-bulk-quick-btns">
+                            <button type="button" class="admin-btn btn-success" onclick="bulkUpdateFilteredDelivery(true)" title="Turn delivery ON for all products matching current filter">
+                                <i class="fas fa-check-double"></i> Make Filtered Deliverable
+                            </button>
+                            <button type="button" class="admin-btn btn-warning" onclick="bulkUpdateFilteredDelivery(false)" title="Pause delivery for all products matching current filter">
+                                <i class="fas fa-pause-circle"></i> Pause Filtered Delivery
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="delivery-toolbar-batch">
+                        <label class="delivery-select-all-label">
+                            <input type="checkbox" id="deliverySelectAll" onchange="toggleSelectAllDelivery(this.checked)">
+                            <span>Select All Visible (<span id="deliverySelectedCount">0</span> selected)</span>
+                        </label>
+                        <div class="delivery-batch-actions-btns" style="display: flex; gap: 8px;">
+                            <button type="button" class="admin-btn btn-sm" onclick="bulkUpdateSelectedDelivery(true)" style="background: #10b981; color: white; border: none;">
+                                <i class="fas fa-truck"></i> Enable Selected
+                            </button>
+                            <button type="button" class="admin-btn btn-sm" onclick="bulkUpdateSelectedDelivery(false)" style="background: #f59e0b; color: white; border: none;">
+                                <i class="fas fa-truck-slash"></i> Pause Selected
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product List / Cards -->
+                <div id="deliveryProductList" class="delivery-product-grid">
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1/-1;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Loading delivery availability...</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Section -->
             <div id="settingsContainer" class="view-container" style="display: none;">
                 <form id="settingsForm">
@@ -2000,6 +2271,21 @@
                         </p>
                     </div>
 
+                    <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">
+                        <i class="fas fa-truck" style="margin-right: 8px;"></i>Delivery Availability Management
+                    </h4>
+                    <div style="background: var(--color-bg-light); border: 1px solid var(--border-light); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <strong style="color: var(--text-primary); display: block; margin-bottom: 4px; font-size: 0.95rem;">Product Delivery Availability Controls</strong>
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">
+                                Keep products visible on the website for customer browsing and discovery, but manage which ones are deliverable in bulk or individually.
+                            </p>
+                        </div>
+                        <button type="button" class="admin-btn admin-btn-primary" onclick="switchView('delivery')" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-sliders-h"></i> Open Delivery Panel
+                        </button>
+                    </div>
+
                     <h4 style="margin: 20px 0 15px; color: var(--color-secondary-blue);">Global Variant Packaging Settings</h4>
                     <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">
                         <i class="fas fa-boxes" style="margin-right: 5px;"></i>
@@ -2132,8 +2418,8 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                    <div class="form-row" style="flex-wrap: wrap; gap: 20px;">
+                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
                             <label class="toggle-switch-sm" style="margin-bottom: 0;">
                                 <input type="checkbox" id="productTrending">
                                 <span class="toggle-slider"></span>
@@ -2143,7 +2429,7 @@
                                 as Trending
                                 Item</label>
                         </div>
-                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px;">
+                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
                             <label class="toggle-switch-sm" style="margin-bottom: 0;">
                                 <input type="checkbox" id="productVisible" checked>
                                 <span class="toggle-slider"></span>
@@ -2153,7 +2439,20 @@
                                 on
                                 Site</label>
                         </div>
+                        <div class="form-group" style="flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;">
+                            <label class="toggle-switch-sm" style="margin-bottom: 0;">
+                                <input type="checkbox" id="productDeliverable" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <label for="productDeliverable"
+                                style="margin: 0; font-weight: 600; color: #10b981; cursor: pointer;">Available
+                                for
+                                Delivery</label>
+                        </div>
                     </div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: -5px 0 15px 0;">
+                        <i class="fas fa-info-circle"></i> Uncheck "Available for Delivery" to keep this product active and visible on the website for browsing &amp; ingredients, while disabling ordering.
+                    </p>
 
 
                     <div class="form-row">
@@ -3009,6 +3308,8 @@
                     Us</span></button>
             <button onclick="switchView('sections')" data-view="sections"><i
                     class="fas fa-layer-group"></i><span>Sections</span></button>
+            <button onclick="switchView('delivery')" data-view="delivery"><i
+                    class="fas fa-truck"></i><span>Delivery</span></button>
             <button onclick="switchView('settings')" data-view="settings"><i
                     class="fas fa-cog"></i><span>Settings</span></button>
         </nav>

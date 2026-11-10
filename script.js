@@ -288,6 +288,17 @@ window.shareCurrentPage = function () {
 // QUICK PREVIEW POPUP FUNCTIONS
 // Shows a quick preview popup when clicking on carousel products
 
+// Delivery Availability Checker
+window.isProductDeliverable = function(product) {
+    if (!product) return true;
+    if (product.is_delivery_available === false) return false;
+    const undeliverable = window.currentSiteSettings?.undeliverable_product_ids || [];
+    if (undeliverable.includes(product.id) || undeliverable.includes(String(product.id))) {
+        return false;
+    }
+    return true;
+};
+
 // State for quick preview
 window.quickPreviewState = {
     product: null,
@@ -567,6 +578,24 @@ window.updateQuickPreviewCartUI = function () {
 
     if (!product || !variant) return;
 
+    const isDeliverable = window.isProductDeliverable(product);
+    if (!isDeliverable) {
+        if (addBtn) {
+            addBtn.disabled = true;
+            addBtn.classList.add('btn-undeliverable');
+            addBtn.innerHTML = '<i class="fas fa-ban"></i> Delivery Paused';
+            addBtn.style.display = 'inline-flex';
+        }
+        if (qtyCounter) qtyCounter.style.display = 'none';
+        return;
+    } else {
+        if (addBtn) {
+            addBtn.disabled = false;
+            addBtn.classList.remove('btn-undeliverable');
+            addBtn.innerHTML = '<i class="fas fa-plus"></i> ADD';
+        }
+    }
+
     // Check if in cart (using localStorage cart from main page)
     let cart = [];
     try {
@@ -596,6 +625,11 @@ window.quickPreviewAddToCart = function () {
     const variant = window.quickPreviewState.variants[window.quickPreviewState.selectedVariantIndex];
 
     if (!product || !variant) return;
+
+    if (!window.isProductDeliverable(product)) {
+        showToast('This product is available for browsing only and not for delivery.', 'info');
+        return;
+    }
 
     // Get cart from localStorage
     let cart = [];
@@ -4029,6 +4063,7 @@ function renderQuickProductsHTML(products, showMrp) {
                 <h4>${escapeHTML(product.product_name)}</h4>
                 <p class="telugu-name">${escapeHTML(product.product_name_telugu || '')}</p>
                 <div class="weight">${escapeHTML(qtyDisplay)}</div>
+                ${!window.isProductDeliverable(product) ? '<div class="quick-delivery-paused"><i class="fas fa-truck-slash"></i> Delivery Paused</div>' : ''}
                 ${showMrp ? `<div class="price-row">
                     <span class="price">₹${priceDisplay}</span>
                     ${qtyDisplay ? `<span class="variant-qty">(${escapeHTML(qtyDisplay)})</span>` : ''}

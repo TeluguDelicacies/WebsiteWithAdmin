@@ -132,6 +132,7 @@ const CsvManager = {
 
                     if (isChecked('csvFieldTrending')) baseRow.is_trending = p.is_trending;
                     if (isChecked('csvFieldVisible')) baseRow.is_visible = p.is_visible;
+                    baseRow.is_delivery_available = p.is_delivery_available !== false;
                     if (isChecked('csvFieldShelfLife')) baseRow.shelf_life = p.shelf_life || '';
                     if (isChecked('csvFieldRefrigeration')) baseRow.is_refrigerated = p.is_refrigerated || false;
 
@@ -376,7 +377,7 @@ const CsvManager = {
                 const productFields = [
                     'product_name', 'product_name_telugu', 'product_category', 'sub_category',
                     'product_tagline', 'product_description', 'ingredients',
-                    'serving_suggestion', 'is_trending', 'is_visible',
+                    'serving_suggestion', 'is_trending', 'is_visible', 'is_delivery_available',
                     'shelf_life', 'is_refrigerated', 'discriptor', 'slug',
                     'display_order', 'total_stock'
                 ];
@@ -390,7 +391,7 @@ const CsvManager = {
                             : undefined);
 
                     if (value !== undefined && value !== '') {
-                        if (field === 'is_refrigerated' || field === 'is_visible' || field === 'is_trending') {
+                        if (field === 'is_refrigerated' || field === 'is_visible' || field === 'is_trending' || field === 'is_delivery_available') {
                             const valStr = value.toString().toLowerCase();
                             payload[field] = (valStr === 'true' || valStr === '1' || valStr === 'yes');
                         } else if (field === 'display_order' || field === 'total_stock' || field === 'shelf_life') {

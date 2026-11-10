@@ -2550,6 +2550,73 @@ QUICK COMMERCE GRID & CARD (New Implementation)
   transform: scale(0.98);
 }
 
+/* Delivery Paused / Undeliverable State */
+.btn-undeliverable,
+.btn-add.btn-undeliverable,
+button.btn-undeliverable {
+  background: #f8fafc !important;
+  color: #94a3b8 !important;
+  border: 1px dashed #cbd5e1 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  font-size: 0.72rem !important;
+  padding: 6px 10px !important;
+  pointer-events: none;
+}
+
+.badge-delivery-paused {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  z-index: 2;
+}
+
+.delivery-paused-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 12px 0 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #92400e;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.delivery-paused-banner i {
+  color: #f59e0b;
+  font-size: 1.15rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.quick-delivery-paused {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
 /* Quantity Counter State (Hidden by default) */
 .qty-counter {
   display: flex;

@@ -319,8 +319,10 @@ const categoryForm = document.getElementById('categoryForm');
 const categoryList = document.getElementById('categoryList');
 const categoriesTableContainer = document.getElementById('categoriesTableContainer');
 const settingsContainer = document.getElementById('settingsContainer');
+const deliveryContainer = document.getElementById('deliveryContainer');
 const viewCategoriesBtn = document.getElementById('viewCategoriesBtn');
 const viewSettingsBtn = document.getElementById('viewSettingsBtn');
+const viewDeliveryBtn = document.getElementById('viewDeliveryBtn');
 const categoryModal = document.getElementById('categoryModal');
 const catModalTitle = document.getElementById('catModalTitle');
 const productCategorySelect = document.getElementById('productCategory');
@@ -357,6 +359,7 @@ window.switchView = (view) => {
     if (settingsContainer) settingsContainer.style.display = 'none';
     if (sectionsContainer) sectionsContainer.style.display = 'none';
     if (imagesContainer) imagesContainer.style.display = 'none';
+    if (deliveryContainer) deliveryContainer.style.display = 'none';
     const combosContainer = document.getElementById('combosContainer');
     if (combosContainer) combosContainer.style.display = 'none';
 
@@ -373,7 +376,7 @@ window.switchView = (view) => {
 
     // Reset buttons active state
     const viewCombosBtn = document.getElementById('viewCombosBtn');
-    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewCombosBtn, viewSectionsBtn, viewSettingsBtn].forEach(btn => {
+    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewCombosBtn, viewSectionsBtn, viewDeliveryBtn, viewSettingsBtn].forEach(btn => {
         if (btn) btn.classList.remove('active');
     });
 
@@ -448,6 +451,11 @@ window.switchView = (view) => {
         if (combosContainer) combosContainer.style.display = 'block';
         activeStyle(viewCombosBtn);
         fetchCombos();
+
+    } else if (view === 'delivery') {
+        if (deliveryContainer) deliveryContainer.style.display = 'block';
+        activeStyle(viewDeliveryBtn);
+        fetchDeliveryProducts();
 
     } else if (view === 'settings') {
         settingsContainer.style.display = 'block';
@@ -1700,6 +1708,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                         ${escapeHTML(product.product_name)}
                         ${product.is_trending ? '<i class="fas fa-fire" title="Trending Item" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
                         ${product.is_visible === false ? '<i class="fas fa-eye-slash" title="Hidden on Site" style="color: #64748b; margin-left: 5px;"></i>' : ''}
+                        ${product.is_delivery_available === false ? '<i class="fas fa-truck-slash" title="Delivery Paused (Browsing Only)" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
                     </h3>
                     <div class="tagline">${escapeHTML(product.product_tagline || '')}</div>
                     <span class="category-badge">${escapeHTML(product.product_category).replace(/-/g, ' ')}</span>
@@ -2040,6 +2049,8 @@ window.openProductModal = async (productId = null) => {
     document.getElementById('productId').value = '';
     document.getElementById('productOrder').value = '0'; // Default order
     document.getElementById('productVisible').checked = true; // Default visible
+    const delivToggle = document.getElementById('productDeliverable');
+    if (delivToggle) delivToggle.checked = true; // Default deliverable
 
     // Reset image gallery
     currentProductImages = [];
@@ -2267,6 +2278,10 @@ async function loadProductData(productId) {
         document.getElementById('productOrder').value = product.display_order || 0;
         document.getElementById('productTrending').checked = product.is_trending || false;
         document.getElementById('productVisible').checked = product.is_visible !== false; // Default true if null
+        const delivToggle = document.getElementById('productDeliverable');
+        if (delivToggle) {
+            delivToggle.checked = product.is_delivery_available !== false;
+        }
 
     } catch (error) {
         console.error('Error loading product:', error);
@@ -2402,6 +2417,7 @@ productForm.addEventListener('submit', async (e) => {
             global_sold: calculatedTotalSold,
             is_trending: document.getElementById('productTrending').checked,
             is_visible: document.getElementById('productVisible').checked,
+            is_delivery_available: document.getElementById('productDeliverable') ? document.getElementById('productDeliverable').checked : true,
             quantity_variants: variants,
             slug: uniqueSlug
         };
@@ -2461,7 +2477,26 @@ productForm.addEventListener('submit', async (e) => {
             }
         }
 
+        // Resilient fallback if column not yet added to products table
+        if (error && error.message && error.message.includes('is_delivery_available')) {
+            delete productData.is_delivery_available;
+            if (productId) {
+                const retry = await supabase.from('products').update(productData).eq('id', productId);
+                error = retry.error;
+            } else {
+                const retry = await supabase.from('products').insert([productData]).select('id').single();
+                error = retry.error;
+                if (retry.data) savedProductId = retry.data.id;
+            }
+        }
+
         if (error) throw error;
+
+        // Sync with site_settings.undeliverable_product_ids
+        const isDeliverable = document.getElementById('productDeliverable') ? document.getElementById('productDeliverable').checked : true;
+        if (savedProductId) {
+            syncDeliveryAvailability([savedProductId], isDeliverable).catch(e => console.warn(e));
+        }
 
         // Save product images to product_images table
         if (savedProductId && currentProductImages.length > 0) {
@@ -4862,3 +4897,301 @@ window.downloadAllImagesZip = async function() {
         if (btn) btn.innerHTML = '<i class="fas fa-file-archive"></i> Download All Images';
     }
 };
+
+// ====================================================
+// DELIVERY AVAILABILITY MANAGEMENT (Bulk & Individual)
+// ====================================================
+let cachedDeliveryProducts = [];
+let cachedDeliveryImages = [];
+
+async function fetchDeliveryProducts() {
+    const listEl = document.getElementById('deliveryProductList');
+    if (listEl) {
+        listEl.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1/-1;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <p>Loading delivery availability...</p>
+            </div>`;
+    }
+
+    try {
+        const [productsResp, imagesResp, categoriesResp, settingsResp] = await Promise.all([
+            supabase.from('products').select('*').order('product_category', { ascending: true }).order('display_order', { ascending: true }),
+            supabase.from('product_images').select('product_id, image_url, is_default').order('display_order', { ascending: true }),
+            supabase.from('categories').select('title, slug').order('display_order', { ascending: true }),
+            supabase.from('site_settings').select('undeliverable_product_ids').single()
+        ]);
+
+        if (productsResp.error) throw productsResp.error;
+
+        const undeliverableIds = (settingsResp.data && settingsResp.data.undeliverable_product_ids) || [];
+        cachedDeliveryImages = imagesResp.data || [];
+
+        // Attach resolved is_delivery_available (both column & settings fallback)
+        cachedDeliveryProducts = (productsResp.data || []).map(p => {
+            const isPausedInSettings = undeliverableIds.some(id => String(id) === String(p.id));
+            const isPausedInColumn = p.is_delivery_available === false;
+            p.is_delivery_available = !(isPausedInSettings || isPausedInColumn);
+            return p;
+        });
+
+        // Populate Category Dropdown
+        const catSelect = document.getElementById('deliveryCategoryFilter');
+        if (catSelect && categoriesResp.data) {
+            const currentVal = catSelect.value;
+            catSelect.innerHTML = '<option value="">All Categories</option>' +
+                categoriesResp.data.map(c => `<option value="${escapeHTML(c.slug)}">${escapeHTML(c.title)}</option>`).join('');
+            catSelect.value = currentVal;
+        }
+
+        renderDeliveryProductsList();
+    } catch (err) {
+        console.error('Error loading delivery products:', err);
+        if (listEl) {
+            listEl.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--color-error); grid-column: 1/-1;">Error loading products: ${escapeHTML(err.message)}</div>`;
+        }
+    }
+}
+
+function updateDeliveryStats() {
+    const total = cachedDeliveryProducts.length;
+    const deliverable = cachedDeliveryProducts.filter(p => p.is_delivery_available !== false).length;
+    const paused = total - deliverable;
+
+    const totalEl = document.getElementById('delivStatTotal');
+    const activeEl = document.getElementById('delivStatActive');
+    const pausedEl = document.getElementById('delivStatPaused');
+
+    if (totalEl) totalEl.textContent = total;
+    if (activeEl) activeEl.textContent = deliverable;
+    if (pausedEl) pausedEl.textContent = paused;
+}
+
+window.filterDeliveryProductsUI = function () {
+    renderDeliveryProductsList();
+};
+
+function getFilteredDeliveryProducts() {
+    const search = (document.getElementById('deliverySearchInput')?.value || '').toLowerCase().trim();
+    const category = (document.getElementById('deliveryCategoryFilter')?.value || '').toLowerCase().trim();
+    const status = (document.getElementById('deliveryStatusFilter')?.value || 'all');
+
+    return cachedDeliveryProducts.filter(p => {
+        // Search filter
+        if (search) {
+            const nameMatch = (p.product_name || '').toLowerCase().includes(search);
+            const teluguMatch = (p.product_name_telugu || '').toLowerCase().includes(search);
+            const catMatch = (p.product_category || '').toLowerCase().includes(search);
+            if (!nameMatch && !teluguMatch && !catMatch) return false;
+        }
+
+        // Category filter
+        if (category) {
+            const pCat = (p.product_category || '').toLowerCase().trim().replace(/\s+/g, '-');
+            if (pCat !== category && (p.product_category || '').toLowerCase().trim() !== category) {
+                return false;
+            }
+        }
+
+        // Status filter
+        if (status === 'deliverable' && p.is_delivery_available === false) return false;
+        if (status === 'paused' && p.is_delivery_available !== false) return false;
+
+        return true;
+    });
+}
+
+function renderDeliveryProductsList() {
+    updateDeliveryStats();
+    const listEl = document.getElementById('deliveryProductList');
+    if (!listEl) return;
+
+    const filtered = getFilteredDeliveryProducts();
+
+    if (filtered.length === 0) {
+        listEl.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary); background: white; border-radius: 12px; border: 1px dashed var(--border-medium);">
+                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p style="margin: 0;">No products match the selected filters.</p>
+            </div>`;
+        updateDeliverySelectedCount();
+        return;
+    }
+
+    listEl.innerHTML = filtered.map(p => {
+        const isDeliverable = p.is_delivery_available !== false;
+        const pImages = cachedDeliveryImages.filter(img => img.product_id === p.id);
+        const thumb = pImages.find(img => img.is_default)?.image_url || pImages[0]?.image_url || PLACEHOLDER_IMAGE;
+        const categoryLabel = (p.product_category || '').replace(/-/g, ' ');
+
+        return `
+            <div class="delivery-card-row ${!isDeliverable ? 'is-paused' : ''}" id="deliv-row-${p.id}">
+                <input type="checkbox" class="delivery-row-check" value="${p.id}" onchange="updateDeliverySelectedCount()" style="width: 18px; height: 18px; cursor: pointer;">
+                <img src="${escapeHTML(thumb)}" onerror="this.src=PLACEHOLDER_IMAGE" style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-light);">
+                <div>
+                    <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">
+                        ${escapeHTML(p.product_name)}
+                        ${p.product_name_telugu ? `<span style="font-weight: normal; font-size: 0.85rem; color: var(--color-secondary-blue); margin-left: 6px;">${escapeHTML(p.product_name_telugu)}</span>` : ''}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                        ${p.product_tagline ? escapeHTML(p.product_tagline) : ''}
+                    </div>
+                </div>
+                <div class="delivery-col-category">
+                    <span class="category-badge" style="text-transform: capitalize;">${escapeHTML(categoryLabel)}</span>
+                </div>
+                <div class="delivery-col-visibility">
+                    ${p.is_visible !== false 
+                        ? '<span class="status-pill status-visible"><i class="fas fa-eye"></i> Visible on Site</span>' 
+                        : '<span class="status-pill status-hidden"><i class="fas fa-eye-slash"></i> Hidden</span>'}
+                </div>
+                <div class="delivery-col-toggle" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
+                    <span id="deliv-badge-${p.id}">
+                        ${isDeliverable 
+                            ? '<span class="status-pill status-deliverable"><i class="fas fa-truck"></i> Deliverable</span>' 
+                            : '<span class="status-pill status-paused"><i class="fas fa-pause-circle"></i> Delivery Paused</span>'}
+                    </span>
+                    <label class="toggle-switch-sm" title="Toggle delivery availability" style="margin: 0;">
+                        <input type="checkbox" ${isDeliverable ? 'checked' : ''} onchange="toggleSingleProductDelivery('${p.id}', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    updateDeliverySelectedCount();
+}
+
+function updateDeliverySelectedCount() {
+    const checked = document.querySelectorAll('.delivery-row-check:checked');
+    const countEl = document.getElementById('deliverySelectedCount');
+    if (countEl) countEl.textContent = checked.length;
+}
+
+window.toggleSelectAllDelivery = function (checked) {
+    document.querySelectorAll('.delivery-row-check').forEach(cb => {
+        cb.checked = checked;
+    });
+    updateDeliverySelectedCount();
+};
+
+window.toggleSingleProductDelivery = async function (productId, isDeliverable) {
+    const product = cachedDeliveryProducts.find(p => String(p.id) === String(productId));
+    if (product) product.is_delivery_available = isDeliverable;
+
+    const row = document.getElementById(`deliv-row-${productId}`);
+    const badge = document.getElementById(`deliv-badge-${productId}`);
+    if (row) row.classList.toggle('is-paused', !isDeliverable);
+    if (badge) {
+        badge.innerHTML = isDeliverable
+            ? '<span class="status-pill status-deliverable"><i class="fas fa-truck"></i> Deliverable</span>'
+            : '<span class="status-pill status-paused"><i class="fas fa-pause-circle"></i> Delivery Paused</span>';
+    }
+    updateDeliveryStats();
+
+    try {
+        await syncDeliveryAvailability([productId], isDeliverable);
+        showToast(`${product ? product.product_name : 'Product'}: Delivery ${isDeliverable ? 'Enabled' : 'Paused (Browsing Only)'}`, 'success');
+    } catch (e) {
+        console.error('Error updating delivery status:', e);
+        showToast('Error saving delivery status: ' + e.message, 'error');
+        if (product) product.is_delivery_available = !isDeliverable;
+        renderDeliveryProductsList();
+    }
+};
+
+window.bulkUpdateFilteredDelivery = async function (isDeliverable) {
+    const filtered = getFilteredDeliveryProducts();
+    if (filtered.length === 0) {
+        showToast('No products match current filters to update.', 'info');
+        return;
+    }
+
+    const actionText = isDeliverable ? 'enable delivery for' : 'pause delivery for';
+    if (!confirm(`Are you sure you want to ${actionText} all ${filtered.length} filtered products?`)) {
+        return;
+    }
+
+    const ids = filtered.map(p => p.id);
+    filtered.forEach(p => p.is_delivery_available = isDeliverable);
+    renderDeliveryProductsList();
+
+    try {
+        await syncDeliveryAvailability(ids, isDeliverable);
+        showToast(`Successfully set ${filtered.length} products to ${isDeliverable ? 'Deliverable' : 'Delivery Paused'}!`, 'success');
+    } catch (e) {
+        console.error('Error in bulk update:', e);
+        showToast('Error during bulk update: ' + e.message, 'error');
+        fetchDeliveryProducts();
+    }
+};
+
+window.bulkUpdateSelectedDelivery = async function (isDeliverable) {
+    const checked = Array.from(document.querySelectorAll('.delivery-row-check:checked')).map(cb => cb.value);
+    if (checked.length === 0) {
+        showToast('Please select at least one product using the checkboxes.', 'info');
+        return;
+    }
+
+    checked.forEach(id => {
+        const p = cachedDeliveryProducts.find(item => String(item.id) === String(id));
+        if (p) p.is_delivery_available = isDeliverable;
+    });
+    renderDeliveryProductsList();
+
+    try {
+        await syncDeliveryAvailability(checked, isDeliverable);
+        showToast(`Updated ${checked.length} selected products to ${isDeliverable ? 'Deliverable' : 'Delivery Paused'}!`, 'success');
+    } catch (e) {
+        console.error('Error in batch update:', e);
+        showToast('Error updating selected products: ' + e.message, 'error');
+        fetchDeliveryProducts();
+    }
+};
+
+async function syncDeliveryAvailability(productIds, isDeliverable) {
+    if (!productIds || productIds.length === 0) return;
+
+    // 1. Update products table
+    try {
+        await supabase
+            .from('products')
+            .update({ is_delivery_available: isDeliverable })
+            .in('id', productIds);
+    } catch (e) {
+        console.warn('Column update warning on products table:', e);
+    }
+
+    // 2. Resilient sync with site_settings.undeliverable_product_ids
+    try {
+        const { data: settingsData } = await supabase
+            .from('site_settings')
+            .select('id, undeliverable_product_ids')
+            .single();
+
+        if (settingsData) {
+            let undeliverableList = Array.isArray(settingsData.undeliverable_product_ids)
+                ? [...settingsData.undeliverable_product_ids]
+                : [];
+
+            const idStrings = productIds.map(String);
+            if (isDeliverable) {
+                undeliverableList = undeliverableList.filter(id => !idStrings.includes(String(id)));
+            } else {
+                idStrings.forEach(id => {
+                    if (!undeliverableList.some(item => String(item) === id)) {
+                        undeliverableList.push(id);
+                    }
+                });
+            }
+
+            await supabase
+                .from('site_settings')
+                .update({ undeliverable_product_ids: undeliverableList })
+                .eq('id', settingsData.id);
+        }
+    } catch (err) {
+        console.warn('site_settings sync warning:', err);
+    }
+}
