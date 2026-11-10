@@ -4526,27 +4526,103 @@ window.orderOnWhatsApp = async function () {
     // Show loading state
     window.showToast('Preparing your order...', 'info');
 
-    // Construct Message
-    let message = `👋 Hi Telugu Delicacies! I would like to place an order.\n\n🛒 *ORDER SUMMARY*`;
-    let total = 0;
-    cart.forEach(item => {
-        const sub = (item.price || 0) * (item.qty || 0);
-        total += sub;
-        message += `\n▪️ ${item.name} ${item.variant ? '(' + item.variant.quantity + ')' : ''} x ${item.qty} = ₹${sub}`;
+    // --- 1. Generate Order Reference ID & Date ---
+    const orderRandomDigits = Math.floor(1000 + Math.random() * 9000);
+    const orderNumber = `TD-${orderRandomDigits}`;
+    const orderDateStr = new Date().toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
     });
 
-    message += `\n\n💰 *Item Total: ₹${total}* (Shipping calculated later)`;
-    message += `\n\nPlease confirm availability and share payment details! ✅`;
+    // --- 2. Construct Rich WhatsApp Message ---
+    let message = `👋 Hi Telugu Delicacies! I would like to place an order:\n\n`;
+    message += `🧾 *ORDER #${orderNumber}*\n`;
+    message += `📅 ${orderDateStr}\n`;
+    let total = 0;
 
-    const phone = (WHATSAPP_NUMBER || '919618519191').replace(/[^\d]/g, '');
+    // Separate products and combos
+    const regularProducts = cart.filter(item => item.type !== 'combo');
+    const comboProducts = cart.filter(item => item.type === 'combo');
+
+    if (regularProducts.length > 0) {
+        message += `\n📦 *PRODUCTS*`;
+        regularProducts.forEach(item => {
+            const sub = (Number(item.price) || 0) * (Number(item.qty) || 0);
+            total += sub;
+            const variantDetails = [
+                item.variant?.quantity,
+                item.variant?.packaging_type
+            ].filter(Boolean).join(' • ');
+            const variantLabel = variantDetails ? `(${variantDetails})` : '';
+            message += `\n▪️ ${item.name} ${variantLabel} x ${item.qty} = ₹${sub}`;
+        });
+    }
+
+    if (comboProducts.length > 0) {
+        message += `\n\n🎁 *COMBO BUNDLES*`;
+        comboProducts.forEach(cartItem => {
+            const sub = (Number(cartItem.price) || 0) * (Number(cartItem.qty) || 0);
+            total += sub;
+            message += `\n▪️ ${cartItem.name} x ${cartItem.qty} = ₹${sub}`;
+        });
+    }
+
+    message += `\n\n💰 *Subtotal: ₹${total}* (Delivery calculated based on pincode)`;
+    message += `\n\n────────────────────────`;
+    message += `\n📍 *DELIVERY DETAILS*`;
+    message += `\nName: `;
+    message += `\nAddress: `;
+    message += `\nPincode / City: `;
+    message += `\n────────────────────────\n`;
+    message += `\nPlease confirm order availability and share payment details/UPI QR! ✅`;
+
+    // --- 3. Dynamic Phone Number Resolution ---
+    const rawPhone = window.currentSiteSettings?.contact_phone_primary || window.currentSiteSettings?.whatsapp_url || WHATSAPP_NUMBER || '919618519191';
+    let phone = String(rawPhone).replace(/[^\d]/g, '');
+    if (phone.length === 10) phone = '91' + phone;
+    if (!phone) phone = '919618519191';
+
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = isMobile
         ? `https://wa.me/${phone}?text=${encodedMessage}`
         : `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
 
+    // --- 4. Save Order Record in Supabase (Non-blocking background log) ---
+    try {
+        const orderData = {
+            order_number: orderNumber,
+            items: cart.map(i => ({
+                id: i.id,
+                name: i.name,
+                price: i.price,
+                qty: i.qty,
+                type: i.type || 'product',
+                variant: i.variant || null
+            })),
+            subtotal: total,
+            total: total,
+            status: 'Pending',
+            source: 'home_page',
+            raw_message: message
+        };
+        await supabase.from('orders').insert([orderData]);
+    } catch (dbErr) {
+        console.warn('Orders database logging notice:', dbErr);
+    }
+
+    // --- 5. Save Snapshot for Safe Recovery ---
+    try {
+        localStorage.setItem('td_last_order', JSON.stringify({
+            orderNumber: orderNumber,
+            items: [...cart],
+            total: total,
+            timestamp: Date.now()
+        }));
+    } catch (e) { }
+
     // Immediate Actions
-    window.clearMainCart(); // Handles reset and toast
-    window.showToast('Thanks for the order! Cart cleared.', 'success');
+    window.clearMainCart();
+    window.showToast('Order prepared! Opening WhatsApp...', 'success');
 
     // Close the cart drawer
     window.toggleMainCartDrawer();

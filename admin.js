@@ -320,9 +320,11 @@ const categoryList = document.getElementById('categoryList');
 const categoriesTableContainer = document.getElementById('categoriesTableContainer');
 const settingsContainer = document.getElementById('settingsContainer');
 const deliveryContainer = document.getElementById('deliveryContainer');
+const ordersContainer = document.getElementById('ordersContainer');
 const viewCategoriesBtn = document.getElementById('viewCategoriesBtn');
 const viewSettingsBtn = document.getElementById('viewSettingsBtn');
 const viewDeliveryBtn = document.getElementById('viewDeliveryBtn');
+const viewOrdersBtn = document.getElementById('viewOrdersBtn');
 const categoryModal = document.getElementById('categoryModal');
 const catModalTitle = document.getElementById('catModalTitle');
 const productCategorySelect = document.getElementById('productCategory');
@@ -360,6 +362,7 @@ window.switchView = (view) => {
     if (sectionsContainer) sectionsContainer.style.display = 'none';
     if (imagesContainer) imagesContainer.style.display = 'none';
     if (deliveryContainer) deliveryContainer.style.display = 'none';
+    if (ordersContainer) ordersContainer.style.display = 'none';
     const combosContainer = document.getElementById('combosContainer');
     if (combosContainer) combosContainer.style.display = 'none';
 
@@ -376,7 +379,7 @@ window.switchView = (view) => {
 
     // Reset buttons active state
     const viewCombosBtn = document.getElementById('viewCombosBtn');
-    [viewProductsBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewCombosBtn, viewSectionsBtn, viewDeliveryBtn, viewSettingsBtn].forEach(btn => {
+    [viewProductsBtn, viewOrdersBtn, viewTestimonialsBtn, viewCategoriesBtn, viewImagesBtn, viewWhyUsBtn, viewCombosBtn, viewSectionsBtn, viewDeliveryBtn, viewSettingsBtn].forEach(btn => {
         if (btn) btn.classList.remove('active');
     });
 
@@ -456,6 +459,11 @@ window.switchView = (view) => {
         if (deliveryContainer) deliveryContainer.style.display = 'block';
         activeStyle(viewDeliveryBtn);
         fetchDeliveryProducts();
+
+    } else if (view === 'orders') {
+        if (ordersContainer) ordersContainer.style.display = 'block';
+        activeStyle(viewOrdersBtn);
+        fetchOrders();
 
     } else if (view === 'settings') {
         settingsContainer.style.display = 'block';
@@ -5199,3 +5207,276 @@ async function syncDeliveryAvailability(productIds, isDeliverable) {
         console.warn('site_settings sync warning:', err);
     }
 }
+
+// ==========================================
+// ORDERS MANAGEMENT CONTROLLER
+// ==========================================
+let cachedOrders = [];
+
+window.fetchOrders = async function () {
+    const loading = document.getElementById('ordersLoading');
+    const table = document.getElementById('ordersTable');
+    const empty = document.getElementById('ordersEmpty');
+
+    if (loading) loading.style.display = 'block';
+    if (table) table.style.display = 'none';
+    if (empty) empty.style.display = 'none';
+
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.warn('Orders fetch note:', error);
+            if (error.code === '42P01' || (error.message && error.message.includes('orders'))) {
+                showToast("Orders table not found in Supabase. Please execute database/migration_create_orders_table.sql", "info");
+            } else {
+                showToast('Error loading orders: ' + error.message, 'error');
+            }
+            cachedOrders = [];
+        } else {
+            cachedOrders = Array.isArray(data) ? data : [];
+        }
+    } catch (e) {
+        console.error('Orders load error:', e);
+        cachedOrders = [];
+    } finally {
+        if (loading) loading.style.display = 'none';
+        window.renderOrdersTable(cachedOrders);
+        window.updateOrderStats(cachedOrders);
+    }
+};
+
+window.renderOrdersTable = function (orders = cachedOrders) {
+    const table = document.getElementById('ordersTable');
+    const tbody = document.getElementById('ordersTableBody');
+    const empty = document.getElementById('ordersEmpty');
+
+    if (!tbody || !table || !empty) return;
+
+    if (!orders || orders.length === 0) {
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+
+    empty.style.display = 'none';
+    table.style.display = 'table';
+
+    tbody.innerHTML = orders.map(order => {
+        const items = Array.isArray(order.items) ? order.items : [];
+        const itemsSummary = items.map(it => {
+            const vText = it.variant ? (it.variant.quantity || '') : '';
+            return `${it.name}${vText ? ' (' + vText + ')' : ''} × ${it.qty}`;
+        }).join(', ') || 'No item details';
+
+        const dateStr = order.created_at
+            ? new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
+            : '—';
+
+        const statusColors = {
+            'Pending': { bg: '#fef3c7', text: '#92400e', border: '#fde68a' },
+            'Confirmed': { bg: '#e0f2fe', text: '#0369a1', border: '#bae6fd' },
+            'Paid': { bg: '#dcfce7', text: '#15803d', border: '#bbf7d0' },
+            'Shipped': { bg: '#f3e8ff', text: '#7e22ce', border: '#e9d5ff' },
+            'Delivered': { bg: '#ecfdf5', text: '#047857', border: '#a7f3d0' },
+            'Cancelled': { bg: '#fee2e2', text: '#b91c1c', border: '#fecaca' }
+        };
+
+        const sc = statusColors[order.status] || statusColors['Pending'];
+
+        return `
+            <tr style="border-bottom: 1px solid var(--border-light); transition: background 0.15s ease;">
+                <td style="padding: 12px 14px; font-weight: 700; color: var(--color-primary-blue);">
+                    ${escapeHTML(order.order_number || 'N/A')}
+                </td>
+                <td style="padding: 12px 14px; font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap;">
+                    ${escapeHTML(dateStr)}
+                </td>
+                <td style="padding: 12px 14px; font-size: 0.85rem; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(itemsSummary)}">
+                    ${escapeHTML(itemsSummary)}
+                </td>
+                <td style="padding: 12px 14px; font-weight: 700; color: #10b981;">
+                    ₹${Number(order.total || order.subtotal || 0).toLocaleString('en-IN')}
+                </td>
+                <td style="padding: 12px 14px;">
+                    <select onchange="window.updateOrderStatus('${order.id}', this.value)" 
+                            style="padding: 4px 8px; font-size: 0.8rem; font-weight: 600; border-radius: 6px; cursor: pointer; background: ${sc.bg}; color: ${sc.text}; border: 1px solid ${sc.border};">
+                        ${['Pending', 'Confirmed', 'Paid', 'Shipped', 'Delivered', 'Cancelled'].map(st => `
+                            <option value="${st}" ${order.status === st ? 'selected' : ''}>${st}</option>
+                        `).join('')}
+                    </select>
+                </td>
+                <td style="padding: 12px 14px; text-align: right; white-space: nowrap;">
+                    <button type="button" class="admin-btn btn-sm" onclick="window.viewOrderDetails('${order.id}')" title="View details" style="padding: 5px 10px; margin-right: 6px;">
+                        <i class="fas fa-eye"></i> Details
+                    </button>
+                    <button type="button" class="admin-btn btn-sm btn-danger" onclick="window.deleteOrder('${order.id}')" title="Delete order" style="padding: 5px 8px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+};
+
+window.updateOrderStats = function (orders = cachedOrders) {
+    const totalEl = document.getElementById('orderStatTotal');
+    const pendingEl = document.getElementById('orderStatPending');
+    const confirmedEl = document.getElementById('orderStatConfirmed');
+    const shippedEl = document.getElementById('orderStatShipped');
+
+    if (totalEl) totalEl.textContent = orders.length;
+    if (pendingEl) pendingEl.textContent = orders.filter(o => o.status === 'Pending').length;
+    if (confirmedEl) confirmedEl.textContent = orders.filter(o => o.status === 'Confirmed' || o.status === 'Paid').length;
+    if (shippedEl) shippedEl.textContent = orders.filter(o => o.status === 'Shipped').length;
+};
+
+window.filterOrdersUI = function () {
+    const searchVal = (document.getElementById('orderSearchInput')?.value || '').toLowerCase().trim();
+    const statusVal = document.getElementById('orderStatusFilter')?.value || 'all';
+
+    const filtered = cachedOrders.filter(order => {
+        if (statusVal !== 'all' && order.status !== statusVal) return false;
+
+        if (searchVal) {
+            const num = (order.order_number || '').toLowerCase();
+            const notes = (order.notes || order.raw_message || '').toLowerCase();
+            const items = Array.isArray(order.items) ? order.items.map(i => (i.name || '').toLowerCase()).join(' ') : '';
+            return num.includes(searchVal) || notes.includes(searchVal) || items.includes(searchVal);
+        }
+        return true;
+    });
+
+    window.renderOrdersTable(filtered);
+};
+
+window.updateOrderStatus = async function (orderId, newStatus) {
+    try {
+        const { error } = await supabase
+            .from('orders')
+            .update({ status: newStatus })
+            .eq('id', orderId);
+
+        if (error) throw error;
+
+        const order = cachedOrders.find(o => String(o.id) === String(orderId));
+        if (order) order.status = newStatus;
+
+        window.updateOrderStats(cachedOrders);
+        showToast(`Order status updated to ${newStatus}!`, 'success');
+        window.filterOrdersUI();
+    } catch (e) {
+        console.error('Error updating order status:', e);
+        showToast('Error updating status: ' + e.message, 'error');
+        window.fetchOrders();
+    }
+};
+
+window.deleteOrder = async function (orderId) {
+    const order = cachedOrders.find(o => String(o.id) === String(orderId));
+    const orderNum = order ? order.order_number : 'this order';
+
+    if (!confirm(`Are you sure you want to delete order ${orderNum}?`)) {
+        return;
+    }
+
+    try {
+        const { error } = await supabase
+            .from('orders')
+            .delete()
+            .eq('id', orderId);
+
+        if (error) throw error;
+
+        cachedOrders = cachedOrders.filter(o => String(o.id) !== String(orderId));
+        showToast(`Order ${orderNum} deleted successfully.`, 'info');
+        window.filterOrdersUI();
+        window.updateOrderStats(cachedOrders);
+    } catch (e) {
+        console.error('Error deleting order:', e);
+        showToast('Error deleting order: ' + e.message, 'error');
+    }
+};
+
+window.viewOrderDetails = function (orderId) {
+    const order = cachedOrders.find(o => String(o.id) === String(orderId));
+    if (!order) return;
+
+    const modal = document.getElementById('orderDetailModal');
+    const title = document.getElementById('modalOrderTitle');
+    const body = document.getElementById('modalOrderBody');
+
+    if (!modal || !body) return;
+
+    if (title) title.textContent = `Order ${order.order_number || ''}`;
+
+    const items = Array.isArray(order.items) ? order.items : [];
+    const dateStr = order.created_at ? new Date(order.created_at).toLocaleString('en-IN') : '—';
+
+    body.innerHTML = `
+        <div style="font-size: 0.9rem; line-height: 1.6;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; background: var(--color-bg-light, #f8fafc); padding: 12px; border-radius: 8px;">
+                <div>
+                    <div><strong>Date:</strong> ${escapeHTML(dateStr)}</div>
+                    <div><strong>Source:</strong> ${escapeHTML(order.source || 'Storefront')}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div><strong>Status:</strong> <span style="font-weight: 700; color: #10b981;">${escapeHTML(order.status || 'Pending')}</span></div>
+                    <div><strong>Total:</strong> ₹${Number(order.total || 0).toLocaleString('en-IN')}</div>
+                </div>
+            </div>
+
+            <h4 style="margin: 15px 0 8px; color: var(--color-primary-blue);">Ordered Items</h4>
+            <div style="border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                    <thead>
+                        <tr style="background: var(--color-bg-light, #f8fafc); border-bottom: 1px solid var(--border-light); text-align: left;">
+                            <th style="padding: 8px 10px;">Item</th>
+                            <th style="padding: 8px 10px; text-align: center;">Qty</th>
+                            <th style="padding: 8px 10px; text-align: right;">Price</th>
+                            <th style="padding: 8px 10px; text-align: right;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(it => {
+                            const sub = (Number(it.price) || 0) * (Number(it.qty) || 0);
+                            const vStr = it.variant ? (it.variant.quantity || '') : '';
+                            return `
+                                <tr style="border-bottom: 1px solid var(--border-light);">
+                                    <td style="padding: 8px 10px;">
+                                        <strong>${escapeHTML(it.name)}</strong>
+                                        ${vStr ? `<div style="font-size: 0.78rem; color: var(--text-secondary);">${escapeHTML(vStr)}</div>` : ''}
+                                    </td>
+                                    <td style="padding: 8px 10px; text-align: center;">${it.qty}</td>
+                                    <td style="padding: 8px 10px; text-align: right;">₹${it.price}</td>
+                                    <td style="padding: 8px 10px; text-align: right; font-weight: 600;">₹${sub}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+
+            ${order.raw_message ? `
+                <h4 style="margin: 15px 0 8px; color: var(--color-primary-blue);">WhatsApp Message Sent</h4>
+                <pre style="background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; font-family: inherit; color: #334155; max-height: 200px; overflow-y: auto;">${escapeHTML(order.raw_message)}</pre>
+            ` : ''}
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" class="admin-btn" onclick="window.closeOrderDetailModal()" style="padding: 8px 20px;">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+};
+
+window.closeOrderDetailModal = function () {
+    const modal = document.getElementById('orderDetailModal');
+    if (modal) modal.style.display = 'none';
+};

@@ -1557,6 +1557,8 @@
                         style="display: flex; gap: 5px; flex-wrap: nowrap; justify-content: center; flex: 1; margin: 0 10px; overflow-x: auto;">
                         <button id="viewProductsBtn" class="admin-btn active"
                             onclick="switchView('products')">Products</button>
+                        <button id="viewOrdersBtn" class="admin-btn"
+                            onclick="switchView('orders')"><i class="fas fa-shopping-bag" style="margin-right: 4px;"></i>Orders</button>
                         <button id="viewCategoriesBtn" class="admin-btn"
                             onclick="switchView('categories')">Categories</button>
                         <button id="viewTestimonialsBtn" class="admin-btn"
@@ -2102,7 +2104,97 @@
                 </div>
             </div>
 
-            <!-- Settings Section -->
+            <!-- Orders Management Section -->
+            <div id="ordersContainer" class="view-container" style="display: none;">
+                <!-- Header -->
+                <div style="border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; color: var(--color-primary-blue); display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-shopping-bag" style="color: #3b82f6;"></i> Order Management
+                            </h3>
+                            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem; max-width: 780px;">
+                                Track orders placed via WhatsApp &amp; website. Update order statuses, inspect items, and chat with customers.
+                            </p>
+                        </div>
+                        <div class="delivery-stats-row" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div class="deliv-stat-card">Total: <strong id="orderStatTotal">0</strong></div>
+                            <div class="deliv-stat-card" style="background:#fef3c7; border-color:#fde68a; color:#92400e;">
+                                <i class="fas fa-clock"></i> Pending: <strong id="orderStatPending">0</strong>
+                            </div>
+                            <div class="deliv-stat-card deliv-stat-active">
+                                <i class="fas fa-check-circle"></i> Confirmed/Paid: <strong id="orderStatConfirmed">0</strong>
+                            </div>
+                            <div class="deliv-stat-card" style="background:#e0f2fe; border-color:#bae6fd; color:#0369a1;">
+                                <i class="fas fa-shipping-fast"></i> Shipped: <strong id="orderStatShipped">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls & Filter Toolbar -->
+                <div class="delivery-toolbar">
+                    <div class="delivery-toolbar-top">
+                        <div class="delivery-search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="orderSearchInput" placeholder="Search by order #, items, notes..." oninput="filterOrdersUI()">
+                        </div>
+                        <select id="orderStatusFilter" onchange="filterOrdersUI()" class="form-input" style="max-width: 200px;">
+                            <option value="all">All Statuses</option>
+                            <option value="Pending">Pending Only</option>
+                            <option value="Confirmed">Confirmed Only</option>
+                            <option value="Paid">Paid Only</option>
+                            <option value="Shipped">Shipped Only</option>
+                            <option value="Delivered">Delivered Only</option>
+                            <option value="Cancelled">Cancelled Only</option>
+                        </select>
+                        <button type="button" class="admin-btn" onclick="fetchOrders()" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-sync-alt"></i> Refresh Orders
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders Table Container -->
+                <div id="ordersTableWrapper" style="background: var(--color-bg-surface, #fff); border-radius: 8px; border: 1px solid var(--border-light); overflow-x: auto; margin-top: 15px;">
+                    <div id="ordersLoading" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Loading orders from database...</p>
+                    </div>
+                    <table id="ordersTable" class="admin-table" style="width: 100%; border-collapse: collapse; display: none;">
+                        <thead>
+                            <tr style="background: var(--color-bg-light, #f8fafc); border-bottom: 1px solid var(--border-light); text-align: left;">
+                                <th style="padding: 12px 14px; font-size: 0.85rem;">Order #</th>
+                                <th style="padding: 12px 14px; font-size: 0.85rem;">Date &amp; Time</th>
+                                <th style="padding: 12px 14px; font-size: 0.85rem;">Items Summary</th>
+                                <th style="padding: 12px 14px; font-size: 0.85rem;">Total</th>
+                                <th style="padding: 12px 14px; font-size: 0.85rem;">Status</th>
+                                <th style="padding: 12px 14px; font-size: 0.85rem; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                    <div id="ordersEmpty" style="display: none; text-align: center; padding: 50px 20px; color: var(--text-secondary);">
+                        <i class="fas fa-shopping-bag" style="font-size: 2.5rem; margin-bottom: 12px; color: #cbd5e1;"></i>
+                        <h4 style="margin: 0 0 6px 0; color: var(--text-primary);">No Orders Found</h4>
+                        <p style="margin: 0; font-size: 0.88rem;">Orders placed via WhatsApp will appear here automatically.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Details Modal -->
+            <div id="orderDetailModal" class="modal" style="display: none;">
+                <div class="modal-content" style="max-width: 620px; border-radius: 12px; padding: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; margin-bottom: 16px;">
+                        <h3 id="modalOrderTitle" style="margin: 0; color: var(--color-primary-blue);">Order Details</h3>
+                        <button type="button" onclick="closeOrderDetailModal()" style="background: transparent; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+                    </div>
+                    <div id="modalOrderBody">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
             <div id="settingsContainer" class="view-container" style="display: none;">
                 <form id="settingsForm">
                     <h3
@@ -3296,6 +3388,8 @@
         <nav id="mobile-bottom-nav">
             <button onclick="switchView('products')" data-view="products"><i
                     class="fas fa-box"></i><span>Products</span></button>
+            <button onclick="switchView('orders')" data-view="orders"><i
+                    class="fas fa-shopping-bag"></i><span>Orders</span></button>
             <button onclick="switchView('categories')" data-view="categories"><i
                     class="fas fa-tags"></i><span>Categories</span></button>
             <button onclick="switchView('images')" data-view="images"><i

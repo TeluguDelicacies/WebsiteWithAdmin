@@ -3583,7 +3583,27 @@ window.generateProductLink = function(product, variantQuantity) {
 
             // Update Drawer
             if (state.cart.length === 0) {
-                if (cartItems) cartItems.innerHTML = '<div class="empty-cart-msg">Your cart is empty</div>';
+                let lastOrderRecoveryHtml = '';
+                try {
+                    const rawLast = localStorage.getItem('td_last_order');
+                    if (rawLast) {
+                        const lastOrder = JSON.parse(rawLast);
+                        if (lastOrder && Array.isArray(lastOrder.items) && lastOrder.items.length > 0) {
+                            lastOrderRecoveryHtml = `
+                                <div class="last-order-recovery" style="margin: 14px 6px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px;">
+                                        Order <strong>${lastOrder.orderNumber || ''}</strong> recently placed
+                                    </div>
+                                    <button type="button" onclick="window.restoreLastOrder()" style="background: white; border: 1px solid #10b981; color: #047857; font-weight: 600; font-size: 0.82rem; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-undo"></i> Restore Cart Items
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                } catch (e) { }
+
+                if (cartItems) cartItems.innerHTML = `<div class="empty-cart-msg">Your cart is empty</div>${lastOrderRecoveryHtml}`;
                 if (cartTotal) cartTotal.innerText = '0';
                 return;
             }
@@ -3638,6 +3658,22 @@ window.generateProductLink = function(product, variantQuantity) {
             if (window.syncAllComboCartButtons) window.syncAllComboCartButtons();
         };
 
+        window.restoreLastOrder = function () {
+            try {
+                const rawLast = localStorage.getItem('td_last_order');
+                if (rawLast) {
+                    const lastOrder = JSON.parse(rawLast);
+                    if (lastOrder && Array.isArray(lastOrder.items) && lastOrder.items.length > 0) {
+                        state.cart = [...lastOrder.items];
+                        window.saveCart();
+                        window.showToast(`Restored ${state.cart.length} items from previous order!`, 'success');
+                    }
+                }
+            } catch (e) {
+                window.showToast('Could not restore previous cart', 'error');
+            }
+        };
+
         window.sendToWhatsApp = async function () {
             if (state.cart.length === 0) {
                 window.showToast('Your cart is empty!', 'error');
@@ -3687,7 +3723,7 @@ window.generateProductLink = function(product, variantQuantity) {
                 if (!error && dbProducts) {
                     let pricesChanged = false;
                     state.cart.forEach(cartItem => {
-                        const dbProd = dbProducts.find(p => p.id === cartItem.id);
+                        const dbProd = dbProducts.find(p => String(p.id) === String(cartItem.id));
                         if (dbProd) {
                             let currentPrice = dbProd.price; // Default base price
 
@@ -3705,7 +3741,6 @@ window.generateProductLink = function(product, variantQuantity) {
 
                             // Update if different
                             if (cartItem.price !== currentPrice) {
-                                console.log(`Price update for ${cartItem.name}: ${cartItem.price} -> ${currentPrice}`);
                                 cartItem.price = currentPrice;
                                 pricesChanged = true;
                             }
@@ -3719,41 +3754,38 @@ window.generateProductLink = function(product, variantQuantity) {
                 }
             } catch (err) {
                 console.error('Price validation error:', err);
-                // Continue with existing cart prices if check fails
             }
 
-            // --- 2. Background Stock Update (Fire & Forget) ---
-            const updateStock = async () => {
-                for (const item of state.cart) {
-                    try {
-                        const { error } = await supabase.rpc('process_order_stock', {
-                            p_product_id: item.id,
-                            p_variant_label: item.variant ? item.variant.quantity : '',
-                            p_qty: item.qty
-                        });
-                        if (error) throw error;
-                    } catch (e) {
-                        console.error('Stock update failed for item:', item.id, e);
-                    }
-                }
-            };
-            updateStock();
+            // --- 2. Generate Order Reference ID & Date ---
+            const orderRandomDigits = Math.floor(1000 + Math.random() * 9000);
+            const orderNumber = `TD-${orderRandomDigits}`;
+            const orderDateStr = new Date().toLocaleString('en-IN', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
 
-            // --- 3. Construct Message with Grouped Products and Combos ---
-            let message = `👋 Hi Telugu Delicacies! I would like to place an order.\n\n🛒 *ORDER SUMMARY*`;
+            // --- 3. Construct Rich WhatsApp Message ---
+            let message = `👋 Hi Telugu Delicacies! I would like to place an order:\n\n`;
+            message += `🧾 *ORDER #${orderNumber}*\n`;
+            message += `📅 ${orderDateStr}\n`;
             let total = 0;
 
             // Separate products and combos
             const regularProducts = state.cart.filter(item => item.type !== 'combo');
             const comboProducts = state.cart.filter(item => item.type === 'combo');
 
-            // List regular products
+            // List regular products with packaging details
             if (regularProducts.length > 0) {
-                message += `\n\n📦 *PRODUCTS*`;
+                message += `\n📦 *PRODUCTS*`;
                 regularProducts.forEach(item => {
-                    const sub = item.price * item.qty;
+                    const sub = (Number(item.price) || 0) * (Number(item.qty) || 0);
                     total += sub;
-                    message += `\n▪️ ${item.name} ${item.variant ? '(' + item.variant.quantity + ')' : ''} x ${item.qty} = ₹${sub}`;
+                    const variantDetails = [
+                        item.variant?.quantity,
+                        item.variant?.packaging_type
+                    ].filter(Boolean).join(' • ');
+                    const variantLabel = variantDetails ? `(${variantDetails})` : '';
+                    message += `\n▪️ ${item.name} ${variantLabel} x ${item.qty} = ₹${sub}`;
                 });
             }
 
@@ -3761,17 +3793,16 @@ window.generateProductLink = function(product, variantQuantity) {
             if (comboProducts.length > 0) {
                 message += `\n\n🎁 *COMBO BUNDLES*`;
                 comboProducts.forEach(cartItem => {
-                    const sub = cartItem.price * cartItem.qty;
+                    const sub = (Number(cartItem.price) || 0) * (Number(cartItem.qty) || 0);
                     total += sub;
                     message += `\n▪️ ${cartItem.name} x ${cartItem.qty} = ₹${sub}`;
 
-                    // Find combo details to list included items
-                    const comboDetails = state.allCombos.find(c => String(c.id) === String(cartItem.id));
+                    const comboDetails = (state.allCombos || []).find(c => String(c.id) === String(cartItem.id));
                     if (comboDetails && comboDetails.combo_items && comboDetails.combo_items.length > 0) {
                         message += `\n   ↳ Includes:`;
                         comboDetails.combo_items.forEach(it => {
                             if (it.products) {
-                                const variantText = it.variant_quantity + (it.packaging_type ? ` - ${it.packaging_type}` : '');
+                                const variantText = [it.variant_quantity, it.packaging_type].filter(Boolean).join(' • ');
                                 message += `\n      • ${it.products.product_name} (${variantText})`;
                             }
                         });
@@ -3779,24 +3810,65 @@ window.generateProductLink = function(product, variantQuantity) {
                 });
             }
 
-            message += `\n\n💰 *Item Total: ₹${total}* (Shipping calculated later)`;
-            message += `\n\nPlease confirm availability and share payment details! ✅`;
+            message += `\n\n💰 *Subtotal: ₹${total}* (Delivery calculated based on pincode)`;
+            message += `\n\n────────────────────────`;
+            message += `\n📍 *DELIVERY DETAILS*`;
+            message += `\nName: `;
+            message += `\nAddress: `;
+            message += `\nPincode / City: `;
+            message += `\n────────────────────────\n`;
+            message += `\nPlease confirm order availability and share payment details/UPI QR! ✅`;
 
-            const phone = '919618519191';
+            // --- 4. Resolve Dynamic Phone Number from Settings ---
+            const rawPhone = state.settings?.contact_phone_primary || state.settings?.whatsapp_url || '919618519191';
+            let phone = String(rawPhone).replace(/[^\d]/g, '');
+            if (phone.length === 10) phone = '91' + phone;
+            if (!phone) phone = '919618519191';
+
             const encodedMessage = encodeURIComponent(message);
-            // Universal Link for mobile, Web URL for desktop
             const whatsappUrl = isMobile
                 ? `https://wa.me/${phone}?text=${encodedMessage}`
                 : `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
 
-            // Immediate Actions
-            window.clearCart(); // Handles reset and toast
-            window.showToast('Thanks for the order! Cart cleared.', 'success'); // Override toast msg
+            // --- 5. Save Order Record in Supabase (Non-blocking background log) ---
+            try {
+                const orderData = {
+                    order_number: orderNumber,
+                    items: state.cart.map(i => ({
+                        id: i.id,
+                        name: i.name,
+                        price: i.price,
+                        qty: i.qty,
+                        type: i.type || 'product',
+                        variant: i.variant || null
+                    })),
+                    subtotal: total,
+                    total: total,
+                    status: 'Pending',
+                    source: 'sales_page',
+                    raw_message: message
+                };
+                await supabase.from('orders').insert([orderData]);
+            } catch (dbErr) {
+                console.warn('Orders database logging notice:', dbErr);
+            }
 
-            // Close the cart drawer
+            // --- 6. Save Last Order Snapshot for Safe Recovery ---
+            try {
+                localStorage.setItem('td_last_order', JSON.stringify({
+                    orderNumber: orderNumber,
+                    items: [...state.cart],
+                    total: total,
+                    timestamp: Date.now()
+                }));
+            } catch (e) { }
+
+            // Clear Cart and Close Drawer
+            window.clearCart();
+            window.showToast('Order prepared! Opening WhatsApp...', 'success');
             window.toggleCartDrawer();
 
-            // Navigation: Mobile uses window.location.href to reliably invoke WhatsApp Universal Link without popup blocking
+            // Navigation: Mobile uses window.location.href, Desktop uses pre-opened tab
             if (isMobile) {
                 window.location.href = whatsappUrl;
             } else if (desktopTab && !desktopTab.closed) {
