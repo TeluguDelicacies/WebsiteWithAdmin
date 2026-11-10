@@ -2586,20 +2586,20 @@ button.btn-undeliverable {
   border: 1px solid #fde68a;
   border-left: 4px solid #f59e0b;
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   margin: 12px 0 16px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   color: #92400e;
-  font-size: 0.85rem;
-  line-height: 1.45;
+  font-size: 0.88rem;
+  line-height: 1.4;
 }
 
 .delivery-paused-banner i {
   color: #f59e0b;
   font-size: 1.15rem;
-  margin-top: 2px;
+  margin-top: 0;
   flex-shrink: 0;
 }
 

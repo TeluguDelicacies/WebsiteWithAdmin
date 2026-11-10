@@ -1794,12 +1794,7 @@ window.generateProductLink = function(product, variantQuantity) {
                 ${!isDeliverable ? `
                     <div class="delivery-paused-banner">
                         <i class="fas fa-truck-slash"></i>
-                        <div>
-                            <strong>Browsing Only — Delivery Unavailable</strong>
-                            <p style="margin:2px 0 0; font-size:0.82rem; color:#b45309;">
-                                This product is currently active on our website for exploring authentic flavors, ingredients, and nutrition details. Home delivery is temporarily paused.
-                            </p>
-                        </div>
+                        <span><strong>Browsing Only — Delivery Unavailable</strong></span>
                     </div>
                 ` : ''}
 
