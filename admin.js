@@ -5154,23 +5154,27 @@ async function syncDeliveryAvailability(productIds, isDeliverable) {
     if (!productIds || productIds.length === 0) return;
 
     // 1. Update products table
-    try {
-        await supabase
-            .from('products')
-            .update({ is_delivery_available: isDeliverable })
-            .in('id', productIds);
-    } catch (e) {
-        console.warn('Column update warning on products table:', e);
+    const { error: prodError } = await supabase
+        .from('products')
+        .update({ is_delivery_available: isDeliverable })
+        .in('id', productIds);
+
+    if (prodError) {
+        console.error('Products table update error:', prodError);
+        if (prodError.message && prodError.message.includes('is_delivery_available')) {
+            throw new Error("Supabase column 'is_delivery_available' missing! Please execute database/migration_delivery_availability.sql in Supabase SQL Editor.");
+        }
+        throw prodError;
     }
 
     // 2. Resilient sync with site_settings.undeliverable_product_ids
     try {
-        const { data: settingsData } = await supabase
+        const { data: settingsData, error: setErr } = await supabase
             .from('site_settings')
             .select('id, undeliverable_product_ids')
             .single();
 
-        if (settingsData) {
+        if (settingsData && !setErr) {
             let undeliverableList = Array.isArray(settingsData.undeliverable_product_ids)
                 ? [...settingsData.undeliverable_product_ids]
                 : [];
