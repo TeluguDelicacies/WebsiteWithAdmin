@@ -1439,24 +1439,33 @@ window.generateProductLink = function(product, variantQuantity) {
             if (!data) return;
             const variant = data.variants[data.currentIdx];
 
-            // Check Cart State
-            const cartItem = state.cart.find(item => item.id == productId &&
+            // Check Cart State with safe String ID comparison
+            const cartItem = (state.cart || []).find(item => String(item.id) === String(productId) &&
                 (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
             );
-            const qty = cartItem ? cartItem.qty : 0;
+            const qty = cartItem ? (cartItem.qty || 0) : 0;
 
             const btnAdd = document.getElementById(`btn-add-${productId}`);
             const qtyCounter = document.getElementById(`qty-counter-${productId}`);
             const qtyVal = document.getElementById(`qty-val-${productId}`);
 
-            if (qty > 0) {
-                btnAdd.style.setProperty('display', 'none', 'important');
-                qtyCounter.style.setProperty('display', 'inline-flex', 'important');
-                qtyVal.innerText = qty;
-            } else {
-                btnAdd.style.setProperty('display', 'inline-flex', 'important');
-                qtyCounter.style.setProperty('display', 'none', 'important');
+            if (btnAdd && qtyCounter && qtyVal) {
+                if (qty > 0) {
+                    btnAdd.style.setProperty('display', 'none', 'important');
+                    qtyCounter.style.setProperty('display', 'inline-flex', 'important');
+                    qtyVal.innerText = qty;
+                } else {
+                    btnAdd.style.setProperty('display', 'inline-flex', 'important');
+                    qtyCounter.style.setProperty('display', 'none', 'important');
+                }
             }
+        };
+
+        window.refreshAllGridCardsUI = function () {
+            document.querySelectorAll('article[id^="card-"]').forEach(card => {
+                const productId = card.id.replace('card-', '');
+                if (productId) window.refreshGridCardUI(productId);
+            });
         };
 
         window.toggleGridVariantDropdown = function (productId) {
@@ -3063,10 +3072,35 @@ window.generateProductLink = function(product, variantQuantity) {
             updateCartUI();
         };
 
-        window.saveCart = function () {
+        window.saveCart = function (skipEvent = false) {
             localStorage.setItem('td_cart', JSON.stringify(state.cart));
             updateCartUI();
+            if (!skipEvent) {
+                window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart: state.cart } }));
+            }
         };
+
+        // Reactive Cross-Tab and Event Sync
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'td_cart') {
+                try {
+                    const saved = localStorage.getItem('td_cart');
+                    state.cart = saved ? JSON.parse(saved) : [];
+                    if (!Array.isArray(state.cart)) state.cart = [];
+                } catch (err) {
+                    console.error('Storage sync error', err);
+                    state.cart = [];
+                }
+                updateCartUI();
+            }
+        });
+
+        window.addEventListener('cart:updated', function (e) {
+            if (e.detail && Array.isArray(e.detail.cart) && e.detail.cart !== state.cart) {
+                state.cart = e.detail.cart;
+                updateCartUI();
+            }
+        });
 
         window.toggleCartDrawer = function () {
             const drawer = document.getElementById('cartDrawer');
@@ -3147,10 +3181,18 @@ window.generateProductLink = function(product, variantQuantity) {
         }
 
         window.addToCart = function (product, variant, qty) {
-            // Hardened Validation: Check existing cart qty + new qty against stock
+            if (!product) return;
+
+            // Delivery availability check
+            if (!window.isProductDeliverable(product)) {
+                window.showToast('Delivery is currently unavailable for this product.', 'info');
+                return;
+            }
+
+            // Safe String ID matching
             const existingIdx = state.cart.findIndex(item =>
-                item.id == product.id &&
-                (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
+                String(item.id) === String(product.id) &&
+                (item.variant ? (item.variant.quantity === (variant ? variant.quantity : undefined) && (item.variant.packaging_type || '') === (variant ? (variant.packaging_type || '') : '')) : true)
             );
 
             const currentCartQty = existingIdx > -1 ? state.cart[existingIdx].qty : 0;
@@ -3160,8 +3202,6 @@ window.generateProductLink = function(product, variantQuantity) {
             const targetQty = currentCartQty + qty;
 
             if (targetQty < 0) {
-                // If removing more than we have, just set to 0 (which usually removes it or keeps at min)
-                // But normally delta is -1, so targetQty would be at least 0.
                 window.showToast('Minimum quantity reached', 'error');
                 return;
             }
@@ -3186,9 +3226,9 @@ window.generateProductLink = function(product, variantQuantity) {
                 state.cart.push({
                     id: product.id,
                     name: product.product_name,
-                    telugu_name: product.product_name_telugu,
-                    price: variant ? variant.price : product.mrp,
-                    image: (state.allProductImages || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (state.allProductImages || []).find(img => img.product_id === product.id)?.image_url || state.placeholder,
+                    telugu_name: product.product_name_telugu || '',
+                    price: variant ? (Number(variant.price) || 0) : (Number(product.mrp) || 0),
+                    image: (state.allProductImages || []).find(img => String(img.product_id) === String(product.id) && img.is_default)?.image_url || (state.allProductImages || []).find(img => String(img.product_id) === String(product.id))?.image_url || state.placeholder,
                     variant: variant,
                     qty: qty
                 });
@@ -3197,27 +3237,13 @@ window.generateProductLink = function(product, variantQuantity) {
             state.cart = [...state.cart];
             window.saveCart();
             animateCartBtn();
-            window.showToast(`${product.product_name} added to cart!`, 'success');
+            if (qty > 0) {
+                window.showToast(`${product.product_name} added to cart!`, 'success');
+            }
         };
 
         window.quickAddComboToCart = function (id, name, price, imageUrl) {
-            const existingIdx = state.cart.findIndex(item => item.id === id && item.type === 'combo');
-            if (existingIdx > -1) {
-                state.cart[existingIdx].qty += 1;
-            } else {
-                state.cart.push({
-                    id: id,
-                    name: name,
-                    price: price,
-                    image: imageUrl,
-                    type: 'combo',
-                    qty: 1
-                });
-            }
-            window.saveCart();
-            if (window.updateCartUI) window.updateCartUI();
-            if (window.animateCartBtn) window.animateCartBtn();
-            window.showToast(`${name} added to cart!`, 'success');
+            window.addComboToCartWithSync(id, name, price, imageUrl);
         };
 
         window.addToCartFromDetail = function () {
@@ -3328,8 +3354,8 @@ window.generateProductLink = function(product, variantQuantity) {
             }
 
             // Find in cart
-            const cartItem = state.cart.find(item =>
-                item.id == product.id &&
+            const cartItem = (state.cart || []).find(item =>
+                String(item.id) === String(product.id) &&
                 (item.variant && selectedVariant ?
                     (item.variant.quantity === selectedVariant.quantity && (item.variant.packaging_type || '') === (selectedVariant.packaging_type || '')) :
                     true)
@@ -3570,9 +3596,9 @@ window.generateProductLink = function(product, variantQuantity) {
                     const variantLabel = item.variant ? `<div class="cart-item-variant">${item.variant.quantity}</div>` : '';
 
                     // Find the default image for the product
-                    const defaultImage = (state.allProductImages || []).find(img => img.product_id === item.id && img.is_default);
+                    const defaultImage = (state.allProductImages || []).find(img => String(img.product_id) === String(item.id) && img.is_default);
                     // If no default, find any image for the product
-                    const anyImage = (state.allProductImages || []).find(img => img.product_id === item.id);
+                    const anyImage = (state.allProductImages || []).find(img => String(img.product_id) === String(item.id));
                     // Determine the image source
                     const imgSrc = defaultImage?.image_url || anyImage?.image_url || item.image || state.placeholder;
 
@@ -3602,6 +3628,9 @@ window.generateProductLink = function(product, variantQuantity) {
                 }).join('');
             }
             if (cartTotal) cartTotal.innerText = total;
+
+            // Sync all visible grid cards simultaneously!
+            if (window.refreshAllGridCardsUI) window.refreshAllGridCardsUI();
 
             // Sync detail page quantity if on product view
             if (window.syncDetailPageCart) window.syncDetailPageCart();
@@ -4609,30 +4638,10 @@ window.generateProductLink = function(product, variantQuantity) {
             }
         };
 
+        // Ensure quickAddComboToCart delegates seamlessly to synced combo handler
         window.quickAddComboToCart = function (id, name, price, image) {
-            let cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
-
-            const existingIndex = cart.findIndex(item => item.id === id && item.isCombo);
-            if (existingIndex > -1) {
-                cart[existingIndex].qty += 1;
-            } else {
-                cart.push({
-                    id: id,
-                    name: name,
-                    price: price,
-                    image: image,
-                    qty: 1,
-                    isCombo: true
-                });
-            }
-
-            localStorage.setItem('td_cart', JSON.stringify(cart));
-            window.initHeaderCartButton();
-            window.showToast?.(`${name} added to cart!`, 'success');
-
-            // Refresh cart drawer if open
-            if (document.getElementById('cartDrawer').classList.contains('open')) {
-                window.renderCartItems?.();
+            if (typeof window.addComboToCartWithSync === 'function') {
+                window.addComboToCartWithSync(id, name, price, image);
             }
         };
 

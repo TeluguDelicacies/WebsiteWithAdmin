@@ -637,11 +637,23 @@ window.quickPreviewAddToCart = function () {
         cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
     } catch (e) { }
 
-    // Check if already exists
+    // Check if already exists with safe String ID comparison
     const existingIdx = cart.findIndex(item =>
-        item.id == product.id &&
+        String(item.id) === String(product.id) &&
         (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
+
+    const currentQty = existingIdx > -1 ? (cart[existingIdx].qty || 0) : 0;
+    const maxStock = variant ? (variant.stock || 0) : (product.total_stock || 0);
+
+    if (currentQty + 1 > maxStock) {
+        if (maxStock <= 0) {
+            showToast('Out of Stock', 'error');
+        } else {
+            showToast(`Cannot add more. Max stock is ${maxStock}. (You have ${currentQty} in cart)`, 'error');
+        }
+        return;
+    }
 
     if (existingIdx > -1) {
         cart[existingIdx].qty += 1;
@@ -650,15 +662,16 @@ window.quickPreviewAddToCart = function () {
             id: product.id,
             name: product.product_name,
             telugu_name: product.product_name_telugu || '',
-            image: (window.allProductImagesCache || []).find(img => img.product_id === product.id && img.is_default)?.image_url || (window.allProductImagesCache || []).find(img => img.product_id === product.id)?.image_url || window.currentSiteSettings?.product_placeholder_url || '',
+            image: (window.allProductImagesCache || []).find(img => String(img.product_id) === String(product.id) && img.is_default)?.image_url || (window.allProductImagesCache || []).find(img => String(img.product_id) === String(product.id))?.image_url || window.currentSiteSettings?.product_placeholder_url || '',
             variant: variant,
             price: Number(variant.price) || 0,
             qty: 1
         });
     }
 
-    // Save to localStorage
+    // Save to localStorage & fire reactive event
     localStorage.setItem('td_cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
 
     // Update UI
     window.updateQuickPreviewCartUI();
@@ -667,6 +680,7 @@ window.quickPreviewAddToCart = function () {
     if (typeof window.updateMainCartUI === 'function') {
         window.updateMainCartUI();
     }
+    showToast(`${product.product_name} added to cart!`, 'success');
 };
 
 window.quickPreviewUpdateQty = function (delta) {
@@ -682,20 +696,29 @@ window.quickPreviewUpdateQty = function (delta) {
     } catch (e) { }
 
     const existingIdx = cart.findIndex(item =>
-        item.id == product.id &&
+        String(item.id) === String(product.id) &&
         (item.variant ? (item.variant.quantity === variant.quantity && (item.variant.packaging_type || '') === (variant.packaging_type || '')) : true)
     );
 
     if (existingIdx > -1) {
-        cart[existingIdx].qty += delta;
+        const maxStock = variant ? (variant.stock || 0) : (product.total_stock || 0);
+        const targetQty = (cart[existingIdx].qty || 0) + delta;
+
+        if (delta > 0 && targetQty > maxStock) {
+            showToast(`Cannot add more. Max stock is ${maxStock}.`, 'error');
+            return;
+        }
+
+        cart[existingIdx].qty = targetQty;
 
         if (cart[existingIdx].qty <= 0) {
             cart.splice(existingIdx, 1);
         }
     }
 
-    // Save to localStorage
+    // Save to localStorage & fire reactive event
     localStorage.setItem('td_cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
 
     // Update UI
     window.updateQuickPreviewCartUI();
@@ -3186,7 +3209,7 @@ function quickAddComboToCart(comboId, comboName, price, imageUrl) {
         let cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
 
         // Check if combo already in cart (combos have type: 'combo')
-        const existingIndex = cart.findIndex(item => item.id === comboId && item.type === 'combo');
+        const existingIndex = cart.findIndex(item => String(item.id) === String(comboId) && item.type === 'combo');
 
         if (existingIndex >= 0) {
             // Increment quantity
@@ -3198,7 +3221,7 @@ function quickAddComboToCart(comboId, comboName, price, imageUrl) {
                 id: comboId,
                 name: comboName,
                 telugu_name: '',
-                price: price,
+                price: Number(price) || 0,
                 image: imageUrl || '', // Include combo image for cart display
                 variant: { quantity: 'Bundle', packaging_type: 'Combo' },
                 qty: 1,
@@ -3207,8 +3230,9 @@ function quickAddComboToCart(comboId, comboName, price, imageUrl) {
             showToast(`"${comboName}" added to cart!`, 'success');
         }
 
-        // Save to localStorage
+        // Save to localStorage & fire reactive event
         localStorage.setItem('td_cart', JSON.stringify(cart));
+        window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
 
         // Update cart UI (badge and drawer)
         if (window.updateMainCartUI) {
@@ -4434,13 +4458,22 @@ window.updateMainCartQty = function (index, delta) {
     const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
     if (!cart[index]) return;
 
-    cart[index].qty = (cart[index].qty || 0) + delta;
+    const currentQty = cart[index].qty || 0;
+    const maxStock = cart[index].variant ? (cart[index].variant.stock || 0) : 999;
+
+    if (delta > 0 && currentQty + delta > maxStock) {
+        showToast(`Cannot add more. Max stock is ${maxStock}.`, 'error');
+        return;
+    }
+
+    cart[index].qty = currentQty + delta;
 
     if (cart[index].qty <= 0) {
         cart.splice(index, 1);
     }
 
     localStorage.setItem('td_cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
     window.updateMainCartUI();
 };
 
@@ -4449,6 +4482,7 @@ window.removeMainCartItem = function (index) {
     const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
     cart.splice(index, 1);
     localStorage.setItem('td_cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart } }));
     window.updateMainCartUI();
     window.showToast('Item removed from cart', 'info');
 };
@@ -4456,6 +4490,7 @@ window.removeMainCartItem = function (index) {
 // Clear entire main cart
 window.clearMainCart = function () {
     localStorage.setItem('td_cart', JSON.stringify([]));
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart: [] } }));
     window.updateMainCartUI();
     // Also reset quick preview cart UI if popup is open
     if (typeof window.updateQuickPreviewCartUI === 'function') {
@@ -4469,6 +4504,18 @@ window.orderOnWhatsApp = async function () {
     const cart = JSON.parse(localStorage.getItem('td_cart') || '[]');
     if (cart.length === 0) {
         window.showToast('Your cart is empty!', 'error');
+        return;
+    }
+
+    // Check delivery availability of cart items
+    const undeliverableItems = cart.filter(item => {
+        const prod = (window.allProductsCache || []).find(p => String(p.id) === String(item.id));
+        return prod && !window.isProductDeliverable(prod);
+    });
+
+    if (undeliverableItems.length > 0) {
+        const names = undeliverableItems.map(i => i.name).join(', ');
+        window.showToast(`Delivery is currently unavailable for: ${names}. Please remove from cart to proceed.`, 'error');
         return;
     }
 
@@ -4522,6 +4569,14 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         window.updateMainCartUI();
     }, 500); // Delay slightly to ensure main init has completed
+});
+
+// Listen for reactive cart:updated event
+window.addEventListener('cart:updated', function (e) {
+    window.updateMainCartUI();
+    if (typeof window.updateQuickPreviewCartUI === 'function') {
+        window.updateQuickPreviewCartUI();
+    }
 });
 
 // Listen for storage changes (cross-tab sync)
