@@ -627,7 +627,7 @@ window.quickPreviewAddToCart = function () {
     if (!product || !variant) return;
 
     if (!window.isProductDeliverable(product)) {
-        showToast('This product is available for browsing only and not for delivery.', 'info');
+        showToast('Delivery is currently unavailable for this product.', 'info');
         return;
     }
 
@@ -4063,7 +4063,7 @@ function renderQuickProductsHTML(products, showMrp) {
                 <h4>${escapeHTML(product.product_name)}</h4>
                 <p class="telugu-name">${escapeHTML(product.product_name_telugu || '')}</p>
                 <div class="weight">${escapeHTML(qtyDisplay)}</div>
-                ${!window.isProductDeliverable(product) ? '<div class="quick-delivery-paused"><i class="fas fa-truck-slash"></i> Delivery Paused</div>' : ''}
+                ${!window.isProductDeliverable(product) ? '<div class="quick-delivery-paused"><i class="fas fa-truck-slash"></i> Delivery Unavailable</div>' : ''}
                 ${showMrp ? `<div class="price-row">
                     <span class="price">₹${priceDisplay}</span>
                     ${qtyDisplay ? `<span class="variant-qty">(${escapeHTML(qtyDisplay)})</span>` : ''}

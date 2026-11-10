@@ -1708,7 +1708,7 @@ function renderProductList() { // No arg needed, uses global allProducts + filte
                         ${escapeHTML(product.product_name)}
                         ${product.is_trending ? '<i class="fas fa-fire" title="Trending Item" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
                         ${product.is_visible === false ? '<i class="fas fa-eye-slash" title="Hidden on Site" style="color: #64748b; margin-left: 5px;"></i>' : ''}
-                        ${product.is_delivery_available === false ? '<i class="fas fa-truck-slash" title="Delivery Paused (Browsing Only)" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
+                        ${product.is_delivery_available === false ? '<i class="fas fa-truck-slash" title="Delivery Unavailable" style="color: #f59e0b; margin-left: 5px;"></i>' : ''}
                     </h3>
                     <div class="tagline">${escapeHTML(product.product_tagline || '')}</div>
                     <span class="category-badge">${escapeHTML(product.product_category).replace(/-/g, ' ')}</span>
@@ -5092,7 +5092,7 @@ window.toggleSingleProductDelivery = async function (productId, isDeliverable) {
 
     try {
         await syncDeliveryAvailability([productId], isDeliverable);
-        showToast(`${product ? product.product_name : 'Product'}: Delivery ${isDeliverable ? 'Enabled' : 'Paused (Browsing Only)'}`, 'success');
+        showToast(`${product ? product.product_name : 'Product'}: Delivery ${isDeliverable ? 'Enabled' : 'Unavailable'}`, 'success');
     } catch (e) {
         console.error('Error updating delivery status:', e);
         showToast('Error saving delivery status: ' + e.message, 'error');

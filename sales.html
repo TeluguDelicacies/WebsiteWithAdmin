@@ -1354,8 +1354,8 @@ window.generateProductLink = function(product, variantQuantity) {
 
                         <div class="card-action-container">
                             ${!isDeliverable ? `
-                                <button class="btn-add btn-undeliverable" disabled title="Currently available for browsing only (delivery unavailable)">
-                                    <i class="fas fa-ban"></i> Delivery Paused
+                                <button class="btn-add btn-undeliverable" disabled title="Delivery Unavailable">
+                                    <i class="fas fa-ban"></i> Delivery Unavailable
                                 </button>
                             ` : `
                                 <!-- Add Button (Visible if Qty 0) -->
@@ -1397,7 +1397,7 @@ window.generateProductLink = function(product, variantQuantity) {
             if (!product) return;
 
             if (!window.isProductDeliverable(product)) {
-                window.showToast('This product is available for browsing only and not for delivery.', 'info');
+                window.showToast('Delivery is currently unavailable for this product.', 'info');
                 return;
             }
 
@@ -1794,7 +1794,7 @@ window.generateProductLink = function(product, variantQuantity) {
                 ${!isDeliverable ? `
                     <div class="delivery-paused-banner">
                         <i class="fas fa-truck-slash"></i>
-                        <span><strong>Browsing Only — Delivery Unavailable</strong></span>
+                        <span><strong>Delivery Unavailable</strong></span>
                     </div>
                 ` : ''}
 
@@ -3223,7 +3223,7 @@ window.generateProductLink = function(product, variantQuantity) {
         window.addToCartFromDetail = function () {
             if (!state.currentProduct) return;
             if (!window.isProductDeliverable(state.currentProduct)) {
-                window.showToast('This product is available for browsing only and not for delivery.', 'info');
+                window.showToast('Delivery is currently unavailable for this product.', 'info');
                 return;
             }
 
